@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css" id="stylesheet">
+    <script type="text/javascript" src="engine/polyominos.js"></script>
+    <script type="text/javascript" src="engine/utilities.js"></script>
+    <script type="text/javascript" src="engine/puzzle.js"></script>
+    <script type="text/javascript" src="engine/generate.js"></script>
+    <script type="text/javascript" src="engine/solve.js"></script>
+    <script type="text/javascript" src="engine/validate.js"></script>
+    <script type="text/javascript" src="engine/svg.js"></script>
+    <script type="text/javascript" src="engine/display2.js"></script>
+    <script type="text/javascript" src="engine/trace.js"></script>
+    <title>Temp</title>
+  </head>
+  <body>
+    <div style="text-align: center">
+      <button id="button" onclick="timing(this)">Timing</button>
+    </div>
+    <svg id="puzzle"></svg>
+    <script>
+      function timing(elem) {
+        var puzzle = window.foo
+        var solutions = []
+        var start = performance.now()
+        solve(puzzle, puzzle.start.x, puzzle.start.y, solutions)
+        var end = performance.now()
+        console.log(puzzle.valid, solutions.length)
+        elem.innerText = Math.round(end - start) / 1000.0
+      }
+      window.onload = function() {
+        setSeed(5)
+        window.foo = randomPuzzle({
+          'width':4, 'height':4, 'colors':2, 'difficulty':[50, 100],
+          'distribution':{
+            'squares':4,
+            'stars':4,
+          }
+        })
+        draw(window.foo)
+      }
+    </script>
+  </body>
+</html>

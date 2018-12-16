@@ -1,0 +1,14 @@
+@font-face { src: url('Constantia.ttf'); }
+label, button, select, option, input {
+  font-family: Constantia;
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 28px;
+}
+table { margin:auto; }
+.resize { position: absolute; }
+input.checkbox {
+  transform: scale(2) translate(0px, -3px);
+  margin-right: 5px;
+}
+body { text-align: center; }

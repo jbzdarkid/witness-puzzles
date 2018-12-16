@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <link rel="stylesheet" type="text/css" href="../data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="data/favicon.png">
+    <script type="text/javascript" src="../engine/polyominos.js"></script>
+    <script type="text/javascript" src="../engine/utilities.js"></script>
+    <script type="text/javascript" src="../engine/puzzle.js"></script>
+    <script type="text/javascript" src="../engine/validate.js"></script>
+    <script type="text/javascript" src="../engine/svg.js"></script>
+    <script type="text/javascript" src="../engine/display2.js"></script>
+    <script type="text/javascript" src="../engine/trace2.js"></script>
+    <title>Loading puzzle...</title>
+  </head>
+  <body>
+    <script>loadSettings()</script>
+    <div style="text-align: center"><label id="title" style="font-size: 72"></label></div>
+    <div style="text-align: center">
+      <svg id="puzzle"></svg>
+    </div>
+  </body>
+  <script>
+    window.onload = function() {
+      var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
+      var pageTitle = document.head.getElementsByTagName('title')[0]
+      pageTitle.innerText = 'Playing puzzle: ' + puzzle.name
+      document.getElementById('title').innerText = puzzle.name
+      draw(puzzle)
+    }
+  </script>
+</html>
