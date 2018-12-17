@@ -1,7 +1,10 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
   <head>
+    <meta property="og:title" content="Witness Puzzle {{ display_hash }}"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Witness Puzzles"/>
     <link rel="stylesheet" type="text/css" href="../data/style.css" id="stylesheet">
-    <link rel="icon" type="image/png" href="data/favicon.png">
+    <link rel="icon" type="image/png" href="../data/favicon.png">
     <script type="text/javascript" src="../engine/polyominos.js"></script>
     <script type="text/javascript" src="../engine/utilities.js"></script>
     <script type="text/javascript" src="../engine/puzzle.js"></script>
@@ -19,12 +22,16 @@
     </div>
   </body>
   <script>
+    window.session_id = '{{ session_id }}'
+    window.display_hash = '{{ display_hash }}'
     window.onload = function() {
+      TELEMETRY('page_load')
       var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
       var pageTitle = document.head.getElementsByTagName('title')[0]
       pageTitle.innerText = 'Playing puzzle: ' + puzzle.name
       document.getElementById('title').innerText = puzzle.name
       draw(puzzle)
+      TELEMETRY('page_load_done')
     }
   </script>
 </html>

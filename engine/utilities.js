@@ -44,6 +44,17 @@ function PLAY_SOUND(track) {
   tracks[track].play()
 }
 
+function TELEMETRY(type) {
+  var request = new XMLHttpRequest()
+  request.open('POST', '/telemetry', true)
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.send(
+    'session_id=' + window.session_id +
+    '&display_hash=' + window.display_hash +
+    '&type=' + type
+  )
+}
+
 WHITE = 'white'
 BLACK = 'black'
 RED = 'red'

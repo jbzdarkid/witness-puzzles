@@ -19,19 +19,24 @@ In vague order of importance.
 -- Clean up solution to be a full path (start point = none, same as trace)
 - Hide solution (puzzleData) from global scope
 - Server
--+ Shortnames for puzzles
 -- A whole bunch of UI for browsing puzzles
 -- Signin?
 -- Preview images for puzzles (meta:og tag)
--- Name for the project (so I can have a reasonable dns name)
--- Telemetry - XMLHttpRequest() is pure JS, but how do I secure anything?
+    Create IAM for S3 access
+    Somehow wire S3 access token into python
+    Use S3 API  https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html
+
+    Kick off a background task? -> Tie to puzzle creation
+    Use legacy/send_email.py to generate images (with selenium/phantomjs)
+-- Telemetry dashboard
+    Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
+
 - Invisible Dots
 !- Feature complete!
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?
 - Solve with pillars is slow, maybe increase warning threshold / disable in play mode?
-- Maybe remove show solution for play mode entirely?
 - Add missing daily styles
 - Shape chooser is not centered
 - change all divs to auto-centering? It's all I seem to use them for rn

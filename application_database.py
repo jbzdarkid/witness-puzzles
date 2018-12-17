@@ -1,9 +1,8 @@
 from flask import Flask
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import UUIDType
 from os import environ
-from uuid import uuid4
 from hashlib import sha256
 
 application = Flask(__name__, template_folder='pages')
@@ -21,16 +20,13 @@ application.config['SECRET_KEY'] = environ['SECRET_KEY'] if 'SECRET_KEY' in envi
 db = SQLAlchemy(application)
 
 class Puzzle(db.Model):
-  __tablename__ = 'puzzles'
-
-  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  # Language of 32: [0-9A-Z] / I, 1, O, 0,
+  # Language of 32: [0-9A-Z] / I, 1, O, 0
   # 8 characters at 32 = 2^40
   # 50% of collision at 2^20 entries
-  display_hash = db.Column(db.String(8), unique=True)
+  display_hash = db.Column(db.String(8), unique=True, primary_key=True)
   data = db.Column(db.Text, nullable=False)
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-  user_id = db.Column(db.Integer, db.ForeignKey('users.id')) #, nullable=False
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #, nullable=False
 
 def create_puzzle(data):
   h = sha256()
@@ -50,8 +46,6 @@ def get_puzzle(display_hash):
   return db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).first()
 
 class User(db.Model):
-  __tablename__ = 'users'
-
   id = db.Column(db.Integer, primary_key=True)
   disp_name = db.Column(db.String(80), nullable=False)
   # google_id
@@ -60,16 +54,49 @@ class User(db.Model):
   # msft_id
 
 class Event(db.Model):
-  __tablename__ = 'telemetry'
-  session_id = db.Column(UUIDType, nullable=False, primary_key=True)
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  session_id = db.Column(UUIDType, nullable=False)
+  display_hash = db.Column(db.String(8), db.ForeignKey('puzzle.display_hash'))
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   type = db.Column(db.String(32), nullable=False)
 
-def new_session():
-  uuid = uuid4()
-  event = Event(session_id=uuid, type='session_create')
+def start_session(session_id):
+  event = Event(session_id=session_id, type='session_create')
   db.session.add(event)
   db.session.commit()
-  return uuid
+
+def add_event(session_id, type):
+  if not is_active(session_id):
+    return
+  event = Event(session_id=session_id, type=type)
+  db.session.add(event)
+  db.session.commit()
+
+def is_active(session_id):
+  session = db.session.query(Event).filter(Event.session_id == session_id).first()
+  if not session:
+    return False
+  if datetime.utcnow() - session.date > timedelta(hours=1):
+    return False
+  return True
+
+def get_all_rows():
+  data = 'Puzzles:\n'
+  puzzles = db.session.query(Puzzle).all()
+  for puzzle in puzzles:
+    data += f'Puzzle {puzzle.display_hash} created on {puzzle.date} of size {len(puzzle.data)}\n'
+
+  #for user in users:
+  #    print user.name
+
+  data += 'Events:\n'
+  sessions = db.session.query(Event).filter(Event.type == 'session_create').all()
+  for session in sessions:
+    data += '\nSession ' + str(session.session_id) + ':\n'
+    events = db.session.query(Event).filter(Event.session_id == session.session_id).all()
+    for event in events:
+      data += f'Event "{event.type}" at time {event.date}\n'
+
+  return data
 
 db.create_all()
