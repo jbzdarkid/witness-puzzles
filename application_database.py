@@ -7,16 +7,27 @@ from hashlib import sha256
 
 application = Flask(__name__, template_folder='pages')
 
-if 'RDS_DB_NAME' in environ:
-  application.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
-    user = environ['RDS_USERNAME'],
-    pswd = environ['RDS_PASSWORD'],
-    host = environ['RDS_HOSTNAME'],
-    port = environ['RDS_PORT'],
-    name = environ['RDS_DB_NAME'],
-  )
-# Secret key will be empty for local development (which is OK, there's no CSRF risk locally.)
-application.config['SECRET_KEY'] = environ['SECRET_KEY'] if 'SECRET_KEY' in environ else 'default'
+if 'RDS_DB_NAME' in environ: # Running on AWS
+  application.config.update({
+    'SQLALCHEMY_DATABASE_URI':'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
+      user = environ['RDS_USERNAME'],
+      pswd = environ['RDS_PASSWORD'],
+      host = environ['RDS_HOSTNAME'],
+      port = environ['RDS_PORT'],
+      name = environ['RDS_DB_NAME'],
+    ),
+    # Re-use the database username/password with flask-basicauth (used to protect certain pages)
+    'USERNAME': environ['RDS_USERNAME'],
+    'PASSWORD': environ['RDS_PASSWORD'],
+    'SECRET_KEY': environ['SECRET_KEY'],
+  })
+  application.debug = False
+else: # Running locally
+  application.config.update({
+    'SECRET_KEY': 'default',
+  })
+  application.debug = True # Required to do auto-reload
+
 db = SQLAlchemy(application)
 
 class Puzzle(db.Model):
@@ -79,6 +90,8 @@ def is_active(session_id):
   if datetime.utcnow() - session.date > timedelta(hours=1):
     return False
   return True
+
+def
 
 def get_all_rows():
   data = 'Puzzles:\n'
