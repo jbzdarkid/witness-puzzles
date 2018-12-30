@@ -266,22 +266,16 @@ class Puzzle {
   }
 
   _floodFill(x, y, region) {
+    if (!this._safeCell(x, y)) return
+    if (this.grid[x][y] === undefined) return
     region.setCell(x, y)
-    this.setCell(x, y, {'type':'line', 'color':3})
+    this.setCell(x, y, undefined)
 
     // @Performance: Why is this ordered TLBR?
-    if (this.getLine(x, y + 1) == 0) {
-      this._floodFill(x, y + 1, region)
-    }
-    if (this.getLine(x + 1, y) == 0) {
-      this._floodFill(x + 1, y, region)
-    }
-    if (this.getLine(x, y - 1) == 0) {
-      this._floodFill(x, y - 1, region)
-    }
-    if (this.getLine(x - 1, y) == 0) {
-      this._floodFill(x - 1, y, region)
-    }
+    this._floodFill(x, y + 1, region)
+    this._floodFill(x + 1, y, region)
+    this._floodFill(x, y - 1, region)
+    this._floodFill(x - 1, y, region)
   }
 
   getRegions() {
@@ -290,9 +284,13 @@ class Puzzle {
 
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with color 0.
-    for (var x=1; x<this.grid.length; x+=2) {
-      for (var y=1; y<this.grid[x].length; y+=2) {
-        this.grid[x][y] = {'type':'line', 'color':0}
+    for (var x=0; x<this.grid.length; x++) {
+      for (var y=0; y<this.grid[x].length; y++) {
+        if (this.getCell(x, y) > 0) {
+          this.grid[x][y] = undefined
+        } else {
+          this.grid[x][y] = true
+        }
       }
     }
 

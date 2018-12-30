@@ -1,8 +1,6 @@
 In vague order of importance.
 
 For sunday:
-- Clean up floodFill to use 0/1
-(perf test as well, to figure out 'fastest comparisions')
 - Use updateCell in solve.js (backtrack after exit)
 - Try to invert trace... I think solve's directions are more logical
 - Change gap testing to be throwing (indicates serious bug)
