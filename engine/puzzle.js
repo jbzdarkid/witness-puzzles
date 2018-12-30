@@ -266,6 +266,7 @@ class Puzzle {
   }
 
   _floodFill(x, y, region) {
+    x = this._mod(x)
     if (!this._safeCell(x, y)) return
     if (this.grid[x][y] === undefined) return
     region.setCell(x, y)
