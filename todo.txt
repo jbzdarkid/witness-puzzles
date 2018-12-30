@@ -1,15 +1,11 @@
 In vague order of importance.
 
-For sunday:
-- Try to invert trace... I think solve's directions are more logical
-
-
 - Start-grow animation
 - What is .line in animations doing?
 - Fix generation colors
 - Simple Symmetry (horiz/verti)
 !- Stable release
-- Favicon
+- Favicon still needs improving
 - Rich line data -> Done
 -- Dots & gaps into the grid
 -- Dots cancelled by negation
@@ -23,6 +19,7 @@ For sunday:
 -- Clean up solution to be a full path (start point = none, same as trace)
 --- Trace equivalence is hard, since it links backwards.
 --- Consider cleaning up / merging PathSegment class
+- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
 - Hide solution (puzzleData) from global scope
 - Server
 -- A whole bunch of UI for browsing puzzles

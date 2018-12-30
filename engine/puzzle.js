@@ -119,6 +119,8 @@ class Puzzle {
   // Wrap a value around at the width of the grid. No-op if not in pillar mode.
   _mod(val) {
     if (!this.pillar) return val
+    // @Performance: Pre-compute a large, safe modulo value (maybe width * height * 2?)
+    // return (val + largezero) % this.grid.length
     var mod = this.grid.length
     return ((val % mod) + mod) % mod
   }
