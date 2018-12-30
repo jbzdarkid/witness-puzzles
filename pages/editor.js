@@ -34,7 +34,7 @@ window.onload = function() {
 
 function newPuzzle() {
   puzzle = new Puzzle(4, 4)
-  puzzle.addStart(0, 8)
+  puzzle.grid[0][8].start = true
   puzzle.addEnd(8, 0, 'right')
   puzzle.name = 'Unnamed Puzzle'
   _redraw(puzzle)
@@ -299,8 +299,10 @@ function _onElementClicked(elem) {
   if (activeParams.type == 'start') {
     if (x%2 != 0 || y%2 != 0) return
     // Toggle the start point -- add it if it isn't removed.
-    if (!puzzle.removeStart(x, y)) {
-      puzzle.addStart(x, y)
+    if (puzzle.grid[x][y].start == undefined) {
+      puzzle.grid[x][y].start = true
+    } else {
+      puzzle.grid[x][y].start = undefined
     }
   } else if (activeParams.type == 'end') {
     if (x%2 != 0 || y%2 != 0) return
@@ -326,27 +328,24 @@ function _onElementClicked(elem) {
     } else {
       puzzle.addEnd(x, y, dir)
     }
-  } else if (['gap', 'dot'].includes(activeParams.type)) {
+  } else if (activeParams.type == 'dot') {
     if (x%2 == 1 && y%2 == 1) return
-    if (activeParams.type == 'gap' && x%2 == 0 && y%2 == 0) return
-    var foundGap = false
-    for (var i=0; i < puzzle.gaps.length; i++) {
-      if (puzzle.gaps[i].x == x && puzzle.gaps[i].y == y) {
-        puzzle.gaps.splice(i, 1)
-        foundGap = true
-        break
-      }
+    // @Future: Some way to toggle colors, should be cognizant of symmetry mode.
+    if (puzzle.grid[x][y].dot == 1) {
+      puzzle.grid[x][y].dot = undefined
+    } else {
+      puzzle.grid[x][y].gap = undefined
+      puzzle.grid[x][y].dot = 1
     }
-    var foundDot = false
-    for (var i=0; i < puzzle.dots.length; i++) {
-      if (puzzle.dots[i].x == x && puzzle.dots[i].y == y) {
-        puzzle.dots.splice(i, 1)
-        foundDot = true
-        break
-      }
+  } else if (activeParams.type == 'gap') {
+    if (x%2 == 1 && y%2 == 1) return
+    if (x%2 == 0 && y%2 == 0) return
+    if (puzzle.grid[x][y].gap == true) {
+      puzzle.grid[x][y].gap = undefined
+    } else {
+      puzzle.grid[x][y].dot = undefined
+      puzzle.grid[x][y].gap = true
     }
-    if (activeParams.type == 'gap' && !foundGap) puzzle.gaps.push({'x':x, 'y':y})
-    if (activeParams.type == 'dot' && !foundDot) puzzle.dots.push({'x':x, 'y':y})
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 != 1 || y%2 != 1) return
     // Only remove the element if it's an exact match
