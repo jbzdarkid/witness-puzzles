@@ -147,39 +147,44 @@ function _drawStartAndEnd(puzzle, svg) {
   }
 
   var startData = undefined
-  for (var startPoint of puzzle.startPoints) {
-    drawSymbolWithSvg(svg, {
-      'type':'start',
-      'width': 58,
-      'height': 58,
-      'x': startPoint.x*41 + 23,
-      'y': startPoint.y*41 + 23,
-    })
-    var start = svg.lastChild
-    // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
-    // in the onclick function below, but passing parameters through scope is hard.
-    start.id = startPoint.x + '_' + startPoint.y
-    start.onclick = function(event) {
-      trace(this, event, puzzle)
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell == undefined || cell.start != true) continue
+      drawSymbolWithSvg(svg, {
+        'type':'start',
+        'width': 58,
+        'height': 58,
+        'x': x*41 + 23,
+        'y': y*41 + 23,
+      })
+      var start = svg.lastChild
+      // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
+      // in the onclick function below, but passing parameters through scope is hard.
+      start.id = x + '_' + y
+      start.onclick = function(event) {
+        trace(this, event, puzzle)
+      }
+
+      // The startpoint must have a primary line through it
+      // @Future: if (cell.line != 1 || cell.line != 2) continue
+      if (cell.line != 1) continue
+
+      // And that line must not be coming from any adjacent cells
+      var leftCell = puzzle.getCell(x - 1, y)
+      if (leftCell != undefined && leftCell.dir == 'right') continue
+
+      var rightCell = puzzle.getCell(x + 1, y)
+      if (rightCell != undefined && rightCell.dir == 'left') continue
+
+      var topCell = puzzle.getCell(x, y - 1)
+      if (topCell != undefined && topCell.dir == 'bottom') continue
+
+      var bottomCell = puzzle.getCell(x, y + 1)
+      if (bottomCell != undefined && bottomCell.dir == 'top') continue
+
+      startData = {'elem':start, 'x':x, 'y':y}
     }
-
-    // The startpoint must have a primary line through it
-    if (puzzle.getLine(startPoint.x, startPoint.y) != 1) continue
-
-    // And that line must not be coming from any adjacent cells
-    var leftCell = puzzle.getCell(startPoint.x - 1, startPoint.y)
-    if (leftCell != undefined && leftCell.dir == 'right') continue
-
-    var rightCell = puzzle.getCell(startPoint.x + 1, startPoint.y)
-    if (rightCell != undefined && rightCell.dir == 'left') continue
-
-    var topCell = puzzle.getCell(startPoint.x, startPoint.y - 1)
-    if (topCell != undefined && topCell.dir == 'bottom') continue
-
-    var bottomCell = puzzle.getCell(startPoint.x, startPoint.y + 1)
-    if (bottomCell != undefined && bottomCell.dir == 'top') continue
-
-    startData = {'elem':start, 'x':startPoint.x, 'y':startPoint.y}
   }
   return startData
 }

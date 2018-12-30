@@ -3,8 +3,13 @@ window.MAX_SOLUTIONS = 10000
 function solve(puzzle) {
   var solutions = []
   var start = (new Date()).getTime()
-  for (var startPoint of puzzle.startPoints) {
-    _solveLoop(puzzle, startPoint.x, startPoint.y, solutions)
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell != undefined && cell.start == true) {
+        _solveLoop(puzzle, x, y, solutions)
+      }
+    }
   }
   var end = (new Date()).getTime()
   console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')

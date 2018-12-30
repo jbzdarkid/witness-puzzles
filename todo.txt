@@ -7,7 +7,7 @@ In vague order of importance.
 !- Stable release
 - Favicon still needs improving
 - Rich line data -> Done
--- Start & end into the grid?
+-- End into the grid?
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
 -- Colored Dots

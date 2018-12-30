@@ -40,27 +40,27 @@ window.onload = function() {
 tests = {
   'end-left': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(4, 4)
+    puzzle.grid[4][4].start = true
     puzzle.addEnd(0, 2, 'left')
     return [puzzle, 10]
   }, 'end-right': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 0)
+    puzzle.grid[0][0].start = true
     puzzle.addEnd(4, 2, 'right')
     return [puzzle, 10]
   }, 'end-up': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(2, 0, 'top')
     return [puzzle, 10]
   }, 'end-down': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(4, 0)
+    puzzle.grid[4][0].start = true
     puzzle.addEnd(2, 4, 'bottom')
     return [puzzle, 10]
   }, 'negation-with-dots': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[3][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[2][1].dot = 1
@@ -70,7 +70,7 @@ tests = {
     return [puzzle, 39]
   }, 'simple-negation': function() {
     var puzzle = new Puzzle(3, 1)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][1] = {'type':'square', 'color':'orange'}
@@ -78,7 +78,7 @@ tests = {
     return [puzzle, 2]
   }, 'simple-double-negation': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[5][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[5][5] = {'type':'nega', 'color':'white'}
@@ -88,7 +88,7 @@ tests = {
     return [puzzle, 41]
   }, 'double-negation-with-double-squares': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][1] = {'type':'nega', 'color':'white'}
@@ -98,7 +98,7 @@ tests = {
     return [puzzle, 62]
   }, 'double-negation-with-double-squares-2': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][1] = {'type':'nega', 'color':'white'}
@@ -109,7 +109,7 @@ tests = {
     return [puzzle, 80]
   }, 'negation-complexity': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[1][3] = {'type':'square', 'color':'orange'}
@@ -118,7 +118,7 @@ tests = {
     return [puzzle, 5]
   }, 'negation-complexity-2': function() {
     var puzzle = new Puzzle(3, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][1] = {'type':'square', 'color':'blue'}
@@ -128,7 +128,7 @@ tests = {
     return [puzzle, 6]
   }, 'negation-complexity-3': function() {
     var puzzle = new Puzzle(3, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][1] = {'type':'square', 'color':'blue'}
@@ -139,7 +139,7 @@ tests = {
     return [puzzle, 7]
   }, 'negation-complexity-B1': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'black'}
     puzzle.grid[1][3] = {'type':'nega', 'color':'black'}
@@ -148,7 +148,7 @@ tests = {
     return [puzzle, 0]
   }, 'negation-complexity-B2': function() {
     var puzzle = new Puzzle(4, 4)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(8, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'black'}
     puzzle.grid[1][3] = {'type':'nega', 'color':'black'}
@@ -156,21 +156,21 @@ tests = {
     return [puzzle, 0]
   }, 'simple-polyominos': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':1}
     puzzle.grid[3][1] = {'type':'poly', 'color':'yellow', 'polyshape':17}
     return [puzzle, 14]
   }, 'simple-polyominos-2': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[5][1] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     puzzle.grid[3][3] = {'type':'poly', 'color':'yellow', 'polyshape':50}
     return [puzzle, 1]
   }, 'negation-with-polyominos': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':19}
@@ -178,7 +178,7 @@ tests = {
     return [puzzle, 5]
   }, 'paiorange-stars': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[1][3] = {'type':'star', 'color':'orange'}
@@ -187,7 +187,7 @@ tests = {
     return [puzzle, 4]
   }, 'stars-and-squares': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[1][3] = {'type':'square', 'color':'orange'}
@@ -196,27 +196,27 @@ tests = {
     return [puzzle, 4]
   }, 'coloorange-polyominos': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[3][1] = {'type':'poly', 'color':'orange', 'polyshape':17}
     return [puzzle, 2]
   }, 'corner-polyomino': function() {
     var puzzle = new Puzzle(4, 4)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(8, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':19}
     return [puzzle, 47]
   }, 'polyomino-with-center-start': function() {
     var puzzle = new Puzzle(3, 2)
-    puzzle.addStart(2, 2)
+    puzzle.grid[2][2].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     return [puzzle, 4]
   }, 'polyomino/ylop-with-center-start': function() {
     var puzzle = new Puzzle(3, 2)
-    puzzle.addStart(2, 2)
+    puzzle.grid[2][2].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':273}
@@ -224,21 +224,21 @@ tests = {
     return [puzzle, 2]
   }, 'polyomino/ylop-with-center-start-2': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(2, 4)
+    puzzle.grid[2][4].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':1911}
     puzzle.grid[3][1] = {'type':'ylop', 'color':'blue', 'polyshape':51}
     return [puzzle, 4]
   }, 'polyomino/ylop-with-edge-start': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(6, 6, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':823}
     puzzle.grid[3][1] = {'type':'ylop', 'color':'blue', 'polyshape':3}
     return [puzzle, 3]
   }, 'impossible-squares': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'square', 'color':'orange'}
     puzzle.grid[1][3] = {'type':'square', 'color':'blue'}
@@ -247,7 +247,7 @@ tests = {
     return [puzzle, 0]
   }, 'dot-and-gap-test': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[0][1].dot = 1
     puzzle.grid[0][3].dot = 1
@@ -260,14 +260,14 @@ tests = {
     return [puzzle, 1]
   }, 'completely-cancel': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':3}
     puzzle.grid[3][3] = {'type':'ylop', 'color':'blue', 'polyshape':3}
     return [puzzle, 6]
   }, 'half-of-game-puzzle': function() {
     var puzzle = new Puzzle(4, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(8, 0, 'right')
     puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':547}
     puzzle.grid[3][3] = {'type':'ylop', 'color':'blue'  , 'polyshape':51}
@@ -275,7 +275,7 @@ tests = {
     return [puzzle, 2]
   }, 'completely-cancel-2': function() {
     var puzzle = new Puzzle(3, 1)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':1}
     puzzle.grid[3][1] = {'type':'ylop', 'color':'blue'  , 'polyshape':17}
@@ -283,7 +283,7 @@ tests = {
     return [puzzle, 2]
   }, 'many-partial-cancels': function() {
     var puzzle = new Puzzle(4, 4)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(8, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':51}
     puzzle.grid[7][1] = {'type':'poly', 'color':'yellow', 'polyshape':1}
@@ -298,27 +298,27 @@ tests = {
     return [puzzle, 17]
   }, 'simple-rpoly': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':35, 'rot':'all'}
     return [puzzle, 5]
   }, 'negation-with-stars': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[3][3] = {'type':'nega', 'color':'white'}
     return [puzzle, 6]
   }, 'coloorange-negation-with-stars': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[3][3] = {'type':'nega', 'color':'orange'}
     return [puzzle, 0]
   }, 'coloorange-negation-with-stars-2': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[1][3] = {'type':'star', 'color':'orange'}
@@ -327,7 +327,7 @@ tests = {
     return [puzzle, 2]
   }, 'coloorange-negation-with-stars-3': function() {
     var puzzle = new Puzzle(2, 2)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[1][3] = {'type':'nega', 'color':'orange'}
@@ -335,7 +335,7 @@ tests = {
     return [puzzle, 0]
   }, 'triangles': function() {
     var puzzle = new Puzzle(5, 1)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(10, 0, 'right')
     puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':1}
     puzzle.grid[5][1] = {'type':'triangle', 'color':'orange', 'count':2}
@@ -343,7 +343,7 @@ tests = {
     return [puzzle, 2]
   }, 'impossible-triangles': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 0)
+    puzzle.grid[0][0].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':1}
     puzzle.grid[3][1] = {'type':'triangle', 'color':'orange', 'count':2}
@@ -357,19 +357,19 @@ tests = {
     return [puzzle, 0]
   }, 'not-quite-impossible-triangles': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(3, 6)
+    puzzle.grid[3][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[3][5] = {'type':'triangle', 'color':'orange', 'count':4}
     return [puzzle, 12]
   }, 'not-quite-impossible-triangles-2': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(3, 0, 'top')
     puzzle.grid[3][1] = {'type':'triangle', 'color':'orange', 'count':4}
     return [puzzle, 12]
   }, 'triple-negation': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][3] = {'type':'nega', 'color':'white'}
@@ -377,14 +377,14 @@ tests = {
     return [puzzle, 0]
   }, 'pillar-with-gap': function() {
     var puzzle = new Puzzle(2, 1, true)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(2, 0, 'top')
     puzzle.grid[1][0].gap = true
     puzzle.grid[1][2].gap = true
     return [puzzle, 2]
   }, 'pillar-with-stones': function() {
     var puzzle = new Puzzle(2, 1, true)
-    puzzle.addStart(2, 2)
+    puzzle.grid[2][2].start = true
     puzzle.addEnd(2, 0, 'top')
     puzzle.grid[1][1] = {'type':'square', 'color':'white'}
     puzzle.grid[3][1] = {'type':'square', 'color':'black'}
@@ -392,49 +392,49 @@ tests = {
     return [puzzle, 0]
   }, 'pillar-with-poly': function() {
     var puzzle = new Puzzle(2, 2, true)
-    puzzle.addStart(2, 4)
+    puzzle.grid[2][4].start = true
     puzzle.addEnd(2, 0, 'top')
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':49}
     return [puzzle, 0]
   }, 'pillar-with-stars': function() {
     var puzzle = new Puzzle(2, 1, true)
-    puzzle.addStart(2, 2)
+    puzzle.grid[2][2].start = true
     puzzle.addEnd(2, 0, 'top')
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[3][1] = {'type':'star', 'color':'orange'}
     return [puzzle, 5]
   }, 'invisible-poly': function() {
     var puzzle = new Puzzle(2, 1)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'polyshape':0}
     return [puzzle, 4]
   }, 'invisible-ylop': function() {
     var puzzle = new Puzzle(2, 1)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[3][1] = {'type':'ylop', 'polyshape':0}
     return [puzzle, 4]
   }, 'invisible-poly-and-ylop': function() {
     var puzzle = new Puzzle(2, 1)
-    puzzle.addStart(0, 2)
+    puzzle.grid[0][2].start = true
     puzzle.addEnd(4, 0, 'right')
     puzzle.grid[1][1] = {'type':'poly', 'polyshape':0}
     puzzle.grid[3][1] = {'type':'ylop', 'polyshape':0}
     return [puzzle, 4]
   }, 'laser-key': function() {
     var puzzle = new Puzzle(0, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(0, 0, 'right')
     return [puzzle, 1]
   }, 'straight': function() {
     var puzzle = new Puzzle(3, 0)
-    puzzle.addStart(0, 0)
+    puzzle.grid[0][0].start = true
     puzzle.addEnd(6, 0, 'right')
     return [puzzle, 1]
   }, 'pillar-square-bug': function() {
     var puzzle = new Puzzle(4, 4, true)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[3][1] = {'type':'square', 'color':'black'}
     puzzle.grid[3][3] = {'type':'square', 'color':'black'}
@@ -448,7 +448,7 @@ tests = {
     return [puzzle, 40]
   }, 'simpler-pillar-square-bug': function() {
     var puzzle = new Puzzle(4, 4, true)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[3][7] = {'type':'square', 'color':'black'}
     puzzle.grid[5][1] = {'type':'square', 'color':'white'}
@@ -456,7 +456,7 @@ tests = {
     return [puzzle, 1373]
   }, 'pillar-poly-bug': function() {
     var puzzle = new Puzzle(4, 4, true)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':17}
     puzzle.end = {'x':0, 'y':0, 'dir':'top'}
@@ -464,7 +464,7 @@ tests = {
   }, 'pillar-triangles-bug-NOCACHE': function() {
     window.DISABLE_CACHE = false
     var puzzle = new Puzzle(4, 4, true)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':3}
     puzzle.grid[5][5] = {'type':'triangle', 'color':'orange', 'count':3}
@@ -472,7 +472,7 @@ tests = {
   }, 'pillar-triangles-bug': function() {
     window.DISABLE_CACHE = true
     var puzzle = new Puzzle(4, 4, true)
-    puzzle.addStart(0, 8)
+    puzzle.grid[0][8].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':3}
     puzzle.grid[5][5] = {'type':'triangle', 'color':'orange', 'count':3}
@@ -480,7 +480,7 @@ tests = {
   }, 'small-pillar-triangles-bug-NOCACHE': function() {
     window.DISABLE_CACHE = false
     var puzzle = new Puzzle(3, 2, true)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':2}
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':2}
@@ -488,27 +488,27 @@ tests = {
   }, 'small-pillar-triangles-bug': function() {
     window.DISABLE_CACHE = true
     var puzzle = new Puzzle(3, 2, true)
-    puzzle.addStart(0, 4)
+    puzzle.grid[0][4].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':2}
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':2}
     return [puzzle, 7]
   }, 'laser-key-pillar': function() {
     var puzzle = new Puzzle(1, 3, true)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(0, 0, 'top')
     return [puzzle, 1]
   }, 'multistart-simple': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
-    puzzle.addStart(2, 6)
-    puzzle.addStart(4, 6)
-    puzzle.addStart(6, 6)
+    puzzle.grid[0][6].start = true
+    puzzle.grid[2][6].start = true
+    puzzle.grid[4][6].start = true
+    puzzle.grid[6][6].start = true
     puzzle.addEnd(6, 0, 'right')
     return [puzzle, 649]
   }, 'multiend-simple': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
+    puzzle.grid[0][6].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.addEnd(2, 0, 'top')
     puzzle.addEnd(4, 0, 'top')
@@ -516,10 +516,10 @@ tests = {
     return [puzzle, 649]
   }, 'multistart-and-end-simple': function() {
     var puzzle = new Puzzle(3, 3)
-    puzzle.addStart(0, 6)
-    puzzle.addStart(2, 6)
-    puzzle.addStart(4, 6)
-    puzzle.addStart(6, 6)
+    puzzle.grid[0][6].start = true
+    puzzle.grid[2][6].start = true
+    puzzle.grid[4][6].start = true
+    puzzle.grid[6][6].start = true
     puzzle.addEnd(0, 0, 'top')
     puzzle.addEnd(2, 0, 'top')
     puzzle.addEnd(4, 0, 'top')

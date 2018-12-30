@@ -253,7 +253,7 @@ function onTraceStart(svg, puzzle, start) {
     }
   }
   data.path.push(new PathSegment('none'))
-  data.puzzle.setCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
+  data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
 }
 
 document.onpointerlockchange = function() {

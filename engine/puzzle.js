@@ -50,7 +50,6 @@ class Puzzle {
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
-    this.startPoints = []
     this.endPoints = []
     this.regionCache = {}
     this.pillar = pillar
@@ -61,7 +60,7 @@ class Puzzle {
     var puzzle = new Puzzle()
     puzzle.name = parsed.name
     puzzle.grid = parsed.grid
-    // Legacy -- grid squares used to use 'false' to indicate emptiness. Now, we use:
+    // @Legacy: Grid squares used to use 'false' to indicate emptiness. Now, we use:
     // Cells default to undefined
     // Lines default to {'type':'line', 'color':0}
     for (var x=0; x<puzzle.grid.length; x++) {
@@ -72,17 +71,22 @@ class Puzzle {
         }
       }
     }
+    // @Legacy: Startpoints used to be only parsed.start
+    if (parsed.start) {
+      parsed.startPoints = [parsed.start]
+    }
+    // @Legacy: Startpoints used to be a separate array, now they are flags
     if (parsed.startPoints) {
-      puzzle.startPoints = parsed.startPoints
-    } else {
-      puzzle.startPoints = [parsed.start]
+      for (var startPoint of parsed.startPoints) {
+        puzzle.grid[startPoint.x][startPoint.y].start = true
+      }
     }
     if (parsed.endPoints) {
       puzzle.endPoints = parsed.endPoints
     } else {
       puzzle.endPoints = [parsed.end]
     }
-    // Legacy -- Dots and gaps used to be off the grid.
+    // @Legacy: Dots and gaps used to be separate arrays
     // Now, they are flags on the individual lines.
     for (var dot of parsed.dots) {
       puzzle.grid[dot.x][dot.y].dot = 1
@@ -161,21 +165,6 @@ class Puzzle {
     Object.assign(this.grid[x][y], properties)
   }
 
-  removeStart(x, y) {
-    for (var i=0; i<this.startPoints.length; i++) {
-      if (this.startPoints[i].x == x && this.startPoints[i].y == y) {
-        this.startPoints.splice(i, 1)
-        return true
-      }
-    }
-    return false
-  }
-
-  addStart(x, y) {
-    this.removeStart(x, y)
-    this.startPoints.push({'x':x, 'y':y})
-  }
-
   removeEnd(x, y) {
     for (var i=0; i<this.endPoints.length; i++) {
       if (this.endPoints[i].x == x && this.endPoints[i].y == y) {
@@ -203,7 +192,6 @@ class Puzzle {
     var copy = new Puzzle(0, 0)
     // @Performance: This is only used when making the solution array, to my knowledge.
     copy.grid = JSON.parse(JSON.stringify(this.grid))
-    copy.startPoints = this.startPoints.slice()
     copy.endPoints = this.endPoints.slice()
     copy.regionCache = this.regionCache
     copy.pillar = this.pillar
