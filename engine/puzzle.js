@@ -63,6 +63,17 @@ class Puzzle {
     var puzzle = new Puzzle()
     puzzle.name = parsed.name
     puzzle.grid = parsed.grid
+    // Legacy -- grid squares used to use 'false' to indicate emptiness. Now, we use:
+    // Cells default to undefined
+    // Lines default to {'type':'line', 'color':0}
+    for (var x=0; x<puzzle.grid.length; x++) {
+      for (var y=0; y<puzzle.grid[x].length; y++) {
+        if (puzzle.grid[x][y] == false) {
+          if (x%2 == 1 && y%2 == 1) puzzle.grid[x][y] = undefined
+          else puzzle.grid[x][y] = {'type':'line', 'color':0}
+        }
+      }
+    }
     if (parsed.startPoints) {
       puzzle.startPoints = parsed.startPoints
     } else {
@@ -84,12 +95,14 @@ class Puzzle {
     return JSON.stringify(this)
   }
 
-  newGrid(width, height) { // FIXME: Should this just be puzzle.clearGrid?
+  // @Cleanup: Should this just be puzzle.clearGrid?
+  newGrid(width, height) {
     var grid = []
-    for (var i=0; i<width; i++) {
-      grid[i] = []
-      for (var j=0; j<height; j++) {
-        grid[i][j] = false
+    for (var x=0; x<width; x++) {
+      grid[x] = []
+      for (var y=0; y<height; y++) {
+        if (x%2 == 1 && y%2 == 1) grid[x][y] = undefined
+        else grid[x][y] = {'type':'line', 'color':0}
       }
     }
     return grid
@@ -103,31 +116,47 @@ class Puzzle {
     return new_grid
   }
 
-  // Wrap a value around at the width of the grid.
+  // Wrap a value around at the width of the grid. No-op if not in pillar mode.
   _mod(val) {
+    if (!this.pillar) return val
     var mod = this.grid.length
     return ((val % mod) + mod) % mod
   }
 
+  // Determine if an x, y pair is a safe reference inside the grid. This should be invoked at the start of every
+  // function, but then functions can access the grid directly.
+  _safeCell(x, y) {
+    if (x < 0 || x >= this.grid.length) return false
+    if (y < 0 || y >= this.grid[x].length) return false
+    return true
+  }
+
   getCell(x, y) {
-    if (this.pillar) {
-      x = this._mod(x)
-    } else {
-      if (x < 0 || x >= this.grid.length) return undefined
-    }
-    if (y < 0 || y >= this.grid[x].length) return undefined
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return undefined
     return this.grid[x][y]
   }
 
   setCell(x, y, value) {
-    // throw 'grid['+x+']['+y+'] is out of bounds'
-    if (this.pillar) {
-      x = this._mod(x)
-    } else {
-      if (x < 0 || x >= this.grid.length) return
-    }
-    if (y < 0 || y >= this.grid[x].length) return
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return
     this.grid[x][y] = value
+  }
+
+  // A variant of getCell which specifically returns line values,
+  // and treats objects as being out-of-bounds
+  getLine(x, y) {
+    var cell = this.getCell(x, y)
+    if (cell == undefined) return undefined
+    if (cell.type != 'line') return undefined
+    return cell.color
+  }
+
+  // A variant of setCell which updates the contents, instead of overwriting.
+  updateCell(x, y, properties) {
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return
+    Object.assign(this.grid[x][y], properties)
   }
 
   removeStart(x, y) {
@@ -187,7 +216,7 @@ class Puzzle {
     this.hints = []
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
-        if (x%2 + y%2 == 1 && !this.getCell(x, y)) {
+        if (x%2 + y%2 == 1 && this.getLine(x, y) > 0) {
           this.hints.push({'x':x, 'y':y})
         }
       }
@@ -208,7 +237,7 @@ class Puzzle {
     var badHints = []
 
     for (var hint of this.hints) {
-      if (this.getCell(hint.x, hint.y) == true) {
+      if (this.getLine(hint.x, hint.y) > 0) {
         // Solution will be broken by this hint
         goodHints.push(hint)
       } else {
@@ -231,70 +260,70 @@ class Puzzle {
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
         if (x%2 == 1 && y%2 == 1) continue
-        this.grid[x][y] = false
+        this.grid[x][y] = {'type':'line', 'color':0}
       }
     }
   }
 
-  _innerLoop(x, y, region) {
+  _floodFill(x, y, region) {
     region.setCell(x, y)
-    this.setCell(x, y, true)
+    this.setCell(x, y, {'type':'line', 'color':3})
 
-    if (this.getCell(x, y + 1) == false) {
-      this._innerLoop(x, y + 1, region)
+    // @Performance: Why is this ordered TLBR?
+    if (this.getLine(x, y + 1) == 0) {
+      this._floodFill(x, y + 1, region)
     }
-    if (this.getCell(x + 1, y) == false) {
-      this._innerLoop(x + 1, y, region)
+    if (this.getLine(x + 1, y) == 0) {
+      this._floodFill(x + 1, y, region)
     }
-    if (this.getCell(x, y - 1) == false) {
-      this._innerLoop(x, y - 1, region)
+    if (this.getLine(x, y - 1) == 0) {
+      this._floodFill(x, y - 1, region)
     }
-    if (this.getCell(x - 1, y) == false) {
-      this._innerLoop(x - 1, y, region)
+    if (this.getLine(x - 1, y) == 0) {
+      this._floodFill(x - 1, y, region)
     }
   }
 
   getRegions() {
+    // Make a copy of the grid -- we will be overwriting it
     var savedGrid = this.copyGrid()
-    // Temporarily remove all elements from the grid
+
+    // Override all elements with empty lines -- this means that flood fill is just
+    // looking for lines with color 0.
     for (var x=1; x<this.grid.length; x+=2) {
       for (var y=1; y<this.grid[x].length; y+=2) {
-        this.grid[x][y] = false
+        this.grid[x][y] = {'type':'line', 'color':0}
       }
     }
+
     var regions = []
-    var pos = {'x':0, 'y':0}
-    while (true) {
-      // Find the next open cell
-      while (this.getCell(pos.x, pos.y) != false) {
-        pos.x++
-        if (pos.x >= this.grid.length) {
-          pos.x = 0
-          pos.y++
-        }
-        if (pos.y >= this.grid[0].length) {
-          this.grid = savedGrid
-          return regions
-        }
-      }
-
-      var region = new Region(this.grid.length)
-      this._innerLoop(pos.x, pos.y, region)
-      regions.push(region)
-    }
-  }
-}
-
-Puzzle.prototype.toString = function() {
-  var output = ''
-  for (var y=0; y<this.grid[0].length; y++) {
     for (var x=0; x<this.grid.length; x++) {
-      cell = this.getCell(x, y)
-      if (cell == false) output += '0'
-      else if (cell == true) output += '1'
-      else output += '#'
+      for (var y=0; y<this.grid[x].length; y++) {
+        // Find the next open cell (NB: getLine treats non-lines as undefined)
+        if (this.getLine(x, y) > 0) continue
+
+        // If this cell is empty (aka hasn't already been used by a region), then create a new one
+        // This will also mark all lines inside the new region as used.
+        var region = new Region(this.grid.length)
+        this._floodFill(x, y, region)
+        regions.push(region)
+      }
     }
-    output += '\n'
+    this.grid = savedGrid
+    return regions
   }
-  return output
+
+  logGrid() {
+    var output = ''
+    for (var y=0; y<this.grid[0].length; y++) {
+      for (var x=0; x<this.grid.length; x++) {
+        var cell = this.getCell(x, y)
+        if (cell == undefined) output += '?'
+        else if (cell.type == 'line') output += cell.color
+        else output += '#'
+      }
+      output += '\n'
+    }
+    console.log(output)
+  }
 }

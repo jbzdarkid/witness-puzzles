@@ -253,7 +253,7 @@ function onTraceStart(svg, puzzle, start) {
     }
   }
   data.path.push(new PathSegment('none'))
-  data.puzzle.setCell(startPoint.x, startPoint.y, true)
+  data.puzzle.setCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
 }
 
 document.onpointerlockchange = function() {
@@ -479,37 +479,37 @@ function _move() {
   var lastDir = data.path[data.path.length - 1].dir
 
   if (data.x < data.bbox.x1 + 12) { // Moving left
-    var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
-    if (cell == undefined) {
+    var line = data.puzzle.getLine(data.pos.x - 1, data.pos.y)
+    if (line == undefined) {
       data.x = data.bbox.x1 + 12
-    } else if (cell == true && lastDir != 'right') {
+    } else if (line > 0 && lastDir != 'right') {
       data.x = data.bbox.x1 + 12
     } else if (data.x < data.bbox.x1) {
       return 'left'
     }
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
-    var cell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
-    if (cell == undefined) {
+    var line = data.puzzle.getLine(data.pos.x + 1, data.pos.y)
+    if (line == undefined) {
       data.x = data.bbox.x2 - 12
-    } else if (cell == true && lastDir != 'left') {
+    } else if (line > 0 && lastDir != 'left') {
       data.x = data.bbox.x2 - 12
     } else if (data.x > data.bbox.x2) {
       return 'right'
     }
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
-    var cell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
-    if (cell == undefined) {
+    var line = data.puzzle.getLine(data.pos.x, data.pos.y - 1)
+    if (line == undefined) {
       data.y = data.bbox.y1 + 12
-    } else if (cell == true && lastDir != 'bottom') {
+    } else if (line > 0 && lastDir != 'bottom') {
       data.y = data.bbox.y1 + 12
     } else if (data.y < data.bbox.y1) {
       return 'top'
     }
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
-    var cell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
-    if (cell == undefined) {
+    var line = data.puzzle.getLine(data.pos.x, data.pos.y + 1)
+    if (line == undefined) {
       data.y = data.bbox.y2 - 12
-    } else if (cell == true && lastDir != 'top') {
+    } else if (line > 0 && lastDir != 'top') {
       data.y = data.bbox.y2 - 12
     } else if (data.y > data.bbox.y2) {
       return 'bottom'
@@ -529,7 +529,7 @@ function _changePos(moveDir) {
 
   if (backedUp) { // Exited cell, mark as unvisited
     data.path.pop().destroy()
-    data.puzzle.setCell(data.pos.x, data.pos.y, false)
+    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
   }
   if (moveDir == 'left') {
     data.pos.x--
@@ -566,6 +566,6 @@ function _changePos(moveDir) {
 
   if (!backedUp) { // Entered a new cell, mark as visited
     data.path.push(new PathSegment(moveDir))
-    data.puzzle.setCell(data.pos.x, data.pos.y, true)
+    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
   }
 }

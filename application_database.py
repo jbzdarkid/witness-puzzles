@@ -91,8 +91,6 @@ def is_active(session_id):
     return False
   return True
 
-def
-
 def get_all_rows():
   data = 'Puzzles:\n'
   puzzles = db.session.query(Puzzle).all()

@@ -1,4 +1,5 @@
 /*** Start cross-compatibility ***/
+// Used to detect if IDs include a direction, e.g. resize-top-left
 if (!String.prototype.includes) {
   String.prototype.includes = function() {
     return String.prototype.indexOf.apply(this, arguments) !== -1
@@ -9,11 +10,13 @@ Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMove
 /*** End cross-compatibility ***/
 
 // https://stackoverflow.com/q/11409895
+// Used to greatly simplify bbox translation by clamping cursor movement per-bbox
 Number.prototype.clamp = function(min, max) {
   return this < min ? min : this > max ? max : this
 }
 
 // http://stackoverflow.com/q/901115
+// @Cleanup: Unneeded? I need to implement daily puzzles somehow, though.
 var urlParams
 (window.onpopstate = function () {
     var match,
@@ -45,6 +48,10 @@ function PLAY_SOUND(track) {
 }
 
 function TELEMETRY(type) {
+  if (window.session_id == undefined) {
+    return // No session -- possibly on the test page.
+  }
+
   var request = new XMLHttpRequest()
   request.open('POST', '/telemetry', true)
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

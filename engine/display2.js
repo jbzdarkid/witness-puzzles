@@ -156,63 +156,64 @@ function _drawStartAndEnd(puzzle, svg) {
       'y': startPoint.y*41 + 23,
     })
     var start = svg.lastChild
-    start.id = startPoint.x + '_' + startPoint.y // FIXME: I'd like to avoid using ID to pass x/y, it feels like a hack.
+    // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
+    // in the onclick function below, but passing parameters through scope is hard.
+    start.id = startPoint.x + '_' + startPoint.y
     start.onclick = function(event) {
       trace(this, event, puzzle)
     }
-    if (puzzle.getCell(startPoint.x, startPoint.y) == true) {
-      // TODO: Clean up once I have rich lines; this start point should be 'none'
-      var surroundingLines = 0
-      if (puzzle.getCell(startPoint.x - 1, startPoint.y) == true) surroundingLines++
-      if (puzzle.getCell(startPoint.x + 1, startPoint.y) == true) surroundingLines++
-      if (puzzle.getCell(startPoint.x, startPoint.y - 1) == true) surroundingLines++
-      if (puzzle.getCell(startPoint.x, startPoint.y + 1) == true) surroundingLines++
-      if (surroundingLines < 2) { // 0 or 1 are valid
-        startData = {'elem':start, 'x':startPoint.x, 'y':startPoint.y}
-      }
-    }
+
+    // The startpoint must have a primary line through it
+    if (puzzle.getLine(startPoint.x, startPoint.y) != 1) continue
+
+    // And that line must not be coming from any adjacent cells
+    var leftCell = puzzle.getCell(startPoint.x - 1, startPoint.y)
+    if (leftCell != undefined && leftCell.dir == 'right') continue
+
+    var rightCell = puzzle.getCell(startPoint.x + 1, startPoint.y)
+    if (rightCell != undefined && rightCell.dir == 'left') continue
+
+    var topCell = puzzle.getCell(startPoint.x, startPoint.y - 1)
+    if (topCell != undefined && topCell.dir == 'bottom') continue
+
+    var bottomCell = puzzle.getCell(startPoint.x, startPoint.y + 1)
+    if (bottomCell != undefined && bottomCell.dir == 'top') continue
+
+    startData = {'elem':start, 'x':startPoint.x, 'y':startPoint.y}
   }
   return startData
 }
 
 function _drawSolution(puzzle, x, y) {
   // Limited because there is a chance of infinite looping with bad input data.
-  // TODO: Clean up once I have rich lines, this should be following the path laid by the solution.
   for (var i=0; i<1000; i++) {
-    var lastDir = data.path[data.path.length - 1].dir
-    var dx = 0
-    var dy = 0
-    if (lastDir != 'right' && puzzle.getCell(x - 1, y) == true) { // Left
-      console.debug('Tracing left')
-      dx = -1
-    } else if (lastDir != 'left' && puzzle.getCell(x + 1, y) == true) { // Right
-      console.debug('Tracing right')
-      dx = 1
-    } else if (lastDir != 'bottom' && puzzle.getCell(x, y - 1) == true) { // Top
-      console.debug('Tracing top')
-      dy = -1
-    } else if (lastDir != 'top' && puzzle.getCell(x, y + 1) == true) { // Bottom
-      console.debug('Tracing bottom')
-      dy = 1
+    var cell = puzzle.getCell(x, y)
+    if (cell == undefined) return // Somehow the path sent us out of bounds
+
+    var dir = cell.dir['dir']
+    if (dir == 'none') { // Reached an endpoint, move into it
+      var endDir = puzzle.getEndDir(x, y)
+      if (endDir == 'left') {
+        onMove(-24, 0)
+      } else if (endDir == 'right') {
+        onMove(24, 0)
+      } else if (endDir == 'top') {
+        onMove(0, -24)
+      } else if (endDir == 'bottom') {
+        onMove(0, 24)
+      }
+      return
     }
+    else if (dir == 'left') dx = -1
+    else if (dir == 'right') dx = 1
+    else if (dir == 'top') dy = -1
+    else if (dir == 'bottom') dy = 1
 
     x += dx
     y += dy
     // Unflag the cell, move into it, and reflag it
-    puzzle.setCell(x, y, false)
+    puzzle.updateCell(x, y, {'color':0})
     onMove(41 * dx, 41 * dy)
-    puzzle.setCell(x, y, true)
-  }
-
-  // Move into endpoint
-  var endDir = puzzle.getEndDir(x, y)
-  if (endDir == 'left') {
-    onMove(-24, 0)
-  } else if (endDir == 'right') {
-    onMove(24, 0)
-  } else if (endDir == 'top') {
-    onMove(0, -24)
-  } else if (endDir == 'bottom') {
-    onMove(0, 24)
+    puzzle.updateCell(x, y, {'color':1, 'dir':dir})
   }
 }

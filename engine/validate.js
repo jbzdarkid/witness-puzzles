@@ -16,29 +16,34 @@ function validate(puzzle) {
   var puzzleHasSymbols = false
   for (var x=1; x<puzzle.grid.length; x+=2) {
     for (var y=1; y<puzzle.grid[x].length; y+=2) {
-      if (puzzle.getCell(x, y) != false) puzzleHasSymbols = true
+      var cell = puzzle.getCell(x, y)
+      if (cell != undefined && cell.type != undefined) {
+        puzzleHasSymbols = true
+        break
+      }
     }
   }
 
   if (!puzzleHasSymbols) {
     // Only things to validate are gaps and dots
     for (var gap of puzzle.gaps) {
-      if (puzzle.getCell(gap.x, gap.y)) {
+      if (puzzle.getLine(gap.x, gap.y) > 0) {
         console.log('Gap at grid['+gap.x+']['+gap.y+'] is covered')
         puzzle.valid = false
         break
       }
     }
     for (var dot of puzzle.dots) {
-      if (!puzzle.getCell(dot.x, dot.y)) {
-        console.log('Dot at', dot.x, dot.y, 'is not covered')
-        puzzle.invalidElements.push(dot)
-        puzzle.valid = false
-      }
+      if (puzzle.getLine(dot.x, dot.y) >= 1) continue
+      console.log('Dot at', dot.x, dot.y, 'is not covered')
+      puzzle.invalidElements.push(dot)
+      puzzle.valid = false
     }
   } else {
     // Check that individual regions are valid
     var regions = puzzle.getRegions()
+    console.log('Found', regions.length, 'regions')
+    console.debug(regions)
     for (var region of regions) {
       var key = region.grid.toString()
       var regionData = puzzle.regionCache[key]
@@ -66,8 +71,7 @@ function _regionCheckNegations(puzzle, region) {
   var negationSymbols = []
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == false) continue
-    if (cell.type == 'nega') {
+    if (cell != undefined && cell.type == 'nega') {
       cell.type = 'nonce'
       puzzle.setCell(pos.x, pos.y, cell)
       negationSymbols.push({'x':pos.x, 'y':pos.y, 'cell':cell})
@@ -92,14 +96,14 @@ function _regionCheckNegations(puzzle, region) {
   }
   // Else, there are invalid elements and negations, try to pair them up
   var source = negationSymbols[0]
-  puzzle.setCell(source.x, source.y, false)
+  puzzle.setCell(source.x, source.y, null)
   console.log('Using negation symbol at', source.x, source.y)
 
   // Logic is duplicate of below
   if (window.NEGATIONS_CANCEL_NEGATIONS) {
     for (var i=1; i<negationSymbols.length; i++) {
       var target = negationSymbols[i]
-      puzzle.setCell(target.x, target.y, false)
+      puzzle.setCell(target.x, target.y, null)
       console.log('Negating other negation symbol at', target.x, target.y)
       var regionData = _regionCheckNegations(puzzle, region)
       puzzle.setCell(target.x, target.y, target.cell)
@@ -116,7 +120,7 @@ function _regionCheckNegations(puzzle, region) {
 
   for (var invalidElement of invalidElements) {
     invalidElement.cell = puzzle.getCell(invalidElement.x, invalidElement.y)
-    puzzle.setCell(invalidElement.x, invalidElement.y, false)
+    puzzle.setCell(invalidElement.x, invalidElement.y, null)
     console.log('Negating other symbol at', invalidElement.x, invalidElement.y)
     // Remove the negation and target, then recurse
     var regionData = _regionCheckNegations(puzzle, region)
@@ -146,10 +150,11 @@ function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
   var invalidElements = []
 
+  // @Cleanup: This needs to be an early exit -- maybe this should throw? Or maybe I just shouldn't check it at all...
   // Check that all gaps are not covered
   // FIXME: Check for invalid gap placement?
   for (var gap of puzzle.gaps) {
-    if (puzzle.getCell(gap.x, gap.y)) {
+    if (puzzle.getLine(gap.x, gap.y) > 0) {
       console.log('Gap at grid['+gap.x+']['+gap.y+'] is covered')
       puzzle.valid = false
     }
@@ -160,7 +165,8 @@ function _regionCheck(puzzle, region) {
   // TODO: Don't iterate all dots once they're in the grid :)
   for (var cell of region.cells) {
     for (var dot of puzzle.dots) {
-      if (dot.x == cell.x && dot.y == cell.y && !puzzle.getCell(cell.x, cell.y)) {
+      if (dot.x == cell.x && dot.y == cell.y) {
+        if (puzzle.getLine(dot.x, dot.y) >= 1) break
         console.log('Dot at', dot.x, dot.y, 'is not covered')
         invalidElements.push(dot)
       }
@@ -169,13 +175,14 @@ function _regionCheck(puzzle, region) {
 
   // Check for triangles
   for (var pos of region.cells) {
-    if (puzzle.getCell(pos.x, pos.y).type == 'triangle') {
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell != undefined && cell.type == 'triangle') {
       var count = 0
-      if (puzzle.getCell(pos.x - 1, pos.y)) count++
-      if (puzzle.getCell(pos.x + 1, pos.y)) count++
-      if (puzzle.getCell(pos.x, pos.y - 1)) count++
-      if (puzzle.getCell(pos.x, pos.y + 1)) count++
-      if (count != puzzle.getCell(pos.x, pos.y).count) {
+      if (puzzle.getLine(pos.x - 1, pos.y) > 0) count++
+      if (puzzle.getLine(pos.x + 1, pos.y) > 0) count++
+      if (puzzle.getLine(pos.x, pos.y - 1) > 0) count++
+      if (puzzle.getLine(pos.x, pos.y + 1) > 0) count++
+      if (cell.count != count) {
         console.log('Triangle at grid['+pos.x+']['+pos.y+'] has', count, 'borders')
         invalidElements.push(pos)
       }
@@ -187,7 +194,7 @@ function _regionCheck(puzzle, region) {
   var squareColors = {}
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == false) continue
+    if (cell == undefined) continue
     if (coloredObjects[cell.color] == undefined) {
       coloredObjects[cell.color] = 0
     }
@@ -200,7 +207,7 @@ function _regionCheck(puzzle, region) {
 
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == false) continue
+    if (cell == undefined) continue
     if (cell.type == 'square') {
       if (squareColorCount > 1) {
         console.log('Found a', cell.color, 'square in a region with', squareColorCount, 'square colors')
@@ -217,7 +224,7 @@ function _regionCheck(puzzle, region) {
   if (!_polyWrapper(region, puzzle)) {
     for (var pos of region.cells) {
       var cell = puzzle.getCell(pos.x, pos.y)
-      if (cell == false) continue
+      if (cell == undefined) continue
       if (cell.type == 'poly' || cell.type == 'ylop') {
         invalidElements.push(pos)
       }
@@ -233,6 +240,7 @@ function _polyWrapper(region, puzzle) {
   var polyCount = 0
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == undefined) continue
     if (cell.polyshape == 0) continue
     if (cell.type == 'poly') {
       polys.push(cell)
@@ -340,11 +348,11 @@ function _polyFit(polys, puzzle) {
 
   for (var i=0; i<polys.length; i++) {
     var poly = polys.splice(i, 1)[0]
-    console.log('Selected poly', poly)
+    console.spam('Selected poly', poly)
     for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
       var cells = polyominoFromPolyshape(polyshape)
       if (!fitsGrid(cells, pos.x, pos.y, puzzle)) continue
-      console.log('Placing at', pos.x, pos.y)
+      console.spam('Placing at', pos.x, pos.y)
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]++
       if (_polyFit(polys, puzzle)) return true
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]--

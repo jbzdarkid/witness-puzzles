@@ -1,12 +1,20 @@
 In vague order of importance.
 
+For sunday:
+- Clean up floodFill to use 0/1
+(perf test as well, to figure out 'fastest comparisions')
+- Use updateCell in solve.js (backtrack after exit)
+- Try to invert trace... I think solve's directions are more logical
+- Change gap testing to be throwing (indicates serious bug)
+
+
 - Start-grow animation
 - What is .line in animations doing?
 - Fix generation colors
 - Simple Symmetry (horiz/verti)
 !- Stable release
 - Favicon
-- Rich line data
+- Rich line data -> Done
 -- Dots & gaps into the grid
 -- Dots cancelled by negation
 -- Start & end into the grid?
@@ -17,6 +25,8 @@ In vague order of importance.
 --- Solution tracer compatibility
 -- Mid-segment endpoints
 -- Clean up solution to be a full path (start point = none, same as trace)
+--- Trace equivalence is hard, since it links backwards.
+--- Consider cleaning up / merging PathSegment class
 - Hide solution (puzzleData) from global scope
 - Server
 -- A whole bunch of UI for browsing puzzles
