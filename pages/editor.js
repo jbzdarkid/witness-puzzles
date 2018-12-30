@@ -140,7 +140,10 @@ function solvePuzzle() {
   var puzzleHasSymbols = false
   for (var x=1; x<puzzle.grid.length; x+=2) {
     for (var y=1; y<puzzle.grid[x].length; y+=2) {
-      if (puzzle.getCell(x, y) != false) puzzleHasSymbols = true
+      if (puzzle.getCell(x, y) != undefined && puzzle.type != 'line') {
+        puzzleHasSymbols = true
+        break
+      }
     }
   }
   if (puzzleHasSymbols && puzzle.grid.length * puzzle.grid[0].length > 121) {
@@ -347,9 +350,10 @@ function _onElementClicked(elem) {
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 != 1 || y%2 != 1) return
     // Only remove the element if it's an exact match
-    if (puzzle.grid[x][y].type == activeParams.type
+    if (puzzle.grid[x][y] != undefined
+     && puzzle.grid[x][y].type == activeParams.type
      && puzzle.grid[x][y].color == activeParams.color) {
-      puzzle.grid[x][y] = false
+      puzzle.grid[x][y] = undefined
     } else {
       puzzle.grid[x][y] = {
         'type': activeParams.type,
@@ -359,11 +363,12 @@ function _onElementClicked(elem) {
   } else if (['poly', 'ylop'].includes(activeParams.type)) {
     if (x%2 != 1 || y%2 != 1) return
     // Only remove the element if it's an exact match
-    if (puzzle.grid[x][y].type == activeParams.type
+    if (puzzle.grid[x][y] != undefined
+     && puzzle.grid[x][y].type == activeParams.type
      && puzzle.grid[x][y].color == activeParams.color
      && puzzle.grid[x][y].polyshape == activeParams.polyshape
      && puzzle.grid[x][y].rot == activeParams.rot) {
-      puzzle.grid[x][y] = false
+      puzzle.grid[x][y] = undefined
     } else {
       puzzle.grid[x][y] = {
         'type': activeParams.type,
@@ -375,12 +380,13 @@ function _onElementClicked(elem) {
   } else if (activeParams.type == 'triangle') {
     if (x%2 != 1 || y%2 != 1) return
     // Only increment count if exact match
-    if (puzzle.grid[x][y].type == activeParams.type
+    if (puzzle.grid[x][y] != undefined
+     && puzzle.grid[x][y].type == activeParams.type
      && puzzle.grid[x][y].color == activeParams.color) {
       puzzle.grid[x][y].count = puzzle.grid[x][y].count % 3 + 1
       // Remove when it matches activeParams -- this allows fluid cycling
       if (puzzle.grid[x][y].count == activeParams.count) {
-        puzzle.grid[x][y] = false
+        puzzle.grid[x][y] = undefined
       }
     } else {
       puzzle.grid[x][y] = {
@@ -570,25 +576,25 @@ function resizePuzzle(dx, dy, id) {
   if (id.includes('left')) {
     while (puzzle.grid.length > newWidth) puzzle.grid.shift()
     while (puzzle.grid.length < newWidth) {
-      puzzle.grid.unshift((new Array(newHeight)).fill(false))
+      puzzle.grid.unshift((new Array(newHeight)).fill(undefined))
     }
   }
   if (id.includes('right')) {
     while (puzzle.grid.length > newWidth) puzzle.grid.pop()
     while (puzzle.grid.length < newWidth) {
-      puzzle.grid.push((new Array(newHeight)).fill(false))
+      puzzle.grid.push((new Array(newHeight)).fill(undefined))
     }
   }
   if (id.includes('top')) {
     for (var row of puzzle.grid) {
       while (row.length > newHeight) row.shift()
-      while (row.length < newHeight) row.unshift(false)
+      while (row.length < newHeight) row.unshift(undefined)
     }
   }
   if (id.includes('bottom')) {
     for (var row of puzzle.grid) {
       while (row.length > newHeight) row.pop()
-      while (row.length < newHeight) row.push(false)
+      while (row.length < newHeight) row.push(undefined)
     }
   }
 
