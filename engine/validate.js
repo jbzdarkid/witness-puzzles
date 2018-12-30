@@ -24,15 +24,17 @@ function validate(puzzle) {
     }
   }
 
-  if (!puzzleHasSymbols) {
-    // Only things to validate are gaps and dots
-    for (var gap of puzzle.gaps) {
-      if (puzzle.getLine(gap.x, gap.y) > 0) {
-        console.log('Gap at grid['+gap.x+']['+gap.y+'] is covered')
-        puzzle.valid = false
-        break
-      }
+  // Validate gap failures as an early exit.
+  // @Robustness: Check for invalid gap placement?
+  for (var gap of puzzle.gaps) {
+    if (puzzle.getLine(gap.x, gap.y) > 0) {
+      console.log('Gap at grid['+gap.x+']['+gap.y+'] is covered')
+      puzzle.valid = false
+      return
     }
+  }
+
+  if (!puzzleHasSymbols) {
     for (var dot of puzzle.dots) {
       if (puzzle.getLine(dot.x, dot.y) >= 1) continue
       console.log('Dot at', dot.x, dot.y, 'is not covered')
@@ -149,16 +151,6 @@ function _regionCheckNegations(puzzle, region) {
 function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
   var invalidElements = []
-
-  // @Cleanup: This needs to be an early exit -- maybe this should throw? Or maybe I just shouldn't check it at all...
-  // Check that all gaps are not covered
-  // FIXME: Check for invalid gap placement?
-  for (var gap of puzzle.gaps) {
-    if (puzzle.getLine(gap.x, gap.y) > 0) {
-      console.log('Gap at grid['+gap.x+']['+gap.y+'] is covered')
-      puzzle.valid = false
-    }
-  }
 
   // Check that all dots are covered
   // FIXME: Check for invalid dot placement?

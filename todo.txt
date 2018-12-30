@@ -2,7 +2,6 @@ In vague order of importance.
 
 For sunday:
 - Try to invert trace... I think solve's directions are more logical
-- Change gap testing to be throwing (indicates serious bug)
 
 
 - Start-grow animation
