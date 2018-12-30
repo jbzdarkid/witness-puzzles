@@ -286,7 +286,7 @@ class Puzzle {
     // looking for lines with color 0.
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
-        if (this.getCell(x, y) > 0) {
+        if (this.getLine(x, y) > 0) {
           this.grid[x][y] = undefined
         } else {
           this.grid[x][y] = true
