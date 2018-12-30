@@ -1,45 +1,61 @@
 // Settings (todo: Expose to the user/puzzlemaker?)
 window.NEGATIONS_CANCEL_NEGATIONS = true
 
-// Puzzle = {grid, start, end, dots, gaps}
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Whether or not the puzzle is valid
+// invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
 // negations: Negation symbols and their targets (for the purpose of darkening)
-// invalidElements: Symbols which are invalid (for the purpose of flashing)
 function validate(puzzle) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
   puzzle.invalidElements = []
   puzzle.negations = []
 
-  // Perf optimization: We can skip iterating regions if the grid has no symbols.
   var puzzleHasSymbols = false
-  for (var x=1; x<puzzle.grid.length; x+=2) {
-    for (var y=1; y<puzzle.grid[x].length; y+=2) {
-      var cell = puzzle.getCell(x, y)
-      if (cell != undefined && cell.type != undefined) {
+  // Validate gap failures as an early exit.
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell == undefined) continue
+      if (cell.type == 'line') {
+        if (cell.gap == true && cell.color > 0) {
+          console.log('Gap at grid['+x+']['+y+'] is covered')
+          puzzle.valid = false
+          return
+        }
+        /* @Future: This is one way of doing it...
+        if (cell.dot == 2 && cell.color == 2) {
+          console.log('A blue dot at grid['+x+']['+y+'] is covered by an orange line')
+          puzzle.valid = false
+        } else if (cell.dot == 3 && cell.color == 1 && puzzle.twocolor == true) {
+          console.log('A orange dot at grid['+x+']['+y+'] is covered by an blue line')
+          puzzle.valid = false
+        }
+
+        // And this is another: [leaning toward this]
+        if (cell.color > 0 && cell.dot > 1 && cell.dot != cell.color) {
+          console.log('A ' + cell.dot + ' color dot at grid['+x+']['+y+'] is covered by a ' + cell.color + ' colored line')
+          puzzle.valid = false
+        }
+        */
+      } else if (cell.type != undefined) {
+        // Perf optimization: We can skip computing regions if the grid has no symbols.
         puzzleHasSymbols = true
-        break
       }
     }
   }
 
-  // Validate gap failures as an early exit.
-  // @Robustness: Check for invalid gap placement?
-  for (var gap of puzzle.gaps) {
-    if (puzzle.getLine(gap.x, gap.y) > 0) {
-      console.log('Gap at grid['+gap.x+']['+gap.y+'] is covered')
-      puzzle.valid = false
-      return
-    }
-  }
-
   if (!puzzleHasSymbols) {
-    for (var dot of puzzle.dots) {
-      if (puzzle.getLine(dot.x, dot.y) >= 1) continue
-      console.log('Dot at', dot.x, dot.y, 'is not covered')
-      puzzle.invalidElements.push(dot)
-      puzzle.valid = false
+    for (var x=0; x<puzzle.grid.length; x++) {
+      for (var y=0; y<puzzle.grid[x].length; y++) {
+        var cell = puzzle.grid[x][y]
+        if (cell == undefined || cell.type != 'line') continue
+        if (cell.dot > 0 && cell.color == 0) {
+          console.log('Dot at', x, y, 'is not covered')
+          puzzle.invalidElements.push({'x':x, 'y':y})
+          puzzle.valid = false
+        }
+      }
     }
   } else {
     // Check that individual regions are valid
@@ -79,7 +95,7 @@ function _regionCheckNegations(puzzle, region) {
       negationSymbols.push({'x':pos.x, 'y':pos.y, 'cell':cell})
     }
   }
-  console.log('Found negation symbols:', negationSymbols)
+  console.log('Found negation symbols:', JSON.stringify(negationSymbols))
   // Get a list of elements that are currently invalid (before any negations are applied)
   var invalidElements = _regionCheck(puzzle, region)
   console.log('Negation-less regioncheck returned invalid elements:', JSON.stringify(invalidElements))
@@ -139,9 +155,8 @@ function _regionCheckNegations(puzzle, region) {
     }
   }
 
-  console.log('All pairings failed')
-  // All negation pairings failed, select one possible pairing and return it
-  // FIXME: Random? This is currently the last possible negation
+  // @Robustness: Random? A lot harder now...
+  console.log('All pairings failed, showing last attempted negation')
   puzzle.setCell(source.x, source.y, source.cell)
   return regionData
 }
@@ -152,16 +167,13 @@ function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
   var invalidElements = []
 
-  // Check that all dots are covered
-  // FIXME: Check for invalid dot placement?
-  // TODO: Don't iterate all dots once they're in the grid :)
-  for (var cell of region.cells) {
-    for (var dot of puzzle.dots) {
-      if (dot.x == cell.x && dot.y == cell.y) {
-        if (puzzle.getLine(dot.x, dot.y) >= 1) break
-        console.log('Dot at', dot.x, dot.y, 'is not covered')
-        invalidElements.push(dot)
-      }
+  // Check for uncovered dots
+  for (var pos of region.cells) {
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == undefined || cell.type != 'line') continue
+    if (cell.dot > 0) {
+      console.log('Dot at', pos.x, pos.y, 'is not covered')
+      invalidElements.push(pos)
     }
   }
 
@@ -257,25 +269,29 @@ function _polyWrapper(region, puzzle) {
   }
 
   // For polyominos, we clear the grid to mark it up again:
-  var copy = puzzle.clone()
   if (polyCount < 0) {
     // This is an early exit, if there's bad counts.
     console.log('More onimoylops than polyominos by', -polyCount)
     return false
   }
+
+  var savedGrid = puzzle.grid
+  puzzle.newGrid()
   // First, we mark all cells as 0: Cells outside the target region should be unaffected.
-  for (var x=0; x<copy.grid.length; x++) {
-    for (var y=0; y<copy.grid[x].length; y++) {
-      copy.setCell(x, y, 0)
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      puzzle.setCell(x, y, 0)
     }
   }
   // In the normal case, we mark every cell as -1: It needs to be covered by one poly
   if (polyCount > 0) {
-    for (var cell of region.cells) copy.setCell(cell.x, cell.y, -1)
+    for (var cell of region.cells) puzzle.setCell(cell.x, cell.y, -1)
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
-  return _ylopFit(ylops.slice(), polys.slice(), copy)
+  var ret = _ylopFit(ylops.slice(), polys.slice(), puzzle)
+  puzzle.grid = savedGrid
+  return ret
 }
 
 // Places the ylops such that they are inside of the grid, then checks if the polys

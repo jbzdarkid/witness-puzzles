@@ -7,8 +7,6 @@ In vague order of importance.
 !- Stable release
 - Favicon still needs improving
 - Rich line data -> Done
--- Dots & gaps into the grid
--- Dots cancelled by negation
 -- Start & end into the grid?
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
@@ -19,6 +17,7 @@ In vague order of importance.
 -- Clean up solution to be a full path (start point = none, same as trace)
 --- Trace equivalence is hard, since it links backwards.
 --- Consider cleaning up / merging PathSegment class
+- When a region fails, but has negation symbols in it, they should still negate things -- even if those negations did not result in a successful puzzle. Note that this includes recursion....
 - Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
 - Hide solution (puzzleData) from global scope
 - Server

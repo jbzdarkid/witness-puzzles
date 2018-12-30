@@ -161,9 +161,9 @@ function trace(elem, event, puzzle) {
       data.cursor.onclick = null
       validate(puzzle)
 
-      for (var combination of puzzle.negations) {
-        data.animations.insertRule('.' + svg.id + '_' + combination.source.x + '_' + combination.source.y + ' {animation: 0.75s 1 forwards fade}')
-        data.animations.insertRule('.' + svg.id + '_' + combination.target.x + '_' + combination.target.y + ' {animation: 0.75s 1 forwards fade}')
+      for (var negation of puzzle.negations) {
+        data.animations.insertRule('.' + svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}')
+        data.animations.insertRule('.' + svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}')
       }
 
       if (puzzle.valid) {
@@ -449,14 +449,8 @@ function _pushCursor(dx, dy, width, height) {
 
 function _gapCollision() {
   var lastDir = data.path[data.path.length - 1].dir
-  var isGap = false
-  for (var gap of data.puzzle.gaps) {
-    if (gap.x == data.pos.x && gap.y == data.pos.y) {
-      isGap = true
-      break
-    }
-  }
-  if (!isGap) return
+  var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+  if (cell != undefined && cell.gap != true) return
 
   if (data.pos.x%2 == 1 && data.pos.y%2 == 0) { // Horizontal cell
     if (lastDir == 'left') {

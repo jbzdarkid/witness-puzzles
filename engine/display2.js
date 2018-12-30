@@ -28,7 +28,8 @@ function draw(puzzle, target='puzzle') {
   rect.setAttribute('height', pixelHeight - 10) // Removing border
 
   _drawGrid(puzzle, svg)
-  var startData = _drawStartAndEnd(puzzle, svg) // Detects and returns the start element to begin tracing
+  // Detects and returns the start element to begin tracing
+  var startData = _drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
@@ -99,34 +100,33 @@ function _drawGrid(puzzle, svg) {
 }
 
 function _drawSymbols(puzzle, svg, target) {
-  for (var x=1; x<puzzle.grid.length; x+=2) {
-    for (var y=1; y<puzzle.grid[x].length; y+=2) {
-      if (puzzle.grid[x][y]) {
-        var params = JSON.parse(JSON.stringify(puzzle.grid[x][y]))
-        params.width = 58
-        params.height = 58
-        params.x = x*41 + 23
-        params.y = y*41 + 23
-        params.class = target + '_' + x + '_' + y
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell == undefined) continue
+      var params = {
+        'width':58,
+        'height':58,
+        'x': x*41 + 23,
+        'y': y*41 + 23,
+        'class': target + '_' + x + '_' + y,
+      }
+      if (cell.dot > 0) {
+        params.type = 'dot'
+        if (cell.dot == 1) params.color = 'black'
+        // @Future: When I implement 2-color dots
+        // if (cell.dot == 2) params.color = 'blue'
+        // if (cell.dot == 3) params.color = 'orange'
+        drawSymbolWithSvg(svg, params)
+      } else if (cell.gap) {
+        params.type = 'gap'
+        if (x%2 == 0 && y%2 == 1) params.rot = 1
+        drawSymbolWithSvg(svg, params)
+      } else if (x%2 == 1 && y%2 == 1) {
+        Object.assign(params, cell)
         drawSymbolWithSvg(svg, params)
       }
     }
-  }
-
-  for (var gap of puzzle.gaps) {
-    var params = {'type':'gap', 'width':58, 'height':58}
-    params.x = gap.x*41 + 23
-    params.y = gap.y*41 + 23
-    if (gap.x%2 == 0 && gap.y%2 == 1) params.rot = 1
-    drawSymbolWithSvg(svg, params)
-  }
-
-  for (var dot of puzzle.dots) {
-    var params = {'type':'dot', 'width':58, 'height':58}
-    params.x = dot.x*41 + 23
-    params.y = dot.y*41 + 23
-    params.class = target + '_' + dot.x + '_' + dot.y
-    drawSymbolWithSvg(svg, params)
   }
 }
 

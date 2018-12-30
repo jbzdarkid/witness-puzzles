@@ -260,7 +260,7 @@ function _dot(svg, params) {
   svg.appendChild(hex)
   hex.setAttribute('points', '5.2 9, 10.4 0, 5.2 -9, -5.2 -9, -10.4 0, -5.2 9')
   hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
-  hex.setAttribute('fill', 'black')
+  hex.setAttribute('fill', params.color)
   hex.setAttribute('class', params.class)
   hex.setAttribute('style', 'pointer-events:none;')
 }

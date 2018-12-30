@@ -46,14 +46,12 @@ class Region {
 class Puzzle {
   constructor(width, height, pillar=false) {
     if (pillar) {
-      this.grid = this.newGrid(2 * width, 2 * height + 1)
+      this.newGrid(2 * width, 2 * height + 1)
     } else {
-      this.grid = this.newGrid(2 * width + 1, 2 * height + 1)
+      this.newGrid(2 * width + 1, 2 * height + 1)
     }
     this.startPoints = []
     this.endPoints = []
-    this.dots = []
-    this.gaps = []
     this.regionCache = {}
     this.pillar = pillar
   }
@@ -84,8 +82,14 @@ class Puzzle {
     } else {
       puzzle.endPoints = [parsed.end]
     }
-    puzzle.dots = parsed.dots
-    puzzle.gaps = parsed.gaps
+    // Legacy -- Dots and gaps used to be off the grid.
+    // Now, they are flags on the individual lines.
+    for (var dot of parsed.dots) {
+      puzzle.grid[dot.x][dot.y].dot = 1
+    }
+    for (var gap of parsed.gaps) {
+      puzzle.grid[gap.x][gap.y].gap = true
+    }
     puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
     return puzzle
@@ -95,25 +99,21 @@ class Puzzle {
     return JSON.stringify(this)
   }
 
-  // @Cleanup: Should this just be puzzle.clearGrid?
+  // This is explicitly *not* just clearing the grid, so that external references
+  // to the grid are not also cleared.
   newGrid(width, height) {
-    var grid = []
+    if (width == undefined) { // Called by someone who just wants to clear the grid.
+      width = this.grid.length
+      height = this.grid[0].length
+    }
+    this.grid = []
     for (var x=0; x<width; x++) {
-      grid[x] = []
+      this.grid[x] = []
       for (var y=0; y<height; y++) {
-        if (x%2 == 1 && y%2 == 1) grid[x][y] = undefined
-        else grid[x][y] = {'type':'line', 'color':0}
+        if (x%2 == 1 && y%2 == 1) this.grid[x][y] = undefined
+        else this.grid[x][y] = {'type':'line', 'color':0}
       }
     }
-    return grid
-  }
-
-  copyGrid() {
-    var new_grid = []
-    for (var row of this.grid) {
-      new_grid.push(row.slice())
-    }
-    return new_grid
   }
 
   // Wrap a value around at the width of the grid. No-op if not in pillar mode.
@@ -201,11 +201,10 @@ class Puzzle {
 
   clone() {
     var copy = new Puzzle(0, 0)
-    copy.grid = this.copyGrid()
+    // @Performance: This is only used when making the solution array, to my knowledge.
+    copy.grid = JSON.parse(JSON.stringify(this.grid))
     copy.startPoints = this.startPoints.slice()
     copy.endPoints = this.endPoints.slice()
-    copy.dots = this.dots.slice()
-    copy.gaps = this.gaps.slice()
     copy.regionCache = this.regionCache
     copy.pillar = this.pillar
     copy.hints = this.hints
@@ -231,7 +230,7 @@ class Puzzle {
   // Returns the shown hint.
   showHint(hint) {
     if (hint != undefined) {
-      this.gaps.push(hint)
+      this.grid[hint.x][hint.y].gap = true
       return
     }
 
@@ -253,7 +252,7 @@ class Puzzle {
     } else {
       return
     }
-    this.gaps.push(hint)
+    this.grid[hint.x][hint.y].gap = true
     this.hints = badHints.concat(goodHints)
     return hint
   }
@@ -262,7 +261,7 @@ class Puzzle {
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
         if (x%2 == 1 && y%2 == 1) continue
-        this.grid[x][y] = {'type':'line', 'color':0}
+        else Object.assign(this.grid[x][y], {'color':0, 'dir':undefined})
       }
     }
   }
@@ -283,13 +282,14 @@ class Puzzle {
 
   getRegions() {
     // Make a copy of the grid -- we will be overwriting it
-    var savedGrid = this.copyGrid()
-
+    var savedGrid = this.grid
+    this.newGrid()
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with color 0.
-    for (var x=0; x<this.grid.length; x++) {
-      for (var y=0; y<this.grid[x].length; y++) {
-        if (this.getLine(x, y) > 0) {
+    for (var x=0; x<savedGrid.length; x++) {
+      for (var y=0; y<savedGrid[x].length; y++) {
+        var cell = savedGrid[x][y]
+        if (cell != undefined && cell.type == 'line' && cell.color > 0) {
           this.grid[x][y] = undefined
         } else {
           this.grid[x][y] = true
@@ -300,8 +300,7 @@ class Puzzle {
     var regions = []
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
-        // Find the next open cell (NB: getLine treats non-lines as undefined)
-        if (this.getLine(x, y) > 0) continue
+        if (this.grid[x][y] == undefined) continue
 
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.

@@ -63,13 +63,11 @@ tests = {
     puzzle.addStart(0, 6)
     puzzle.addEnd(6, 0, 'right')
     puzzle.grid[3][1] = {'type':'nega', 'color':'white'}
-    puzzle.dots = [
-      {'x':2, 'y':1},
-      {'x':4, 'y':1},
-      {'x':3, 'y':0},
-      {'x':3, 'y':2}
-    ]
-    return [puzzle, 0]
+    puzzle.grid[2][1].dot = 1
+    puzzle.grid[4][1].dot = 1
+    puzzle.grid[3][0].dot = 1
+    puzzle.grid[3][2].dot = 1
+    return [puzzle, 39]
   }, 'simple-negation': function() {
     var puzzle = new Puzzle(3, 1)
     puzzle.addStart(0, 2)
@@ -107,8 +105,8 @@ tests = {
     puzzle.grid[1][3] = {'type':'square', 'color':'orange'}
     puzzle.grid[3][3] = {'type':'square', 'color':'blue'}
     puzzle.grid[5][3] = {'type':'square', 'color':'blue'}
-    puzzle.dots = [{'x':2, 'y':2}]
-    return [puzzle, 38]
+    puzzle.grid[2][2].dot = 1
+    return [puzzle, 80]
   }, 'negation-complexity': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.addStart(0, 4)
@@ -251,18 +249,14 @@ tests = {
     var puzzle = new Puzzle(2, 2)
     puzzle.addStart(0, 4)
     puzzle.addEnd(4, 0, 'right')
-    puzzle.dots = [
-      {'x':0, 'y':1},
-      {'x':0, 'y':3},
-      {'x':1, 'y':0},
-      {'x':3, 'y':0}
-    ]
-    puzzle.gaps = [
-      {'x':1, 'y':2},
-      {'x':2, 'y':1},
-      {'x':2, 'y':3},
-      {'x':3, 'y':2}
-    ]
+    puzzle.grid[0][1].dot = 1
+    puzzle.grid[0][3].dot = 1
+    puzzle.grid[1][0].dot = 1
+    puzzle.grid[3][0].dot = 1
+    puzzle.grid[1][2].gap = true
+    puzzle.grid[2][1].gap = true
+    puzzle.grid[2][3].gap = true
+    puzzle.grid[3][2].gap = true
     return [puzzle, 1]
   }, 'completely-cancel': function() {
     var puzzle = new Puzzle(2, 2)
@@ -300,7 +294,7 @@ tests = {
     puzzle.grid[5][5] = {'type':'ylop', 'color':'blue'  , 'polyshape':1}
     puzzle.grid[1][7] = {'type':'poly', 'color':'yellow', 'polyshape':50}
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':51}
-    puzzle.gaps = [{'x':5, 'y':4}]
+    puzzle.grid[5][4].gap = true
     return [puzzle, 17]
   }, 'simple-rpoly': function() {
     var puzzle = new Puzzle(2, 2)
@@ -385,10 +379,8 @@ tests = {
     var puzzle = new Puzzle(2, 1, true)
     puzzle.addStart(0, 2)
     puzzle.addEnd(2, 0, 'top')
-    puzzle.gaps = [
-      {'x':1, 'y':0},
-      {'x':1, 'y':2}
-    ]
+    puzzle.grid[1][0].gap = true
+    puzzle.grid[1][2].gap = true
     return [puzzle, 2]
   }, 'pillar-with-stones': function() {
     var puzzle = new Puzzle(2, 1, true)
