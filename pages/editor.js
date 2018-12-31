@@ -297,7 +297,7 @@ function _onElementClicked(elem) {
   var y = parseInt(elem.id.split('_')[1])
 
   if (activeParams.type == 'start') {
-    if (x%2 != 0 || y%2 != 0) return
+    if (x%2 == 1 && y%2 == 1) return
     // Toggle the start point -- add it if it isn't removed.
     if (puzzle.grid[x][y].start == undefined) {
       puzzle.grid[x][y].start = true

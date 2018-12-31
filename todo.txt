@@ -11,8 +11,6 @@ In vague order of importance.
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
 -- Colored Dots
--- Mid-segment start
---- Solution tracer compatibility
 -- Mid-segment endpoints
 -- Clean up solution to be a full path (start point = none, same as trace)
 --- Trace equivalence is hard, since it links backwards.

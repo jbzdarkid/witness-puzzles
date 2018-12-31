@@ -167,8 +167,8 @@ function _drawStartAndEnd(puzzle, svg) {
       }
 
       // The startpoint must have a primary line through it
-      // @Future: if (cell.line != 1 || cell.line != 2) continue
-      if (cell.line != 1) continue
+      // @Future: if (cell.color != 1 || cell.color != 2) continue
+      if (cell.color != 1) continue
 
       // And that line must not be coming from any adjacent cells
       var leftCell = puzzle.getCell(x - 1, y)
@@ -190,14 +190,50 @@ function _drawStartAndEnd(puzzle, svg) {
 }
 
 function _drawSolution(puzzle, x, y) {
+  console.info('Drawing solution')
+  var rows = '   |'
+  for (var i=0; i<puzzle.grid.length; i++) {
+    if (i < 10) rows += ' '
+    rows += '  ' + i + ' |'
+  }
+  console.info(rows)
+  for (var j=0; j<puzzle.grid[0].length; j++) {
+    var output = ''
+    if (j < 10) output += ' '
+    output += j + ' |'
+    for (var i=0; i<puzzle.grid.length; i++) {
+      var cell = puzzle.grid[i][j]
+      if (cell == undefined || cell.dir == undefined) {
+        output += '     |'
+      } else if (cell.dir == 'left') {
+        output += 'left |'
+      } else if (cell.dir == 'right') {
+        output += 'right|'
+      } else if (cell.dir == 'top') {
+        output += 'up   |'
+      } else if (cell.dir == 'bottom') {
+        output += 'down |'
+      } else if (cell.dir == 'none') {
+        output += 'none |'
+      }
+    }
+    console.info(output)
+  }
+
   // Limited because there is a chance of infinite looping with bad input data.
   for (var i=0; i<1000; i++) {
+    console.log(puzzle.grid[8][8])
     var cell = puzzle.getCell(x, y)
-    if (cell == undefined) return // Somehow the path sent us out of bounds
-
-    var dir = cell.dir['dir']
+    if (cell == undefined) {
+      console.error('Solution trace went out of bounds at', x, y)
+      return
+    }
+    var dir = cell.dir
+    var dx = 0
+    var dy = 0
     if (dir == 'none') { // Reached an endpoint, move into it
       var endDir = puzzle.getEndDir(x, y)
+      console.log('Reached endpoint')
       if (endDir == 'left') {
         onMove(-24, 0)
       } else if (endDir == 'right') {
@@ -214,11 +250,13 @@ function _drawSolution(puzzle, x, y) {
     else if (dir == 'top') dy = -1
     else if (dir == 'bottom') dy = 1
 
+    console.log('Currently at', x, y, cell, 'moving', dx, dy)
+
     x += dx
     y += dy
     // Unflag the cell, move into it, and reflag it
     puzzle.updateCell(x, y, {'color':0})
     onMove(41 * dx, 41 * dy)
-    puzzle.updateCell(x, y, {'color':1, 'dir':dir})
+    puzzle.updateCell(x, y, {'color':1})
   }
 }
