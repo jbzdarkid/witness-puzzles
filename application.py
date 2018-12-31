@@ -4,10 +4,10 @@ from application_database import *
 from uuid import UUID, uuid4
 
 def request_is_authorized():
-  if ('USERNAME' in application.config and
+  if ('USERNAME' in application.config and request.authorization and
       application.config['USERNAME'] != request.authorization.username):
     return False
-  if ('PASSWORD' in application.config and
+  if ('PASSWORD' in application.config and request.authorization and
       application.config['PASSWORD'] != request.authorization.password):
     return False
   return True

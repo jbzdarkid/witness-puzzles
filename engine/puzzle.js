@@ -88,11 +88,15 @@ class Puzzle {
     }
     // @Legacy: Dots and gaps used to be separate arrays
     // Now, they are flags on the individual lines.
-    for (var dot of parsed.dots) {
-      puzzle.grid[dot.x][dot.y].dot = 1
+    if (parsed.dots) {
+      for (var dot of parsed.dots) {
+        puzzle.grid[dot.x][dot.y].dot = 1
+      }
     }
-    for (var gap of parsed.gaps) {
-      puzzle.grid[gap.x][gap.y].gap = true
+    if (parsed.gaps) {
+      for (var gap of parsed.gaps) {
+        puzzle.grid[gap.x][gap.y].gap = true
+      }
     }
     puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
