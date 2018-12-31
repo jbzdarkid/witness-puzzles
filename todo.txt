@@ -1,21 +1,18 @@
 In vague order of importance.
 
-- Start-grow animation
-- What is .line in animations doing?
-- Fix generation colors
 - console.group() whenever I have recursion. Please.
+- When a region fails, but has negation symbols in it, they should still negate things -- even if those negations did not result in a successful puzzle. Note that this includes recursion....
 - Simple Symmetry (horiz/verti)
-!- Stable release
-- Favicon still needs improving
+
 - Rich line data -> Done
 -- End into the grid?
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
 -- Colored Dots
+-- Invisible Dots
 -- Mid-segment endpoints
-- When a region fails, but has negation symbols in it, they should still negate things -- even if those negations did not result in a successful puzzle. Note that this includes recursion....
-- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
-- Hide solution (puzzleData) from global scope
+-- Formal object, maybe?
+
 - Server
 -- A whole bunch of UI for browsing puzzles
 -- Signin?
@@ -29,13 +26,16 @@ In vague order of importance.
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
 
-- Invisible Dots
-!- Feature complete!
+- Hide solution (puzzleData) from global scope
+- Add a start-grow animation
+- What is .line in animations doing?
+- Fix generation colors / general improvements to random puzzles
+- Favicon still needs improving
+- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?
 - Solve with pillars is slow, maybe increase warning threshold / disable in play mode?
-- Add missing daily styles
 - Shape chooser is not centered
 - change all divs to auto-centering? It's all I seem to use them for rn
 -- Maybe have a class="centered"
