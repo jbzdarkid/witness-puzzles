@@ -4,13 +4,15 @@ from application_database import *
 from uuid import UUID, uuid4
 
 def request_is_authorized():
-  if ('USERNAME' in application.config and request.authorization and
-      application.config['USERNAME'] != request.authorization.username):
-    return False
-  if ('PASSWORD' in application.config and request.authorization and
-      application.config['PASSWORD'] != request.authorization.password):
-    return False
-  return True
+  if 'USERNAME' not in application.config or 'PASSWORD' not in application.config:
+    return True # No user/pass specified, allow access
+  if not request.authorization:
+    return False # No auth provided, block access
+  if (application.config['USERNAME'] == request.authorization.username and
+      application.config['PASSWORD'] == request.authorization.password):
+    return True # Correct user/pass provided, allow access
+
+  return False # Default, block access
 
 def __static_content_func(protected, filename):
   if protected and not request_is_authorized():
