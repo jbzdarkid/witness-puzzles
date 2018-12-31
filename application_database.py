@@ -1,32 +1,9 @@
-from flask import Flask
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy_utils import UUIDType
-from os import environ
 from hashlib import sha256
+from sqlalchemy_utils import UUIDType
 
-application = Flask(__name__, template_folder='pages')
-
-if 'RDS_DB_NAME' in environ: # Running on AWS
-  application.config.update({
-    'SQLALCHEMY_DATABASE_URI':'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
-      user = environ['RDS_USERNAME'],
-      pswd = environ['RDS_PASSWORD'],
-      host = environ['RDS_HOSTNAME'],
-      port = environ['RDS_PORT'],
-      name = environ['RDS_DB_NAME'],
-    ),
-    # Re-use the database username/password with flask-basicauth (used to protect certain pages)
-    'USERNAME': environ['RDS_USERNAME'],
-    'PASSWORD': environ['RDS_PASSWORD'],
-    'SECRET_KEY': environ['SECRET_KEY'],
-  })
-  application.debug = False
-else: # Running locally
-  application.config.update({
-    'SECRET_KEY': 'default',
-  })
-  application.debug = True # Required to do auto-reload
+from application_utils import *
 
 db = SQLAlchemy(application)
 

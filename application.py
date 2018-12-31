@@ -1,41 +1,9 @@
-from flask import send_from_directory, redirect, render_template, request, Response
+from flask import redirect, render_template, request, Response
 import os
-from application_database import *
 from uuid import UUID, uuid4
 
-def request_is_authorized():
-  if 'USERNAME' not in application.config or 'PASSWORD' not in application.config:
-    return True # No user/pass specified, allow access
-  if not request.authorization:
-    return False # No auth provided, block access
-  if (application.config['USERNAME'] == request.authorization.username and
-      application.config['PASSWORD'] == request.authorization.password):
-    return True # Correct user/pass provided, allow access
-
-  return False # Default, block access
-
-def __static_content_func(protected, filename):
-  if protected and not request_is_authorized():
-    # Contents, HTTP code, headers
-    return '', 401, {'WWW-Authenticate': 'Basic realm=""'}
-
-  root, file = filename.rsplit('/', 1)
-  return send_from_directory(root, file)
-
-# Recursively host folders, files, with custom paths per request.
-def host_statically(path, serverpath=None, protected=False):
-  path = path.replace('\\', '/')
-  if os.path.isdir(path):
-    for file in os.listdir(path):
-      if serverpath:
-        host_statically(f'{path}/{file}', f'{serverpath}/{file}')
-      else:
-        host_statically(f'{path}/{file}')
-    return
-
-  if not serverpath:
-    serverpath = f'/{path}'
-  application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
+from application_database import *
+from application_utils import *
 
 # Root should be some sort of puzzle browser, not old index.html
 # application.add_url_rule('/', 'root', lambda:send_from_directory('', 'index.html'))
