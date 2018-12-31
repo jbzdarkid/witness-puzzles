@@ -12,6 +12,7 @@ In vague order of importance.
 -- Invisible Dots
 -- Mid-segment endpoints
 -- Formal object, maybe?
+- Nightly builds again? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 
 - Server
 -- A whole bunch of UI for browsing puzzles
