@@ -3,6 +3,7 @@ In vague order of importance.
 - Start-grow animation
 - What is .line in animations doing?
 - Fix generation colors
+- console.group() whenever I have recursion. Please.
 - Simple Symmetry (horiz/verti)
 !- Stable release
 - Favicon still needs improving
@@ -12,9 +13,6 @@ In vague order of importance.
 -- Colored symmetry lines (0/1/2)
 -- Colored Dots
 -- Mid-segment endpoints
--- Clean up solution to be a full path (start point = none, same as trace)
---- Trace equivalence is hard, since it links backwards.
---- Consider cleaning up / merging PathSegment class
 - When a region fails, but has negation symbols in it, they should still negate things -- even if those negations did not result in a successful puzzle. Note that this includes recursion....
 - Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
 - Hide solution (puzzleData) from global scope
