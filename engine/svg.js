@@ -67,7 +67,7 @@ function _poly(svg, params) {
   if (params.polyshape === 0) return
   var size = 10 // Side length of individual squares in the polyomino
   var space = 4 // Gap between squares in the polyomino
-  var polyomino = polyominoFromPolyshape(params.polyshape)
+  var polyomino = window.polyominoFromPolyshape(params.polyshape)
 
   var bounds = {'xmin':0, 'xmax':0, 'ymin':0, 'ymax':0}
   for (var pos of polyomino) {

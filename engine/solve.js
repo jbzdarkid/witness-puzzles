@@ -22,7 +22,7 @@ function _solveLoop(puzzle, x, y, solutions) {
   if (endDir != undefined) {
     // Reached the end point, validate solution and tail recurse
     puzzle.updateCell(x, y, {'color':1, 'dir':'none'})
-    validate(puzzle)
+    window.validate(puzzle)
     if (puzzle.valid) {
       solutions.push(puzzle.clone())
     }

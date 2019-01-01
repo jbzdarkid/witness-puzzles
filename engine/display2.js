@@ -19,8 +19,8 @@ function draw(puzzle, target='puzzle') {
   var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(rect)
   rect.setAttribute('stroke-width', 10)
-  rect.setAttribute('stroke', BORDER)
-  rect.setAttribute('fill', BACKGROUND)
+  rect.setAttribute('stroke', window.BORDER)
+  rect.setAttribute('fill', window.BACKGROUND)
   // Accounting for the border thickness
   rect.setAttribute('x', 5)
   rect.setAttribute('y', 5)
@@ -124,7 +124,7 @@ function _drawSymbols(puzzle, svg, target) {
         drawSymbolWithSvg(svg, params)
       } else if (x%2 === 1 && y%2 === 1) {
         Object.assign(params, cell)
-        drawSymbolWithSvg(svg, params)
+        window.drawSymbolWithSvg(svg, params)
       }
     }
   }
@@ -136,7 +136,7 @@ function _drawStartAndEnd(puzzle, svg) {
       console.error('Endpoint at', endPoint.x, endPoint.y, 'has no defined direction!')
       continue
     }
-    drawSymbolWithSvg(svg, {
+    window.drawSymbolWithSvg(svg, {
       'type':'end',
       'width': 58,
       'height': 58,
@@ -235,13 +235,13 @@ function _drawSolution(puzzle, x, y) {
       var endDir = puzzle.getEndDir(x, y)
       console.log('Reached endpoint')
       if (endDir === 'left') {
-        onMove(-24, 0)
+        window.onMove(-24, 0)
       } else if (endDir === 'right') {
-        onMove(24, 0)
+        window.onMove(24, 0)
       } else if (endDir === 'top') {
-        onMove(0, -24)
+        window.onMove(0, -24)
       } else if (endDir === 'bottom') {
-        onMove(0, 24)
+        window.onMove(0, 24)
       }
       return
     }

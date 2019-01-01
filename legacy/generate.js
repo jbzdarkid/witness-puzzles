@@ -5,7 +5,7 @@ function setSeed(newSeed) {
   seed = newSeed
 }
 
-function _randint(n) {
+function randInt(n) {
   seed = ((seed << 13) ^ seed) - (seed >> 21)
   return Math.abs(seed) % Math.floor(n)
 }
@@ -21,23 +21,23 @@ function randomPuzzle(style) {
     puzzle.addStart(style.start.x, style.start.y)
   } else {
     // TODO: Allow start points mid-segment
-    puzzle.addStart(2 * _randint(width), 2 * _randint(height))
+    puzzle.addStart(2 * randInt(width), 2 * randInt(height))
   }
   if (style.end) {
     puzzle.addEnd(style.end.x, style.end.y)
   } else {
-    switch (_randint(4)) {
+    switch (randInt(4)) {
       case 0:
-        puzzle.addEnd(0, 2 * _randint(height), 'left')
+        puzzle.addEnd(0, 2 * randInt(height), 'left')
         break
       case 1:
-        puzzle.addEnd(2 * width - 1, 2 * _randint(height), 'right')
+        puzzle.addEnd(2 * width - 1, 2 * randInt(height), 'right')
         break
       case 2:
-        puzzle.addEnd(2 * _randint(width), 0, 'top')
+        puzzle.addEnd(2 * randInt(width), 0, 'top')
         break
       case 3:
-        puzzle.addEnd(2 * _randint(width), 2 * height - 1, 'bottom')
+        puzzle.addEnd(2 * randInt(width), 2 * height - 1, 'bottom')
         break
     }
   }
@@ -66,7 +66,7 @@ function randomPuzzle(style) {
           corners = []
           break
         } else {
-          var index = _randint(edges.length + corners.length)
+          var index = randInt(edges.length + corners.length)
           if (index < edges.length) {
             puzzle.dots.push(edges.splice(index, 1)[0])
           } else {
@@ -74,29 +74,29 @@ function randomPuzzle(style) {
           }
         }
       } else if (type == 'gaps') {
-        puzzle.gaps.push(edges.splice(_randint(edges.length), 1)[0])
+        puzzle.gaps.push(edges.splice(randInt(edges.length), 1)[0])
       } else if (type == 'negations') {
-        var color = [WHITE, RED, BLUE, BLACK][_randint(style['colors'])]
-        var pos = cells.splice(_randint(cells.length), 1)[0]
+        var color = [WHITE, RED, BLUE, BLACK][randInt(style['colors'])]
+        var pos = cells.splice(randInt(cells.length), 1)[0]
         puzzle.grid[pos.x][pos.y] = {'type':'nega', 'color':color}
       } else if (type == 'squares') {
-        var color = [BLACK, WHITE, RED, BLUE][_randint(style['colors'])]
-        var pos = cells.splice(_randint(cells.length), 1)[0]
+        var color = [BLACK, WHITE, RED, BLUE][randInt(style['colors'])]
+        var pos = cells.splice(randInt(cells.length), 1)[0]
         puzzle.grid[pos.x][pos.y] = {'type':'square', 'color':color}
       } else if (type == 'stars') {
-        var color = [ORANGE, WHITE, BLACK, RED, BLUE][_randint(style['colors'])]
-        var pos = cells.splice(_randint(cells.length), 1)[0]
+        var color = [ORANGE, WHITE, BLACK, RED, BLUE][randInt(style['colors'])]
+        var pos = cells.splice(randInt(cells.length), 1)[0]
         puzzle.grid[pos.x][pos.y] = {'type':'star', 'color':color}
         // If the distribution has more stars, place another of the same color
         // This reduces the likelihood of unsolvable puzzles
         if (i < style['distribution'][type]-1) {
           i++
-          var pos2 = cells.splice(_randint(cells.length), 1)[0]
+          var pos2 = cells.splice(randInt(cells.length), 1)[0]
           puzzle.grid[pos2.x][pos2.y] = {'type':'star', 'color':color}
         }
       } else if (type == 'triangles') {
-        var pos = cells.splice(_randint(cells.length), 1)[0]
-        var rng = _randint(100)
+        var pos = cells.splice(randInt(cells.length), 1)[0]
+        var rng = randInt(100)
         var count = 1 // 51%
         if (rng > 50) count = 2 // 25%
         if (rng > 85) count = 3 // 14%
@@ -104,23 +104,23 @@ function randomPuzzle(style) {
       } else { // Polyominos
         var obj = {}
         if (['polyominos', 'rpolyominos'].includes(type)) {
-          var size = _randint(Math.min(width, height))+1
+          var size = randInt(Math.min(width, height))+1
           obj.type = 'poly'
         } else if (['onimoylops', 'ronimoylops'].includes(type)) {
-          var size = _randint(Math.min(width, height)-1)+1
+          var size = randInt(Math.min(width, height)-1)+1
           obj.type = 'ylop'
         }
         var polyshapes = POLYOMINOS[size]
-        var polyshape = polyshapes[_randint(polyshapes.length)]
+        var polyshape = polyshapes[randInt(polyshapes.length)]
         var rotations = getRotations(polyshape, 'all')
-        obj.polyshape = rotations[_randint(4)]
+        obj.polyshape = rotations[randInt(4)]
 
         if (type[0] == 'r') { // rpolyominos or ronimoylops
           obj.rot = 'all'
         }
-        obj.color = [YELLOW, RED, BLUE, WHITE][_randint(style['colors'])]
+        obj.color = [YELLOW, RED, BLUE, WHITE][randInt(style['colors'])]
 
-        var pos = cells.splice(_randint(cells.length), 1)[0]
+        var pos = cells.splice(randInt(cells.length), 1)[0]
         puzzle.grid[pos.x][pos.y] = obj
       }
     }
@@ -129,9 +129,9 @@ function randomPuzzle(style) {
 }
 
 function randomLeftDoorPoly() {
-  var size = _randint(3)
+  var size = randInt(3)
     if (size == 0) {
-      var shape = ['I', 'L'][_randint(2)]
+      var shape = ['I', 'L'][randInt(2)]
     } else if (size == 1) {
       /*
       RRR ####
@@ -146,7 +146,7 @@ function randomLeftDoorPoly() {
            #
       RUU ##
       */
-      var shape = ['I', 'L', 'S', 'J', 'L', 'Z', 'J', 'I'][_randint(8)]
+      var shape = ['I', 'L', 'S', 'J', 'L', 'Z', 'J', 'I'][randInt(8)]
     } else if (size == 2) {
       /*
       RRRR #####
@@ -178,9 +178,9 @@ function randomLeftDoorPoly() {
       RUUU ##
       */
 
-      var shape = ['L', 'M', 'V', 'M', 'W', 'S', 'J', 'L', 'Z', 'W', 'N', 'V', 'N', 'J'][_randint(14)]
+      var shape = ['L', 'M', 'V', 'M', 'W', 'S', 'J', 'L', 'Z', 'W', 'N', 'V', 'N', 'J'][randInt(14)]
     }
-  return {'size':size+3, 'shape':shape, 'rot':_randint(4)}
+  return {'size':size+3, 'shape':shape, 'rot':randInt(4)}
 }
 
 function randomLeftDoor() {
@@ -188,15 +188,15 @@ function randomLeftDoor() {
   var width = 4
   var puzzle = new Puzzle(width, height)
   while (true) {
-    var star1 = {'x':2*_randint(4)+1, 'y':2*_randint(4)+1}
-    var star2 = {'x':2*_randint(4)+1, 'y':2*_randint(4)+1}
+    var star1 = {'x':2*randInt(4)+1, 'y':2*randInt(4)+1}
+    var star2 = {'x':2*randInt(4)+1, 'y':2*randInt(4)+1}
     if (star1.x == star2.x && star1.y == star2.y) continue
     // Manhattan distance
     if (Math.abs(star1.x - star2.x) + Math.abs(star1.y - star2.y) < 6)
       continue
 
-    var poly1 = {'x':2*_randint(4)+1, 'y':2*_randint(4)+1}
-    var poly2 = {'x':2*_randint(4)+1, 'y':2*_randint(4)+1}
+    var poly1 = {'x':2*randInt(4)+1, 'y':2*randInt(4)+1}
+    var poly2 = {'x':2*randInt(4)+1, 'y':2*randInt(4)+1}
     if (poly1.x == star1.x && poly1.y == star1.y) continue
     if (poly1.x == star2.x && poly1.y == star2.y) continue
     if (poly2.x == star1.x && poly2.y == star1.y) continue
@@ -207,18 +207,18 @@ function randomLeftDoor() {
     Object.assign(poly2, randomLeftDoorPoly())
 
     for (var i=0; i<8; i++) {
-      if (_randint(2) == 0) {
-        puzzle.gaps.push({'x':_randint(4)*2+1, 'y':_randint(5)*2})
+      if (randInt(2) == 0) {
+        puzzle.gaps.push({'x':randInt(4)*2+1, 'y':randInt(5)*2})
       } else {
-        puzzle.gaps.push({'x':_randint(5)*2, 'y':_randint(4)*2+1})
+        puzzle.gaps.push({'x':randInt(5)*2, 'y':randInt(4)*2+1})
       }
     }
 
     break
   }
   var colors = [BLACK, RED, BLUE, WHITE]
-  var color1 = colors.splice(_randint(colors.length), 1)
-  var color2 = colors.splice(_randint(colors.length), 1)
+  var color1 = colors.splice(randInt(colors.length), 1)
+  var color2 = colors.splice(randInt(colors.length), 1)
 
   star1.type = 'star'
   star2.type = 'star'
@@ -259,25 +259,25 @@ function randomRightDoor() {
     }
   }
 
-  var square1 = cells.splice(_randint(cells.length), 1)[0]
-  var square2 = cells.splice(_randint(cells.length), 1)[0]
-  var square3 = cells.splice(_randint(cells.length), 1)[0]
-  var square4 = cells.splice(_randint(cells.length), 1)[0]
+  var square1 = cells.splice(randInt(cells.length), 1)[0]
+  var square2 = cells.splice(randInt(cells.length), 1)[0]
+  var square3 = cells.splice(randInt(cells.length), 1)[0]
+  var square4 = cells.splice(randInt(cells.length), 1)[0]
 
   corners.splice(24, 1) // Start point is illegal
   corners.splice(0, 1) // End point is illegal
-  puzzle.dots.push(corners.splice(_randint(corners.length), 1)[0])
-  puzzle.dots.push(corners.splice(_randint(corners.length), 1)[0])
+  puzzle.dots.push(corners.splice(randInt(corners.length), 1)[0])
+  puzzle.dots.push(corners.splice(randInt(corners.length), 1)[0])
 
   for (var i=0; i<8; i++) {
-    var edge = _randint(edges.length)
+    var edge = randInt(edges.length)
     console.log(edges.slice(edge, edge+1))
     puzzle.gaps.push(edges.slice(edge, edge+1)[0])
   }
 
   var colors = [PURPLE, RED, ORANGE, GREEN, BLUE]
-  var color1 = colors.splice(_randint(colors.length), 1)
-  var color2 = colors.splice(_randint(colors.length), 1)
+  var color1 = colors.splice(randInt(colors.length), 1)
+  var color2 = colors.splice(randInt(colors.length), 1)
 
   puzzle.grid[square1.x][square1.y] = {'type':'square', 'color':color1}
   puzzle.grid[square2.x][square2.y] = {'type':'square', 'color':color1}
@@ -340,10 +340,10 @@ function randomTriple() {
     }
   }
 
-  var square1 = cells.splice(_randint(cells.length), 1)[0]
-  var square2 = cells.splice(_randint(cells.length), 1)[0]
-  var square3 = cells.splice(_randint(cells.length), 1)[0]
-  var square4 = cells.splice(_randint(cells.length), 1)[0]
+  var square1 = cells.splice(randInt(cells.length), 1)[0]
+  var square2 = cells.splice(randInt(cells.length), 1)[0]
+  var square3 = cells.splice(randInt(cells.length), 1)[0]
+  var square4 = cells.splice(randInt(cells.length), 1)[0]
   puzzle.grid[square1.x][square1.y] = {'type':'square', 'color':'green'}
   puzzle.grid[square2.x][square2.y] = {'type':'square', 'color':'green'}
   puzzle.grid[square3.x][square3.y] = {'type':'square', 'color':'purple'}
@@ -355,7 +355,7 @@ function randomTriple() {
 
   var placedWhites = 0
   while(placedWhites < 5 && cells.length > 0) {
-    var square = cells.splice(_randint(cells.length), 1)[0]
+    var square = cells.splice(randInt(cells.length), 1)[0]
     if (!puzzle.grid[square.x][square.y]) {
       puzzle.grid[square.x][square.y] = {'type':'square', 'color':'white'}
       placedWhites++

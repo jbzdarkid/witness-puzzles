@@ -152,7 +152,7 @@ function solvePuzzle() {
       return
     }
   }
-  solutions = solve(puzzle)
+  solutions = window.solve(puzzle)
   _showSolution(0, puzzle)
 }
 
@@ -258,7 +258,7 @@ function _tryUpdatePuzzle(serialized) {
 function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   document.getElementById('pillarBox').checked = puzzle.pillar
-  draw(puzzle)
+  window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
 
@@ -475,7 +475,7 @@ function _drawColorButtons() {
     params.text = button.id
     params.color = button.id
     if (activeParams.color === button.id) {
-      button.parentElement.style.background = BORDER
+      button.parentElement.style.background = window.BORDER
     } else {
       button.parentElement.style.background = null
     }
@@ -512,8 +512,8 @@ function _shapeChooser() {
   chooser.style.position = 'absolute'
   chooser.style.padding = 25
   chooser.style.minWidth = '400px'
-  chooser.style.background = BACKGROUND
-  chooser.style.border = BORDER
+  chooser.style.background = window.BACKGROUND
+  chooser.style.border = window.BORDER
   chooser.onmousedown = function(event) {_shapeChooserClick(event, this)}
   for (var x=0; x<4; x++) {
     var row = chooser.insertRow(x)
@@ -556,7 +556,7 @@ function _shapeChooserClick(event, cell) {
   if (cell.clicked) {
     cell.style.background = 'black'
   } else {
-    cell.style.background = FOREGROUND
+    cell.style.background = window.FOREGROUND
   }
   _drawSymbolButtons()
 }

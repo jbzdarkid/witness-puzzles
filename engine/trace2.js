@@ -144,8 +144,8 @@ function _clearGrid(svg, puzzle) {
 function trace(elem, event, puzzle) {
   var svg = elem.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
-    PLAY_SOUND('start')
-    TELEMETRY('start_trace')
+    window.PLAY_SOUND('start')
+    window.TELEMETRY('start_trace')
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
     onTraceStart(svg, puzzle, elem)
@@ -167,12 +167,12 @@ function trace(elem, event, puzzle) {
       }
 
       if (puzzle.valid) {
-        PLAY_SOUND('success')
-        TELEMETRY('stop_trace_success')
+        window.PLAY_SOUND('success')
+        window.TELEMETRY('stop_trace_success')
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success}')
       } else {
-        PLAY_SOUND('fail')
-        TELEMETRY('stop_trace_fail')
+        window.PLAY_SOUND('fail')
+        window.TELEMETRY('stop_trace_fail')
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail}')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
@@ -181,14 +181,14 @@ function trace(elem, event, puzzle) {
       }
 
     } else if (event.which === 3) { // Right-clicked, not at the end: Clear puzzle
-      PLAY_SOUND('abort')
-      TELEMETRY('stop_trace_abort')
+      window.PLAY_SOUND('abort')
+      window.TELEMETRY('stop_trace_abort')
       _clearGrid(svg, puzzle)
     } else { // Exit lock but allow resuming from the cursor
-      TELEMETRY('stop_trace_temporary')
+      window.TELEMETRY('stop_trace_temporary')
       data.cursor.onclick = function(event) {
         if (this.parentElement !== data.svg) return // Another puzzle is live, so data is gone
-        TELEMETRY('start_trace_temporary')
+        window.TELEMETRY('start_trace_temporary')
         data.tracing = true
         elem.requestPointerLock()
       }
@@ -201,14 +201,14 @@ function onTraceStart(svg, puzzle, start) {
   var x = parseFloat(start.getAttribute('cx'))
   var y = parseFloat(start.getAttribute('cy'))
   var startPoint = {
-    'x': parseInt(start.id.split('_')[0]),
-    'y': parseInt(start.id.split('_')[1]),
+    'x': parseInt(start.id.split('_')[0], 10),
+    'y': parseInt(start.id.split('_')[1], 10),
   }
 
   var cursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
   svg.appendChild(cursor)
   cursor.setAttribute('r', 12)
-  cursor.setAttribute('fill', CURSOR)
+  cursor.setAttribute('fill', window.CURSOR)
   cursor.setAttribute('stroke', 'black')
   cursor.setAttribute('stroke-width', '2px')
   cursor.setAttribute('stroke-opacity', '0.4')

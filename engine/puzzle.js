@@ -238,9 +238,9 @@ class Puzzle {
       }
     }
     if (goodHints.length > 0) {
-      var hint = goodHints.splice(_randint(goodHints.length), 1)[0]
+      var hint = goodHints.splice(window.randInt(goodHints.length), 1)[0]
     } else if (badHints.length > 0) {
-      var hint = badHints.splice(_randint(badHints.length), 1)[0]
+      var hint = badHints.splice(window.randInt(badHints.length), 1)[0]
     } else {
       return
     }

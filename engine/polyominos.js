@@ -90,7 +90,7 @@ function polyominoFromPolyshape(polyshape, ylop=false) {
   return polyomino
 }
 
-POLYOMINOS = {
+window.POLYOMINOS = {
   '1':[1],
   '2':[3, 17, 33, 18],
   '3':[7, 19, 22, 35, 37, 49, 50, 52, 67, 82, 97, 273, 274, 289, 290, 529, 530, 545],
