@@ -162,6 +162,7 @@ function trace(elem, event, puzzle) {
       window.validate(puzzle)
 
       for (var negation of puzzle.negations) {
+        console.debug('Rendering negation', negation)
         data.animations.insertRule('.' + svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}')
         data.animations.insertRule('.' + svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}')
       }

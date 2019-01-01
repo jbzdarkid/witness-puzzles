@@ -117,32 +117,17 @@ function _regionCheckNegations(puzzle, region) {
   puzzle.setCell(source.x, source.y, null)
   console.spam('Using negation symbol at', source.x, source.y)
 
-  // Logic is duplicate of below
   if (window.NEGATIONS_CANCEL_NEGATIONS) {
     for (var i=1; i<negationSymbols.length; i++) {
-      var target = negationSymbols[i]
-      puzzle.setCell(target.x, target.y, null)
-      console.spam('Negating other negation symbol at', target.x, target.y)
-      console.group()
-      var regionData = _regionCheckNegations(puzzle, region)
-      console.groupEnd()
-      puzzle.setCell(target.x, target.y, target.cell)
-
-      if (regionData.invalidElements.length === 0) {
-        console.spam('Negation pair valid')
-        // Restore negation symbol, add to list of negation pairs
-        puzzle.setCell(source.x, source.y, source.cell)
-        regionData.negations.push({'source':source, 'target':target})
-        return regionData
-      }
+      invalidElements.unshift(negationSymbols[i])
     }
   }
-
   for (var invalidElement of invalidElements) {
     invalidElement.cell = puzzle.getCell(invalidElement.x, invalidElement.y)
-    puzzle.setCell(invalidElement.x, invalidElement.y, null)
-    console.spam('Negating other symbol at', invalidElement.x, invalidElement.y)
+    console.spam('Negating', invalidElement.cell, 'at', invalidElement.x, invalidElement.y)
+
     // Remove the negation and target, then recurse
+    puzzle.setCell(invalidElement.x, invalidElement.y, null)
     console.group()
     var regionData = _regionCheckNegations(puzzle, region)
     console.groupEnd()
@@ -160,6 +145,7 @@ function _regionCheckNegations(puzzle, region) {
   }
 
   console.spam('All pairings failed, returning last attempted negation')
+  regionData.negations.push({'source':source, 'target':invalidElement})
   puzzle.setCell(source.x, source.y, source.cell)
   return regionData
 }
