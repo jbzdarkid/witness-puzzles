@@ -5,7 +5,7 @@ window.onload = function() {
   var numFailures = 0
   var testNames = Object.keys(tests)
   for (var i=0; i<testNames.length; i++) {
-    if (i%3 == 0) table.insertRow()
+    if (i%3 === 0) table.insertRow()
     var testName = testNames[i]
 
     var cell = table.rows[table.rows.length - 1].insertCell()
@@ -19,7 +19,7 @@ window.onload = function() {
       var expectedSolutions = puzzleData[1]
       var solutions = solve(puzzle)
       draw(puzzle, testName)
-      if (solutions.length != expectedSolutions) {
+      if (solutions.length !== expectedSolutions) {
         console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
         for (var solution of solutions) {
           solution.logGrid()

@@ -18,7 +18,7 @@ window.onload = function() {
   var puzzleName = document.getElementById('puzzleName')
   puzzleName.oninput = function() {savePuzzle()}
   puzzleName.onkeypress = function(event) {
-    if (event.key == 'Enter') {
+    if (event.key === 'Enter') {
       event.preventDefault()
       this.blur()
     }
@@ -101,7 +101,7 @@ function deletePuzzleAndLoadNext() {
     puzzleList.shift()
   }
 
-  if (puzzleList.length == 0) {
+  if (puzzleList.length === 0) {
     window.localStorage.clear()
     newPuzzle()
     return
@@ -140,7 +140,7 @@ function solvePuzzle() {
   var puzzleHasSymbols = false
   for (var x=1; x<puzzle.grid.length; x+=2) {
     for (var y=1; y<puzzle.grid[x].length; y+=2) {
-      if (puzzle.getCell(x, y) != undefined && puzzle.type != 'line') {
+      if (puzzle.getCell(x, y) != undefined && puzzle.type !== 'line') {
         puzzleHasSymbols = true
         break
       }
@@ -165,10 +165,10 @@ function setVSymmetry(value) {
 }
 
 function setPillar(value) {
-  if (value == false && puzzle.grid.length%2 == 0) { // Non-pillar
+  if (value === false && puzzle.grid.length%2 === 0) { // Non-pillar
     puzzle.pillar = false
     resizePuzzle(1, 0, 'right')
-  } else if (value == true && puzzle.grid.length%2 == 1) { // Pillar
+  } else if (value === true && puzzle.grid.length%2 === 1) { // Pillar
     // If puzzle is not wide enough to shrink (1xN), then prevent pillar-izing, and uncheck the box.
     if (puzzle.grid.length <= 1) {
       document.getElementById('pillarBox').checked = false
@@ -177,12 +177,12 @@ function setPillar(value) {
 
     var newEnds = []
     for (var endPoint of puzzle.endPoints) {
-      if (endPoint.x != 0) {
+      if (endPoint.x !== 0) {
         newEnds.push(endPoint)
-      } else if (endPoint.y == 0) {
+      } else if (endPoint.y === 0) {
         endPoint.dir = 'top'
         newEnds.push(endPoint)
-      } else if (endPoint.y == puzzle.grid[endPoint.x].length - 1) {
+      } else if (endPoint.y === puzzle.grid[endPoint.x].length - 1) {
         endPoint.dir = 'bottom'
         newEnds.push(endPoint)
       }
@@ -234,7 +234,7 @@ function _removePuzzleFromList(puzzleName) {
   var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
   if (!puzzleList) puzzleList = []
   var index = puzzleList.indexOf(puzzleName)
-  if (index == -1) return
+  if (index === -1) return
   puzzleList.splice(index, 1)
   window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
@@ -272,8 +272,8 @@ function _redraw(puzzle) {
   for (var x=0; x<puzzle.grid.length; x++) {
     var yPos = 40
     for (var y=0; y<puzzle.grid[x].length; y++) {
-      var width = (x%2 == 0 ? 24 : 58)
-      var height = (y%2 == 0 ? 24 : 58)
+      var width = (x%2 === 0 ? 24 : 58)
+      var height = (y%2 === 0 ? 24 : 58)
       var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
       puzzleElement.appendChild(rect)
       rect.setAttribute('x', xPos)
@@ -296,27 +296,27 @@ function _onElementClicked(elem) {
   var x = parseInt(elem.id.split('_')[0])
   var y = parseInt(elem.id.split('_')[1])
 
-  if (activeParams.type == 'start') {
-    if (x%2 == 1 && y%2 == 1) return
+  if (activeParams.type === 'start') {
+    if (x%2 === 1 && y%2 === 1) return
     // Toggle the start point -- add it if it isn't removed.
     if (puzzle.grid[x][y].start == undefined) {
       puzzle.grid[x][y].start = true
     } else {
       puzzle.grid[x][y].start = undefined
     }
-  } else if (activeParams.type == 'end') {
-    if (x%2 != 0 || y%2 != 0) return
+  } else if (activeParams.type === 'end') {
+    if (x%2 !== 0 || y%2 !== 0) return
     // Compute all valid endpoint directions for this location
     var validDirs = []
-    if (x == 0 && !puzzle.pillar) validDirs.push('left')
-    if (y == 0) validDirs.push('top')
-    if (x == puzzle.grid.length - 1 && !puzzle.pillar) validDirs.push('right')
-    if (y == puzzle.grid[x].length - 1) validDirs.push('bottom')
-    if (validDirs.length == 0) return
+    if (x === 0 && !puzzle.pillar) validDirs.push('left')
+    if (y === 0) validDirs.push('top')
+    if (x === puzzle.grid.length - 1 && !puzzle.pillar) validDirs.push('right')
+    if (y === puzzle.grid[x].length - 1) validDirs.push('bottom')
+    if (validDirs.length === 0) return
 
     // If (x, y) is an endpoint, loop to the next direction
     var index = validDirs.indexOf(puzzle.getEndDir(x, y))
-    if (index != -1) {
+    if (index !== -1) {
       var dir = validDirs[index + 1]
     } else {
       // Not an endpoint, choose the first valid direction
@@ -328,30 +328,30 @@ function _onElementClicked(elem) {
     } else {
       puzzle.addEnd(x, y, dir)
     }
-  } else if (activeParams.type == 'dot') {
-    if (x%2 == 1 && y%2 == 1) return
+  } else if (activeParams.type === 'dot') {
+    if (x%2 === 1 && y%2 === 1) return
     // @Future: Some way to toggle colors, should be cognizant of symmetry mode.
-    if (puzzle.grid[x][y].dot == 1) {
+    if (puzzle.grid[x][y].dot === 1) {
       puzzle.grid[x][y].dot = undefined
     } else {
       puzzle.grid[x][y].gap = undefined
       puzzle.grid[x][y].dot = 1
     }
-  } else if (activeParams.type == 'gap') {
-    if (x%2 == 1 && y%2 == 1) return
-    if (x%2 == 0 && y%2 == 0) return
-    if (puzzle.grid[x][y].gap == true) {
+  } else if (activeParams.type === 'gap') {
+    if (x%2 === 1 && y%2 === 1) return
+    if (x%2 === 0 && y%2 === 0) return
+    if (puzzle.grid[x][y].gap === true) {
       puzzle.grid[x][y].gap = undefined
     } else {
       puzzle.grid[x][y].dot = undefined
       puzzle.grid[x][y].gap = true
     }
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
-    if (x%2 != 1 || y%2 != 1) return
+    if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != undefined
-     && puzzle.grid[x][y].type == activeParams.type
-     && puzzle.grid[x][y].color == activeParams.color) {
+     && puzzle.grid[x][y].type === activeParams.type
+     && puzzle.grid[x][y].color === activeParams.color) {
       puzzle.grid[x][y] = undefined
     } else {
       puzzle.grid[x][y] = {
@@ -360,13 +360,13 @@ function _onElementClicked(elem) {
       }
     }
   } else if (['poly', 'ylop'].includes(activeParams.type)) {
-    if (x%2 != 1 || y%2 != 1) return
+    if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != undefined
-     && puzzle.grid[x][y].type == activeParams.type
-     && puzzle.grid[x][y].color == activeParams.color
-     && puzzle.grid[x][y].polyshape == activeParams.polyshape
-     && puzzle.grid[x][y].rot == activeParams.rot) {
+     && puzzle.grid[x][y].type === activeParams.type
+     && puzzle.grid[x][y].color === activeParams.color
+     && puzzle.grid[x][y].polyshape === activeParams.polyshape
+     && puzzle.grid[x][y].rot === activeParams.rot) {
       puzzle.grid[x][y] = undefined
     } else {
       puzzle.grid[x][y] = {
@@ -376,15 +376,15 @@ function _onElementClicked(elem) {
         'rot': activeParams.rot,
       }
     }
-  } else if (activeParams.type == 'triangle') {
-    if (x%2 != 1 || y%2 != 1) return
+  } else if (activeParams.type === 'triangle') {
+    if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match
     if (puzzle.grid[x][y] != undefined
-     && puzzle.grid[x][y].type == activeParams.type
-     && puzzle.grid[x][y].color == activeParams.color) {
+     && puzzle.grid[x][y].type === activeParams.type
+     && puzzle.grid[x][y].color === activeParams.color) {
       puzzle.grid[x][y].count = puzzle.grid[x][y].count % 3 + 1
       // Remove when it matches activeParams -- this allows fluid cycling
-      if (puzzle.grid[x][y].count == activeParams.count) {
+      if (puzzle.grid[x][y].count === activeParams.count) {
         puzzle.grid[x][y] = undefined
       }
     } else {
@@ -423,7 +423,7 @@ function _drawSymbolButtons() {
     params.height = 64
     params.width = 64
     params.border = 2
-    if (activeParams.id == button.id) {
+    if (activeParams.id === button.id) {
       button.parentElement.style.background = BORDER
     } else {
       button.parentElement.style.background = null
@@ -436,7 +436,7 @@ function _drawSymbolButtons() {
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape
       button.onclick = function() {
-        if (activeParams.id == this.id) {
+        if (activeParams.id === this.id) {
           activeParams = Object.assign(activeParams, this.params)
           _shapeChooser()
         } else {
@@ -444,9 +444,9 @@ function _drawSymbolButtons() {
           _drawSymbolButtons()
         }
       }
-    } else if (button.id == 'triangle') {
+    } else if (button.id === 'triangle') {
       button.onclick = function() {
-        if (activeParams.id == this.id) {
+        if (activeParams.id === this.id) {
           symbolData.triangle.count = symbolData.triangle.count % 3 + 1
           activeParams.count = symbolData.triangle.count
         }
@@ -471,7 +471,7 @@ function _drawColorButtons() {
     var params = {'width':146, 'height':45, 'border':2}
     params.text = button.id
     params.color = button.id
-    if (activeParams.color == button.id) {
+    if (activeParams.color === button.id) {
       button.parentElement.style.background = BORDER
     } else {
       button.parentElement.style.background = null
@@ -523,7 +523,7 @@ function _shapeChooser() {
       cell.onmousedown = function(event) {_shapeChooserClick(event, this)}
       cell.style.width = 58
       cell.style.height = 58
-      if ((activeParams.polyshape & cell.powerOfTwo) != 0) {
+      if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
         cell.clicked = true
         cell.style.background = 'black'
       } else {
@@ -547,7 +547,7 @@ function _shapeChooserClick(event, cell) {
     return
   }
   // Clicks inside the chooser box are non-closing
-  if (cell.id == 'chooser') {
+  if (cell.id === 'chooser') {
     event.stopPropagation()
     return
   }
@@ -632,8 +632,8 @@ function resizePuzzle(dx, dy, id) {
 
   var newEnds = []
   for (var endPoint of puzzle.endPoints) {
-    if (endPoint.dir == 'right' && !puzzle.pillar) endPoint.x += dx
-    if (endPoint.dir == 'top') endPoint.y += dy
+    if (endPoint.dir === 'right' && !puzzle.pillar) endPoint.x += dx
+    if (endPoint.dir === 'top') endPoint.y += dy
     if (endPoint.x >= 0 && endPoint.x < newWidth
      && endPoint.y >= 0 && endPoint.y < newHeight) {
       newEnds.push(endPoint)
