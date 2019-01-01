@@ -2,32 +2,32 @@ window.BBOX_DEBUG = false
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
-    this.endBox = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
-    this._updateEndBox()
+    this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
+    this._update()
 /*
     this.x1 = x1
     this.x2 = x2
     this.y1 = y1
     this.y2 = y2
-    this.endBox = {}
+    this.raw = {}
 */
   }
 
   shift(dir, pixels) {
     if (dir === 'left') {
-      this.endBox.x2 = this.endBox.x1
-      this.endBox.x1 -= pixels
+      this.raw.x2 = this.raw.x1
+      this.raw.x1 -= pixels
     } else if (dir === 'right') {
-      this.endBox.x1 = this.endBox.x2
-      this.endBox.x2 += pixels
+      this.raw.x1 = this.raw.x2
+      this.raw.x2 += pixels
     } else if (dir === 'top') {
-      this.endBox.y2 = this.endBox.y1
-      this.endBox.y1 -= pixels
+      this.raw.y2 = this.raw.y1
+      this.raw.y1 -= pixels
     } else if (dir === 'bottom') {
-      this.endBox.y1 = this.endBox.y2
-      this.endBox.y2 += pixels
+      this.raw.y1 = this.raw.y2
+      this.raw.y2 += pixels
     }
-    this._updateEndBox()
+    this._update()
   }
 
   inRaw(x, y) {
@@ -35,18 +35,18 @@ class BoundingBox {
       (this.x1 < x && x < this.x2) &&
       (this.y1 < y && y < this.y2)
     var inEndBox =
-      (this.endBox.x1 < x && x < this.endBox.x2) &&
-      (this.endBox.y1 < y && y < this.endBox.y2)
+      (this.raw.x1 < x && x < this.raw.x2) &&
+      (this.raw.y1 < y && y < this.raw.y2)
 
     return inEndBox && !inMainBox
   }
 
-  _updateEndBox() {
+  _update() {
     // Check for endpoint adjustment
-    this.x1 = this.endBox.x1
-    this.x2 = this.endBox.x2
-    this.y1 = this.endBox.y1
-    this.y2 = this.endBox.y2
+    this.x1 = this.raw.x1
+    this.x2 = this.raw.x2
+    this.y1 = this.raw.y1
+    this.y2 = this.raw.y2
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
     if (cell.end === 'left') {
       this.x1 -= 24
@@ -59,31 +59,31 @@ class BoundingBox {
     }
 
     this.middle = { // Note: Middle of the raw object
-      'x':(this.endBox.x1 + this.endBox.x2)/2,
-      'y':(this.endBox.y1 + this.endBox.y2)/2
+      'x':(this.raw.x1 + this.raw.x2)/2,
+      'y':(this.raw.y1 + this.raw.y2)/2
     }
   }
 /*
     // Adjust the endbox to fill the endpoint
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-    this.endBox.x1 = this.x1
-    this.endBox.x2 = this.x2
-    this.endBox.y1 = this.y1
-    this.endBox.y2 = this.y2
+    this.raw.x1 = this.x1
+    this.raw.x2 = this.x2
+    this.raw.y1 = this.y1
+    this.raw.y2 = this.y2
     if (cell.end === 'left') {
-      this.endBox.x1 += 24
+      this.raw.x1 += 24
 //      this.y1 += 17
 //      this.y2 -= 10
     } else if (cell.end === 'right') {
-      this.endBox.x2 -= 24
+      this.raw.x2 -= 24
     } else if (cell.end === 'top') {
-      this.endBox.y1 += 24
+      this.raw.y1 += 24
     } else if (cell.end === 'bottom') {
-      this.endBox.y2 -= 24
+      this.raw.y2 -= 24
     }
     this.middle = { // Note: Middle of the endpoint object
-      'x':(this.endBox.x1 + this.endBox.x2)/2,
-      'y':(this.endBox.y1 + this.endBox.y2)/2
+      'x':(this.raw.x1 + this.raw.x2)/2,
+      'y':(this.raw.y1 + this.raw.y2)/2
     }
   }
 */
@@ -117,7 +117,7 @@ class PathSegment {
   }
 
   redraw() { // Uses raw bbox because of endpoints
-    var points1 = JSON.parse(JSON.stringify(data.bbox.endBox))
+    var points1 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (this.dir === 'left') {
       points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
     } else if (this.dir === 'right') {
@@ -134,9 +134,9 @@ class PathSegment {
       points1.x2 + ' ' + points1.y1
     )
 
-    // The second half of the line uses the endBox so that it can enter the endpoint properly.
+    // The second half of the line uses the raw so that it can enter the endpoint properly.
     var pastMiddle = true
-    var points2 = JSON.parse(JSON.stringify(data.bbox.endBox))
+    var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
       points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
