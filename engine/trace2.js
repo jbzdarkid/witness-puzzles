@@ -358,6 +358,8 @@ function _push(dx, dy, dir, targetDir) {
 function _pushCursor(dx, dy, width, height) {
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+  if (cell == undefined) return
+
   if (!data.puzzle.pillar) { // Left/right walls are inner if we're a pillar
     if ([undefined, 'top', 'bottom'].includes(cell.end)) {
       // Only consider non-endpoints or endpoints which are parallel
@@ -379,28 +381,30 @@ function _pushCursor(dx, dy, width, height) {
   }
 
   // Inner wall collision
-  if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
-    if (data.x < data.bbox.middle.x) {
-      _push(dx, dy, 'topbottom', 'left')
-      return 'topbottom inner wall, moved left'
-    } else {
-      _push(dx, dy, 'topbottom', 'right')
-      return 'topbottom inner wall, moved right'
-    }
-  } else if (data.pos.x%2 === 0 && data.pos.y%2 === 1) { // Vertical cell
-    if (data.y < data.bbox.middle.y) {
-      _push(dx, dy, 'leftright', 'top')
-      return 'leftright inner wall, moved up'
-    } else {
-      _push(dx, dy, 'leftright', 'bottom')
-      return 'leftright inner wall, moved down'
+  if (cell.end == undefined) {
+    if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
+      if (data.x < data.bbox.middle.x) {
+        _push(dx, dy, 'topbottom', 'left')
+        return 'topbottom inner wall, moved left'
+      } else {
+        _push(dx, dy, 'topbottom', 'right')
+        return 'topbottom inner wall, moved right'
+      }
+    } else if (data.pos.x%2 === 0 && data.pos.y%2 === 1) { // Vertical cell
+      if (data.y < data.bbox.middle.y) {
+        _push(dx, dy, 'leftright', 'top')
+        return 'leftright inner wall, moved up'
+      } else {
+        _push(dx, dy, 'leftright', 'bottom')
+        return 'leftright inner wall, moved down'
+      }
     }
   }
 
-  // Intersection collision
+  // Intersection & endpoint collision
   // Ratio of movement to be considered turning at an intersection
   var turnMod = 2
-  if (data.pos.x%2 === 0 && data.pos.y%2 === 0) {
+  if ((data.pos.x%2 === 0 && data.pos.y%2 === 0) || cell.end != undefined) {
     if (data.x < data.bbox.middle.x) {
       _push(dx, dy, 'topbottom', 'right')
       // Overshot the intersection and appears to be trying to turn
