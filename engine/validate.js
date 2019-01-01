@@ -268,7 +268,7 @@ function _polyWrapper(region, puzzle) {
   }
   if (polyCount > 0 && polyCount !== regionSize) {
     console.log('Combined size of polyominos', polyCount, 'does not match region size', regionSize)
-//    return false
+    return false
   }
 
   // For polyominos, we clear the grid to mark it up again:
