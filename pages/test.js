@@ -58,6 +58,17 @@ var tests = {
     puzzle.grid[4][0].start = true
     puzzle.grid[2][4].end = 'bottom'
     return [puzzle, 10]
+  }, 'mid-segment-end': function() {
+    var puzzle = new Puzzle(1, 1)
+    puzzle.grid[0][0].start = true
+    puzzle.grid[0][1].end = 'left'
+    puzzle.grid[0][2].start = true
+    puzzle.grid[1][0].end = 'top'
+    puzzle.grid[1][2].end = 'bottom'
+    puzzle.grid[2][0].start = true
+    puzzle.grid[2][1].end = 'right'
+    puzzle.grid[2][2].start = true
+    return [puzzle, 32]
   }, 'negation-with-dots': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true

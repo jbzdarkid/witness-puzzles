@@ -90,7 +90,8 @@ class PathSegment {
       points1.x1 + ' ' + points1.y1 + ',' +
       points1.x1 + ' ' + points1.y2 + ',' +
       points1.x2 + ' ' + points1.y2 + ',' +
-      points1.x2 + ' ' + points1.y1)
+      points1.x2 + ' ' + points1.y1
+    )
 
     var pastMiddle = true
     var points2 = data.bbox.rawCopy()
@@ -113,7 +114,8 @@ class PathSegment {
       points2.x1 + ' ' + points2.y1 + ',' +
       points2.x1 + ' ' + points2.y2 + ',' +
       points2.x2 + ' ' + points2.y2 + ',' +
-      points2.x2 + ' ' + points2.y1)
+      points2.x2 + ' ' + points2.y1
+    )
 
     if (pastMiddle) {
       this.circ.setAttribute('opacity', 1)
