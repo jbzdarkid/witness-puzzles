@@ -4,13 +4,6 @@ class BoundingBox {
   constructor(x1, x2, y1, y2) {
     this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
     this._update()
-/*
-    this.x1 = x1
-    this.x2 = x2
-    this.y1 = y1
-    this.y2 = y2
-    this.raw = {}
-*/
   }
 
   shift(dir, pixels) {
@@ -63,30 +56,6 @@ class BoundingBox {
       'y':(this.raw.y1 + this.raw.y2)/2
     }
   }
-/*
-    // Adjust the endbox to fill the endpoint
-    var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-    this.raw.x1 = this.x1
-    this.raw.x2 = this.x2
-    this.raw.y1 = this.y1
-    this.raw.y2 = this.y2
-    if (cell.end === 'left') {
-      this.raw.x1 += 24
-//      this.y1 += 17
-//      this.y2 -= 10
-    } else if (cell.end === 'right') {
-      this.raw.x2 -= 24
-    } else if (cell.end === 'top') {
-      this.raw.y1 += 24
-    } else if (cell.end === 'bottom') {
-      this.raw.y2 -= 24
-    }
-    this.middle = { // Note: Middle of the endpoint object
-      'x':(this.raw.x1 + this.raw.x2)/2,
-      'y':(this.raw.y1 + this.raw.y2)/2
-    }
-  }
-*/
 }
 
 class PathSegment {
@@ -136,22 +105,40 @@ class PathSegment {
 
     // The second half of the line uses the raw so that it can enter the endpoint properly.
     var pastMiddle = true
+    var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != undefined)
     var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
       points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
+      if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
+        points2.y1 += 17
+        points2.y2 -= 17
+      }
     } else if (data.x > data.bbox.middle.x && this.dir !== 'left') {
       points2.x1 = data.bbox.middle.x
       points2.x2 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
+      if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
+        points2.y1 += 17
+        points2.y2 -= 17
+      }
     } else if (data.y < data.bbox.middle.y && this.dir !== 'bottom') {
       points2.y1 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
       points2.y2 = data.bbox.middle.y
+      if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
+        points2.x1 += 17
+        points2.x2 -= 17
+      }
     } else if (data.y > data.bbox.middle.y && this.dir !== 'top') {
       points2.y1 = data.bbox.middle.y
       points2.y2 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
+      if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
+        points2.x1 += 17
+        points2.x2 -= 17
+      }
     } else if (this.dir !== 'none') { // Start point always has circle visible
       pastMiddle = false
     }
+
     this.poly2.setAttribute('points',
       points2.x1 + ' ' + points2.y1 + ',' +
       points2.x1 + ' ' + points2.y2 + ',' +
@@ -174,6 +161,10 @@ class PathSegment {
 var data = {}
 
 function _clearGrid(svg, puzzle) {
+  if (data.bboxDebug != undefined) {
+    data.svg.removeChild(data.bboxDebug)
+  }
+
   while (svg.getElementsByClassName('cursor').length > 0) {
     svg.getElementsByClassName('cursor')[0].remove()
   }
@@ -260,10 +251,6 @@ function onTraceStart(svg, puzzle, start) {
   cursor.setAttribute('class', 'cursor')
   cursor.setAttribute('cx', x)
   cursor.setAttribute('cy', y)
-
-  if (data.bboxDebug != undefined) {
-    data.svg.removeChild(data.bboxDebug)
-  }
 
   data = {
     'tracing':true,
