@@ -290,7 +290,7 @@ function _onElementClicked(elem) {
       puzzle.grid[x][y].start = undefined
     }
   } else if (activeParams.type === 'end') {
-    if (x%2 !== 0 || y%2 !== 0) return
+    if (x%2 === 1 && y%2 === 1) return
     var validDirs = puzzle.getValidEndDirs(x, y)
     if (validDirs.length === 0) return
 

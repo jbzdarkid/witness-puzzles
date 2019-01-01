@@ -1,7 +1,6 @@
 In vague order of importance.
 
 - Rich line data -> Done
--- Mid-segment endpoints
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
 -- Colored Dots
