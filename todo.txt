@@ -24,6 +24,7 @@ In vague order of importance.
 
     Kick off a background task? -> Tie to puzzle creation
     Use legacy/send_email.py to generate images (with selenium/phantomjs)
+    This is also where I should validate the solution (client-side provided, always) to prevent cheesing.
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
 
