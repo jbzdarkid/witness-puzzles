@@ -535,8 +535,8 @@ function _shapeChooser() {
 }
 
 function _shapeChooserClick(event, cell) {
+  var chooser = document.getElementById('chooser')
   if (cell == undefined) {
-    var chooser = document.getElementById('chooser')
     var anchor = document.getElementById('anchor')
     var puzzle = document.getElementById('puzzle')
 
@@ -552,7 +552,6 @@ function _shapeChooserClick(event, cell) {
     return
   }
   cell.clicked = !cell.clicked
-  var chooser = document.getElementById('chooser')
   activeParams.polyshape ^= cell.powerOfTwo
   if (cell.clicked) {
     cell.style.background = 'black'
@@ -668,19 +667,17 @@ function _dragStart(event, elem) {
 
 function _dragMove(event, elem) {
   if (!dragging) return
+  var dx = 0
+  var dy = 0
   if (elem.id.includes('left')) {
-    var dx = dragging.x - event.clientX
+    dx = dragging.x - event.clientX
   } else if (elem.id.includes('right')) {
-    var dx = event.clientX - dragging.x
-  } else {
-    var dx = 0
+    dx = event.clientX - dragging.x
   }
   if (elem.id.includes('top')) {
-    var dy = dragging.y - event.clientY
+    dy = dragging.y - event.clientY
   } else if (elem.id.includes('bottom')) {
-    var dy = event.clientY - dragging.y
-  } else {
-    var dy = 0
+    dy = event.clientY - dragging.y
   }
 
   if (Math.abs(dx) >= 82 || Math.abs(dy) >= 82) {
