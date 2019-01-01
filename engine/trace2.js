@@ -104,7 +104,7 @@ class PathSegment {
     )
 
     // The second half of the line uses the raw so that it can enter the endpoint properly.
-    var pastMiddle = true
+    var firstHalf = false
     var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != undefined)
     var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
@@ -136,7 +136,7 @@ class PathSegment {
         points2.x2 -= 17
       }
     } else if (this.dir !== 'none') { // Start point always has circle visible
-      pastMiddle = false
+      firstHalf = true
     }
 
     this.poly2.setAttribute('points',
@@ -146,14 +146,14 @@ class PathSegment {
       points2.x2 + ' ' + points2.y1
     )
 
-    if (pastMiddle) {
+    if (firstHalf && this.dir !== 'none') { // Doesn't apply to the startpoint
+      this.circ.setAttribute('opacity', 0)
+      this.poly2.setAttribute('opacity', 0)
+    } else {
       this.circ.setAttribute('opacity', 1)
       this.circ.setAttribute('cx', data.bbox.middle.x)
       this.circ.setAttribute('cy', data.bbox.middle.y)
       this.poly2.setAttribute('opacity', 1)
-    } else {
-      this.circ.setAttribute('opacity', 0)
-      this.poly2.setAttribute('opacity', 0)
     }
   }
 }
