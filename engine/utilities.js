@@ -62,59 +62,60 @@ function TELEMETRY(type) {
   )
 }
 
-WHITE = 'white'
-BLACK = 'black'
-RED = 'red'
-BLUE = 'blue'
-ORANGE = 'orange'
-YELLOW = 'yellow'
+window.WHITE = 'white'
+window.BLACK = 'black'
+window.RED = 'red'
+window.BLUE = 'blue'
+window.ORANGE = 'orange'
+window.YELLOW = 'yellow'
 
 if (localStorage.theme === 'true') { // Dark scheme
-  BACKGROUND = '#221' // '#000'
-  FOREGROUND = '#751' // '#873'
-  BORDER = '#666'
-  LINE_DEFAULT = '#888' // '#FD8'
-  LINE_SUCCESS = '#BBB' // '#FA0'
-  LINE_FAIL = '#000'
-  CURSOR = '#FFF'
-  TEXT_COLOR = '#CCC'
-  PAGE_BACKGROUND = '#000'
+  window.BACKGROUND      = '#221' // '#000'
+  window.FOREGROUND      = '#751' // '#873'
+  window.BORDER          = '#666'
+  window.LINE_DEFAULT    = '#888' // '#FD8'
+  window.LINE_SUCCESS    = '#BBB' // '#FA0'
+  window.LINE_FAIL       = '#000'
+  window.CURSOR          = '#FFF'
+  window.TEXT_COLOR      = '#CCC'
+  window.PAGE_BACKGROUND = '#000'
 } else { // Light scheme
-  BACKGROUND = '#0A8'
-  FOREGROUND = '#344'
-  BORDER = '#000'
-  LINE_DEFAULT = '#AAA'
-  LINE_SUCCESS = '#FFF'
-  LINE_FAIL = '#000'
-  CURSOR = '#FFF'
-  TEXT_COLOR = '#000'
-  PAGE_BACKGROUND = '#FFF'
+  window.BACKGROUND      = '#0A8'
+  window.FOREGROUND      = '#344'
+  window.BORDER          = '#000'
+  window.LINE_DEFAULT    = '#AAA'
+  window.LINE_SUCCESS    = '#FFF'
+  window.LINE_FAIL       = '#000'
+  window.CURSOR          = '#FFF'
+  window.TEXT_COLOR      = '#000'
+  window.PAGE_BACKGROUND = '#FFF'
 }
 
-var animations = '.line { \
-  fill: ' + LINE_DEFAULT + '; \
-  pointer-events: none; \
-} \
-@keyframes line-success { \
-  from {fill: ' + LINE_DEFAULT + ';} \
-  to {fill: ' + LINE_SUCCESS + ';} \
-} \
-@keyframes line-fail { \
-  from {fill: ' + LINE_DEFAULT + ';} \
-  to {fill: ' + LINE_FAIL + ';} \
-} \
-@keyframes start-grow { \
-  from {height: 12; width: 12; top: 6; left: 6;} \
-  to {height: 48; width: 48; top: -12; left: -12;} \
-} \
-@keyframes error { \
-  from {} \
-  to {fill: red;} \
-} \
-@keyframes fade { \
-  from {} \
-  to {opacity: 0.35;} \
-}'
+var animations =
+'.line {' +
+'  fill: ' + window.LINE_DEFAULT + ';' +
+'  pointer-events: none;' +
+'}' +
+'@keyframes line-success {' +
+'  from {fill: ' + window.LINE_DEFAULT + ';}' +
+'  to {fill: ' + window.LINE_SUCCESS + ';}' +
+'}' +
+'@keyframes line-fail {' +
+'  from {fill: ' + window.LINE_DEFAULT + ';}' +
+'  to {fill: ' + window.LINE_FAIL + ';}' +
+'}' +
+'@keyframes start-grow {' +
+'  from {height: 12; width: 12; top: 6; left: 6;}' +
+'  to {height: 48; width: 48; top: -12; left: -12;}' +
+'}' +
+'@keyframes error {' +
+'  from {}' +
+'  to {fill: red;}' +
+'}' +
+'@keyframes fade {' +
+'  from {}' +
+'  to {opacity: 0.35;}' +
+'}'
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
@@ -122,14 +123,14 @@ style.appendChild(document.createTextNode(animations))
 document.head.appendChild(style)
 
 // Custom logging to allow leveling
-var console_error = console.error
-var console_warn = console.warn
-var console_info = console.log
-var console_log = console.log
-var console_debug = console.log
-var console_spam = console.log
-var console_group = console.group
-var console_groupEnd = console.groupEnd
+var consoleError = console.error
+var consoleWarn = console.warn
+var consoleInfo = console.log
+var consoleLog = console.log
+var consoleDebug = console.log
+var consoleSpam = console.log
+var consoleGroup = console.group
+var consoleGroupEnd = console.groupEnd
 
 function setLogLevel(level) {
   console.error = function() {}
@@ -144,29 +145,29 @@ function setLogLevel(level) {
   if (level === 'none') return
 
   // Instead of throw, but still red flags and is easy to find
-  console.error = console_error
+  console.error = consoleError
   if (level === 'error') return
 
   // Less serious than error, but flagged nonetheless
-  console.warn = console_warn
+  console.warn = consoleWarn
   if (level === 'warn') return
 
   // Default visible, important information
-  console.info = console_info
+  console.info = consoleInfo
   if (level === 'info') return
 
   // Useful for debugging (mainly validation)
-  console.log = console_log
+  console.log = consoleLog
   if (level === 'log') return
 
   // Useful for serious debugging (mainly graphics/misc)
-  console.debug = console_debug
+  console.debug = consoleDebug
   if (level === 'debug') return
 
   // Useful for insane debugging (mainly tracing/recursion)
-  console.spam = console_spam
-  console.group = console_group
-  console.groupEnd = console_groupEnd
+  console.spam = consoleSpam
+  console.group = consoleGroup
+  console.groupEnd = consoleGroupEnd
   if (level === 'spam') return
 }
 setLogLevel('info')
@@ -200,8 +201,8 @@ function loadSettings() {
   document.body.appendChild(parentDiv)
   parentDiv.style.position = 'absolute'
   parentDiv.style.float = 'left'
-  parentDiv.style.border = '2px solid ' + BORDER
-  parentDiv.style.background = PAGE_BACKGROUND
+  parentDiv.style.border = '2px solid ' + window.BORDER
+  parentDiv.style.background = window.PAGE_BACKGROUND
 
   var toggle = document.createElement('label')
   parentDiv.appendChild(toggle)
@@ -236,8 +237,8 @@ function loadSettings() {
   }
   themeBox.checked = (localStorage.theme === 'true')
   // This needs to happen now, since the document body hasn't yet loaded.
-  document.body.style.color = TEXT_COLOR
-  document.body.style.background = PAGE_BACKGROUND
+  document.body.style.color = window.TEXT_COLOR
+  document.body.style.background = window.PAGE_BACKGROUND
 
   var themeLabel = document.createElement('label')
   settings.appendChild(themeLabel)
