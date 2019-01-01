@@ -271,8 +271,8 @@ function _redraw(puzzle) {
   var topLeft = {'x':40, 'y':40}
   for (var x=0; x<puzzle.grid.length; x++) {
     var yPos = 40
+    var width = (x%2 === 0 ? 24 : 58)
     for (var y=0; y<puzzle.grid[x].length; y++) {
-      var width = (x%2 === 0 ? 24 : 58)
       var height = (y%2 === 0 ? 24 : 58)
       var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
       puzzleElement.appendChild(rect)
@@ -293,8 +293,8 @@ function _redraw(puzzle) {
 }
 
 function _onElementClicked(elem) {
-  var x = parseInt(elem.id.split('_')[0])
-  var y = parseInt(elem.id.split('_')[1])
+  var x = parseInt(elem.id.split('_')[0], 10)
+  var y = parseInt(elem.id.split('_')[1], 10)
 
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
@@ -314,13 +314,12 @@ function _onElementClicked(elem) {
     if (y === puzzle.grid[x].length - 1) validDirs.push('bottom')
     if (validDirs.length === 0) return
 
+    // Choose the first valid direction
+    var dir = validDirs[0]
     // If (x, y) is an endpoint, loop to the next direction
     var index = validDirs.indexOf(puzzle.getEndDir(x, y))
     if (index !== -1) {
-      var dir = validDirs[index + 1]
-    } else {
-      // Not an endpoint, choose the first valid direction
-      var dir = validDirs[0]
+      dir = validDirs[index + 1]
     }
     // If the direction loops past the end (or there are no valid directions), remove the endpoint.
     if (dir == undefined) {
@@ -460,13 +459,17 @@ function _drawSymbolButtons() {
       }
     }
     while (button.firstChild) button.removeChild(button.firstChild)
-    button.appendChild(drawSymbol(params))
+    button.appendChild(window.drawSymbol(params))
   }
 }
 
 function _drawColorButtons() {
   var colorTable = document.getElementById('colorButtons')
   colorTable.style.display = null
+  var changeActiveColor = function() {
+    activeParams.color = this.id
+    _drawColorButtons()
+  }
   for (var button of colorTable.getElementsByTagName('button')) {
     var params = {'width':146, 'height':45, 'border':2}
     params.text = button.id
@@ -480,13 +483,10 @@ function _drawColorButtons() {
     button.style.border = params.border
     button.style.height = params.height + 2*params.border
     button.style.width = params.width + 2*params.border
-    button.onclick = function() {
-      activeParams.color = this.id
-      _drawColorButtons()
-    }
+    button.onclick = changeActiveColor
     while (button.firstChild) button.removeChild(button.firstChild)
     params.type = 'crayon'
-    button.appendChild(drawSymbol(params))
+    button.appendChild(window.drawSymbol(params))
   }
 }
 

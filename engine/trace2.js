@@ -159,7 +159,7 @@ function trace(elem, event, puzzle) {
     var endDir = puzzle.getEndDir(data.pos.x, data.pos.y)
     if (endDir != undefined && !data.bbox.inRaw(data.x, data.y)) {
       data.cursor.onclick = null
-      validate(puzzle)
+      window.validate(puzzle)
 
       for (var negation of puzzle.negations) {
         data.animations.insertRule('.' + svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}')
@@ -305,12 +305,13 @@ function onMove(dx, dy) {
   }
 }
 
-function _push(dx, dy, dir, target_dir) {
+function _push(dx, dy, dir, targetDir) {
   // Fraction of movement to redirect in the other direction
-  if (target_dir === 'left' || target_dir === 'top') {
-    var movementRatio = -3
-  } else if (target_dir === 'right' || target_dir === 'bottom') {
-    var movementRatio = 3
+  var movementRatio = undefined
+  if (targetDir === 'left' || targetDir === 'top') {
+    movementRatio = -3
+  } else if (targetDir === 'right' || targetDir === 'bottom') {
+    movementRatio = 3
   }
 
   if (dir === 'left') {
