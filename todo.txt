@@ -11,6 +11,7 @@ In vague order of importance.
 -- Invisible Dots
 -- Mid-segment endpoints
 -- Formal object, maybe?
+- Better UI for "draggable edge" (editor)
 - Nightly builds again? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 
 - Server

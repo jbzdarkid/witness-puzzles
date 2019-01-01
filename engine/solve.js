@@ -31,6 +31,7 @@ function _solveLoop(puzzle, x, y, solutions) {
   // @Cleanup: Maybe I *can* move stuff into the recursion, by using updateCell?
   // That way, I could remove a lot of the redundant getLine calls.
   // @Performance: @Sanity: Don't allow the line to go through gaps.
+  // @Performance: Before trying the above, figure out why 5x5 with 2x gap over start point is 20s.
 
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
   // Extend path left

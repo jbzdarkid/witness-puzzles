@@ -565,80 +565,31 @@ function _shapeChooserClick(event, cell) {
 // row/column is added. The endpoint will try to stay fixed, but will be pulled
 // to remain against the edge.
 function resizePuzzle(dx, dy, id) {
-  var newWidth = puzzle.grid.length + dx
-  var newHeight = puzzle.grid[0].length + dy
+  var width = puzzle.grid.length
+  var height = puzzle.grid[0].length
+  var newWidth = width + dx
+  var newHeight = height + dy
+  console.log('Resizing puzzle of size', width, height, 'to', newWidth, newHeight)
 
   if (newWidth <= 0 || newHeight <= 0) return false
   if (newWidth > 21 || newHeight > 21) return false
 
-  if (id.includes('left')) {
-    while (puzzle.grid.length > newWidth) puzzle.grid.shift()
-    while (puzzle.grid.length < newWidth) {
-      puzzle.grid.unshift((new Array(newHeight)).fill(undefined))
-    }
-  }
-  if (id.includes('right')) {
-    while (puzzle.grid.length > newWidth) puzzle.grid.pop()
-    while (puzzle.grid.length < newWidth) {
-      puzzle.grid.push((new Array(newHeight)).fill(undefined))
-    }
-  }
-  if (id.includes('top')) {
-    for (var row of puzzle.grid) {
-      while (row.length > newHeight) row.shift()
-      while (row.length < newHeight) row.unshift(undefined)
-    }
-  }
-  if (id.includes('bottom')) {
-    for (var row of puzzle.grid) {
-      while (row.length > newHeight) row.pop()
-      while (row.length < newHeight) row.push(undefined)
+
+  var xOffset = (id.includes('left') ? dx : 0)
+  var yOffset = (id.includes('top') ? dy : 0)
+
+  var savedGrid = puzzle.grid
+  puzzle.newGrid(newWidth, newHeight)
+
+  for (var x=0; x<width; x++) {
+    for (var y=0; y<height; y++) {
+      var cell = savedGrid[x][y]
+      puzzle.setCell(x + xOffset, y + yOffset, cell)
     }
   }
 
-  var newDots = []
-  for (var dot of puzzle.dots) {
-    if (id.includes('left')) dot.x += dx
-    if (id.includes('top')) dot.y += dy
-    if (dot.x >= 0 && dot.x < newWidth
-     && dot.y >= 0 && dot.y < newHeight) {
-      newDots.push(dot)
-    }
-  }
-  puzzle.dots = newDots
-
-  var newGaps = []
-  for (var gap of puzzle.gaps) {
-    if (id.includes('left')) gap.x += dx
-    if (id.includes('top')) gap.y += dy
-    if (gap.x >= 0 && gap.x < newWidth
-     && gap.y >= 0 && gap.y < newHeight) {
-      newGaps.push(gap)
-    }
-  }
-  puzzle.gaps = newGaps
-
-  var newStarts = []
-  for (var startPoint of puzzle.startPoints) {
-    if (id.includes('left')) startPoint.x += dx
-    if (id.includes('top')) startPoint.y += dy
-    if (startPoint.x >= 0 && startPoint.x < newWidth
-     && startPoint.y >= 0 && startPoint.y < newHeight) {
-      newStarts.push(startPoint)
-    }
-  }
-  puzzle.startPoints = newStarts
-
-  var newEnds = []
-  for (var endPoint of puzzle.endPoints) {
-    if (endPoint.dir === 'right' && !puzzle.pillar) endPoint.x += dx
-    if (endPoint.dir === 'top') endPoint.y += dy
-    if (endPoint.x >= 0 && endPoint.x < newWidth
-     && endPoint.y >= 0 && endPoint.y < newHeight) {
-      newEnds.push(endPoint)
-    }
-  }
-  puzzle.endPoints = newEnds
+  // @Bug: Once endpoints are on the grid, this should get much easier. Just wait.
+  puzzle.endPoints = []
 
   savePuzzle()
   _redraw(puzzle)
