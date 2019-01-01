@@ -2,48 +2,44 @@ window.BBOX_DEBUG = false
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
-    this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
+    this.endBox = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
     this._update()
   }
 
   shift(dir, pixels) {
     if (dir === 'left') {
-      this.raw.x2 = this.raw.x1
-      this.raw.x1 -= pixels
+      this.endBox.x2 = this.endBox.x1
+      this.endBox.x1 -= pixels
     } else if (dir === 'right') {
-      this.raw.x1 = this.raw.x2
-      this.raw.x2 += pixels
+      this.endBox.x1 = this.endBox.x2
+      this.endBox.x2 += pixels
     } else if (dir === 'top') {
-      this.raw.y2 = this.raw.y1
-      this.raw.y1 -= pixels
+      this.endBox.y2 = this.endBox.y1
+      this.endBox.y1 -= pixels
     } else if (dir === 'bottom') {
-      this.raw.y1 = this.raw.y2
-      this.raw.y2 += pixels
+      this.endBox.y1 = this.endBox.y2
+      this.endBox.y2 += pixels
     }
     this._update()
   }
 
   inRaw(x, y) {
     return (
-      x.clamp(this.raw.x1, this.raw.x2) === x &&
-      y.clamp(this.raw.y1, this.raw.y2) === y
+      x.clamp(this.endBox.x1, this.endBox.x2) === x &&
+      y.clamp(this.endBox.y1, this.endBox.y2) === y
     )
-  }
-
-  rawCopy() {
-    return JSON.parse(JSON.stringify(this.raw))
   }
 
   _update() {
     // Check for endpoint adjustment
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-    this.x1 = this.raw.x1 + (cell.end === 'left' ? -24 : 0)
-    this.x2 = this.raw.x2 + (cell.end === 'right' ? 24 : 0)
-    this.y1 = this.raw.y1 + (cell.end === 'top' ? -24 : 0)
-    this.y2 = this.raw.y2 + (cell.end === 'bottom' ? 24 : 0)
+    this.x1 = this.endBox.x1 + (cell.end === 'left' ? -24 : 0)
+    this.x2 = this.endBox.x2 + (cell.end === 'right' ? 24 : 0)
+    this.y1 = this.endBox.y1 + (cell.end === 'top' ? -24 : 0)
+    this.y2 = this.endBox.y2 + (cell.end === 'bottom' ? 24 : 0)
     this.middle = { // Note: Middle of the raw object
-      'x':(this.raw.x1 + this.raw.x2)/2,
-      'y':(this.raw.y1 + this.raw.y2)/2
+      'x':(this.endBox.x1 + this.endBox.x2)/2,
+      'y':(this.endBox.y1 + this.endBox.y2)/2
     }
   }
 }
@@ -76,7 +72,7 @@ class PathSegment {
   }
 
   redraw() { // Uses raw bbox because of endpoints
-    var points1 = data.bbox.rawCopy()
+    var points1 = JSON.parse(JSON.stringify(data.bbox.endBox))
     if (this.dir === 'left') {
       points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
     } else if (this.dir === 'right') {
@@ -94,7 +90,7 @@ class PathSegment {
     )
 
     var pastMiddle = true
-    var points2 = data.bbox.rawCopy()
+    var points2 = JSON.parse(JSON.stringify(data.bbox.endBox))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
       points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
