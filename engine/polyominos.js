@@ -14,11 +14,11 @@ function _mask(x, y) {
 function _isSet(polyshape, x, y) {
   if (x < 0 || y < 0) return false
   if (x > 4 || y > 4) return false
-  return (polyshape & _mask(x, y)) != 0
+  return (polyshape & _mask(x, y)) !== 0
 }
 
 function getRotations(polyshape, rot=null) {
-  if (rot != 'all') return [polyshape]
+  if (rot !== 'all') return [polyshape]
 
   var rotations = [0, 0, 0, 0]
   for (var x=0; x<4; x++) {

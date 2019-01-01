@@ -8,18 +8,18 @@ function drawSymbol(params) {
 }
 
 function drawSymbolWithSvg(svg, params) {
-  if (params.type == 'square') _square(svg, params)
-  else if (params.type == 'dot') _dot(svg, params)
-  else if (params.type == 'gap') _gap(svg, params)
-  else if (params.type == 'star') _star(svg, params)
-  else if (params.type == 'poly') _poly(svg, params)
-  else if (params.type == 'ylop') _ylop(svg, params)
-  else if (params.type == 'nega') _nega(svg, params)
-  else if (params.type == 'nonce') {} // Do nothing
-  else if (params.type == 'triangle') _triangle(svg, params)
-  else if (params.type == 'crayon') _crayon(svg, params)
-  else if (params.type == 'start') _start(svg, params)
-  else if (params.type == 'end') _end(svg, params)
+  if (params.type === 'square') _square(svg, params)
+  else if (params.type === 'dot') _dot(svg, params)
+  else if (params.type === 'gap') _gap(svg, params)
+  else if (params.type === 'star') _star(svg, params)
+  else if (params.type === 'poly') _poly(svg, params)
+  else if (params.type === 'ylop') _ylop(svg, params)
+  else if (params.type === 'nega') _nega(svg, params)
+  else if (params.type === 'nonce') {} // Do nothing
+  else if (params.type === 'triangle') _triangle(svg, params)
+  else if (params.type === 'crayon') _crayon(svg, params)
+  else if (params.type === 'start') _start(svg, params)
+  else if (params.type === 'end') _end(svg, params)
   else console.error('Unknown symbol type in params: ' + JSON.stringify(params))
 }
 
@@ -64,7 +64,7 @@ function _star(svg, params) {
 }
 
 function _poly(svg, params) {
-  if (params.polyshape == 0) return
+  if (params.polyshape === 0) return
   var size = 10 // Side length of individual squares in the polyomino
   var space = 4 // Gap between squares in the polyomino
   var polyomino = polyominoFromPolyshape(params.polyshape)
@@ -81,11 +81,11 @@ function _poly(svg, params) {
   var center_y = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
 
   for (var pos of polyomino) {
-    if (pos.x%2 != 0 || pos.y%2 != 0) continue
+    if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
     svg.appendChild(rect)
     var transform = 'translate('+(center_x+pos.x*offset)+', '+(center_y+pos.y*offset)+')'
-    if (params.rot == 'all') {
+    if (params.rot === 'all') {
       // -30 degree rotation around the midpoint of the square
       transform = 'rotate(-30, ' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ') ' + transform
     }
@@ -98,7 +98,7 @@ function _poly(svg, params) {
 }
 
 function _ylop(svg, params) {
-  if (params.polyshape == 0) return
+  if (params.polyshape === 0) return
   var size = 12 // Side length of individual squares in the polyomino
   var space = 2 // Gap between squares in the polyomino
   var polyomino = polyominoFromPolyshape(params.polyshape)
@@ -115,7 +115,7 @@ function _ylop(svg, params) {
   var center_y = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
 
   for (var pos of polyomino) {
-    if (pos.x%2 != 0 || pos.y%2 != 0) continue
+    if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     svg.appendChild(poly)
     var points = [
@@ -124,7 +124,7 @@ function _ylop(svg, params) {
     ]
     poly.setAttribute('points', points.join(', '))
     var transform = 'translate('+(center_x+pos.x*offset)+', '+(center_y+pos.y*offset)+')'
-    if (params.rot == 'all') {
+    if (params.rot === 'all') {
       // -30 degree rotation around the midpoint of the square
       transform = 'rotate(-30, ' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ') ' + transform
     }
@@ -238,16 +238,16 @@ function _end(svg, params) {
   circ.setAttribute('cx', params.height/2 + params.x)
   circ.setAttribute('cy', params.width/2 + params.y)
 
-  if (params.dir == 'left') {
+  if (params.dir === 'left') {
     rect.setAttribute('x', parseInt(rect.getAttribute('x')) - 12)
     circ.setAttribute('cx', parseInt(circ.getAttribute('cx')) - 24)
-  } else if (params.dir == 'right') {
+  } else if (params.dir === 'right') {
     rect.setAttribute('x', parseInt(rect.getAttribute('x')) + 12)
     circ.setAttribute('cx', parseInt(circ.getAttribute('cx')) + 24)
-  } else if (params.dir == 'top') {
+  } else if (params.dir === 'top') {
     rect.setAttribute('y', parseInt(rect.getAttribute('y')) - 12)
     circ.setAttribute('cy', parseInt(circ.getAttribute('cy')) - 24)
-  } else if (params.dir == 'bottom') {
+  } else if (params.dir === 'bottom') {
     rect.setAttribute('y', parseInt(rect.getAttribute('y')) + 12)
     circ.setAttribute('cy', parseInt(circ.getAttribute('cy')) + 24)
   } else {

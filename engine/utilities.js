@@ -69,7 +69,7 @@ BLUE = 'blue'
 ORANGE = 'orange'
 YELLOW = 'yellow'
 
-if (localStorage.theme == 'true') { // Dark scheme
+if (localStorage.theme === 'true') { // Dark scheme
   BACKGROUND = '#221' // '#000'
   FOREGROUND = '#751' // '#873'
   BORDER = '#666'
@@ -137,31 +137,31 @@ function setLogLevel(level) {
   console.debug = function() {}
   console.spam = function() {}
 
-  if (level == 'none') return
+  if (level === 'none') return
 
   // Instead of throw, but still red flags and is easy to find
   console.error = console_error
-  if (level == 'error') return
+  if (level === 'error') return
 
   // Less serious than error, but flagged nonetheless
   console.warn = console_warn
-  if (level == 'warn') return
+  if (level === 'warn') return
 
   // Default visible, important information
   console.info = console_info
-  if (level == 'info') return
+  if (level === 'info') return
 
   // Useful for debugging (mainly validation)
   console.log = console_log
-  if (level == 'log') return
+  if (level === 'log') return
 
   // Useful for serious debugging (mainly graphics/misc)
   console.debug = console_debug
-  if (level == 'debug') return
+  if (level === 'debug') return
 
   // Useful for insane debugging (mainly tracing)
   console.spam = console_spam
-  if (level == 'spam') return
+  if (level === 'spam') return
 }
 setLogLevel('info')
 
@@ -209,7 +209,7 @@ function loadSettings() {
   settings.id = 'settings'
   settings.style.margin = '10px'
 
-  if (localStorage.settings == 'hidden') {
+  if (localStorage.settings === 'hidden') {
     hideSettings()
   } else {
     showSettings()
@@ -228,7 +228,7 @@ function loadSettings() {
     localStorage.theme = this.checked
     location.reload()
   }
-  themeBox.checked = (localStorage.theme == 'true')
+  themeBox.checked = (localStorage.theme === 'true')
   // This needs to happen now, since the document body hasn't yet loaded.
   document.body.style.color = TEXT_COLOR
   document.body.style.background = PAGE_BACKGROUND

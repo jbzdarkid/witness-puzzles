@@ -21,7 +21,7 @@ class Region {
 
   setCell(x, y) {
     x = this._mod(x)
-    if ((this.grid[x] & (1 << y)) != 0) return
+    if ((this.grid[x] & (1 << y)) !== 0) return
     this.grid[x] |= (1 << y)
     this.cells.push({'x':x, 'y':y})
   }
@@ -65,8 +65,8 @@ class Puzzle {
     // Lines default to {'type':'line', 'color':0}
     for (var x=0; x<puzzle.grid.length; x++) {
       for (var y=0; y<puzzle.grid[x].length; y++) {
-        if (puzzle.grid[x][y] == false) {
-          if (x%2 == 1 && y%2 == 1) puzzle.grid[x][y] = undefined
+        if (puzzle.grid[x][y] === false) {
+          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
           else puzzle.grid[x][y] = {'type':'line', 'color':0}
         }
       }
@@ -118,7 +118,7 @@ class Puzzle {
     for (var x=0; x<width; x++) {
       this.grid[x] = []
       for (var y=0; y<height; y++) {
-        if (x%2 == 1 && y%2 == 1) this.grid[x][y] = undefined
+        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = undefined
         else this.grid[x][y] = {'type':'line', 'color':0}
       }
     }
@@ -158,7 +158,7 @@ class Puzzle {
   getLine(x, y) {
     var cell = this.getCell(x, y)
     if (cell == undefined) return undefined
-    if (cell.type != 'line') return undefined
+    if (cell.type !== 'line') return undefined
     return cell.color
   }
 
@@ -171,7 +171,7 @@ class Puzzle {
 
   removeEnd(x, y) {
     for (var i=0; i<this.endPoints.length; i++) {
-      if (this.endPoints[i].x == x && this.endPoints[i].y == y) {
+      if (this.endPoints[i].x === x && this.endPoints[i].y === y) {
         this.endPoints.splice(i, 1)
         return true
       }
@@ -187,7 +187,7 @@ class Puzzle {
   getEndDir(x, y) {
     if (this.pillar) x = this._mod(x)
     for (var endPoint of this.endPoints) {
-      if (x == endPoint.x && y == endPoint.y) return endPoint.dir
+      if (x === endPoint.x && y === endPoint.y) return endPoint.dir
     }
     return undefined
   }
@@ -209,7 +209,7 @@ class Puzzle {
     this.hints = []
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
-        if (x%2 + y%2 == 1 && this.getLine(x, y) > 0) {
+        if (x%2 + y%2 === 1 && this.getLine(x, y) > 0) {
           this.hints.push({'x':x, 'y':y})
         }
       }
@@ -252,7 +252,7 @@ class Puzzle {
   clearLines() {
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
-        if (x%2 == 1 && y%2 == 1) continue
+        if (x%2 === 1 && y%2 === 1) continue
         else Object.assign(this.grid[x][y], {'color':0, 'dir':undefined})
       }
     }
@@ -281,7 +281,7 @@ class Puzzle {
     for (var x=0; x<savedGrid.length; x++) {
       for (var y=0; y<savedGrid[x].length; y++) {
         var cell = savedGrid[x][y]
-        if (cell != undefined && cell.type == 'line' && cell.color > 0) {
+        if (cell != undefined && cell.type === 'line' && cell.color > 0) {
           this.grid[x][y] = undefined
         } else {
           this.grid[x][y] = true
@@ -311,7 +311,7 @@ class Puzzle {
       for (var x=0; x<this.grid.length; x++) {
         var cell = this.getCell(x, y)
         if (cell == undefined) output += '?'
-        else if (cell.type == 'line') output += cell.color
+        else if (cell.type === 'line') output += cell.color
         else output += '#'
       }
       output += '\n'

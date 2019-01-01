@@ -7,16 +7,16 @@ class BoundingBox {
   }
 
   shift(dir, pixels) {
-    if (dir == 'left') {
+    if (dir === 'left') {
       this.raw.x2 = this.raw.x1
       this.raw.x1 -= pixels
-    } else if (dir == 'right') {
+    } else if (dir === 'right') {
       this.raw.x1 = this.raw.x2
       this.raw.x2 += pixels
-    } else if (dir == 'top') {
+    } else if (dir === 'top') {
       this.raw.y2 = this.raw.y1
       this.raw.y1 -= pixels
-    } else if (dir == 'bottom') {
+    } else if (dir === 'bottom') {
       this.raw.y1 = this.raw.y2
       this.raw.y2 += pixels
     }
@@ -25,8 +25,8 @@ class BoundingBox {
 
   inRaw(x, y) {
     return (
-      x.clamp(this.raw.x1, this.raw.x2) == x &&
-      y.clamp(this.raw.y1, this.raw.y2) == y
+      x.clamp(this.raw.x1, this.raw.x2) === x &&
+      y.clamp(this.raw.y1, this.raw.y2) === y
     )
   }
 
@@ -37,10 +37,10 @@ class BoundingBox {
   _update() {
     // Check for endpoint adjustment
     var endDir = data.puzzle.getEndDir(data.pos.x, data.pos.y)
-    this.x1 = this.raw.x1 + (endDir == 'left' ? -24 : 0)
-    this.x2 = this.raw.x2 + (endDir == 'right' ? 24 : 0)
-    this.y1 = this.raw.y1 + (endDir == 'top' ? -24 : 0)
-    this.y2 = this.raw.y2 + (endDir == 'bottom' ? 24 : 0)
+    this.x1 = this.raw.x1 + (endDir === 'left' ? -24 : 0)
+    this.x2 = this.raw.x2 + (endDir === 'right' ? 24 : 0)
+    this.y1 = this.raw.y1 + (endDir === 'top' ? -24 : 0)
+    this.y2 = this.raw.y2 + (endDir === 'bottom' ? 24 : 0)
     this.middle = { // Note: Middle of the raw object
       'x':(this.raw.x1 + this.raw.x2)/2,
       'y':(this.raw.y1 + this.raw.y2)/2
@@ -59,7 +59,7 @@ class PathSegment {
     this.poly1.setAttribute('class', 'line ' + data.svg.id)
     this.circ.setAttribute('class', 'line ' + data.svg.id)
     this.poly2.setAttribute('class', 'line ' + data.svg.id)
-    if (this.dir == 'none') { // Start point
+    if (this.dir === 'none') { // Start point
       this.circ.setAttribute('r', 24)
       this.circ.setAttribute('cx', data.bbox.middle.x)
       this.circ.setAttribute('cy', data.bbox.middle.y)
@@ -77,13 +77,13 @@ class PathSegment {
 
   redraw() { // Uses raw bbox because of endpoints
     var points1 = data.bbox.rawCopy()
-    if (this.dir == 'left') {
+    if (this.dir === 'left') {
       points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
-    } else if (this.dir == 'right') {
+    } else if (this.dir === 'right') {
       points1.x2 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
-    } else if (this.dir == 'top') {
+    } else if (this.dir === 'top') {
       points1.y1 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
-    } else if (this.dir == 'bottom') {
+    } else if (this.dir === 'bottom') {
       points1.y2 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
     }
     this.poly1.setAttribute('points',
@@ -94,19 +94,19 @@ class PathSegment {
 
     var pastMiddle = true
     var points2 = data.bbox.rawCopy()
-    if (data.x < data.bbox.middle.x && this.dir != 'right') {
+    if (data.x < data.bbox.middle.x && this.dir !== 'right') {
       points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
-    } else if (data.x > data.bbox.middle.x && this.dir != 'left') {
+    } else if (data.x > data.bbox.middle.x && this.dir !== 'left') {
       points2.x1 = data.bbox.middle.x
       points2.x2 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
-    } else if (data.y < data.bbox.middle.y && this.dir != 'bottom') {
+    } else if (data.y < data.bbox.middle.y && this.dir !== 'bottom') {
       points2.y1 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
       points2.y2 = data.bbox.middle.y
-    } else if (data.y > data.bbox.middle.y && this.dir != 'top') {
+    } else if (data.y > data.bbox.middle.y && this.dir !== 'top') {
       points2.y1 = data.bbox.middle.y
       points2.y2 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
-    } else if (this.dir != 'none') { // Start point always has circle visible
+    } else if (this.dir !== 'none') { // Start point always has circle visible
       pastMiddle = false
     }
     this.poly2.setAttribute('points',
@@ -180,14 +180,14 @@ function trace(elem, event, puzzle) {
         }
       }
 
-    } else if (event.which == 3) { // Right-clicked, not at the end: Clear puzzle
+    } else if (event.which === 3) { // Right-clicked, not at the end: Clear puzzle
       PLAY_SOUND('abort')
       TELEMETRY('stop_trace_abort')
       _clearGrid(svg, puzzle)
     } else { // Exit lock but allow resuming from the cursor
       TELEMETRY('stop_trace_temporary')
       data.cursor.onclick = function(event) {
-        if (this.parentElement != data.svg) return // Another puzzle is live, so data is gone
+        if (this.parentElement !== data.svg) return // Another puzzle is live, so data is gone
         TELEMETRY('start_trace_temporary')
         data.tracing = true
         elem.requestPointerLock()
@@ -232,16 +232,16 @@ function onTraceStart(svg, puzzle, start) {
   svg.appendChild(data.bboxDebug)
   data.bboxDebug.setAttribute('fill', 'white')
   data.bboxDebug.setAttribute('opacity', 0.3)
-  if (startPoint.x % 2 == 1) { // Start point is on a horizontal segment
+  if (startPoint.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
-  } else if (startPoint.y % 2 == 1) { // Start point is on a vertical segment
+  } else if (startPoint.y % 2 === 1) { // Start point is on a vertical segment
     data.bbox = new BoundingBox(x - 12, x + 12, y - 29, y + 29)
   } else { // Start point is at an intersection
     data.bbox = new BoundingBox(x - 12, x + 12, y - 12, y + 12)
   }
 
   for (var styleSheet of document.styleSheets) {
-    if (styleSheet.title == 'animations') {
+    if (styleSheet.title === 'animations') {
       data.animations = styleSheet
       break
     }
@@ -276,8 +276,8 @@ document.onpointerlockchange = function() {
 
 function onMove(dx, dy) {
   if (!data.tracing) return
-  var width = (data.pos.x%2 == 0 ? 24 : 58)
-  var height = (data.pos.y%2 == 0 ? 24 : 58)
+  var width = (data.pos.x%2 === 0 ? 24 : 58)
+  var height = (data.pos.y%2 === 0 ? 24 : 58)
 
   // Also handles some collision
   var colliedWith = _pushCursor(dx, dy, width, height)
@@ -288,7 +288,7 @@ function onMove(dx, dy) {
     _gapCollision()
     var moveDir = _move()
     data.path[data.path.length - 1].redraw()
-    if (moveDir == 'none') break
+    if (moveDir === 'none') break
     console.debug('Moved', moveDir)
     _changePos(moveDir)
   }
@@ -307,44 +307,44 @@ function onMove(dx, dy) {
 
 function _push(dx, dy, dir, target_dir) {
   // Fraction of movement to redirect in the other direction
-  if (target_dir == 'left' || target_dir == 'top') {
+  if (target_dir === 'left' || target_dir === 'top') {
     var movementRatio = -3
-  } else if (target_dir == 'right' || target_dir == 'bottom') {
+  } else if (target_dir === 'right' || target_dir === 'bottom') {
     var movementRatio = 3
   }
 
-  if (dir == 'left') {
+  if (dir === 'left') {
     var overshoot = data.bbox.x1 - (data.x + dx) + 12
     if (overshoot > 0) {
       data.y += dy + overshoot / movementRatio
       data.x = data.bbox.x1 + 12
       return true
     }
-  } else if (dir == 'right') {
+  } else if (dir === 'right') {
     var overshoot = (data.x + dx) - data.bbox.x2 + 12
     if (overshoot > 0) {
       data.y += dy + overshoot / movementRatio
       data.x = data.bbox.x2 - 12
       return true
     }
-  } else if (dir == 'leftright') {
+  } else if (dir === 'leftright') {
     data.y += dy + Math.abs(dx) / movementRatio
     return true
-  } else if (dir == 'top') {
+  } else if (dir === 'top') {
     var overshoot = data.bbox.y1 - (data.y + dy) + 12
     if (overshoot > 0) {
       data.x += dx + overshoot / movementRatio
       data.y = data.bbox.y1 + 12
       return true
     }
-  } else if (dir == 'bottom') {
+  } else if (dir === 'bottom') {
     var overshoot = (data.y + dy) - data.bbox.y2 + 12
     if (overshoot > 0) {
       data.x += dx + overshoot / movementRatio
       data.y = data.bbox.y2 - 12
       return true
     }
-  } else if (dir == 'topbottom') {
+  } else if (dir === 'topbottom') {
     data.x += dx + Math.abs(dy) / movementRatio
     return true
   }
@@ -357,25 +357,25 @@ function _pushCursor(dx, dy, width, height) {
   if (!data.puzzle.pillar) { // Left/right walls are inner if we're a pillar
     if ([undefined, 'top', 'bottom'].includes(endDir)) {
       // Only consider non-endpoints or endpoints which are parallel
-      if (data.pos.x == 0) { // Against left wall
+      if (data.pos.x === 0) { // Against left wall
         if (_push(dx, dy, 'left', 'top')) return 'left outer wall'
       }
-      if (data.pos.x == data.puzzle.grid.length - 1) { // Against right wall
+      if (data.pos.x === data.puzzle.grid.length - 1) { // Against right wall
         if (_push(dx, dy, 'right', 'top')) return 'right outer wall'
       }
     }
   }
   if ([undefined, 'left', 'right'].includes(endDir)) {
-    if (data.pos.y == 0) { // Against top wall
+    if (data.pos.y === 0) { // Against top wall
       if (_push(dx, dy, 'top', 'right')) return 'top outer wall'
     }
-    if (data.pos.y == data.puzzle.grid[data.pos.x].length - 1) { // Against bottom wall
+    if (data.pos.y === data.puzzle.grid[data.pos.x].length - 1) { // Against bottom wall
       if (_push(dx, dy, 'bottom', 'right')) return 'bottom outer wall'
     }
   }
 
   // Inner wall collision
-  if (data.pos.x%2 == 1 && data.pos.y%2 == 0) { // Horizontal cell
+  if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
     if (data.x < data.bbox.middle.x) {
       _push(dx, dy, 'topbottom', 'left')
       return 'topbottom inner wall, moved left'
@@ -383,7 +383,7 @@ function _pushCursor(dx, dy, width, height) {
       _push(dx, dy, 'topbottom', 'right')
       return 'topbottom inner wall, moved right'
     }
-  } else if (data.pos.x%2 == 0 && data.pos.y%2 == 1) { // Vertical cell
+  } else if (data.pos.x%2 === 0 && data.pos.y%2 === 1) { // Vertical cell
     if (data.y < data.bbox.middle.y) {
       _push(dx, dy, 'leftright', 'top')
       return 'leftright inner wall, moved up'
@@ -396,7 +396,7 @@ function _pushCursor(dx, dy, width, height) {
   // Intersection collision
   // Ratio of movement to be considered turning at an intersection
   var turnMod = 2
-  if (data.pos.x%2 == 0 && data.pos.y%2 == 0) {
+  if (data.pos.x%2 === 0 && data.pos.y%2 === 0) {
     if (data.x < data.bbox.middle.x) {
       _push(dx, dy, 'topbottom', 'right')
       // Overshot the intersection and appears to be trying to turn
@@ -450,18 +450,18 @@ function _pushCursor(dx, dy, width, height) {
 function _gapCollision() {
   var lastDir = data.path[data.path.length - 1].dir
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-  if (cell != undefined && cell.gap != true) return
+  if (cell != undefined && cell.gap !== true) return
 
-  if (data.pos.x%2 == 1 && data.pos.y%2 == 0) { // Horizontal cell
-    if (lastDir == 'left') {
+  if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
+    if (lastDir === 'left') {
       data.x = Math.max(data.bbox.middle.x + 21, data.x)
-    } else if (lastDir == 'right') {
+    } else if (lastDir === 'right') {
       data.x = Math.min(data.x, data.bbox.middle.x - 21)
     }
-  } else if (data.pos.x%2 == 0 && data.pos.y%2 == 1) { // Vertical cell
-    if (lastDir == 'top') {
+  } else if (data.pos.x%2 === 0 && data.pos.y%2 === 1) { // Vertical cell
+    if (lastDir === 'top') {
       data.y = Math.max(data.bbox.middle.y + 21, data.y)
-    } else if (lastDir == 'bottom') {
+    } else if (lastDir === 'bottom') {
       data.y = Math.min(data.y, data.bbox.middle.y - 21)
     }
   }
@@ -476,7 +476,7 @@ function _move() {
     var line = data.puzzle.getLine(data.pos.x - 1, data.pos.y)
     if (line == undefined) {
       data.x = data.bbox.x1 + 12
-    } else if (line > 0 && lastDir != 'right') {
+    } else if (line > 0 && lastDir !== 'right') {
       data.x = data.bbox.x1 + 12
     } else if (data.x < data.bbox.x1) {
       return 'left'
@@ -485,7 +485,7 @@ function _move() {
     var line = data.puzzle.getLine(data.pos.x + 1, data.pos.y)
     if (line == undefined) {
       data.x = data.bbox.x2 - 12
-    } else if (line > 0 && lastDir != 'left') {
+    } else if (line > 0 && lastDir !== 'left') {
       data.x = data.bbox.x2 - 12
     } else if (data.x > data.bbox.x2) {
       return 'right'
@@ -494,7 +494,7 @@ function _move() {
     var line = data.puzzle.getLine(data.pos.x, data.pos.y - 1)
     if (line == undefined) {
       data.y = data.bbox.y1 + 12
-    } else if (line > 0 && lastDir != 'bottom') {
+    } else if (line > 0 && lastDir !== 'bottom') {
       data.y = data.bbox.y1 + 12
     } else if (data.y < data.bbox.y1) {
       return 'top'
@@ -503,7 +503,7 @@ function _move() {
     var line = data.puzzle.getLine(data.pos.x, data.pos.y + 1)
     if (line == undefined) {
       data.y = data.bbox.y2 - 12
-    } else if (line > 0 && lastDir != 'top') {
+    } else if (line > 0 && lastDir !== 'top') {
       data.y = data.bbox.y2 - 12
     } else if (data.y > data.bbox.y2) {
       return 'bottom'
@@ -516,16 +516,16 @@ function _changePos(moveDir) {
   var lastDir = data.path[data.path.length - 1].dir
 
   var backedUp = (
-    (moveDir == 'left' && lastDir == 'right') ||
-    (moveDir == 'right' && lastDir == 'left') ||
-    (moveDir == 'top' && lastDir == 'bottom') ||
-    (moveDir == 'bottom' && lastDir == 'top'))
+    (moveDir === 'left' && lastDir === 'right') ||
+    (moveDir === 'right' && lastDir === 'left') ||
+    (moveDir === 'top' && lastDir === 'bottom') ||
+    (moveDir === 'bottom' && lastDir === 'top'))
 
   if (backedUp) { // Exited cell, mark as unvisited
     data.path.pop().destroy()
     data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
   }
-  if (moveDir == 'left') {
+  if (moveDir === 'left') {
     data.pos.x--
     if (data.puzzle.pillar && data.pos.x < 0) { // Wrap around the left
       data.x += data.puzzle.grid.length * 41
@@ -534,9 +534,9 @@ function _changePos(moveDir) {
       data.bbox.shift('right', 58)
       data.cursor.setAttribute('cx', data.x)
     } else {
-      data.bbox.shift('left', (data.pos.x%2 == 0 ? 24 : 58))
+      data.bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
     }
-  } else if (moveDir == 'right') {
+  } else if (moveDir === 'right') {
     data.pos.x++
     if (data.puzzle.pillar && data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
       data.x -= data.puzzle.grid.length * 41
@@ -544,17 +544,17 @@ function _changePos(moveDir) {
       data.bbox.shift('left', data.puzzle.grid.length * 41 - 82)
       data.bbox.shift('left', 24)
     } else {
-      data.bbox.shift('right', (data.pos.x%2 == 0 ? 24 : 58))
+      data.bbox.shift('right', (data.pos.x%2 === 0 ? 24 : 58))
     }
-  } else if (moveDir == 'top') {
+  } else if (moveDir === 'top') {
     data.pos.y--
-    data.bbox.shift('top', (data.pos.y%2 == 0 ? 24 : 58))
-  } else if (moveDir == 'bottom') {
+    data.bbox.shift('top', (data.pos.y%2 === 0 ? 24 : 58))
+  } else if (moveDir === 'bottom') {
     data.pos.y++
-    data.bbox.shift('bottom', (data.pos.y%2 == 0 ? 24 : 58))
+    data.bbox.shift('bottom', (data.pos.y%2 === 0 ? 24 : 58))
   }
 
-  if (data.pos.x%2 == 1 && data.pos.y%2 == 1) {
+  if (data.pos.x%2 === 1 && data.pos.y%2 === 1) {
     console.error('Cursor went out of bounds (into a cell)!')
   }
 

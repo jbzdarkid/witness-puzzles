@@ -45,9 +45,9 @@ function _drawGrid(puzzle, svg) {
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
       line.setAttribute('stroke', FOREGROUND)
-      if (x%2 == 1 && y%2 == 0) { // Horizontal
+      if (x%2 === 1 && y%2 === 0) { // Horizontal
         line.setAttribute('x1', (x-1)*41 + 52)
-        if (puzzle.pillar && x == puzzle.grid.length - 1) {
+        if (puzzle.pillar && x === puzzle.grid.length - 1) {
           line.setAttribute('x2', (x+1)*41 + 28)
         } else {
           line.setAttribute('x2', (x+1)*41 + 52)
@@ -57,19 +57,19 @@ function _drawGrid(puzzle, svg) {
         svg.appendChild(line)
 
         /* Try:
-        if (puzzle.pillar && x == 1) {
+        if (puzzle.pillar && x === 1) {
           line.setAttribute('x1', (x-1)*41 + 40)
         } else {
           line.setAttribute('x1', (x-1)*41 + 52)
         }
-        if (puzzle.pillar && x == puzzle.grid.length - 1) {
+        if (puzzle.pillar && x === puzzle.grid.length - 1) {
           line.setAttribute('x2', (x+1)*41 + 40)
         } else {
           line.setAttribute('x2', (x+1)*41 + 52)
         } */
 
         if (puzzle.pillar) {
-          if (x == 1) {
+          if (x === 1) {
             var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
             rect.setAttribute('x', (x-1)*41 + 40)
             rect.setAttribute('y', y*41 + 40)
@@ -78,7 +78,7 @@ function _drawGrid(puzzle, svg) {
             rect.setAttribute('fill', FOREGROUND)
             svg.appendChild(rect)
           }
-          if (x == puzzle.grid.length - 1) {
+          if (x === puzzle.grid.length - 1) {
             var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
             rect.setAttribute('x', (x+1)*41 + 16)
             rect.setAttribute('y', y*41 + 40)
@@ -88,7 +88,7 @@ function _drawGrid(puzzle, svg) {
             svg.appendChild(rect)
           }
         }
-      } else if (x%2 == 0 && y%2 == 1) { // Vertical
+      } else if (x%2 === 0 && y%2 === 1) { // Vertical
         line.setAttribute('x1', x*41 + 52)
         line.setAttribute('x2', x*41 + 52)
         line.setAttribute('y1', (y-1)*41 + 52)
@@ -113,16 +113,16 @@ function _drawSymbols(puzzle, svg, target) {
       }
       if (cell.dot > 0) {
         params.type = 'dot'
-        if (cell.dot == 1) params.color = 'black'
+        if (cell.dot === 1) params.color = 'black'
         // @Future: When I implement 2-color dots
-        // if (cell.dot == 2) params.color = 'blue'
-        // if (cell.dot == 3) params.color = 'orange'
+        // if (cell.dot === 2) params.color = 'blue'
+        // if (cell.dot === 3) params.color = 'orange'
         drawSymbolWithSvg(svg, params)
       } else if (cell.gap) {
         params.type = 'gap'
-        if (x%2 == 0 && y%2 == 1) params.rot = 1
+        if (x%2 === 0 && y%2 === 1) params.rot = 1
         drawSymbolWithSvg(svg, params)
-      } else if (x%2 == 1 && y%2 == 1) {
+      } else if (x%2 === 1 && y%2 === 1) {
         Object.assign(params, cell)
         drawSymbolWithSvg(svg, params)
       }
@@ -150,7 +150,7 @@ function _drawStartAndEnd(puzzle, svg) {
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == undefined || cell.start != true) continue
+      if (cell == undefined || cell.start !== true) continue
       drawSymbolWithSvg(svg, {
         'type':'start',
         'width': 58,
@@ -167,21 +167,21 @@ function _drawStartAndEnd(puzzle, svg) {
       }
 
       // The startpoint must have a primary line through it
-      // @Future: if (cell.color != 1 || cell.color != 2) continue
-      if (cell.color != 1) continue
+      // @Future: if (cell.color !== 1 || cell.color !== 2) continue
+      if (cell.color !== 1) continue
 
       // And that line must not be coming from any adjacent cells
       var leftCell = puzzle.getCell(x - 1, y)
-      if (leftCell != undefined && leftCell.dir == 'right') continue
+      if (leftCell != undefined && leftCell.dir === 'right') continue
 
       var rightCell = puzzle.getCell(x + 1, y)
-      if (rightCell != undefined && rightCell.dir == 'left') continue
+      if (rightCell != undefined && rightCell.dir === 'left') continue
 
       var topCell = puzzle.getCell(x, y - 1)
-      if (topCell != undefined && topCell.dir == 'bottom') continue
+      if (topCell != undefined && topCell.dir === 'bottom') continue
 
       var bottomCell = puzzle.getCell(x, y + 1)
-      if (bottomCell != undefined && bottomCell.dir == 'top') continue
+      if (bottomCell != undefined && bottomCell.dir === 'top') continue
 
       startData = {'elem':start, 'x':x, 'y':y}
     }
@@ -205,15 +205,15 @@ function _drawSolution(puzzle, x, y) {
       var cell = puzzle.grid[i][j]
       if (cell == undefined || cell.dir == undefined) {
         output += '     |'
-      } else if (cell.dir == 'left') {
+      } else if (cell.dir === 'left') {
         output += 'left |'
-      } else if (cell.dir == 'right') {
+      } else if (cell.dir === 'right') {
         output += 'right|'
-      } else if (cell.dir == 'top') {
+      } else if (cell.dir === 'top') {
         output += 'up   |'
-      } else if (cell.dir == 'bottom') {
+      } else if (cell.dir === 'bottom') {
         output += 'down |'
-      } else if (cell.dir == 'none') {
+      } else if (cell.dir === 'none') {
         output += 'none |'
       }
     }
@@ -231,24 +231,24 @@ function _drawSolution(puzzle, x, y) {
     var dir = cell.dir
     var dx = 0
     var dy = 0
-    if (dir == 'none') { // Reached an endpoint, move into it
+    if (dir === 'none') { // Reached an endpoint, move into it
       var endDir = puzzle.getEndDir(x, y)
       console.log('Reached endpoint')
-      if (endDir == 'left') {
+      if (endDir === 'left') {
         onMove(-24, 0)
-      } else if (endDir == 'right') {
+      } else if (endDir === 'right') {
         onMove(24, 0)
-      } else if (endDir == 'top') {
+      } else if (endDir === 'top') {
         onMove(0, -24)
-      } else if (endDir == 'bottom') {
+      } else if (endDir === 'bottom') {
         onMove(0, 24)
       }
       return
     }
-    else if (dir == 'left') dx = -1
-    else if (dir == 'right') dx = 1
-    else if (dir == 'top') dy = -1
-    else if (dir == 'bottom') dy = 1
+    else if (dir === 'left') dx = -1
+    else if (dir === 'right') dx = 1
+    else if (dir === 'top') dy = -1
+    else if (dir === 'bottom') dy = 1
 
     console.log('Currently at', x, y, cell, 'moving', dx, dy)
 
