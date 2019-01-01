@@ -18,9 +18,9 @@ function solve(puzzle) {
 
 function _solveLoop(puzzle, x, y, solutions) {
   if (window.MAX_SOLUTIONS !== -1 && solutions.length >= window.MAX_SOLUTIONS) return
-  var endDir = puzzle.getEndDir(x, y)
-  if (endDir != undefined) {
-    // Reached the end point, validate solution and tail recurse
+  var cell = puzzle.getCell(x, y)
+  if (cell.end != undefined) {
+    // Reached an endpoint, validate solution and tail recurse
     puzzle.updateCell(x, y, {'color':1, 'dir':'none'})
     window.validate(puzzle)
     if (puzzle.valid) {

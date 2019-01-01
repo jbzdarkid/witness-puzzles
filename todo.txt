@@ -1,17 +1,15 @@
 In vague order of importance.
 
-- Simple Symmetry (horiz/verti)
-
 - Rich line data -> Done
--- End into the grid?
+-- Mid-segment endpoints
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
 -- Colored Dots
 -- Invisible Dots
--- Mid-segment endpoints
 -- Formal object, maybe?
 - Better UI for "draggable edge" (editor)
 - Nightly builds again? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
+- Simple Symmetry (horiz/verti)
 
 - Server
 -- A whole bunch of UI for browsing puzzles
@@ -33,6 +31,9 @@ In vague order of importance.
 - Fix generation colors / general improvements to random puzzles
 - Favicon still needs improving
 - Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
+- Checkboxes are terrible. Maybe write my own?
+- Crayons could be colored in, maybe.
+- Editor dragging has deadzone -- there should be a magic pixel (or they should be much closer.)
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?

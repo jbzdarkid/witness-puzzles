@@ -36,11 +36,11 @@ class BoundingBox {
 
   _update() {
     // Check for endpoint adjustment
-    var endDir = data.puzzle.getEndDir(data.pos.x, data.pos.y)
-    this.x1 = this.raw.x1 + (endDir === 'left' ? -24 : 0)
-    this.x2 = this.raw.x2 + (endDir === 'right' ? 24 : 0)
-    this.y1 = this.raw.y1 + (endDir === 'top' ? -24 : 0)
-    this.y2 = this.raw.y2 + (endDir === 'bottom' ? 24 : 0)
+    var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+    this.x1 = this.raw.x1 + (cell.end === 'left' ? -24 : 0)
+    this.x2 = this.raw.x2 + (cell.end === 'right' ? 24 : 0)
+    this.y1 = this.raw.y1 + (cell.end === 'top' ? -24 : 0)
+    this.y2 = this.raw.y2 + (cell.end === 'bottom' ? 24 : 0)
     this.middle = { // Note: Middle of the raw object
       'x':(this.raw.x1 + this.raw.x2)/2,
       'y':(this.raw.y1 + this.raw.y2)/2
@@ -156,8 +156,8 @@ function trace(elem, event, puzzle) {
     data.tracing = false
 
     // At endpoint and not in raw box -> In true endpoint
-    var endDir = puzzle.getEndDir(data.pos.x, data.pos.y)
-    if (endDir != undefined && !data.bbox.inRaw(data.x, data.y)) {
+    var cell = puzzle.getCell(data.pos.x, data.pos.y)
+    if (cell.end != undefined && !data.bbox.inRaw(data.x, data.y)) {
       data.cursor.onclick = null
       window.validate(puzzle)
 
@@ -355,9 +355,9 @@ function _push(dx, dy, dir, targetDir) {
 
 function _pushCursor(dx, dy, width, height) {
   // Outer wall collision
-  var endDir = data.puzzle.getEndDir(data.pos.x, data.pos.y)
+  var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
   if (!data.puzzle.pillar) { // Left/right walls are inner if we're a pillar
-    if ([undefined, 'top', 'bottom'].includes(endDir)) {
+    if ([undefined, 'top', 'bottom'].includes(cell.end)) {
       // Only consider non-endpoints or endpoints which are parallel
       if (data.pos.x === 0) { // Against left wall
         if (_push(dx, dy, 'left', 'top')) return 'left outer wall'
@@ -367,7 +367,7 @@ function _pushCursor(dx, dy, width, height) {
       }
     }
   }
-  if ([undefined, 'left', 'right'].includes(endDir)) {
+  if ([undefined, 'left', 'right'].includes(cell.end)) {
     if (data.pos.y === 0) { // Against top wall
       if (_push(dx, dy, 'top', 'right')) return 'top outer wall'
     }

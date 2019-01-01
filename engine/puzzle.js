@@ -50,7 +50,6 @@ class Puzzle {
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
-    this.endPoints = []
     this.regionCache = {}
     this.pillar = pillar
   }
@@ -81,10 +80,15 @@ class Puzzle {
         puzzle.grid[startPoint.x][startPoint.y].start = true
       }
     }
+    // @Legacy: Endpoints used to be only parsed.end
+    if (parsed.end) {
+      parsed.endPoints = [parsed.end]
+    }
+    // @Legacy: Endpoints used to be a separate array, now they are flags
     if (parsed.endPoints) {
-      puzzle.endPoints = parsed.endPoints
-    } else {
-      puzzle.endPoints = [parsed.end]
+      for (var endPoint of parsed.endPoints) {
+        puzzle.grid[endPoint.x][endPoint.y].end = endPoint.dir
+      }
     }
     // @Legacy: Dots and gaps used to be separate arrays
     // Now, they are flags on the individual lines.
@@ -169,34 +173,22 @@ class Puzzle {
     Object.assign(this.grid[x][y], properties)
   }
 
-  removeEnd(x, y) {
-    for (var i=0; i<this.endPoints.length; i++) {
-      if (this.endPoints[i].x === x && this.endPoints[i].y === y) {
-        this.endPoints.splice(i, 1)
-        return true
-      }
-    }
-    return false
-  }
+  getValidEndDirs(x, y) {
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return []
 
-  addEnd(x, y, dir) {
-    this.removeEnd(x, y)
-    this.endPoints.push({'x':x, 'y':y, 'dir':dir})
-  }
-
-  getEndDir(x, y) {
-    if (this.pillar) x = this._mod(x)
-    for (var endPoint of this.endPoints) {
-      if (x === endPoint.x && y === endPoint.y) return endPoint.dir
-    }
-    return undefined
+    var dirs = []
+    if (x === 0 && !this.pillar) dirs.push('left')
+    if (y === 0) dirs.push('top')
+    if (x === this.grid.length - 1 && !this.pillar) dirs.push('right')
+    if (y === this.grid[x].length - 1) dirs.push('bottom')
+    return dirs
   }
 
   clone() {
     var copy = new Puzzle(0, 0)
     // @Performance: This is only used when making the solution array, to my knowledge.
     copy.grid = JSON.parse(JSON.stringify(this.grid))
-    copy.endPoints = this.endPoints.slice()
     copy.regionCache = this.regionCache
     copy.pillar = this.pillar
     copy.hints = this.hints

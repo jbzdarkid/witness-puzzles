@@ -131,59 +131,56 @@ function _drawSymbols(puzzle, svg, target) {
 }
 
 function _drawStartAndEnd(puzzle, svg) {
-  for (var endPoint of puzzle.endPoints) {
-    if (endPoint.dir == undefined) {
-      console.error('Endpoint at', endPoint.x, endPoint.y, 'has no defined direction!')
-      continue
-    }
-    window.drawSymbolWithSvg(svg, {
-      'type':'end',
-      'width': 58,
-      'height': 58,
-      'dir': endPoint.dir,
-      'x': endPoint.x*41 + 23,
-      'y': endPoint.y*41 + 23,
-    })
-  }
-
   var startData = undefined
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == undefined || cell.start !== true) continue
-      window.drawSymbolWithSvg(svg, {
-        'type':'start',
-        'width': 58,
-        'height': 58,
-        'x': x*41 + 23,
-        'y': y*41 + 23,
-      })
-      var start = svg.lastChild
-      // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
-      // in the onclick function below, but passing parameters through scope is hard.
-      start.id = x + '_' + y
-      start.onclick = function(event) {
-        window.trace(this, event, puzzle)
+      if (cell == undefined) continue
+      if (cell.end != undefined) {
+        window.drawSymbolWithSvg(svg, {
+          'type':'end',
+          'width': 58,
+          'height': 58,
+          'dir': cell.end,
+          'x': x*41 + 23,
+          'y': y*41 + 23,
+        })
       }
+      if (cell.start === true) {
+        window.drawSymbolWithSvg(svg, {
+          'type':'start',
+          'width': 58,
+          'height': 58,
+          'x': x*41 + 23,
+          'y': y*41 + 23,
+        })
+        var start = svg.lastChild
+        // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
+        // in the onclick function below, but passing parameters through scope is hard.
+        start.id = x + '_' + y
+        start.onclick = function(event) {
+          window.trace(this, event, puzzle)
+        }
 
-      // The startpoint must have a primary line through it
-      // @Future: if (cell.color !== 1 || cell.color !== 2) continue
-      if (cell.color !== 1) continue
+        // The startpoint must have a primary line through it
+        // @Future: if (cell.color !== 1 || cell.color !== 2) continue
+        if (cell.color !== 1) continue
 
-      // And that line must not be coming from any adjacent cells
-      var leftCell = puzzle.getCell(x - 1, y)
-      if (leftCell != undefined && leftCell.dir === 'right') continue
+        // And that line must not be coming from any adjacent cells
+        var leftCell = puzzle.getCell(x - 1, y)
+        if (leftCell != undefined && leftCell.dir === 'right') continue
 
-      var rightCell = puzzle.getCell(x + 1, y)
-      if (rightCell != undefined && rightCell.dir === 'left') continue
+        var rightCell = puzzle.getCell(x + 1, y)
+        if (rightCell != undefined && rightCell.dir === 'left') continue
 
-      var topCell = puzzle.getCell(x, y - 1)
-      if (topCell != undefined && topCell.dir === 'bottom') continue
+        var topCell = puzzle.getCell(x, y - 1)
+        if (topCell != undefined && topCell.dir === 'bottom') continue
 
-      var bottomCell = puzzle.getCell(x, y + 1)
-      if (bottomCell != undefined && bottomCell.dir === 'top') continue
+        var bottomCell = puzzle.getCell(x, y + 1)
+        if (bottomCell != undefined && bottomCell.dir === 'top') continue
 
-      startData = {'elem':start, 'x':x, 'y':y}
+        startData = {'elem':start, 'x':x, 'y':y}
+      }
     }
   }
   return startData
@@ -232,15 +229,15 @@ function _drawSolution(puzzle, x, y) {
     var dx = 0
     var dy = 0
     if (dir === 'none') { // Reached an endpoint, move into it
-      var endDir = puzzle.getEndDir(x, y)
+      var cell = puzzle.getCell(x, y)
       console.log('Reached endpoint')
-      if (endDir === 'left') {
+      if (cell.end === 'left') {
         window.onMove(-24, 0)
-      } else if (endDir === 'right') {
+      } else if (cell.end === 'right') {
         window.onMove(24, 0)
-      } else if (endDir === 'top') {
+      } else if (cell.end === 'top') {
         window.onMove(0, -24)
-      } else if (endDir === 'bottom') {
+      } else if (cell.end === 'bottom') {
         window.onMove(0, 24)
       }
       return

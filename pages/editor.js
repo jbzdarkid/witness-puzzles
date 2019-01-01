@@ -35,7 +35,7 @@ window.onload = function() {
 function newPuzzle() {
   puzzle = new Puzzle(4, 4)
   puzzle.grid[0][8].start = true
-  puzzle.addEnd(8, 0, 'right')
+  puzzle.grid[8][0].end = 'right'
   puzzle.name = 'Unnamed Puzzle'
   _redraw(puzzle)
   window.localStorage.setItem('activePuzzle', '')
@@ -175,20 +175,6 @@ function setPillar(value) {
       return
     }
 
-    var newEnds = []
-    for (var endPoint of puzzle.endPoints) {
-      if (endPoint.x !== 0) {
-        newEnds.push(endPoint)
-      } else if (endPoint.y === 0) {
-        endPoint.dir = 'top'
-        newEnds.push(endPoint)
-      } else if (endPoint.y === puzzle.grid[endPoint.x].length - 1) {
-        endPoint.dir = 'bottom'
-        newEnds.push(endPoint)
-      }
-    }
-    puzzle.endPoints = newEnds
-
     puzzle.pillar = true
     resizePuzzle(-1, 0, 'right')
   }
@@ -298,7 +284,6 @@ function _onElementClicked(elem) {
 
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
-    // Toggle the start point -- add it if it isn't removed.
     if (puzzle.grid[x][y].start == undefined) {
       puzzle.grid[x][y].start = true
     } else {
@@ -306,27 +291,19 @@ function _onElementClicked(elem) {
     }
   } else if (activeParams.type === 'end') {
     if (x%2 !== 0 || y%2 !== 0) return
-    // Compute all valid endpoint directions for this location
-    var validDirs = []
-    if (x === 0 && !puzzle.pillar) validDirs.push('left')
-    if (y === 0) validDirs.push('top')
-    if (x === puzzle.grid.length - 1 && !puzzle.pillar) validDirs.push('right')
-    if (y === puzzle.grid[x].length - 1) validDirs.push('bottom')
+    var validDirs = puzzle.getValidEndDirs(x, y)
     if (validDirs.length === 0) return
 
     // Choose the first valid direction
     var dir = validDirs[0]
     // If (x, y) is an endpoint, loop to the next direction
-    var index = validDirs.indexOf(puzzle.getEndDir(x, y))
+    var index = validDirs.indexOf(puzzle.grid[x][y].end)
     if (index !== -1) {
       dir = validDirs[index + 1]
     }
-    // If the direction loops past the end (or there are no valid directions), remove the endpoint.
-    if (dir == undefined) {
-      puzzle.removeEnd(x, y)
-    } else {
-      puzzle.addEnd(x, y, dir)
-    }
+    // If the direction loops past the end (or there are no valid directions),
+    // remove the endpoint by setting to undefined.
+    puzzle.grid[x][y].end = dir
   } else if (activeParams.type === 'dot') {
     if (x%2 === 1 && y%2 === 1) return
     // @Future: Some way to toggle colors, should be cognizant of symmetry mode.
@@ -337,8 +314,7 @@ function _onElementClicked(elem) {
       puzzle.grid[x][y].dot = 1
     }
   } else if (activeParams.type === 'gap') {
-    if (x%2 === 1 && y%2 === 1) return
-    if (x%2 === 0 && y%2 === 0) return
+    if (x%2 === y%2) return
     if (puzzle.grid[x][y].gap === true) {
       puzzle.grid[x][y].gap = undefined
     } else {
@@ -574,7 +550,6 @@ function resizePuzzle(dx, dy, id) {
   if (newWidth <= 0 || newHeight <= 0) return false
   if (newWidth > 21 || newHeight > 21) return false
 
-
   var xOffset = (id.includes('left') ? dx : 0)
   var yOffset = (id.includes('top') ? dy : 0)
 
@@ -584,12 +559,19 @@ function resizePuzzle(dx, dy, id) {
   for (var x=0; x<width; x++) {
     for (var y=0; y<height; y++) {
       var cell = savedGrid[x][y]
+      if (cell == undefined || cell.end == undefined) continue
+      var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
+      if (validDirs.length === 0) {
+        console.debug('Endpoint at', x, y, 'no longer fits on the grid')
+        continue
+      }
+      if (!validDirs.includes(cell.end)) {
+        console.debug('Changing direct of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
+        cell.end = validDirs[0]
+      }
       puzzle.setCell(x + xOffset, y + yOffset, cell)
     }
   }
-
-  // @Bug: Once endpoints are on the grid, this should get much easier. Just wait.
-  puzzle.endPoints = []
 
   savePuzzle()
   _redraw(puzzle)
