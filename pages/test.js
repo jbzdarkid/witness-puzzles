@@ -17,8 +17,8 @@ window.onload = function() {
       var puzzleData = tests[testName]()
       var puzzle = puzzleData[0]
       var expectedSolutions = puzzleData[1]
-      var solutions = solve(puzzle)
-      draw(puzzle, testName)
+      var solutions = window.solve(puzzle)
+      window.draw(puzzle, testName)
       if (solutions.length !== expectedSolutions) {
         console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
         for (var solution of solutions) {
@@ -37,7 +37,7 @@ window.onload = function() {
   return numFailures
 }
 
-tests = {
+var tests = {
   'end-left': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[4][4].start = true

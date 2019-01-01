@@ -1,4 +1,4 @@
-from flask import redirect, render_template, request, Response
+from flask import redirect, render_template, request
 import os
 from uuid import UUID, uuid4
 

@@ -251,10 +251,10 @@ function _polyWrapper(region, puzzle) {
     if (cell.polyshape === 0) continue
     if (cell.type === 'poly') {
       polys.push(cell)
-      polyCount += getPolySize(cell.polyshape)
+      polyCount += window.getPolySize(cell.polyshape)
     } else if (cell.type === 'ylop') {
       ylops.push(cell)
-      polyCount -= getPolySize(cell.polyshape)
+      polyCount -= window.getPolySize(cell.polyshape)
     }
   }
   var regionSize = 0
@@ -302,13 +302,13 @@ function _polyWrapper(region, puzzle) {
 function _ylopFit(ylops, polys, puzzle) {
   if (ylops.length === 0) return _polyFit(polys, puzzle)
   var ylop = ylops.pop()
-  var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
+  var ylopRotations = window.getRotations(ylop.polyshape, ylop.rot)
   for (var x=1; x<puzzle.grid.length; x+=2) {
     for (var y=1; y<puzzle.grid[x].length; y+=2) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
-        var cells = polyominoFromPolyshape(polyshape, true)
-        if (!fitsGrid(cells, x, y, puzzle)) continue
+        var cells = window.polyominoFromPolyshape(polyshape, true)
+        if (!window.fitsGrid(cells, x, y, puzzle)) continue
         for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]--
         console.group()
         if (_ylopFit(ylops, polys, puzzle)) return true
@@ -362,9 +362,9 @@ function _polyFit(polys, puzzle) {
   for (var i=0; i<polys.length; i++) {
     var poly = polys.splice(i, 1)[0]
     console.spam('Selected poly', poly)
-    for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
-      var cells = polyominoFromPolyshape(polyshape)
-      if (!fitsGrid(cells, pos.x, pos.y, puzzle)) continue
+    for (var polyshape of window.getRotations(poly.polyshape, poly.rot)) {
+      var cells = window.polyominoFromPolyshape(polyshape)
+      if (!window.fitsGrid(cells, pos.x, pos.y, puzzle)) continue
       console.spam('Placing at', pos.x, pos.y)
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]++
       console.group('')

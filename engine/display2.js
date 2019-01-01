@@ -33,7 +33,7 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
-    onTraceStart(svg, puzzle, startData.elem)
+    window.onTraceStart(svg, puzzle, startData.elem)
     _drawSolution(puzzle, startData.x, startData.y)
   }
 }
@@ -44,7 +44,7 @@ function _drawGrid(puzzle, svg) {
       var line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
-      line.setAttribute('stroke', FOREGROUND)
+      line.setAttribute('stroke', window.FOREGROUND)
       if (x%2 === 1 && y%2 === 0) { // Horizontal
         line.setAttribute('x1', (x-1)*41 + 52)
         if (puzzle.pillar && x === puzzle.grid.length - 1) {
@@ -75,7 +75,7 @@ function _drawGrid(puzzle, svg) {
             rect.setAttribute('y', y*41 + 40)
             rect.setAttribute('width', 24)
             rect.setAttribute('height', 24)
-            rect.setAttribute('fill', FOREGROUND)
+            rect.setAttribute('fill', window.FOREGROUND)
             svg.appendChild(rect)
           }
           if (x === puzzle.grid.length - 1) {
@@ -84,7 +84,7 @@ function _drawGrid(puzzle, svg) {
             rect.setAttribute('y', y*41 + 40)
             rect.setAttribute('width', 24)
             rect.setAttribute('height', 24)
-            rect.setAttribute('fill', FOREGROUND)
+            rect.setAttribute('fill', window.FOREGROUND)
             svg.appendChild(rect)
           }
         }
@@ -151,7 +151,7 @@ function _drawStartAndEnd(puzzle, svg) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined || cell.start !== true) continue
-      drawSymbolWithSvg(svg, {
+      window.drawSymbolWithSvg(svg, {
         'type':'start',
         'width': 58,
         'height': 58,
@@ -163,7 +163,7 @@ function _drawStartAndEnd(puzzle, svg) {
       // in the onclick function below, but passing parameters through scope is hard.
       start.id = x + '_' + y
       start.onclick = function(event) {
-        trace(this, event, puzzle)
+        window.trace(this, event, puzzle)
       }
 
       // The startpoint must have a primary line through it
