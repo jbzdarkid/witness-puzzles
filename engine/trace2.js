@@ -3,7 +3,14 @@ window.BBOX_DEBUG = false
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
     this.endBox = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
-    this._update()
+    this._updateEndBox()
+/*
+    this.x1 = x1
+    this.x2 = x2
+    this.y1 = y1
+    this.y2 = y2
+    this.endBox = {}
+*/
   }
 
   shift(dir, pixels) {
@@ -20,28 +27,66 @@ class BoundingBox {
       this.endBox.y1 = this.endBox.y2
       this.endBox.y2 += pixels
     }
-    this._update()
+    this._updateEndBox()
   }
 
   inRaw(x, y) {
-    return (
-      x.clamp(this.endBox.x1, this.endBox.x2) === x &&
-      y.clamp(this.endBox.y1, this.endBox.y2) === y
-    )
+    var inMainBox =
+      (this.x1 < x && x < this.x2) &&
+      (this.y1 < y && y < this.y2)
+    var inEndBox =
+      (this.endBox.x1 < x && x < this.endBox.x2) &&
+      (this.endBox.y1 < y && y < this.endBox.y2)
+
+    return inEndBox && !inMainBox
   }
 
-  _update() {
+  _updateEndBox() {
     // Check for endpoint adjustment
+    this.x1 = this.endBox.x1
+    this.x2 = this.endBox.x2
+    this.y1 = this.endBox.y1
+    this.y2 = this.endBox.y2
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-    this.x1 = this.endBox.x1 + (cell.end === 'left' ? -24 : 0)
-    this.x2 = this.endBox.x2 + (cell.end === 'right' ? 24 : 0)
-    this.y1 = this.endBox.y1 + (cell.end === 'top' ? -24 : 0)
-    this.y2 = this.endBox.y2 + (cell.end === 'bottom' ? 24 : 0)
+    if (cell.end === 'left') {
+      this.x1 -= 24
+    } else if (cell.end === 'right') {
+      this.x2 += 24
+    } else if (cell.end === 'top') {
+      this.y1 -= 24
+    } else if (cell.end === 'bottom') {
+      this.y2 += 24
+    }
+
     this.middle = { // Note: Middle of the raw object
       'x':(this.endBox.x1 + this.endBox.x2)/2,
       'y':(this.endBox.y1 + this.endBox.y2)/2
     }
   }
+/*
+    // Adjust the endbox to fill the endpoint
+    var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+    this.endBox.x1 = this.x1
+    this.endBox.x2 = this.x2
+    this.endBox.y1 = this.y1
+    this.endBox.y2 = this.y2
+    if (cell.end === 'left') {
+      this.endBox.x1 += 24
+//      this.y1 += 17
+//      this.y2 -= 10
+    } else if (cell.end === 'right') {
+      this.endBox.x2 -= 24
+    } else if (cell.end === 'top') {
+      this.endBox.y1 += 24
+    } else if (cell.end === 'bottom') {
+      this.endBox.y2 -= 24
+    }
+    this.middle = { // Note: Middle of the endpoint object
+      'x':(this.endBox.x1 + this.endBox.x2)/2,
+      'y':(this.endBox.y1 + this.endBox.y2)/2
+    }
+  }
+*/
 }
 
 class PathSegment {
@@ -89,6 +134,7 @@ class PathSegment {
       points1.x2 + ' ' + points1.y1
     )
 
+    // The second half of the line uses the endBox so that it can enter the endpoint properly.
     var pastMiddle = true
     var points2 = JSON.parse(JSON.stringify(data.bbox.endBox))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
