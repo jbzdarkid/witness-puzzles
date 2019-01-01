@@ -220,7 +220,7 @@ function onTraceStart(svg, puzzle, start) {
   cursor.setAttribute('cy', y)
 
   if (data.bboxDebug != undefined) {
-    svg.removeChild(data.bboxDebug)
+    data.svg.removeChild(data.bboxDebug)
   }
 
   data = {
