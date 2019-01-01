@@ -10,8 +10,6 @@ In vague order of importance.
 - Nightly builds again? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 - Simple Symmetry (horiz/verti)
 
-- "In endpoint" is very generous right now.
-
 - Server
 -- A whole bunch of UI for browsing puzzles
 -- Signin?

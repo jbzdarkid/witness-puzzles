@@ -23,15 +23,15 @@ class BoundingBox {
     this._update()
   }
 
-  inRaw(x, y) {
+  inMain(x, y) {
     var inMainBox =
       (this.x1 < x && x < this.x2) &&
       (this.y1 < y && y < this.y2)
-    var inEndBox =
+    var inRawBox =
       (this.raw.x1 < x && x < this.raw.x2) &&
       (this.raw.y1 < y && y < this.raw.y2)
 
-    return inEndBox && !inMainBox
+    return inMainBox && !inRawBox
   }
 
   _update() {
@@ -190,9 +190,9 @@ function trace(elem, event, puzzle) {
     // Signal the onMouseMove to stop accepting input (race condition)
     data.tracing = false
 
-    // At endpoint and not in raw box -> In true endpoint
+    // At endpoint and in main box
     var cell = puzzle.getCell(data.pos.x, data.pos.y)
-    if (cell.end != undefined && !data.bbox.inRaw(data.x, data.y)) {
+    if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
       data.cursor.onclick = null
       window.validate(puzzle)
 
