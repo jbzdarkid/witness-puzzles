@@ -10,6 +10,10 @@ def http_to_https():
     return
   return redirect(request.url.replace('http://', 'https://', 1), code=301)
 
+def disable_caching(request):
+  request.headers['Cache-Control'] = 'no-cache'
+  return request
+
 if 'RDS_DB_NAME' in os.environ: # Running on AWS
   application.config.update({
     'SQLALCHEMY_DATABASE_URI':'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
@@ -31,6 +35,7 @@ else: # Running locally
   application.config.update({
     'SECRET_KEY': 'default',
   })
+  application.after_request(disable_caching)
   application.debug = True # Required to do auto-reload
 
 def request_is_authorized():
