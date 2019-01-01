@@ -128,6 +128,8 @@ var console_info = console.log
 var console_log = console.log
 var console_debug = console.log
 var console_spam = console.log
+var console_group = console.group
+var console_groupEnd = console.groupEnd
 
 function setLogLevel(level) {
   console.error = function() {}
@@ -136,6 +138,8 @@ function setLogLevel(level) {
   console.log = function() {}
   console.debug = function() {}
   console.spam = function() {}
+  console.group = function() {}
+  console.groupEnd = function() {}
 
   if (level === 'none') return
 
@@ -159,8 +163,10 @@ function setLogLevel(level) {
   console.debug = console_debug
   if (level === 'debug') return
 
-  // Useful for insane debugging (mainly tracing)
+  // Useful for insane debugging (mainly tracing/recursion)
   console.spam = console_spam
+  console.group = console_group
+  console.groupEnd = console_groupEnd
   if (level === 'spam') return
 }
 setLogLevel('info')

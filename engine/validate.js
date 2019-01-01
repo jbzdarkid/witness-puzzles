@@ -95,7 +95,7 @@ function _regionCheckNegations(puzzle, region) {
       negationSymbols.push({'x':pos.x, 'y':pos.y, 'cell':cell})
     }
   }
-  console.log('Found negation symbols:', JSON.stringify(negationSymbols))
+  console.debug('Found negation symbols:', JSON.stringify(negationSymbols))
   // Get a list of elements that are currently invalid (before any negations are applied)
   var invalidElements = _regionCheck(puzzle, region)
   console.log('Negation-less regioncheck returned invalid elements:', JSON.stringify(invalidElements))
@@ -108,26 +108,28 @@ function _regionCheckNegations(puzzle, region) {
   // If there are not enough elements to pair, return
   if (negationSymbols.length === 0 ||
      (invalidElements.length === 0 && (negationSymbols.length < 2 || !window.NEGATIONS_CANCEL_NEGATIONS))) {
-    console.log('Not enough elements left to create a pair')
+    console.debug('Not enough elements left to create a pair')
     invalidElements = invalidElements.concat(negationSymbols)
     return {'invalidElements':invalidElements, 'negations':[]}
   }
   // Else, there are invalid elements and negations, try to pair them up
   var source = negationSymbols[0]
   puzzle.setCell(source.x, source.y, null)
-  console.log('Using negation symbol at', source.x, source.y)
+  console.spam('Using negation symbol at', source.x, source.y)
 
   // Logic is duplicate of below
   if (window.NEGATIONS_CANCEL_NEGATIONS) {
     for (var i=1; i<negationSymbols.length; i++) {
       var target = negationSymbols[i]
       puzzle.setCell(target.x, target.y, null)
-      console.log('Negating other negation symbol at', target.x, target.y)
+      console.spam('Negating other negation symbol at', target.x, target.y)
+      console.group()
       var regionData = _regionCheckNegations(puzzle, region)
+      console.groupEnd()
       puzzle.setCell(target.x, target.y, target.cell)
 
       if (regionData.invalidElements.length === 0) {
-        console.log('Negation pair valid')
+        console.spam('Negation pair valid')
         // Restore negation symbol, add to list of negation pairs
         puzzle.setCell(source.x, source.y, source.cell)
         regionData.negations.push({'source':source, 'target':target})
@@ -139,15 +141,17 @@ function _regionCheckNegations(puzzle, region) {
   for (var invalidElement of invalidElements) {
     invalidElement.cell = puzzle.getCell(invalidElement.x, invalidElement.y)
     puzzle.setCell(invalidElement.x, invalidElement.y, null)
-    console.log('Negating other symbol at', invalidElement.x, invalidElement.y)
+    console.spam('Negating other symbol at', invalidElement.x, invalidElement.y)
     // Remove the negation and target, then recurse
+    console.group()
     var regionData = _regionCheckNegations(puzzle, region)
+    console.groupEnd()
     // Restore the target
     puzzle.setCell(invalidElement.x, invalidElement.y, invalidElement.cell)
 
     // No invalid elements after negation is applied, so the region validates
     if (regionData.invalidElements.length === 0) {
-      console.log('Negation pair valid')
+      console.spam('Negation pair valid')
       // Restore negation symbol, add to list of negation pairs
       puzzle.setCell(source.x, source.y, source.cell)
       regionData.negations.push({'source':source, 'target':invalidElement})
@@ -155,8 +159,7 @@ function _regionCheckNegations(puzzle, region) {
     }
   }
 
-  // @Robustness: Random? A lot harder now...
-  console.log('All pairings failed, showing last attempted negation')
+  console.spam('All pairings failed, returning last attempted negation')
   puzzle.setCell(source.x, source.y, source.cell)
   return regionData
 }
@@ -265,7 +268,7 @@ function _polyWrapper(region, puzzle) {
   }
   if (polyCount > 0 && polyCount !== regionSize) {
     console.log('Combined size of polyominos', polyCount, 'does not match region size', regionSize)
-    return false
+//    return false
   }
 
   // For polyominos, we clear the grid to mark it up again:
@@ -307,7 +310,9 @@ function _ylopFit(ylops, polys, puzzle) {
         var cells = polyominoFromPolyshape(polyshape, true)
         if (!fitsGrid(cells, x, y, puzzle)) continue
         for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]--
+        console.group()
         if (_ylopFit(ylops, polys, puzzle)) return true
+        console.groupEnd()
         for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]++
       }
     }
@@ -324,7 +329,7 @@ function _polyFit(polys, puzzle) {
     for (var x=0; x<puzzle.grid.length; x++) {
       var cell = puzzle.getCell(x, y)
       if (cell > 0) {
-        console.log('Cell has been overfilled and no negations left to place')
+        console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
         return false
       }
       if (x%2 === 1 && y%2 === 1 && cell < 0 && polys.length === 0) {
@@ -362,7 +367,9 @@ function _polyFit(polys, puzzle) {
       if (!fitsGrid(cells, pos.x, pos.y, puzzle)) continue
       console.spam('Placing at', pos.x, pos.y)
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]++
+      console.group('')
       if (_polyFit(polys, puzzle)) return true
+      console.groupEnd('')
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]--
     }
     polys.splice(i, 0, poly)

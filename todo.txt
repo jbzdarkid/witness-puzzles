@@ -1,6 +1,5 @@
 In vague order of importance.
 
-- console.group() whenever I have recursion. Please.
 - When a region fails, but has negation symbols in it, they should still negate things -- even if those negations did not result in a successful puzzle. Note that this includes recursion....
 - Simple Symmetry (horiz/verti)
 
