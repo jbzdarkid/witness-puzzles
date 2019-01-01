@@ -129,7 +129,7 @@ class PathSegment {
   }
 }
 
-var data
+var data = {}
 
 function _clearGrid(svg, puzzle) {
   while (svg.getElementsByClassName('cursor').length > 0) {
@@ -218,6 +218,10 @@ function onTraceStart(svg, puzzle, start) {
   cursor.setAttribute('class', 'cursor')
   cursor.setAttribute('cx', x)
   cursor.setAttribute('cy', y)
+
+  if (data.bboxDebug != undefined) {
+    svg.removeChild(data.bboxDebug)
+  }
 
   data = {
     'tracing':true,
