@@ -24,7 +24,6 @@ In vague order of importance.
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
 
-- DNS configuration without WWW? AWS should support this.
 - Add a start-grow animation
 - Fix generation colors / general improvements to random puzzles
 - Favicon still needs improving
