@@ -15,7 +15,7 @@ function drawSymbolWithSvg(svg, params) {
   else if (params.type === 'poly') _poly(svg, params)
   else if (params.type === 'ylop') _ylop(svg, params)
   else if (params.type === 'nega') _nega(svg, params)
-  else if (params.type === 'nonce') {} // Do nothing
+  else if (params.type === 'nonce') { /* Do nothing */ }
   else if (params.type === 'triangle') _triangle(svg, params)
   else if (params.type === 'crayon') _crayon(svg, params)
   else if (params.type === 'start') _start(svg, params)
@@ -77,14 +77,14 @@ function _poly(svg, params) {
     bounds.ymax = Math.max(bounds.ymax, pos.y)
   }
   var offset = (size+space)/2 // Offset between elements to create the gap
-  var center_x = (params.width - size - offset * (bounds.xmax + bounds.xmin)) / 2 + params.x
-  var center_y = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
+  var centerX = (params.width - size - offset * (bounds.xmax + bounds.xmin)) / 2 + params.x
+  var centerY = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
 
   for (var pos of polyomino) {
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
     svg.appendChild(rect)
-    var transform = 'translate('+(center_x+pos.x*offset)+', '+(center_y+pos.y*offset)+')'
+    var transform = 'translate(' + (centerX + pos.x*offset) + ', ' + (centerY + pos.y*offset) + ')'
     if (params.rot === 'all') {
       // -30 degree rotation around the midpoint of the square
       transform = 'rotate(-30, ' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ') ' + transform
@@ -101,7 +101,7 @@ function _ylop(svg, params) {
   if (params.polyshape === 0) return
   var size = 12 // Side length of individual squares in the polyomino
   var space = 2 // Gap between squares in the polyomino
-  var polyomino = polyominoFromPolyshape(params.polyshape)
+  var polyomino = window.polyominoFromPolyshape(params.polyshape)
 
   var bounds = {'xmin':0, 'xmax':0, 'ymin':0, 'ymax':0}
   for (var pos of polyomino) {
@@ -111,8 +111,8 @@ function _ylop(svg, params) {
     bounds.ymax = Math.max(bounds.ymax, pos.y)
   }
   var offset = (size+space)/2 // Offset between elements to create the gap
-  var center_x = (params.width - size - offset * (bounds.xmax + bounds.xmin)) / 2 + params.x
-  var center_y = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
+  var centerX = (params.width - size - offset * (bounds.xmax + bounds.xmin)) / 2 + params.x
+  var centerY = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
 
   for (var pos of polyomino) {
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
@@ -123,7 +123,7 @@ function _ylop(svg, params) {
       '3 3', '3 9', '9 9', '9 3', '0 3',
     ]
     poly.setAttribute('points', points.join(', '))
-    var transform = 'translate('+(center_x+pos.x*offset)+', '+(center_y+pos.y*offset)+')'
+    var transform = 'translate(' + (centerX + pos.x*offset) + ', ' + (centerY + pos.y*offset) + ')'
     if (params.rot === 'all') {
       // -30 degree rotation around the midpoint of the square
       transform = 'rotate(-30, ' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ') ' + transform
@@ -175,9 +175,9 @@ function _triangle(svg, params) {
     for (var x=0; x<wide; x++) {
       var poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       svg.appendChild(poly)
-      var x_coord = params.x + params.width/2 + 11*(2*x - wide + 1)
-      var y_coord = params.y + params.height/2 + 10*(2*y - high + 1)
-      poly.setAttribute('transform', 'translate(' + x_coord + ', ' + y_coord + ')')
+      var Xcoord = params.x + params.width/2 + 11*(2*x - wide + 1)
+      var Ycoord = params.y + params.height/2 + 10*(2*y - high + 1)
+      poly.setAttribute('transform', 'translate(' + Xcoord + ', ' + Ycoord + ')')
       poly.setAttribute('points', '0 -8, -8 6, 8 6')
       poly.setAttribute('fill', params.color)
       poly.setAttribute('class', params.class)
@@ -217,7 +217,7 @@ function _start(svg, params) {
   var circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 24)
-  circ.setAttribute('fill', FOREGROUND)
+  circ.setAttribute('fill', window.FOREGROUND)
   circ.setAttribute('cx', params.height/2 + params.x)
   circ.setAttribute('cy', params.width/2 + params.y)
 }
@@ -227,29 +227,29 @@ function _end(svg, params) {
   svg.appendChild(rect)
   rect.setAttribute('width', 24)
   rect.setAttribute('height', 24)
-  rect.setAttribute('fill', FOREGROUND)
+  rect.setAttribute('fill', window.FOREGROUND)
   rect.setAttribute('x', params.height/2 - 12 + params.x)
   rect.setAttribute('y', params.width/2 - 12 + params.y)
 
   var circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 12)
-  circ.setAttribute('fill', FOREGROUND)
+  circ.setAttribute('fill', window.FOREGROUND)
   circ.setAttribute('cx', params.height/2 + params.x)
   circ.setAttribute('cy', params.width/2 + params.y)
 
   if (params.dir === 'left') {
-    rect.setAttribute('x', parseInt(rect.getAttribute('x')) - 12)
-    circ.setAttribute('cx', parseInt(circ.getAttribute('cx')) - 24)
+    rect.setAttribute('x', parseInt(rect.getAttribute('x'), 10) - 12)
+    circ.setAttribute('cx', parseInt(circ.getAttribute('cx'), 10) - 24)
   } else if (params.dir === 'right') {
-    rect.setAttribute('x', parseInt(rect.getAttribute('x')) + 12)
-    circ.setAttribute('cx', parseInt(circ.getAttribute('cx')) + 24)
+    rect.setAttribute('x', parseInt(rect.getAttribute('x'), 10) + 12)
+    circ.setAttribute('cx', parseInt(circ.getAttribute('cx'), 10) + 24)
   } else if (params.dir === 'top') {
-    rect.setAttribute('y', parseInt(rect.getAttribute('y')) - 12)
-    circ.setAttribute('cy', parseInt(circ.getAttribute('cy')) - 24)
+    rect.setAttribute('y', parseInt(rect.getAttribute('y'), 10) - 12)
+    circ.setAttribute('cy', parseInt(circ.getAttribute('cy'), 10) - 24)
   } else if (params.dir === 'bottom') {
-    rect.setAttribute('y', parseInt(rect.getAttribute('y')) + 12)
-    circ.setAttribute('cy', parseInt(circ.getAttribute('cy')) + 24)
+    rect.setAttribute('y', parseInt(rect.getAttribute('y'), 10) + 12)
+    circ.setAttribute('cy', parseInt(circ.getAttribute('cy'), 10) + 24)
   } else {
     console.error('Endpoint direction not defined!', JSON.stringify(params))
   }
@@ -267,25 +267,25 @@ function _dot(svg, params) {
 
 function _gap(svg, params) {
   if (!params.rot) params.rot = 0
-  var center_x = params.height/2 + params.x
-  var center_y = params.width/2 + params.y
-  var rotate = function(degrees) {return 'rotate(' + degrees + ', ' + center_x + ', ' + center_y + ')'}
+  var centerX = params.height/2 + params.x
+  var centerY = params.width/2 + params.y
+  var rotate = function(degrees) {return 'rotate(' + degrees + ', ' + centerX + ', ' + centerY + ')'}
 
   var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 58)
   rect.setAttribute('height', 24)
-  rect.setAttribute('fill', FOREGROUND)
+  rect.setAttribute('fill', window.FOREGROUND)
   rect.setAttribute('transform', rotate(90 * params.rot))
-  rect.setAttribute('x', center_x - 29)
-  rect.setAttribute('y', center_y - 12)
+  rect.setAttribute('x', centerX - 29)
+  rect.setAttribute('y', centerY - 12)
 
   var rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(rect2)
   rect2.setAttribute('width', 18)
   rect2.setAttribute('height', 24)
-  rect2.setAttribute('fill', BACKGROUND)
+  rect2.setAttribute('fill', window.BACKGROUND)
   rect2.setAttribute('transform', rotate(90 * params.rot))
-  rect2.setAttribute('x', center_x - 9)
-  rect2.setAttribute('y', center_y - 12)
+  rect2.setAttribute('x', centerX - 9)
+  rect2.setAttribute('y', centerY - 12)
 }
