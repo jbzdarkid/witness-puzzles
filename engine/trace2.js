@@ -299,7 +299,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     }
   }
   data.path.push(new PathSegment('none'))
-  data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
+  data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
 }
 
 document.onpointerlockchange = function() {
