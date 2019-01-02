@@ -36,26 +36,26 @@ function _solveLoop(puzzle, x, y, solutions) {
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
   // Extend path left
   if (y%2 === 0 && puzzle.getLine(x - 1, y) === 0) {
-    puzzle.updateCell(x--, y, {'color':1, 'dir':'left'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(++x, y, {'color':0, 'dir':undefined})
+    puzzle.updateCell(x, y, {'color':1, 'dir':'left'})
+    _solveLoop(puzzle, x - 1, y, solutions)
+    puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
   }
   // Extend path right
   if (y%2 === 0 && puzzle.getLine(x + 1, y) === 0) {
-    puzzle.updateCell(x++, y, {'color':1, 'dir':'right'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(--x, y, {'color':0, 'dir':undefined})
+    puzzle.updateCell(x, y, {'color':1, 'dir':'right'})
+    _solveLoop(puzzle, x + 1, y, solutions)
+    puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
   }
   // Extend path up
   if (x%2 === 0 && puzzle.getLine(x, y - 1) === 0) {
-    puzzle.updateCell(x, y--, {'color':1, 'dir':'top'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(x, ++y, {'color':0, 'dir':undefined})
+    puzzle.updateCell(x, y, {'color':1, 'dir':'top'})
+    _solveLoop(puzzle, x, y - 1, solutions)
+    puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
   }
   // Extend path down
   if (x%2 === 0 && puzzle.getLine(x, y + 1) === 0) {
-    puzzle.updateCell(x, y++, {'color':1, 'dir':'bottom'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(x, --y, {'color':0, 'dir':undefined})
+    puzzle.updateCell(x, y, {'color':1, 'dir':'bottom'})
+    _solveLoop(puzzle, x, y + 1, solutions)
+    puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
   }
 }
