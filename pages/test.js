@@ -536,5 +536,29 @@ var tests = {
     puzzle.grid[4][0].end = 'top'
     puzzle.grid[6][0].end = 'top'
     return [puzzle, 2320]
+  }, 'symmetry-1': function() {
+    var puzzle = new Puzzle(1, 1)
+    puzzle.symmetry = {'x':true, 'y':false}
+    puzzle.grid[0][2].start = true
+    puzzle.grid[2][2].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[2][0].end = 'top'
+    return [puzzle, 1]
+  }, 'symmetry-2': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.symmetry = {'x':true, 'y':false}
+    puzzle.grid[0][4].start = true
+    puzzle.grid[4][4].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][0].end = 'top'
+    return [puzzle, 1]
+  }, 'symmetry-3': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.symmetry = {'x':true, 'y':false}
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][6].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[6][0].end = 'top'
+    return [puzzle, 0]
   }
 }

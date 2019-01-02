@@ -1,5 +1,10 @@
 In vague order of importance.
 
+- Symmetry [WIP]
+-- Fix gap collision
+-- Pass paired start point element
+-- Enable in editor
+
 - Rich line data -> Done
 -- Empty segments (not just gaps)
 -- Colored symmetry lines (0/1/2)
@@ -8,7 +13,6 @@ In vague order of importance.
 -- Formal object, maybe?
 - Better UI for "draggable edge" (editor)
 - Nightly builds again? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
-- Simple Symmetry (horiz/verti)
 
 - Server
 -- A whole bunch of UI for browsing puzzles
@@ -31,6 +35,7 @@ In vague order of importance.
 - Editor dragging has deadzone -- there should be a magic pixel (or they should be much closer.)
 - Hide solution (puzzleData) from global scope
 - Finish documenting files (at least the engine, cmon)
+- Any time I pass (x, y) as parameters, I should probably pass {'x':x, 'y':y}
 
 !- Small things / Bugs
 - What is .line in animations doing?

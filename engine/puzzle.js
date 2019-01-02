@@ -104,6 +104,7 @@ class Puzzle {
     }
     puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
+    puzzle.symmetry = parsed.symmetry
     return puzzle
   }
 
@@ -155,6 +156,19 @@ class Puzzle {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
     this.grid[x][y] = value
+  }
+
+  getSymmetricalPos(x, y) {
+    if (this.pillar) x = x + (this.grid.length - 1)/2
+    if (this.symmetry != undefined) {
+      if (this.symmetry.x === true) {
+        x = (this.grid.length - 1) - x
+      }
+      if (this.symmetry.y === true) {
+        y = (this.grid.length[0] - 1) - y
+      }
+    }
+    return {'x':x, 'y':y}
   }
 
   // A variant of getCell which specifically returns line values,

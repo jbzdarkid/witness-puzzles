@@ -19,8 +19,21 @@ function solve(puzzle) {
 function _solveLoop(puzzle, x, y, solutions) {
   if (window.MAX_SOLUTIONS !== -1 && solutions.length >= window.MAX_SOLUTIONS) return
   var cell = puzzle.getCell(x, y)
-  if (cell == undefined || cell.color !== 0) return
-  puzzle.updateCell(x, y, {'color':1})
+  if (cell == undefined) return
+
+  if (puzzle.symmetry != undefined) {
+    // Get the symmetrical position, and try coloring it
+    var sym = puzzle.getSymmetricalPos(x, y)
+    puzzle.updateCell(sym.x, sym.y, {'color':3})
+    if (cell.color !== 0) { // If we collide with it (or another line, elsewhere)
+      puzzle.updateCell(sym.x, sym.y, {'color':0})
+      return
+    }
+    puzzle.updateCell(x, y, {'color':2}) // Otherwise, keep going.
+  } else {
+    if (cell.color !== 0) return
+    puzzle.updateCell(x, y, {'color':1})
+  }
 
   if (cell.end != undefined) {
     // Reached an endpoint, validate solution and keep going -- there may be other endpoints

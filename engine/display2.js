@@ -146,7 +146,26 @@ function _drawStartAndEnd(puzzle, svg) {
           'y': y*41 + 23,
         })
       }
+
       if (cell.start === true) {
+        var symStart = undefined
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          var symCell = puzzle.getCell(sym.x, sym.y)
+          if (symCell.start !== true) {
+            console.error('Found a startpoint at', x, y, 'but there was no symmetrical startpoint at', sym.x, sym.y)
+          }
+
+          window.drawSymbolWithSvg(svg, {
+            'type':'start',
+            'width': 58,
+            'height': 58,
+            'x': sym.x*41 + 23,
+            'y': sym.y*41 + 23,
+          })
+          symStart = svg.lastChild
+        }
+
         window.drawSymbolWithSvg(svg, {
           'type':'start',
           'width': 58,
@@ -155,16 +174,10 @@ function _drawStartAndEnd(puzzle, svg) {
           'y': y*41 + 23,
         })
         var start = svg.lastChild
-        // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
-        // in the onclick function below, but passing parameters through scope is hard.
-        start.id = x + '_' + y
-        start.onclick = function(event) {
-          window.trace(this, event, puzzle)
-        }
+        window.addTraceStart(puzzle, {'x':x, 'y':y}, start, symStart)
 
         // The startpoint must have a primary line through it
-        // @Future: if (cell.color !== 1 || cell.color !== 2) continue
-        if (cell.color !== 1) continue
+        if (cell.color !== 1 && cell.color !== 2) continue
 
         // And that line must not be coming from any adjacent cells
         var leftCell = puzzle.getCell(x - 1, y)

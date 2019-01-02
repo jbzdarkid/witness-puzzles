@@ -59,11 +59,12 @@ class BoundingBox {
 }
 
 class PathSegment {
-  constructor(dir) {
+  constructor(dir, bbox=data.bbox) {
     this.poly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.dir = dir
+    this.bbox = bbox
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
     this.poly1.setAttribute('class', 'line ' + data.svg.id)
@@ -71,8 +72,8 @@ class PathSegment {
     this.poly2.setAttribute('class', 'line ' + data.svg.id)
     if (this.dir === 'none') { // Start point
       this.circ.setAttribute('r', 24)
-      this.circ.setAttribute('cx', data.bbox.middle.x)
-      this.circ.setAttribute('cy', data.bbox.middle.y)
+      this.circ.setAttribute('cx', this.bbox.middle.x)
+      this.circ.setAttribute('cy', this.bbox.middle.y)
     } else {
       data.svg.insertBefore(this.poly1, data.cursor)
       this.circ.setAttribute('r', 12)
@@ -86,15 +87,15 @@ class PathSegment {
   }
 
   redraw() { // Uses raw bbox because of endpoints
-    var points1 = JSON.parse(JSON.stringify(data.bbox.raw))
+    var points1 = JSON.parse(JSON.stringify(this.bbox.raw))
     if (this.dir === 'left') {
-      points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
+      points1.x1 = data.x.clamp(this.bbox.middle.x, this.bbox.x2)
     } else if (this.dir === 'right') {
-      points1.x2 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
+      points1.x2 = data.x.clamp(this.bbox.x1, this.bbox.middle.x)
     } else if (this.dir === 'top') {
-      points1.y1 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
+      points1.y1 = data.y.clamp(this.bbox.middle.y, this.bbox.y2)
     } else if (this.dir === 'bottom') {
-      points1.y2 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
+      points1.y2 = data.y.clamp(this.bbox.y1, this.bbox.middle.y)
     }
     this.poly1.setAttribute('points',
       points1.x1 + ' ' + points1.y1 + ',' +
@@ -106,31 +107,31 @@ class PathSegment {
     // The second half of the line uses the raw so that it can enter the endpoint properly.
     var firstHalf = false
     var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != undefined)
-    var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
-    if (data.x < data.bbox.middle.x && this.dir !== 'right') {
-      points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
-      points2.x2 = data.bbox.middle.x
+    var points2 = JSON.parse(JSON.stringify(this.bbox.raw))
+    if (data.x < this.bbox.middle.x && this.dir !== 'right') {
+      points2.x1 = data.x.clamp(this.bbox.x1, this.bbox.middle.x)
+      points2.x2 = this.bbox.middle.x
       if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
-    } else if (data.x > data.bbox.middle.x && this.dir !== 'left') {
-      points2.x1 = data.bbox.middle.x
-      points2.x2 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
+    } else if (data.x > this.bbox.middle.x && this.dir !== 'left') {
+      points2.x1 = this.bbox.middle.x
+      points2.x2 = data.x.clamp(this.bbox.middle.x, this.bbox.x2)
       if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
-    } else if (data.y < data.bbox.middle.y && this.dir !== 'bottom') {
-      points2.y1 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
-      points2.y2 = data.bbox.middle.y
+    } else if (data.y < this.bbox.middle.y && this.dir !== 'bottom') {
+      points2.y1 = data.y.clamp(this.bbox.y1, this.bbox.middle.y)
+      points2.y2 = this.bbox.middle.y
       if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
         points2.x1 += 17
         points2.x2 -= 17
       }
-    } else if (data.y > data.bbox.middle.y && this.dir !== 'top') {
-      points2.y1 = data.bbox.middle.y
-      points2.y2 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
+    } else if (data.y > this.bbox.middle.y && this.dir !== 'top') {
+      points2.y1 = this.bbox.middle.y
+      points2.y2 = data.y.clamp(this.bbox.middle.y, this.bbox.y2)
       if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
         points2.x1 += 17
         points2.x2 -= 17
@@ -151,8 +152,8 @@ class PathSegment {
       this.poly2.setAttribute('opacity', 0)
     } else {
       this.circ.setAttribute('opacity', 1)
-      this.circ.setAttribute('cx', data.bbox.middle.x)
-      this.circ.setAttribute('cy', data.bbox.middle.y)
+      this.circ.setAttribute('cx', this.bbox.middle.x)
+      this.circ.setAttribute('cy', this.bbox.middle.y)
       this.poly2.setAttribute('opacity', 1)
     }
   }
@@ -176,15 +177,23 @@ function _clearGrid(svg, puzzle) {
   puzzle.clearLines()
 }
 
-function trace(elem, event, puzzle) {
-  var svg = elem.parentElement
+function addTraceStart(puzzle, pos, start, symStart=undefined) {
+  console.error(puzzle, pos, start, symStart)
+  start.onmouseover = function() {console.error('Foo!')}
+  start.onclick = function(event) {
+    trace(event, puzzle, pos, this, symStart)
+  }
+}
+
+function trace(event, puzzle, pos, start, symStart=undefined) {
+  var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
     window.PLAY_SOUND('start')
     window.TELEMETRY('start_trace')
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
-    onTraceStart(svg, puzzle, elem)
-    elem.requestPointerLock()
+    onTraceStart(puzzle, x, y, svg, start, symStart)
+    start.requestPointerLock()
   } else {
     event.stopPropagation()
     // Signal the onMouseMove to stop accepting input (race condition)
@@ -226,20 +235,16 @@ function trace(elem, event, puzzle) {
         if (this.parentElement !== data.svg) return // Another puzzle is live, so data is gone
         window.TELEMETRY('start_trace_temporary')
         data.tracing = true
-        elem.requestPointerLock()
+        start.requestPointerLock()
       }
     }
     document.exitPointerLock()
   }
 }
 
-function onTraceStart(svg, puzzle, start) {
-  var x = parseFloat(start.getAttribute('cx'))
-  var y = parseFloat(start.getAttribute('cy'))
-  var startPoint = {
-    'x': parseInt(start.id.split('_')[0], 10),
-    'y': parseInt(start.id.split('_')[1], 10),
-  }
+function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
+  var cx = parseFloat(start.getAttribute('cx'))
+  var cy = parseFloat(start.getAttribute('cy'))
 
   var cursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
   svg.appendChild(cursor)
@@ -257,23 +262,31 @@ function onTraceStart(svg, puzzle, start) {
     'svg':svg,
     // Cursor element and location
     'cursor': cursor,
-    'x':x,
-    'y':y,
+    'x':cx,
+    'y':cy,
     // Position within puzzle.grid
-    'pos':startPoint,
+    'pos':pos,
     'puzzle':puzzle,
+    'bbox':undefined,
+    'symbbox':undefined,
     'path':[],
+    'sympath':[],
   }
   data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(data.bboxDebug)
   data.bboxDebug.setAttribute('fill', 'white')
   data.bboxDebug.setAttribute('opacity', 0.3)
-  if (startPoint.x % 2 === 1) { // Start point is on a horizontal segment
+  if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
-  } else if (startPoint.y % 2 === 1) { // Start point is on a vertical segment
+  } else if (pos.y % 2 === 1) { // Start point is on a vertical segment
     data.bbox = new BoundingBox(x - 12, x + 12, y - 29, y + 29)
   } else { // Start point is at an intersection
     data.bbox = new BoundingBox(x - 12, x + 12, y - 12, y + 12)
+  }
+  if (puzzle.symmetry != undefined) {
+    var dx = parseFloat(symStart.getAttribute('cx')) - x
+    var dy = parseFloat(symStart.getAttribute('cy')) - y
+    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
   }
 
   for (var styleSheet of document.styleSheets) {
@@ -288,8 +301,17 @@ function onTraceStart(svg, puzzle, start) {
       data.animations.deleteRule(i--)
     }
   }
-  data.path.push(new PathSegment('none'))
-  data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
+  if (data.puzzle.symmetry != undefined) {
+    data.path.push(new PathSegment('none', data.bbox))
+    data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':2})
+
+    data.sympath.push(new PathSegment('none', data.symbbox))
+    var sym = data.puzzle.getSymmetricalPos(startPoint.x, startPoint.y)
+    data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
+  } else {
+    data.path.push(new PathSegment('none'))
+    data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
+  }
 }
 
 document.onpointerlockchange = function() {
@@ -324,6 +346,7 @@ function onMove(dx, dy) {
     _gapCollision()
     var moveDir = _move()
     data.path[data.path.length - 1].redraw()
+    data.sympath[data.sympath.length - 1].redraw()
     if (moveDir === 'none') break
     console.debug('Moved', moveDir)
     _changePos(moveDir)
@@ -565,6 +588,11 @@ function _changePos(moveDir) {
   if (backedUp) { // Exited cell, mark as unvisited
     data.path.pop().destroy()
     data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+    if (data.puzzle.symmetry != undefined) {
+      data.sympath.pop().destroy()
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      data.puzzle.updateCell(sym.x, sym.y, {'color':0})
+    }
   }
   if (moveDir === 'left') {
     data.pos.x--
@@ -600,7 +628,17 @@ function _changePos(moveDir) {
   }
 
   if (!backedUp) { // Entered a new cell, mark as visited
-    data.path.push(new PathSegment(moveDir))
-    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+    if (data.puzzle.symmetry != undefined) {
+      data.path.push(new PathSegment(moveDir))
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
+
+      var symMoveDir = ['left', 'right', 'top', 'bottom'][['right', 'left', 'bottom', 'top'].indexOf(moveDir)]
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      data.sympath.push(new PathSegment(symMoveDir))
+      data.puzzle.updateCell(sym.x, sym.y, {'color':3})
+    } else {
+      data.path.push(new PathSegment(moveDir))
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+    }
   }
 }
