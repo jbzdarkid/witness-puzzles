@@ -33,7 +33,7 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
-    window.onTraceStart(svg, puzzle, startData.elem)
+    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start)
     _drawSolution(puzzle, startData.x, startData.y)
   }
 }
@@ -155,12 +155,7 @@ function _drawStartAndEnd(puzzle, svg) {
           'y': y*41 + 23,
         })
         var start = svg.lastChild
-        // @Cleanup: I'm setting x and y on the startpoint here to pass them in to trace. Ideally, I'd like to set them
-        // in the onclick function below, but passing parameters through scope is hard.
-        start.id = x + '_' + y
-        start.onclick = function(event) {
-          window.trace(this, event, puzzle)
-        }
+        window.addTraceStart(puzzle, {'x':x, 'y':y}, start)
 
         // The startpoint must have a primary line through it
         // @Future: if (cell.color !== 1 || cell.color !== 2) continue
@@ -179,7 +174,7 @@ function _drawStartAndEnd(puzzle, svg) {
         var bottomCell = puzzle.getCell(x, y + 1)
         if (bottomCell != undefined && bottomCell.dir === 'top') continue
 
-        startData = {'elem':start, 'x':x, 'y':y}
+        startData = {'x':x, 'y':y, 'start':start}
       }
     }
   }

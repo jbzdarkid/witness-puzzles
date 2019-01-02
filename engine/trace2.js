@@ -176,15 +176,21 @@ function _clearGrid(svg, puzzle) {
   puzzle.clearLines()
 }
 
-function trace(elem, event, puzzle) {
-  var svg = elem.parentElement
+function addTraceStart(puzzle, pos, start, symStart=undefined) {
+  start.onclick = function(event) {
+    trace(event, puzzle, pos, this, symStart)
+  }
+}
+
+function trace(event, puzzle, pos, start, symStart=undefined) {
+  var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
     window.PLAY_SOUND('start')
     window.TELEMETRY('start_trace')
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
-    onTraceStart(svg, puzzle, elem)
-    elem.requestPointerLock()
+    onTraceStart(puzzle, pos, svg, start, symStart)
+    start.requestPointerLock()
   } else {
     event.stopPropagation()
     // Signal the onMouseMove to stop accepting input (race condition)
@@ -226,20 +232,16 @@ function trace(elem, event, puzzle) {
         if (this.parentElement !== data.svg) return // Another puzzle is live, so data is gone
         window.TELEMETRY('start_trace_temporary')
         data.tracing = true
-        elem.requestPointerLock()
+        start.requestPointerLock()
       }
     }
     document.exitPointerLock()
   }
 }
 
-function onTraceStart(svg, puzzle, start) {
+function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   var x = parseFloat(start.getAttribute('cx'))
   var y = parseFloat(start.getAttribute('cy'))
-  var startPoint = {
-    'x': parseInt(start.id.split('_')[0], 10),
-    'y': parseInt(start.id.split('_')[1], 10),
-  }
 
   var cursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
   svg.appendChild(cursor)
@@ -260,20 +262,28 @@ function onTraceStart(svg, puzzle, start) {
     'x':x,
     'y':y,
     // Position within puzzle.grid
-    'pos':startPoint,
+    'pos':pos,
     'puzzle':puzzle,
+    'bbox':undefined,
+    'symbbox':undefined,
     'path':[],
+    'sympath':[],
   }
   data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(data.bboxDebug)
   data.bboxDebug.setAttribute('fill', 'white')
   data.bboxDebug.setAttribute('opacity', 0.3)
-  if (startPoint.x % 2 === 1) { // Start point is on a horizontal segment
+  if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
-  } else if (startPoint.y % 2 === 1) { // Start point is on a vertical segment
+  } else if (pos.y % 2 === 1) { // Start point is on a vertical segment
     data.bbox = new BoundingBox(x - 12, x + 12, y - 29, y + 29)
   } else { // Start point is at an intersection
     data.bbox = new BoundingBox(x - 12, x + 12, y - 12, y + 12)
+  }
+  if (puzzle.symmetry != undefined) {
+    var dx = parseFloat(symStart.getAttribute('cx')) - x
+    var dy = parseFloat(symStart.getAttribute('cy')) - y
+    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
   }
 
   for (var styleSheet of document.styleSheets) {
