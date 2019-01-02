@@ -1,9 +1,11 @@
 JavaScript implementation of the puzzles in The Witness
 
 # Table of Contents
-1. [Overview](#Overview)
-  1. [utilities.js](#utilities.js)
-  1. [puzzle.js](#puzzle.js)
+1. [Overview / Explanation of files](#Overview)
+  1. [utilities.js](#utilitiesjs)
+  1. [puzzle.js](#puzzlejs)
+1. [Contributing]
+1. [Legal]
 
 # Overview
 This repo handles puzzle creation, solution, and displaying. The core engine is made of 8 files:
