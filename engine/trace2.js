@@ -177,14 +177,6 @@ function _clearGrid(svg, puzzle) {
   puzzle.clearLines()
 }
 
-function addTraceStart(puzzle, pos, start, symStart=undefined) {
-  console.error(puzzle, pos, start, symStart)
-  start.onmouseover = function() {console.error('Foo!')}
-  start.onclick = function(event) {
-    trace(event, puzzle, pos, this, symStart)
-  }
-}
-
 function trace(event, puzzle, pos, start, symStart=undefined) {
   var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
@@ -192,7 +184,7 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
     window.TELEMETRY('start_trace')
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
-    onTraceStart(puzzle, x, y, svg, start, symStart)
+    onTraceStart(puzzle, pos, svg, start, symStart)
     start.requestPointerLock()
   } else {
     event.stopPropagation()
@@ -243,8 +235,8 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
 }
 
 function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
-  var cx = parseFloat(start.getAttribute('cx'))
-  var cy = parseFloat(start.getAttribute('cy'))
+  var x = parseFloat(start.getAttribute('cx'))
+  var y = parseFloat(start.getAttribute('cy'))
 
   var cursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
   svg.appendChild(cursor)
@@ -262,19 +254,16 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     'svg':svg,
     // Cursor element and location
     'cursor': cursor,
-    'x':cx,
-    'y':cy,
+    'x':x,
+    'y':y,
     // Position within puzzle.grid
     'pos':pos,
     'puzzle':puzzle,
-    'bbox':undefined,
-    'symbbox':undefined,
     'path':[],
     'sympath':[],
   }
   data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(data.bboxDebug)
-  data.bboxDebug.setAttribute('fill', 'white')
   data.bboxDebug.setAttribute('opacity', 0.3)
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
@@ -282,11 +271,6 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     data.bbox = new BoundingBox(x - 12, x + 12, y - 29, y + 29)
   } else { // Start point is at an intersection
     data.bbox = new BoundingBox(x - 12, x + 12, y - 12, y + 12)
-  }
-  if (puzzle.symmetry != undefined) {
-    var dx = parseFloat(symStart.getAttribute('cx')) - x
-    var dy = parseFloat(symStart.getAttribute('cy')) - y
-    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
   }
 
   for (var styleSheet of document.styleSheets) {
@@ -301,16 +285,27 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
       data.animations.deleteRule(i--)
     }
   }
-  if (data.puzzle.symmetry != undefined) {
+  if (data.puzzle.symmetry == undefined) {
+    data.path.push(new PathSegment('none'))
+    data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
+    data.bboxDebug.setAttribute('fill', 'white')
+  } else {
     data.path.push(new PathSegment('none', data.bbox))
-    data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':2})
+    data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':2})
+    data.bboxDebug.setAttribute('fill', 'blue')
 
     data.sympath.push(new PathSegment('none', data.symbbox))
-    var sym = data.puzzle.getSymmetricalPos(startPoint.x, startPoint.y)
+    var sym = data.puzzle.getSymmetricalPos(pos.x, pos.y)
     data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
-  } else {
-    data.path.push(new PathSegment('none'))
-    data.puzzle.updateCell(startPoint.x, startPoint.y, {'type':'line', 'color':1})
+
+    var dx = parseFloat(symStart.getAttribute('cx')) - x
+    var dy = parseFloat(symStart.getAttribute('cy')) - y
+    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
+
+    data.symbboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+    svg.appendChild(data.symbboxDebug)
+    data.symbboxDebug.setAttribute('fill', 'orange')
+    data.symbboxDebug.setAttribute('opacity', 0.3)
   }
 }
 
@@ -346,7 +341,7 @@ function onMove(dx, dy) {
     _gapCollision()
     var moveDir = _move()
     data.path[data.path.length - 1].redraw()
-    data.sympath[data.sympath.length - 1].redraw()
+    if (data.puzzle.symmetry != undefined) data.sympath[data.sympath.length - 1].redraw()
     if (moveDir === 'none') break
     console.debug('Moved', moveDir)
     _changePos(moveDir)
@@ -361,6 +356,11 @@ function onMove(dx, dy) {
     data.bboxDebug.setAttribute('y', data.bbox.y1)
     data.bboxDebug.setAttribute('width', data.bbox.x2 - data.bbox.x1)
     data.bboxDebug.setAttribute('height', data.bbox.y2 - data.bbox.y1)
+
+    data.symbboxDebug.setAttribute('x', data.symbbox.x1)
+    data.symbboxDebug.setAttribute('y', data.symbbox.y1)
+    data.symbboxDebug.setAttribute('width', data.symbbox.x2 - data.symbbox.x1)
+    data.symbboxDebug.setAttribute('height', data.symbbox.y2 - data.symbbox.y1)
   }
 }
 
@@ -576,6 +576,9 @@ function _move() {
   return 'none'
 }
 
+// @Cleanup: I'm pretty sure this is the spot to split out symmetry logic --
+// divide this function into the 'singleton agnostic' (bbox/path) code / 'singleton aware' (pos/cursor) code
+// It may involve some duplication, but pass the duplicated stuff from one to the other and it'll be ok.
 function _changePos(moveDir) {
   var lastDir = data.path[data.path.length - 1].dir
 
@@ -628,7 +631,10 @@ function _changePos(moveDir) {
   }
 
   if (!backedUp) { // Entered a new cell, mark as visited
-    if (data.puzzle.symmetry != undefined) {
+    if (data.puzzle.symmetry == undefined) {
+      data.path.push(new PathSegment(moveDir))
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+    } else {
       data.path.push(new PathSegment(moveDir))
       data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
 
@@ -636,9 +642,6 @@ function _changePos(moveDir) {
       var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
       data.sympath.push(new PathSegment(symMoveDir))
       data.puzzle.updateCell(sym.x, sym.y, {'color':3})
-    } else {
-      data.path.push(new PathSegment(moveDir))
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
     }
   }
 }

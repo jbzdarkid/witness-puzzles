@@ -33,7 +33,7 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
-    window.onTraceStart(svg, puzzle, startData.elem)
+    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start)
     _drawSolution(puzzle, startData.x, startData.y)
   }
 }
@@ -164,6 +164,7 @@ function _drawStartAndEnd(puzzle, svg) {
             'y': sym.y*41 + 23,
           })
           symStart = svg.lastChild
+          symStart.style.display = 'none'
         }
 
         window.drawSymbolWithSvg(svg, {
@@ -173,8 +174,13 @@ function _drawStartAndEnd(puzzle, svg) {
           'x': x*41 + 23,
           'y': y*41 + 23,
         })
-        var start = svg.lastChild
-        window.addTraceStart(puzzle, {'x':x, 'y':y}, start, symStart)
+        var start = svg.lastChild;
+
+        (function(puzzle, x, y, start, symStart) {
+          start.onclick = function(event) {
+            trace(event, puzzle, {'x':x, 'y':y}, start, symStart)
+          }
+        })(puzzle, x, y, start, symStart)
 
         // The startpoint must have a primary line through it
         if (cell.color !== 1 && cell.color !== 2) continue
@@ -192,7 +198,7 @@ function _drawStartAndEnd(puzzle, svg) {
         var bottomCell = puzzle.getCell(x, y + 1)
         if (bottomCell != undefined && bottomCell.dir === 'top') continue
 
-        startData = {'elem':start, 'x':x, 'y':y}
+        startData = {'x':x, 'y':y, 'start':start}
       }
     }
   }
