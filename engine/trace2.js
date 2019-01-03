@@ -597,33 +597,14 @@ function _changePos(moveDir) {
       data.puzzle.updateCell(sym.x, sym.y, {'color':0})
     }
   }
-  if (moveDir === 'left') {
-    data.pos.x--
-    if (data.puzzle.pillar && data.pos.x < 0) { // Wrap around the left
-      data.x += data.puzzle.grid.length * 41
-      data.pos.x += data.puzzle.grid.length
-      data.bbox.shift('right', data.puzzle.grid.length * 41 - 82)
-      data.bbox.shift('right', 58)
-      data.cursor.setAttribute('cx', data.x)
-    } else {
-      data.bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
-    }
-  } else if (moveDir === 'right') {
-    data.pos.x++
-    if (data.puzzle.pillar && data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
-      data.x -= data.puzzle.grid.length * 41
-      data.pos.x -= data.puzzle.grid.length
-      data.bbox.shift('left', data.puzzle.grid.length * 41 - 82)
-      data.bbox.shift('left', 24)
-    } else {
-      data.bbox.shift('right', (data.pos.x%2 === 0 ? 24 : 58))
-    }
-  } else if (moveDir === 'top') {
-    data.pos.y--
-    data.bbox.shift('top', (data.pos.y%2 === 0 ? 24 : 58))
-  } else if (moveDir === 'bottom') {
-    data.pos.y++
-    data.bbox.shift('bottom', (data.pos.y%2 === 0 ? 24 : 58))
+
+  _changePos2(moveDir, data.bbox)
+
+  if (data.puzzle.symmetry != undefined) {
+    var symMoveDir = ['left', 'right', 'top', 'bottom'][['right', 'left', 'bottom', 'top'].indexOf(moveDir)]
+    var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+
+    _changePos2(symMoveDir, data.symbbox)
   }
 
   if (data.pos.x%2 === 1 && data.pos.y%2 === 1) {
@@ -645,3 +626,34 @@ function _changePos(moveDir) {
     }
   }
 }
+
+function _changePos2(moveDir, bbox) {
+  if (moveDir === 'left') {
+    data.pos.x--
+    if (data.puzzle.pillar && data.pos.x < 0) { // Wrap around the left
+      data.x += data.puzzle.grid.length * 41
+      data.pos.x += data.puzzle.grid.length
+      bbox.shift('right', data.puzzle.grid.length * 41 - 82)
+      bbox.shift('right', 58)
+    } else {
+      bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
+    }
+  } else if (moveDir === 'right') {
+    data.pos.x++
+    if (data.puzzle.pillar && data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
+      data.x -= data.puzzle.grid.length * 41
+      data.pos.x -= data.puzzle.grid.length
+      bbox.shift('left', data.puzzle.grid.length * 41 - 82)
+      bbox.shift('left', 24)
+    } else {
+      bbox.shift('right', (data.pos.x%2 === 0 ? 24 : 58))
+    }
+  } else if (moveDir === 'top') {
+    data.pos.y--
+    bbox.shift('top', (data.pos.y%2 === 0 ? 24 : 58))
+  } else if (moveDir === 'bottom') {
+    data.pos.y++
+    bbox.shift('bottom', (data.pos.y%2 === 0 ? 24 : 58))
+  }
+}
+
