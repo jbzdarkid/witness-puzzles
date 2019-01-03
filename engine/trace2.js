@@ -1,4 +1,4 @@
-window.BBOX_DEBUG = false
+window.BBOX_DEBUG = true
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
@@ -598,13 +598,21 @@ function _changePos(moveDir) {
     }
   }
 
-  _changePos2(moveDir, data.bbox)
+  _changePos2(data.pos, moveDir, data.bbox)
 
   if (data.puzzle.symmetry != undefined) {
-    var symMoveDir = ['left', 'right', 'top', 'bottom'][['right', 'left', 'bottom', 'top'].indexOf(moveDir)]
-    var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+    var symMoves = ['left', 'right', 'top', 'bottom']
+    if (data.puzzle.symmetry.x === true) {
+      symMoves[0] = 'right'
+      symMoves[1] = 'left'
+    } else if (data.puzzle.symmetry.y === true) {
+      symMoves[2] = 'bottom'
+      symMoves[3] = 'top'
+    } 
 
-    _changePos2(symMoveDir, data.symbbox)
+    var symMoveDir = symMoves[['left', 'right', 'top', 'bottom'].indexOf(moveDir)]
+    var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+    _changePos2(sym, symMoveDir, data.symbbox)
   }
 
   if (data.pos.x%2 === 1 && data.pos.y%2 === 1) {
@@ -627,33 +635,33 @@ function _changePos(moveDir) {
   }
 }
 
-function _changePos2(moveDir, bbox) {
+function _changePos2(pos, moveDir, bbox) {
   if (moveDir === 'left') {
-    data.pos.x--
-    if (data.puzzle.pillar && data.pos.x < 0) { // Wrap around the left
+    pos.x--
+    if (data.puzzle.pillar && pos.x < 0) { // Wrap around the left
       data.x += data.puzzle.grid.length * 41
-      data.pos.x += data.puzzle.grid.length
+      pos.x += data.puzzle.grid.length
       bbox.shift('right', data.puzzle.grid.length * 41 - 82)
       bbox.shift('right', 58)
     } else {
-      bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
+      bbox.shift('left', (pos.x%2 === 0 ? 24 : 58))
     }
   } else if (moveDir === 'right') {
-    data.pos.x++
-    if (data.puzzle.pillar && data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
+    pos.x++
+    if (data.puzzle.pillar && pos.x >= data.puzzle.grid.length) { // Wrap around to the right
       data.x -= data.puzzle.grid.length * 41
-      data.pos.x -= data.puzzle.grid.length
+      pos.x -= data.puzzle.grid.length
       bbox.shift('left', data.puzzle.grid.length * 41 - 82)
       bbox.shift('left', 24)
     } else {
-      bbox.shift('right', (data.pos.x%2 === 0 ? 24 : 58))
+      bbox.shift('right', (pos.x%2 === 0 ? 24 : 58))
     }
   } else if (moveDir === 'top') {
-    data.pos.y--
-    bbox.shift('top', (data.pos.y%2 === 0 ? 24 : 58))
+    pos.y--
+    bbox.shift('top', (pos.y%2 === 0 ? 24 : 58))
   } else if (moveDir === 'bottom') {
-    data.pos.y++
-    bbox.shift('bottom', (data.pos.y%2 === 0 ? 24 : 58))
+    pos.y++
+    bbox.shift('bottom', (pos.y%2 === 0 ? 24 : 58))
   }
 }
 
