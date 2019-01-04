@@ -86,16 +86,16 @@ class PathSegment {
     data.svg.removeChild(this.poly2)
   }
 
-  redraw() { // Uses raw bbox because of endpoints
+  redraw(x=data.x, y=data.y, pos=data.pos) { // Uses raw bbox because of endpoints
     var points1 = JSON.parse(JSON.stringify(this.bbox.raw))
     if (this.dir === 'left') {
-      points1.x1 = data.x.clamp(this.bbox.middle.x, this.bbox.x2)
+      points1.x1 = x.clamp(this.bbox.middle.x, this.bbox.x2)
     } else if (this.dir === 'right') {
-      points1.x2 = data.x.clamp(this.bbox.x1, this.bbox.middle.x)
+      points1.x2 = x.clamp(this.bbox.x1, this.bbox.middle.x)
     } else if (this.dir === 'top') {
-      points1.y1 = data.y.clamp(this.bbox.middle.y, this.bbox.y2)
+      points1.y1 = y.clamp(this.bbox.middle.y, this.bbox.y2)
     } else if (this.dir === 'bottom') {
-      points1.y2 = data.y.clamp(this.bbox.y1, this.bbox.middle.y)
+      points1.y2 = y.clamp(this.bbox.y1, this.bbox.middle.y)
     }
     this.poly1.setAttribute('points',
       points1.x1 + ' ' + points1.y1 + ',' +
@@ -106,33 +106,33 @@ class PathSegment {
 
     // The second half of the line uses the raw so that it can enter the endpoint properly.
     var firstHalf = false
-    var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != undefined)
+    var isEnd = (data.puzzle.grid[pos.x][pos.y].end != undefined)
     var points2 = JSON.parse(JSON.stringify(this.bbox.raw))
-    if (data.x < this.bbox.middle.x && this.dir !== 'right') {
-      points2.x1 = data.x.clamp(this.bbox.x1, this.bbox.middle.x)
+    if (x < this.bbox.middle.x && this.dir !== 'right') {
+      points2.x1 = x.clamp(this.bbox.x1, this.bbox.middle.x)
       points2.x2 = this.bbox.middle.x
-      if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
+      if (isEnd && pos.x%2 == 0 && pos.y%2 == 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
-    } else if (data.x > this.bbox.middle.x && this.dir !== 'left') {
+    } else if (x > this.bbox.middle.x && this.dir !== 'left') {
       points2.x1 = this.bbox.middle.x
-      points2.x2 = data.x.clamp(this.bbox.middle.x, this.bbox.x2)
-      if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
+      points2.x2 = x.clamp(this.bbox.middle.x, this.bbox.x2)
+      if (isEnd && pos.x%2 == 0 && pos.y%2 == 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
-    } else if (data.y < this.bbox.middle.y && this.dir !== 'bottom') {
-      points2.y1 = data.y.clamp(this.bbox.y1, this.bbox.middle.y)
+    } else if (y < this.bbox.middle.y && this.dir !== 'bottom') {
+      points2.y1 = y.clamp(this.bbox.y1, this.bbox.middle.y)
       points2.y2 = this.bbox.middle.y
-      if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
+      if (isEnd && pos.x%2 == 1 && pos.y%2 == 0) {
         points2.x1 += 17
         points2.x2 -= 17
       }
-    } else if (data.y > this.bbox.middle.y && this.dir !== 'top') {
+    } else if (y > this.bbox.middle.y && this.dir !== 'top') {
       points2.y1 = this.bbox.middle.y
-      points2.y2 = data.y.clamp(this.bbox.middle.y, this.bbox.y2)
-      if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
+      points2.y2 = y.clamp(this.bbox.middle.y, this.bbox.y2)
+      if (isEnd && pos.x%2 == 1 && pos.y%2 == 0) {
         points2.x1 += 17
         points2.x2 -= 17
       }
@@ -164,6 +164,9 @@ var data = {}
 function _clearGrid(svg, puzzle) {
   if (data.bboxDebug != undefined) {
     data.svg.removeChild(data.bboxDebug)
+  }
+  if (data.symbboxDebug != undefined) {
+    data.svg.removeChild(data.symbboxDebug)
   }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
@@ -340,8 +343,13 @@ function onMove(dx, dy) {
   while (true) {
     _gapCollision()
     var moveDir = _move()
-    data.path[data.path.length - 1].redraw()
-    if (data.puzzle.symmetry != undefined) data.sympath[data.sympath.length - 1].redraw()
+    if (data.puzzle.symmetry == undefined) {
+      data.path[data.path.length - 1].redraw()
+    } else {
+      data.path[data.path.length - 1].redraw(data.x, data.y, data.pos)
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      data.sympath[data.sympath.length - 1].redraw() 
+    }
     if (moveDir === 'none') break
     console.debug('Moved', moveDir)
     _changePos(moveDir)
@@ -598,9 +606,9 @@ function _changePos(moveDir) {
     }
   }
 
-  _changePos2(data.pos, moveDir, data.bbox)
-
-  if (data.puzzle.symmetry != undefined) {
+  if (data.puzzle.symmetry == undefined) {
+    _changePos2(data.pos, moveDir, data.bbox)
+  } else {
     var symMoves = ['left', 'right', 'top', 'bottom']
     if (data.puzzle.symmetry.x === true) {
       symMoves[0] = 'right'
@@ -612,6 +620,7 @@ function _changePos(moveDir) {
 
     var symMoveDir = symMoves[['left', 'right', 'top', 'bottom'].indexOf(moveDir)]
     var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+    _changePos2(data.pos, moveDir, data.bbox)
     _changePos2(sym, symMoveDir, data.symbbox)
   }
 
@@ -624,12 +633,12 @@ function _changePos(moveDir) {
       data.path.push(new PathSegment(moveDir))
       data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
     } else {
-      data.path.push(new PathSegment(moveDir))
+      data.path.push(new PathSegment(moveDir, data.bbox))
       data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
 
-      var symMoveDir = ['left', 'right', 'top', 'bottom'][['right', 'left', 'bottom', 'top'].indexOf(moveDir)]
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
-      data.sympath.push(new PathSegment(symMoveDir))
+      // var symMoveDir = ['left', 'right', 'top', 'bottom'][['right', 'left', 'bottom', 'top'].indexOf(moveDir)]
+      // var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      data.sympath.push(new PathSegment(symMoveDir, data.symbbox))
       data.puzzle.updateCell(sym.x, sym.y, {'color':3})
     }
   }
