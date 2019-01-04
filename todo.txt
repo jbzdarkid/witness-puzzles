@@ -1,6 +1,7 @@
 In vague order of importance.
 
 - Symmetry [WIP]
+-- Add data.coords (and data.symcoords)
 -- Fix gap collision
 -- Pass paired start point element
 -- Enable in editor
