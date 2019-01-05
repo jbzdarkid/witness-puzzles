@@ -158,9 +158,23 @@ class Puzzle {
     this.grid[x][y] = value
   }
 
-  getSymmetricalPos(x, y) {
-    if (this.pillar) x = x + (this.grid.length - 1)/2
+  getSymmetricalDir(dir) {
     if (this.symmetry != undefined) {
+      if (this.symmetry.x === true) {
+        if (dir === 'left') return 'right'
+        if (dir === 'right') return 'left'
+      }
+      if (this.symmetry.y === true) {
+        if (dir === 'top') return 'bottom'
+        if (dir === 'bottom') return 'top'
+      }
+    }
+    return dir
+  }
+
+  getSymmetricalPos(x, y) {
+    if (this.symmetry != undefined) {
+      if (this.pillar) x = x + (this.grid.length - 1)/2
       if (this.symmetry.x === true) {
         x = (this.grid.length - 1) - x
       }
