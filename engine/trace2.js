@@ -1,4 +1,4 @@
-window.BBOX_DEBUG = false
+window.BBOX_DEBUG = true
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
@@ -354,40 +354,54 @@ function onMove(dx, dy) {
     _gapCollision()
 
     // Potentially move the location to a new cell, and make absolute boundary checks
-    var moveDir = _move()
+    var moveDir = _move(data)
     // Graphically redraw the path
     data.path[data.path.length - 1].redraw(data)
-    if (data.puzzle.symmetry != undefined)
-    {
-      symdata.path[symdata.path.length - 1].redraw(symdata)
-    }
     if (moveDir === 'none') break
     console.debug('Moved', moveDir)
 
+    if (data.puzzle.symmetry != undefined)
+    {
+      var symMoveDir = _move(symdata)
+      symdata.path[symdata.path.length - 1].redraw(symdata)
+      if (symMoveDir === 'none') break
+      console.debug('Symmetry moved', symMoveDir)
+    }
 
+    // Change the actual position in the puzzle
 
     var lastDir = data.path[data.path.length - 1].dir
-
     var backedUp = (
       (moveDir === 'left' && lastDir === 'right') ||
       (moveDir === 'right' && lastDir === 'left') ||
       (moveDir === 'top' && lastDir === 'bottom') ||
       (moveDir === 'bottom' && lastDir === 'top'))
 
-    if (backedUp) { // Exited cell, mark as unvisited
-      data.path.pop().destroy()
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-    }
-
-    // Change the actual position in the puzzle
-    _changePos(data, moveDir)
-    if (data.puzzle.symmetry != undefined)
-    {
-      _changePos(symdata, data.puzzle.getSymmetricalDir(moveDir))
-    }
-    if (!backedUp) { // Entered a new cell, mark as visited
-      data.path.push(new PathSegment(moveDir, data.bbox))
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+    if (data.puzzle.symmetry == undefined) {
+      if (backedUp) { // Exited cell, mark as unvisited
+        data.path.pop().destroy()
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+      }
+      _changePos(data, moveDir)
+      if (!backedUp) { // Entered a new cell, mark as visited
+        data.path.push(new PathSegment(moveDir, data.bbox))
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+      }
+    } else {
+      if (backedUp) {
+        data.path.pop().destroy()
+        symdata.path.pop().destroy()
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+        data.puzzle.updateCell(symdata.pos.x, symdata.pos.y, {'color':0})
+      }
+      _changePos(data, moveDir)
+      _changePos(symdata, symMoveDir)
+      if (!backedUp) {
+        data.path.push(new PathSegment(moveDir, data.bbox))
+        symdata.path.push(new PathSegment(symMoveDir, symdata.bbox))
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
+        data.puzzle.updateCell(symdata.pos.x, symdata.pos.y, {'color':3})
+      }
     }
   }
 
@@ -404,8 +418,8 @@ function onMove(dx, dy) {
     {
       symdata.bboxDebug.setAttribute('x', symdata.bbox.x1)
       symdata.bboxDebug.setAttribute('y', symdata.bbox.y1)
-      symdata.bboxDebug.setAttribute('width', symdata.bbox.x2 - data.bbox.x1)
-      symdata.bboxDebug.setAttribute('height', symdata.bbox.y2 - data.bbox.y1)
+      symdata.bboxDebug.setAttribute('width', symdata.bbox.x2 - symdata.bbox.x1)
+      symdata.bboxDebug.setAttribute('height', symdata.bbox.y2 - symdata.bbox.y1)
     }
   }
 }
@@ -582,7 +596,7 @@ function _gapCollision() {
 
 // Change actual puzzle cells, and limit motion to only puzzle cells.
 // Returns the direction moved, or null otherwise.
-function _move() {
+function _move(data) {
   var lastDir = data.path[data.path.length - 1].dir
 
   if (data.x < data.bbox.x1 + 12) { // Moving left
