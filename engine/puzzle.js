@@ -302,6 +302,8 @@ class Puzzle {
   }
 
   logGrid() {
+    // If the log level is too low, skip this
+    if (console.log.toString().length == 13) return
     var output = ''
     for (var y=0; y<this.grid[0].length; y++) {
       for (var x=0; x<this.grid.length; x++) {
