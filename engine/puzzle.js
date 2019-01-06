@@ -165,7 +165,7 @@ class Puzzle {
         x = (this.grid.length - 1) - x
       }
       if (this.symmetry.y === true) {
-        y = (this.grid.length[0] - 1) - y
+        y = (this.grid[0].length - 1) - y
       }
     }
     return {'x':x, 'y':y}

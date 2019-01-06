@@ -1,9 +1,10 @@
 In vague order of importance.
 
 - Symmetry [WIP]
--- Add data.coords (and data.symcoords)
 -- Fix gap collision
--- Pass paired start point element
+-- Update self-collision (even and odd)
+-- Colored trace-lines?
+-- "symmetry=false" pillars
 -- Enable in editor
 
 - Rich line data -> Done
