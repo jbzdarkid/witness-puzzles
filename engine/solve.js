@@ -25,7 +25,8 @@ function _solveLoop(puzzle, x, y, solutions) {
     // Get the symmetrical position, and try coloring it
     var sym = puzzle.getSymmetricalPos(x, y)
     puzzle.updateCell(sym.x, sym.y, {'color':3})
-    if (cell.color !== 0) { // If we collide with it (or another line, elsewhere)
+    // If we collide with our immediate reflection, ourselves, or our reflection elsewhere
+    if (cell.color !== 0) {
       puzzle.updateCell(sym.x, sym.y, {'color':0})
       return
     }
@@ -40,7 +41,7 @@ function _solveLoop(puzzle, x, y, solutions) {
     puzzle.updateCell(x, y, {'dir':'none'})
     window.validate(puzzle)
     if (puzzle.valid) {
-      solutions.push(puzzle.clone())
+      solutions.push(Puzzle.deserialize(puzzle.serialize()))
     }
   }
   // @Performance: @Sanity: Don't allow the line to go through gaps.

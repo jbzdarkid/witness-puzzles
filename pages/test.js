@@ -545,6 +545,7 @@ var tests = {
     puzzle.grid[2][0].end = 'top'
     return [puzzle, 1]
   }, 'symmetry-2': function() {
+    setLogLevel('debug')
     var puzzle = new Puzzle(2, 2)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][4].start = true
@@ -553,6 +554,7 @@ var tests = {
     puzzle.grid[4][0].end = 'top'
     return [puzzle, 1]
   }, 'symmetry-3-down': function() {
+    setLogLevel('info')
     var puzzle = new Puzzle(3, 3)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][6].start = true
@@ -568,5 +570,18 @@ var tests = {
     puzzle.grid[6][6].end = 'right'
     puzzle.grid[6][0].end = 'right'
     return [puzzle, 0]
-  }
+  }/* @Future:
+  , 'symmetry-dots': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.symmetry = {'x':true, 'y':false}
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][6].start = true
+    puzzle.grid[0][4].dot = 1
+    puzzle.grid[0][2].dot = 2
+    puzzle.grid[6][4].dot = 1
+    puzzle.grid[6][2].dot = 3
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[6][0].end = 'top'
+    return [puzzle, 0]
+  }*/
 }

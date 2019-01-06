@@ -199,16 +199,6 @@ class Puzzle {
     return dirs
   }
 
-  clone() {
-    var copy = new Puzzle(0, 0)
-    // @Performance: This is only used when making the solution array, to my knowledge.
-    copy.grid = JSON.parse(JSON.stringify(this.grid))
-    copy.regionCache = this.regionCache
-    copy.pillar = this.pillar
-    copy.hints = this.hints
-    return copy
-  }
-
   // Called on a solution. Computes a list of gaps to show as hints which *do not*
   // break the path.
   loadHints() {
