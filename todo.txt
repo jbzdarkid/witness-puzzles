@@ -1,8 +1,6 @@
 In vague order of importance.
 
 - Symmetry [WIP]
--- Fix gap collision
--- Update self-collision (even and odd)
 -- Colored Dots
 -- pillars in general
 -- Enable in editor

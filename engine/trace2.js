@@ -427,7 +427,7 @@ function onMove(dx, dy) {
 
   // Potentially move the location to a new cell, and make absolute boundary checks
   while (true) {
-    _gapCollision()
+    _gapAndSymmetryCollision()
     var moveDir = _move()
     data.path[data.path.length - 1].redraw()
     if (moveDir === 'none') break
@@ -594,23 +594,30 @@ function _pushCursor(dx, dy, width, height) {
   }
 }
 
-function _gapCollision() {
+function _gapAndSymmetryCollision() {
   var lastDir = data.path[data.path.length - 1].dir
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-  if (cell != undefined && cell.gap !== true) return
+  if (cell == undefined) return
 
-  if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
-    if (lastDir === 'left') {
-      data.x = Math.max(data.bbox.middle.x + 21, data.x)
-    } else if (lastDir === 'right') {
-      data.x = Math.min(data.x, data.bbox.middle.x - 21)
+  var gapSize = 0
+  if (cell.gap === true) {
+    gapSize = 21
+  } else if (data.puzzle.symmetry != undefined) {
+    var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+    if (sym.x === data.pos.x && sym.y === data.pos.y) {
+      gapSize = 13
     }
-  } else if (data.pos.x%2 === 0 && data.pos.y%2 === 1) { // Vertical cell
-    if (lastDir === 'top') {
-      data.y = Math.max(data.bbox.middle.y + 21, data.y)
-    } else if (lastDir === 'bottom') {
-      data.y = Math.min(data.y, data.bbox.middle.y - 21)
-    }
+  }
+  if (gapSize === 0) return
+
+  if (lastDir === 'left') {
+    data.x = Math.max(data.bbox.middle.x + gapSize, data.x)
+  } else if (lastDir === 'right') {
+    data.x = Math.min(data.x, data.bbox.middle.x - gapSize)
+  } else if (lastDir === 'top') {
+    data.y = Math.max(data.bbox.middle.y + gapSize, data.y)
+  } else if (lastDir === 'bottom') {
+    data.y = Math.min(data.y, data.bbox.middle.y - gapSize)
   }
 }
 
