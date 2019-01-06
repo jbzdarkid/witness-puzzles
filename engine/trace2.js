@@ -265,9 +265,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     'pos':pos,
     'puzzle':puzzle,
     'bbox':undefined,
-    'symbbox':undefined,
     'path':[],
-    'sympath':[],
   }
   data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   svg.appendChild(data.bboxDebug)
@@ -279,11 +277,6 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     data.bbox = new BoundingBox(x - 12, x + 12, y - 29, y + 29)
   } else { // Start point is at an intersection
     data.bbox = new BoundingBox(x - 12, x + 12, y - 12, y + 12)
-  }
-  if (puzzle.symmetry != undefined) {
-    var dx = parseFloat(symStart.getAttribute('cx')) - x
-    var dy = parseFloat(symStart.getAttribute('cy')) - y
-    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
   }
 
   for (var styleSheet of document.styleSheets) {
@@ -299,7 +292,17 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     }
   }
   data.path.push(new PathSegment('none'))
-  data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
+
+  if (puzzle.symmetry == undefined) {
+    data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
+  } else {
+    data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':2})
+    var sym = data.puzzle.getSymmetricalPos(pos.x, pos.y)
+    data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
+
+    data.symX = parseFloat(symStart.getAttribute('cx'))
+    data.symY = parseFloat(symStart.getAttribute('cy'))
+  }
 }
 
 document.onpointerlockchange = function() {
@@ -574,7 +577,13 @@ function _changePos(moveDir) {
 
   if (backedUp) { // Exited cell, mark as unvisited
     data.path.pop().destroy()
-    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+    if (data.puzzle.symmetry == undefined) {
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+    } else {
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      data.puzzle.updateCell(sym.x, sym.y, {'color':0})
+    }
   }
   if (moveDir === 'left') {
     data.pos.x--
@@ -583,7 +592,6 @@ function _changePos(moveDir) {
       data.pos.x += data.puzzle.grid.length
       data.bbox.shift('right', data.puzzle.grid.length * 41 - 82)
       data.bbox.shift('right', 58)
-      data.cursor.setAttribute('cx', data.x)
     } else {
       data.bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
     }
@@ -611,6 +619,12 @@ function _changePos(moveDir) {
 
   if (!backedUp) { // Entered a new cell, mark as visited
     data.path.push(new PathSegment(moveDir))
-    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+    if (data.puzzle.symmetry == undefined) {
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+    } else {
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      data.puzzle.updateCell(sym.x, sym.y, {'color':3})
+    }
   }
 }
