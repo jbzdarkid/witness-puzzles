@@ -3,14 +3,12 @@ In vague order of importance.
 - Symmetry [WIP]
 -- Fix gap collision
 -- Update self-collision (even and odd)
--- Colored trace-lines?
--- "symmetry=false" pillars
+-- Colored Dots
+-- pillars in general
 -- Enable in editor
 
 - Rich line data -> Done
 -- Empty segments (not just gaps)
--- Colored symmetry lines (0/1/2)
--- Colored Dots
 -- Invisible Dots
 -- Formal object, maybe?
 - Better UI for "draggable edge" (editor)
@@ -38,9 +36,10 @@ In vague order of importance.
 - Hide solution (puzzleData) from global scope
 - Finish documenting files (at least the engine, cmon)
 - Any time I pass (x, y) as parameters, I should probably pass {'x':x, 'y':y}
+-- Risky, means pass-by-reference
+- JS supports 'format strings', via `foo ${bar}`
 
 !- Small things / Bugs
-- What is .line in animations doing?
 - What uses getRotations? Why do we need rot=null?
 - Solve with pillars is slow, maybe increase warning threshold / disable in play mode?
 - Shape chooser is not centered

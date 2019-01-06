@@ -67,9 +67,6 @@ class PathSegment {
     data.svg.insertBefore(this.poly1, data.cursor)
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
-    this.poly1.setAttribute('class', 'line ' + data.svg.id)
-    this.circ.setAttribute('class', 'line ' + data.svg.id)
-    this.poly2.setAttribute('class', 'line ' + data.svg.id)
     this.circ.setAttribute('cx', data.bbox.middle.x)
     this.circ.setAttribute('cy', data.bbox.middle.y)
     if (this.dir === 'none') { // Start point
@@ -78,22 +75,34 @@ class PathSegment {
       this.circ.setAttribute('r', 12)
     }
 
-    if (data.puzzle.symmetry != undefined) {
-      this.sympoly1 = this.poly1.cloneNode()
-      this.symcirc = this.circ.cloneNode()
-      this.sympoly2 = this.poly2.cloneNode()
+    if (data.puzzle.symmetry == undefined) {
+      this.poly1.setAttribute('class', 'line-1 ' + data.svg.id)
+      this.circ.setAttribute('class', 'line-1 ' + data.svg.id)
+      this.poly2.setAttribute('class', 'line-1 ' + data.svg.id)
+    } else {
+      this.poly1.setAttribute('class', 'line-2 ' + data.svg.id)
+      this.circ.setAttribute('class', 'line-2 ' + data.svg.id)
+      this.poly2.setAttribute('class', 'line-2 ' + data.svg.id)
+
+      this.sympoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      this.symcirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      this.sympoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       this.symcursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
       data.svg.insertBefore(this.sympoly1, data.cursor)
       data.svg.insertBefore(this.symcirc, data.cursor)
       data.svg.insertBefore(this.sympoly2, data.cursor)
       data.svg.insertBefore(this.symcursor, data.cursor)
+      this.sympoly1.setAttribute('class', 'line-3 ' + data.svg.id)
+      this.symcirc.setAttribute('class', 'line-3 ' + data.svg.id)
+      this.sympoly2.setAttribute('class', 'line-3 ' + data.svg.id)
+      this.symcursor.setAttribute('class', 'line-3 ' + data.svg.id)
 
-      var tmp = this._reflect(data.bbox.middle.x, data.bbox.middle.y)
-      this.symcirc.setAttribute('cx', tmp.x)
-      this.symcirc.setAttribute('cy', tmp.y)
-      this.symcursor.setAttribute('cx', tmp.x)
-      this.symcursor.setAttribute('cy', tmp.y)
-      this.symcursor.setAttribute('class', 'line ' + data.svg.id)
+      var refl = this._reflect(data.bbox.middle.x, data.bbox.middle.y)
+      this.symcirc.setAttribute('cx', refl.x)
+      this.symcirc.setAttribute('cy', refl.y)
+      this.symcirc.setAttribute('r', this.circ.getAttribute('r'))
+      this.symcursor.setAttribute('cx', refl.x)
+      this.symcursor.setAttribute('cy', refl.y)
       this.symcursor.setAttribute('r', 12)
     }
   }
@@ -208,9 +217,11 @@ class PathSegment {
       )
 
       if (this.dir !== 'none') {
-        var tmp = this._reflect(data.x, data.y)
-        this.symcursor.setAttribute('cx', tmp.x)
-        this.symcursor.setAttribute('cy', tmp.y)
+        var x = data.x.clamp(data.bbox.x1, data.bbox.x2)
+        var y = data.y.clamp(data.bbox.y1, data.bbox.y2)
+        var refl = this._reflect(x, y)
+        this.symcursor.setAttribute('cx', refl.x)
+        this.symcursor.setAttribute('cy', refl.y)
       }
 
       this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
@@ -220,6 +231,7 @@ class PathSegment {
 
   _reflect(x, y) {
     if (data.puzzle.symmetry != undefined) {
+      // @Future: Symmetry + pillars = :(
       // if (this.pillar) x = x + (this.grid.length - 1)/2
       if (data.puzzle.symmetry.x === true) {
         x = data.sumX - x
@@ -243,8 +255,16 @@ function _clearGrid(svg, puzzle) {
     svg.getElementsByClassName('cursor')[0].remove()
   }
 
-  while (svg.getElementsByClassName('line').length > 0) {
-    svg.getElementsByClassName('line')[0].remove()
+  while (svg.getElementsByClassName('line-1').length > 0) {
+    svg.getElementsByClassName('line-1')[0].remove()
+  }
+
+  while (svg.getElementsByClassName('line-2').length > 0) {
+    svg.getElementsByClassName('line-2')[0].remove()
+  }
+
+  while (svg.getElementsByClassName('line-3').length > 0) {
+    svg.getElementsByClassName('line-3')[0].remove()
   }
 
   puzzle.clearLines()
