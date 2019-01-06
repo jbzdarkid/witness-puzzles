@@ -114,8 +114,17 @@ function _drawSymbols(puzzle, svg, target) {
       if (cell.dot > 0) {
         params.type = 'dot'
         if (cell.dot === 1) params.color = 'black'
-        if (cell.dot === 2) params.color = window.LINE_PRIMARY
-        if (cell.dot === 3) params.color = window.LINE_SECONDARY
+        else if (cell.dot === 2) params.color = window.LINE_PRIMARY
+        else if (cell.dot === 3) params.color = window.LINE_SECONDARY
+        else if (cell.dot === 4) {
+          params.color = window.FOREGROUND
+          // This makes the invisible dots visible, only while we're in the editor.
+          // @Robustness: Some way this can't be cheated?
+          if (window.activeParams != undefined) {
+            params.stroke = 'black'
+            params.strokeWidth = '2px'
+          }
+        }
         drawSymbolWithSvg(svg, params)
       } else if (cell.gap) {
         params.type = 'gap'

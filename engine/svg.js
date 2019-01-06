@@ -262,6 +262,8 @@ function _dot(svg, params) {
   hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
   hex.setAttribute('fill', params.color)
   hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
   hex.setAttribute('style', 'pointer-events:none;')
 }
 

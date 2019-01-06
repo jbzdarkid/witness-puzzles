@@ -573,13 +573,33 @@ var tests = {
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][6].start = true
     puzzle.grid[6][6].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[6][0].end = 'top'
     puzzle.grid[0][4].dot = 1
     puzzle.grid[0][2].dot = 2
     puzzle.grid[6][4].dot = 1
     puzzle.grid[6][2].dot = 3
-    puzzle.grid[0][0].end = 'top'
-    puzzle.grid[6][0].end = 'top'
     return [puzzle, 5]
+  }, 'invisible-dots-with-border': function() {
+    window.activeParams = {}
+    var puzzle = new Puzzle(3, 3)
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[0][4].dot = 4
+    puzzle.grid[0][2].dot = 4
+    puzzle.grid[6][4].dot = 4
+    puzzle.grid[6][2].dot = 4
+    return [puzzle, 56]
+  }, 'invisible-dots': function() {
+    window.activeParams = undefined
+    var puzzle = new Puzzle(3, 3)
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[0][4].dot = 4
+    puzzle.grid[0][2].dot = 4
+    puzzle.grid[6][4].dot = 4
+    puzzle.grid[6][2].dot = 4
+    return [puzzle, 56]
   }, 'symmetry-pillar-h': function() {
     var puzzle = new Puzzle(4, 4, true)
     puzzle.symmetry = {'x':true, 'y':false}

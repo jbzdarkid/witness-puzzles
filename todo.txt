@@ -5,7 +5,6 @@ In vague order of importance.
 
 - Rich line data -> Done
 -- Empty segments (not just gaps)
--- Invisible Dots
 -- Formal object, maybe?
 - Better UI for "draggable edge" (editor)
 - Nightly builds again? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings

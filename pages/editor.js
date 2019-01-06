@@ -353,6 +353,7 @@ function _onElementClicked(x, y) {
       dotColors.push(2)
       dotColors.push(3)
     }
+    dotColors.push(4)
 
     var index = dotColors.indexOf(puzzle.grid[x][y].dot)
     if (index !== -1) {
