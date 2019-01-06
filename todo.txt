@@ -1,8 +1,7 @@
 In vague order of importance.
 
 - Symmetry [WIP]
--- Colored Dots
--- pillars in general
+-- Pillars in general
 
 - Rich line data -> Done
 -- Empty segments (not just gaps)
@@ -35,6 +34,8 @@ In vague order of importance.
 - Any time I pass (x, y) as parameters, I should probably pass {'x':x, 'y':y}
 -- Risky, means pass-by-reference
 - JS supports 'format strings', via `foo ${bar}`
+- Add "title" to editor buttons
+- Enabling pillar mode is discarding grid contents
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?

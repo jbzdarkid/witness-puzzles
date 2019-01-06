@@ -71,7 +71,7 @@ window.ORANGE = 'orange'
 window.YELLOW = 'yellow'
 
 window.LINE_PRIMARY = '#8FF'
-window.LINE_SECONDARY = '#FF6'
+window.LINE_SECONDARY = '#FF2'
 
 if (localStorage.theme === 'true') { // Dark scheme
   window.BACKGROUND      = '#221' // '#000'

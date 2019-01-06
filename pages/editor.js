@@ -177,18 +177,21 @@ function setVSymmetry(value) {
 }
 
 function _enforceSymmetry() {
-  if (puzzle.symmetry == undefined) return
   // Ensure puzzle is symmetrical
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       if (x%2 == 1 && y%2 == 1) continue // Ignore cells
-      var sym = puzzle.getSymmetricalPos(x, y)
-      if (puzzle.grid[x][y].start === true) {
-        puzzle.updateCell(sym.x, sym.y, {'start':true})
-      }
-      if (puzzle.grid[x][y].end != undefined) {
-        var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
-        puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+      if (puzzle.symmetry == undefined) {
+        if (puzzle.grid[x][y].dot > 1) puzzle.grid[x][y].dot = 1
+      } else {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        if (puzzle.grid[x][y].start === true) {
+          puzzle.updateCell(sym.x, sym.y, {'start':true})
+        }
+        if (puzzle.grid[x][y].end != undefined) {
+          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
+          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+        }
       }
     }
   }
@@ -351,13 +354,18 @@ function _onElementClicked(x, y) {
     }
   } else if (activeParams.type === 'dot') {
     if (x%2 === 1 && y%2 === 1) return
-    // @Future: Some way to toggle colors, should be cognizant of symmetry mode.
-    if (puzzle.grid[x][y].dot === 1) {
-      puzzle.grid[x][y].dot = undefined
-    } else {
-      puzzle.grid[x][y].gap = undefined
-      puzzle.grid[x][y].dot = 1
+    var dotColors = [undefined, 1]
+    if (puzzle.symmetry != undefined) {
+      dotColors.push(2)
+      dotColors.push(3)
     }
+
+    var index = dotColors.indexOf(puzzle.grid[x][y].dot)
+    if (index !== -1) {
+      var color = dotColors[index + 1]
+    }
+
+    puzzle.grid[x][y].dot = color
   } else if (activeParams.type === 'gap') {
     if (x%2 === y%2) return
     if (puzzle.grid[x][y].gap === true) {

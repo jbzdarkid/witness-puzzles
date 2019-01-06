@@ -568,8 +568,7 @@ var tests = {
     puzzle.grid[6][6].end = 'right'
     puzzle.grid[6][0].end = 'right'
     return [puzzle, 16]
-  }/* @Future:
-  , 'symmetry-dots': function() {
+  }, 'symmetry-dots': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][6].start = true
@@ -580,6 +579,6 @@ var tests = {
     puzzle.grid[6][2].dot = 3
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[6][0].end = 'top'
-    return [puzzle, 0]
-  }*/
+    return [puzzle, 5]
+  }
 }

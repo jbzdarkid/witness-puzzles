@@ -114,9 +114,8 @@ function _drawSymbols(puzzle, svg, target) {
       if (cell.dot > 0) {
         params.type = 'dot'
         if (cell.dot === 1) params.color = 'black'
-        // @Future: When I implement 2-color dots
-        // if (cell.dot === 2) params.color = 'blue' // This is very dark
-        // if (cell.dot === 3) params.color = 'orange'
+        if (cell.dot === 2) params.color = window.LINE_PRIMARY
+        if (cell.dot === 3) params.color = window.LINE_SECONDARY
         drawSymbolWithSvg(svg, params)
       } else if (cell.gap) {
         params.type = 'gap'

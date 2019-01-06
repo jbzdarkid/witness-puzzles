@@ -19,25 +19,21 @@ function validate(puzzle) {
       if (cell == undefined) continue
       if (cell.type === 'line') {
         if (cell.gap === true && cell.color > 0) {
-          console.log('Gap at grid['+x+']['+y+'] is covered')
-          puzzle.valid = false
-          return
-        }
-        /* @Future: This is one way of doing it...
-        if (cell.dot === 2 && cell.color === 2) {
-          console.log('A blue dot at grid['+x+']['+y+'] is covered by an orange line')
-          puzzle.valid = false
-        } else if (cell.dot === 3 && cell.color === 1 && puzzle.twocolor === true) {
-          console.log('A orange dot at grid['+x+']['+y+'] is covered by an blue line')
+          console.log('Gap at', x, y, 'is covered')
           puzzle.valid = false
         }
-
-        // And this is another: [leaning toward this]
-        if (cell.color > 0 && cell.dot > 1 && cell.dot !== cell.color) {
-          console.log('A ' + cell.dot + ' color dot at grid['+x+']['+y+'] is covered by a ' + cell.color + ' colored line')
-          puzzle.valid = false
+        if (cell.dot > 0) {
+          if (cell.color === 0) {
+            console.log('Dot at', x, y, 'is not covered')
+            puzzle.invalidElements.push({'x':x, 'y':y})
+          } else if (cell.color === 2 && cell.dot === 3) {
+            console.log('Yellow dot at', x, y, 'is covered by blue line')
+            puzzle.valid = false
+          } else if (cell.color === 3 && cell.dot === 2) {
+            console.log('Blue dot at', x, y, 'is covered by yellow line')
+            puzzle.valid = false
+          }
         }
-        */
       } else if (cell.type != undefined) {
         // Perf optimization: We can skip computing regions if the grid has no symbols.
         puzzleHasSymbols = true
@@ -45,23 +41,14 @@ function validate(puzzle) {
     }
   }
 
-  if (!puzzleHasSymbols) {
-    for (var x=0; x<puzzle.grid.length; x++) {
-      for (var y=0; y<puzzle.grid[x].length; y++) {
-        var cell = puzzle.grid[x][y]
-        if (cell == undefined || cell.type !== 'line') continue
-        if (cell.dot > 0 && cell.color === 0) {
-          console.log('Dot at', x, y, 'is not covered')
-          puzzle.invalidElements.push({'x':x, 'y':y})
-          puzzle.valid = false
-        }
-      }
-    }
-  } else {
-    // Check that individual regions are valid
+  if (!puzzleHasSymbols) { // No additional symbols, and we already checked dots & gaps
+    puzzle.valid &= (puzzle.invalidElements.length === 0)
+  } else { // Additional symbols, so we need to discard dots & divide them by region
+    puzzle.invalidElements = []
     var regions = puzzle.getRegions()
     console.log('Found', regions.length, 'regions')
     console.debug(regions)
+
     for (var region of regions) {
       var key = region.grid.toString()
       var regionData = puzzle.regionCache[key]
@@ -152,6 +139,7 @@ function _regionCheckNegations(puzzle, region) {
 
 // Checks if a region (series of cells) is valid.
 // Since the path must be complete at this point, returns only true or false
+// @Performance: We're iterating region.cells a bunch of times, these loops could be merged
 function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
   var invalidElements = []
