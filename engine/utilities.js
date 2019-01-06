@@ -94,10 +94,11 @@ if (localStorage.theme === 'true') { // Dark scheme
   window.TEXT_COLOR      = '#000'
   window.PAGE_BACKGROUND = '#FFF'
 }
+// pointer-events: none; allows for onclick events to bubble up
 var animations =
-'.line-1 {fill: ' + window.LINE_DEFAULT + ';}' +
-'.line-2 {fill: ' + window.LINE_PRIMARY + ';}' +
-'.line-3 {fill: ' + window.LINE_SECONDARY + ';}' +
+'.line-1 {fill: ' + window.LINE_DEFAULT + '; pointer-events: none;}' +
+'.line-2 {fill: ' + window.LINE_PRIMARY + '; pointer-events: none;}' +
+'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none;}' +
 '@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}' +
 '@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}' +
 '@keyframes error {to {fill: red;}}' +
