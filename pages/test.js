@@ -580,5 +580,13 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[6][0].end = 'top'
     return [puzzle, 5]
+  }, 'symmetry-pillar-h': function() {
+    var puzzle = new Puzzle(4, 4, true)
+    puzzle.symmetry = {'x':true, 'y':false}
+    puzzle.grid[0][8].start = true
+    puzzle.grid[4][8].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][0].end = 'top'
+    return [puzzle, 0]
   }
 }
