@@ -543,25 +543,23 @@ var tests = {
     puzzle.grid[2][2].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[2][0].end = 'top'
-    return [puzzle, 1]
+    return [puzzle, 2]
   }, 'symmetry-2': function() {
-    setLogLevel('spam')
     var puzzle = new Puzzle(2, 2)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][4].start = true
     puzzle.grid[4][4].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[4][0].end = 'top'
-    return [puzzle, 1]
+    return [puzzle, 2]
   }, 'symmetry-3-down': function() {
-    setLogLevel('info')
     var puzzle = new Puzzle(3, 3)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][6].start = true
     puzzle.grid[6][6].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[6][0].end = 'top'
-    return [puzzle, 0]
+    return [puzzle, 16]
   }, 'symmetry-3-left': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.symmetry = {'x':false, 'y':true}
@@ -569,7 +567,7 @@ var tests = {
     puzzle.grid[0][0].start = true
     puzzle.grid[6][6].end = 'right'
     puzzle.grid[6][0].end = 'right'
-    return [puzzle, 0]
+    return [puzzle, 16]
   }/* @Future:
   , 'symmetry-dots': function() {
     var puzzle = new Puzzle(3, 3)
