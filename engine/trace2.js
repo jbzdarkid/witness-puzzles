@@ -64,6 +64,7 @@ class PathSegment {
     this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.dir = dir
+    data.svg.insertBefore(this.poly1, data.cursor)
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
     this.poly1.setAttribute('class', 'line ' + data.svg.id)
@@ -74,7 +75,6 @@ class PathSegment {
       this.circ.setAttribute('cx', data.bbox.middle.x)
       this.circ.setAttribute('cy', data.bbox.middle.y)
     } else {
-      data.svg.insertBefore(this.poly1, data.cursor)
       this.circ.setAttribute('r', 12)
     }
   }
