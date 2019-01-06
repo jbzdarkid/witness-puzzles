@@ -70,12 +70,31 @@ class PathSegment {
     this.poly1.setAttribute('class', 'line ' + data.svg.id)
     this.circ.setAttribute('class', 'line ' + data.svg.id)
     this.poly2.setAttribute('class', 'line ' + data.svg.id)
+    this.circ.setAttribute('cx', data.bbox.middle.x)
+    this.circ.setAttribute('cy', data.bbox.middle.y)
     if (this.dir === 'none') { // Start point
       this.circ.setAttribute('r', 24)
-      this.circ.setAttribute('cx', data.bbox.middle.x)
-      this.circ.setAttribute('cy', data.bbox.middle.y)
     } else {
       this.circ.setAttribute('r', 12)
+    }
+
+    if (data.puzzle.symmetry != undefined) {
+      this.sympoly1 = this.poly1.cloneNode()
+      this.symcirc = this.circ.cloneNode()
+      this.sympoly2 = this.poly2.cloneNode()
+      this.symcursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      data.svg.insertBefore(this.sympoly1, data.cursor)
+      data.svg.insertBefore(this.symcirc, data.cursor)
+      data.svg.insertBefore(this.sympoly2, data.cursor)
+      data.svg.insertBefore(this.symcursor, data.cursor)
+
+      var tmp = this._reflect(data.bbox.middle.x, data.bbox.middle.y)
+      this.symcirc.setAttribute('cx', tmp.x)
+      this.symcirc.setAttribute('cy', tmp.y)
+      this.symcursor.setAttribute('cx', tmp.x)
+      this.symcursor.setAttribute('cy', tmp.y)
+      this.symcursor.setAttribute('class', 'line ' + data.svg.id)
+      this.symcursor.setAttribute('r', 12)
     }
   }
 
@@ -83,6 +102,12 @@ class PathSegment {
     data.svg.removeChild(this.poly1)
     data.svg.removeChild(this.circ)
     data.svg.removeChild(this.poly2)
+    if (data.puzzle.symmetry != undefined) {
+      data.svg.removeChild(this.sympoly1)
+      data.svg.removeChild(this.symcirc)
+      data.svg.removeChild(this.sympoly2)
+      data.svg.removeChild(this.symcursor)
+    }
   }
 
   redraw() { // Uses raw bbox because of endpoints
@@ -151,10 +176,59 @@ class PathSegment {
       this.poly2.setAttribute('opacity', 0)
     } else {
       this.circ.setAttribute('opacity', 1)
-      this.circ.setAttribute('cx', data.bbox.middle.x)
-      this.circ.setAttribute('cy', data.bbox.middle.y)
       this.poly2.setAttribute('opacity', 1)
     }
+    if (data.puzzle.symmetry != undefined) {
+      var tmp = this._reflect(points1.x1, points1.y1)
+      var tmp2 = this._reflect(points1.x2, points1.y2)
+      points1.x1 = tmp2.x
+      points1.x2 = tmp.x
+      points1.y1 = tmp2.y
+      points1.y2 = tmp.y
+
+      this.sympoly1.setAttribute('points',
+        points1.x1 + ' ' + points1.y1 + ',' +
+        points1.x1 + ' ' + points1.y2 + ',' +
+        points1.x2 + ' ' + points1.y2 + ',' +
+        points1.x2 + ' ' + points1.y1
+      )
+
+      var tmp = this._reflect(points2.x1, points2.y1)
+      var tmp2 = this._reflect(points2.x2, points2.y2)
+      points2.x1 = tmp2.x
+      points2.x2 = tmp.x
+      points2.y1 = tmp2.y
+      points2.y2 = tmp.y
+
+      this.sympoly2.setAttribute('points',
+        points2.x1 + ' ' + points2.y1 + ',' +
+        points2.x1 + ' ' + points2.y2 + ',' +
+        points2.x2 + ' ' + points2.y2 + ',' +
+        points2.x2 + ' ' + points2.y1
+      )
+
+      if (this.dir !== 'none') {
+        var tmp = this._reflect(data.x, data.y)
+        this.symcursor.setAttribute('cx', tmp.x)
+        this.symcursor.setAttribute('cy', tmp.y)
+      }
+
+      this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
+      this.sympoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
+    }
+  }
+
+  _reflect(x, y) {
+    if (data.puzzle.symmetry != undefined) {
+      // if (this.pillar) x = x + (this.grid.length - 1)/2
+      if (data.puzzle.symmetry.x === true) {
+        x = data.sumX - x
+      }
+      if (data.puzzle.symmetry.y === true) {
+        y = data.sumY - y
+      }
+    }
+    return {'x':x, 'y':y}
   }
 }
 
@@ -291,8 +365,6 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
       data.animations.deleteRule(i--)
     }
   }
-  data.path.push(new PathSegment('none'))
-
   if (puzzle.symmetry == undefined) {
     data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
   } else {
@@ -300,9 +372,10 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     var sym = data.puzzle.getSymmetricalPos(pos.x, pos.y)
     data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
 
-    data.symX = parseFloat(symStart.getAttribute('cx'))
-    data.symY = parseFloat(symStart.getAttribute('cy'))
+    data.sumX = parseFloat(symStart.getAttribute('cx')) + x
+    data.sumY = parseFloat(symStart.getAttribute('cy')) + y
   }
+  data.path.push(new PathSegment('none')) // Must be after data.sumX/sumY
 }
 
 document.onpointerlockchange = function() {

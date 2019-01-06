@@ -552,7 +552,7 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[4][0].end = 'top'
     return [puzzle, 1]
-  }, 'symmetry-3': function() {
+  }, 'symmetry-3-down': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][6].start = true
@@ -560,5 +560,14 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[6][0].end = 'top'
     return [puzzle, 0]
-  }
+  }/* @Bug: This should be working!
+  , 'symmetry-3-left': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.symmetry = {'x':false, 'y':true}
+    puzzle.grid[0][6].start = true
+    puzzle.grid[0][0].start = true
+    puzzle.grid[6][6].end = 'right'
+    puzzle.grid[6][0].end = 'right'
+    return [puzzle, 0]
+  }*/
 }
