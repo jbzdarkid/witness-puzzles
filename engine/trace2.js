@@ -249,6 +249,7 @@ var data = {}
 function _clearGrid(svg, puzzle) {
   if (data.bboxDebug != undefined) {
     data.svg.removeChild(data.bboxDebug)
+    data.bboxDebug = undefined
   }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
@@ -323,7 +324,7 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
     } else { // Exit lock but allow resuming from the cursor
       window.TELEMETRY('stop_trace_temporary')
       data.cursor.onclick = function(event) {
-        if (this.parentElement !== data.svg) return // Another puzzle is live, so data is gone
+        if (svg !== data.svg) return // Another puzzle is live, so data is gone
         window.TELEMETRY('start_trace_temporary')
         data.tracing = true
         start.requestPointerLock()
@@ -358,7 +359,6 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     // Position within puzzle.grid
     'pos':pos,
     'puzzle':puzzle,
-    'bbox':undefined,
     'path':[],
   }
   data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
