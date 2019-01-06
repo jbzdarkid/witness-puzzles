@@ -64,6 +64,7 @@ class PathSegment {
     this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.dir = dir
+    data.svg.insertBefore(this.poly1, data.cursor)
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
     this.poly1.setAttribute('class', 'line ' + data.svg.id)
@@ -74,7 +75,6 @@ class PathSegment {
       this.circ.setAttribute('cx', bbox.middle.x)
       this.circ.setAttribute('cy', bbox.middle.y)
     } else {
-      data.svg.insertBefore(this.poly1, data.cursor)
       this.circ.setAttribute('r', 12)
     }
   }
@@ -307,6 +307,8 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     var dy = symdata.y - data.y
     symdata.bbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
     symdata.path.push(new PathSegment('none', symdata.bbox))
+    console.log(symdata.path[0])
+    console.log(data.svg)
   }
 
   for (var styleSheet of document.styleSheets) {
