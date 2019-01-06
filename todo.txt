@@ -3,7 +3,6 @@ In vague order of importance.
 - Symmetry [WIP]
 -- Colored Dots
 -- pillars in general
--- Enable in editor
 
 - Rich line data -> Done
 -- Empty segments (not just gaps)

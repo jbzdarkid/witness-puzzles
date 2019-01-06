@@ -188,12 +188,12 @@ class PathSegment {
       this.poly2.setAttribute('opacity', 1)
     }
     if (data.puzzle.symmetry != undefined) {
-      var tmp = this._reflect(points1.x1, points1.y1)
-      var tmp2 = this._reflect(points1.x2, points1.y2)
-      points1.x1 = tmp2.x
-      points1.x2 = tmp.x
-      points1.y1 = tmp2.y
-      points1.y2 = tmp.y
+      var refl1 = this._reflect(points1.x1, points1.y1)
+      var refl2 = this._reflect(points1.x2, points1.y2)
+      points1.x1 = refl2.x
+      points1.x2 = refl1.x
+      points1.y1 = refl2.y
+      points1.y2 = refl1.y
 
       this.sympoly1.setAttribute('points',
         points1.x1 + ' ' + points1.y1 + ',' +
@@ -202,12 +202,12 @@ class PathSegment {
         points1.x2 + ' ' + points1.y1
       )
 
-      var tmp = this._reflect(points2.x1, points2.y1)
-      var tmp2 = this._reflect(points2.x2, points2.y2)
-      points2.x1 = tmp2.x
-      points2.x2 = tmp.x
-      points2.y1 = tmp2.y
-      points2.y2 = tmp.y
+      var refl1 = this._reflect(points2.x1, points2.y1)
+      var refl2 = this._reflect(points2.x2, points2.y2)
+      points2.x1 = refl2.x
+      points2.x2 = refl1.x
+      points2.y1 = refl2.y
+      points2.y2 = refl1.y
 
       this.sympoly2.setAttribute('points',
         points2.x1 + ' ' + points2.y1 + ',' +

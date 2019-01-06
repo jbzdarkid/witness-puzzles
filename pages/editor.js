@@ -157,11 +157,43 @@ function solvePuzzle() {
 }
 
 function setHSymmetry(value) {
-
+  if (value === true) {
+    if (puzzle.symmetry == undefined) {
+      puzzle.symmetry = {}
+    }
+    puzzle.symmetry.x = true
+  } else {
+    if (puzzle.symmetry != undefined && puzzle.symmetry.y === true) {
+      puzzle.symmetry.x = false
+    } else {
+      puzzle.symmetry = undefined
+    }
+  }
+  _enforceSymmetry()
 }
 
 function setVSymmetry(value) {
+  _enforceSymmetry()
+}
 
+function _enforceSymmetry() {
+  if (puzzle.symmetry == undefined) return
+  // Ensure puzzle is symmetrical
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      if (x%2 == 1 && y%2 == 1) continue // Ignore cells
+      var sym = puzzle.getSymmetricalPos(x, y)
+      if (puzzle.grid[x][y].start === true) {
+        puzzle.updateCell(sym.x, sym.y, {'start':true})
+      }
+      if (puzzle.grid[x][y].end != undefined) {
+        var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
+        puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+      }
+    }
+  }
+  savePuzzle()
+  _redraw(puzzle)
 }
 
 function setPillar(value) {
@@ -244,6 +276,10 @@ function _tryUpdatePuzzle(serialized) {
 function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   document.getElementById('pillarBox').checked = puzzle.pillar
+  if (puzzle.symmetry != undefined) {
+    document.getElementById('hSymBox').checked = puzzle.symmetry.x
+    document.getElementById('vSymBox').checked = puzzle.symmetry.y
+  }
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
@@ -251,6 +287,10 @@ function _redraw(puzzle) {
   var puzzleElement = document.getElementById('puzzle')
   for (var child of puzzleElement.children) {
     child.onclick = null
+  }
+
+  var addOnClick = function(elem, x, y) {
+    elem.onclick = function() {_onElementClicked(x, y)}
   }
 
   var xPos = 40
@@ -269,8 +309,7 @@ function _redraw(puzzle) {
       rect.setAttribute('fill', 'white')
       rect.setAttribute('opacity', 0)
       yPos += height
-      rect.id = x + '_' + y
-      rect.onclick = function() {_onElementClicked(this)}
+      addOnClick(rect, x, y)
       rect.onmouseover = function() {this.setAttribute('opacity', 0.1)}
       rect.onmouseout = function() {this.setAttribute('opacity', 0)}
     }
@@ -278,16 +317,17 @@ function _redraw(puzzle) {
   }
 }
 
-function _onElementClicked(elem) {
-  var x = parseInt(elem.id.split('_')[0], 10)
-  var y = parseInt(elem.id.split('_')[1], 10)
-
+function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].start == undefined) {
       puzzle.grid[x][y].start = true
     } else {
       puzzle.grid[x][y].start = undefined
+    }
+    if (puzzle.symmetry != undefined) {
+      var sym = puzzle.getSymmetricalPos(x, y)
+      puzzle.updateCell(sym.x, sym.y, {'start':puzzle.grid[x][y].start})
     }
   } else if (activeParams.type === 'end') {
     if (x%2 === 1 && y%2 === 1) return
@@ -304,6 +344,11 @@ function _onElementClicked(elem) {
     // If the direction loops past the end (or there are no valid directions),
     // remove the endpoint by setting to undefined.
     puzzle.grid[x][y].end = dir
+    if (puzzle.symmetry != undefined) {
+      var sym = puzzle.getSymmetricalPos(x, y)
+      var symmetricalDir = puzzle.getSymmetricalDir(dir)
+      puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+    }
   } else if (activeParams.type === 'dot') {
     if (x%2 === 1 && y%2 === 1) return
     // @Future: Some way to toggle colors, should be cognizant of symmetry mode.
