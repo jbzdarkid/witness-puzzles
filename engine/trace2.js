@@ -1,4 +1,4 @@
-window.BBOX_DEBUG = true
+window.BBOX_DEBUG = false
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
@@ -59,7 +59,7 @@ class BoundingBox {
 }
 
 class PathSegment {
-  constructor(dir, bbox) {
+  constructor(dir) {
     this.poly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
@@ -72,8 +72,8 @@ class PathSegment {
     this.poly2.setAttribute('class', 'line ' + data.svg.id)
     if (this.dir === 'none') { // Start point
       this.circ.setAttribute('r', 24)
-      this.circ.setAttribute('cx', bbox.middle.x)
-      this.circ.setAttribute('cy', bbox.middle.y)
+      this.circ.setAttribute('cx', data.bbox.middle.x)
+      this.circ.setAttribute('cy', data.bbox.middle.y)
     } else {
       this.circ.setAttribute('r', 12)
     }
@@ -85,7 +85,7 @@ class PathSegment {
     data.svg.removeChild(this.poly2)
   }
 
-  redraw(data) { // Uses raw bbox because of endpoints
+  redraw() { // Uses raw bbox because of endpoints
     var points1 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (this.dir === 'left') {
       points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
@@ -159,14 +159,10 @@ class PathSegment {
 }
 
 var data = {}
-var symdata = {}
 
 function _clearGrid(svg, puzzle) {
   if (data.bboxDebug != undefined) {
     data.svg.removeChild(data.bboxDebug)
-  }
-  if (symdata.bboxDebug != undefined) {
-    data.svg.removeChild(symdata.bboxDebug)
   }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
@@ -268,9 +264,15 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     // Position within puzzle.grid
     'pos':pos,
     'puzzle':puzzle,
+    'bbox':undefined,
+    'symbbox':undefined,
     'path':[],
+    'sympath':[],
   }
-
+  data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  svg.appendChild(data.bboxDebug)
+  data.bboxDebug.setAttribute('fill', 'white')
+  data.bboxDebug.setAttribute('opacity', 0.3)
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
   } else if (pos.y % 2 === 1) { // Start point is on a vertical segment
@@ -278,37 +280,10 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   } else { // Start point is at an intersection
     data.bbox = new BoundingBox(x - 12, x + 12, y - 12, y + 12)
   }
-  data.path.push(new PathSegment('none', data.bbox))
-
-  data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-  svg.appendChild(data.bboxDebug)
-  data.bboxDebug.setAttribute('opacity', 0.3)
-  if (puzzle.symmetry == undefined) {
-    data.bboxDebug.setAttribute('fill', 'white')
-    puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
-  } else {
-    symdata = {
-      'x':parseFloat(symStart.getAttribute('cx')),
-      'y':parseFloat(symStart.getAttribute('cy')),
-      'pos':puzzle.getSymmetricalPos(pos.x, pos.y),
-      'puzzle':puzzle,
-      'path':[],
-    }
-
-    data.bboxDebug.setAttribute('fill', 'blue')
-    puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':2})
-
-    symdata.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-    svg.appendChild(symdata.bboxDebug)
-    symdata.bboxDebug.setAttribute('opacity', 0.3)
-    symdata.bboxDebug.setAttribute('fill', 'orange')
-
-    var dx = symdata.x - data.x
-    var dy = symdata.y - data.y
-    symdata.bbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
-    symdata.path.push(new PathSegment('none', symdata.bbox))
-    console.log(symdata.path[0])
-    console.log(data.svg)
+  if (puzzle.symmetry != undefined) {
+    var dx = parseFloat(symStart.getAttribute('cx')) - x
+    var dy = parseFloat(symStart.getAttribute('cy')) - y
+    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
   }
 
   for (var styleSheet of document.styleSheets) {
@@ -323,6 +298,8 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
       data.animations.deleteRule(i--)
     }
   }
+  data.path.push(new PathSegment('none'))
+  data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
 }
 
 document.onpointerlockchange = function() {
@@ -345,66 +322,21 @@ document.onpointerlockchange = function() {
 
 function onMove(dx, dy) {
   if (!data.tracing) return
+  var width = (data.pos.x%2 === 0 ? 24 : 58)
+  var height = (data.pos.y%2 === 0 ? 24 : 58)
 
-  // Handles collision with outer and inner edges, endpoints, self
-  var colliedWith = _pushCursor(data, dx, dy)
+  // Also handles some collision
+  var colliedWith = _pushCursor(dx, dy, width, height)
   console.spam('Collided with', colliedWith)
 
-  // Movement may be more than one cell's worth, so we loop until it's exhausted
+  // Potentially move the location to a new cell, and make absolute boundary checks
   while (true) {
-    // Check for collision with gaps every loop, to prevent 'going too fast beyond a gap'
     _gapCollision()
-
-    // Potentially move the location to a new cell, and make absolute boundary checks
-    var moveDir = _move(data)
-    // Graphically redraw the path
-    data.path[data.path.length - 1].redraw(data)
+    var moveDir = _move()
+    data.path[data.path.length - 1].redraw()
     if (moveDir === 'none') break
     console.debug('Moved', moveDir)
-
-    if (data.puzzle.symmetry != undefined)
-    {
-      var symMoveDir = _move(symdata)
-      symdata.path[symdata.path.length - 1].redraw(symdata)
-      if (symMoveDir === 'none') break
-      console.debug('Symmetry moved', symMoveDir)
-    }
-
-    // Change the actual position in the puzzle
-
-    var lastDir = data.path[data.path.length - 1].dir
-    var backedUp = (
-      (moveDir === 'left' && lastDir === 'right') ||
-      (moveDir === 'right' && lastDir === 'left') ||
-      (moveDir === 'top' && lastDir === 'bottom') ||
-      (moveDir === 'bottom' && lastDir === 'top'))
-
-    if (data.puzzle.symmetry == undefined) {
-      if (backedUp) { // Exited cell, mark as unvisited
-        data.path.pop().destroy()
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-      }
-      _changePos(data, moveDir)
-      if (!backedUp) { // Entered a new cell, mark as visited
-        data.path.push(new PathSegment(moveDir, data.bbox))
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
-      }
-    } else {
-      if (backedUp) {
-        data.path.pop().destroy()
-        symdata.path.pop().destroy()
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-        data.puzzle.updateCell(symdata.pos.x, symdata.pos.y, {'color':0})
-      }
-      _changePos(data, moveDir)
-      _changePos(symdata, symMoveDir)
-      if (!backedUp) {
-        data.path.push(new PathSegment(moveDir, data.bbox))
-        symdata.path.push(new PathSegment(symMoveDir, symdata.bbox))
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
-        data.puzzle.updateCell(symdata.pos.x, symdata.pos.y, {'color':3})
-      }
-    }
+    _changePos(moveDir)
   }
 
   // Move the cursor
@@ -416,17 +348,10 @@ function onMove(dx, dy) {
     data.bboxDebug.setAttribute('y', data.bbox.y1)
     data.bboxDebug.setAttribute('width', data.bbox.x2 - data.bbox.x1)
     data.bboxDebug.setAttribute('height', data.bbox.y2 - data.bbox.y1)
-    if (data.puzzle.symmetry != undefined)
-    {
-      symdata.bboxDebug.setAttribute('x', symdata.bbox.x1)
-      symdata.bboxDebug.setAttribute('y', symdata.bbox.y1)
-      symdata.bboxDebug.setAttribute('width', symdata.bbox.x2 - symdata.bbox.x1)
-      symdata.bboxDebug.setAttribute('height', symdata.bbox.y2 - symdata.bbox.y1)
-    }
   }
 }
 
-function _push(data, dx, dy, dir, targetDir) {
+function _push(dx, dy, dir, targetDir) {
   // Fraction of movement to redirect in the other direction
   var movementRatio = undefined
   if (targetDir === 'left' || targetDir === 'top') {
@@ -473,10 +398,7 @@ function _push(data, dx, dy, dir, targetDir) {
   return false
 }
 
-function _pushCursor(data, dx, dy) {
-  var width = (data.pos.x%2 === 0 ? 24 : 58)
-  var height = (data.pos.y%2 === 0 ? 24 : 58)
-
+function _pushCursor(dx, dy, width, height) {
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
   if (cell == undefined) return
@@ -485,19 +407,19 @@ function _pushCursor(data, dx, dy) {
     if ([undefined, 'top', 'bottom'].includes(cell.end)) {
       // Only consider non-endpoints or endpoints which are parallel
       if (data.pos.x === 0) { // Against left wall
-        if (_push(data, dx, dy, 'left', 'top')) return 'left outer wall'
+        if (_push(dx, dy, 'left', 'top')) return 'left outer wall'
       }
       if (data.pos.x === data.puzzle.grid.length - 1) { // Against right wall
-        if (_push(data, dx, dy, 'right', 'top')) return 'right outer wall'
+        if (_push(dx, dy, 'right', 'top')) return 'right outer wall'
       }
     }
   }
   if ([undefined, 'left', 'right'].includes(cell.end)) {
     if (data.pos.y === 0) { // Against top wall
-      if (_push(data, dx, dy, 'top', 'right')) return 'top outer wall'
+      if (_push(dx, dy, 'top', 'right')) return 'top outer wall'
     }
     if (data.pos.y === data.puzzle.grid[data.pos.x].length - 1) { // Against bottom wall
-      if (_push(data, dx, dy, 'bottom', 'right')) return 'bottom outer wall'
+      if (_push(dx, dy, 'bottom', 'right')) return 'bottom outer wall'
     }
   }
 
@@ -505,18 +427,18 @@ function _pushCursor(data, dx, dy) {
   if (cell.end == undefined) {
     if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
       if (data.x < data.bbox.middle.x) {
-        _push(data, dx, dy, 'topbottom', 'left')
+        _push(dx, dy, 'topbottom', 'left')
         return 'topbottom inner wall, moved left'
       } else {
-        _push(data, dx, dy, 'topbottom', 'right')
+        _push(dx, dy, 'topbottom', 'right')
         return 'topbottom inner wall, moved right'
       }
     } else if (data.pos.x%2 === 0 && data.pos.y%2 === 1) { // Vertical cell
       if (data.y < data.bbox.middle.y) {
-        _push(data, dx, dy, 'leftright', 'top')
+        _push(dx, dy, 'leftright', 'top')
         return 'leftright inner wall, moved up'
       } else {
-        _push(data, dx, dy, 'leftright', 'bottom')
+        _push(dx, dy, 'leftright', 'bottom')
         return 'leftright inner wall, moved down'
       }
     }
@@ -527,7 +449,7 @@ function _pushCursor(data, dx, dy) {
   var turnMod = 2
   if ((data.pos.x%2 === 0 && data.pos.y%2 === 0) || cell.end != undefined) {
     if (data.x < data.bbox.middle.x) {
-      _push(data, dx, dy, 'topbottom', 'right')
+      _push(dx, dy, 'topbottom', 'right')
       // Overshot the intersection and appears to be trying to turn
       if (data.x > data.bbox.middle.x && Math.abs(dy) * turnMod > Math.abs(dx)) {
         data.y += Math.sign(dy) * (data.x - data.bbox.middle.x)
@@ -536,7 +458,7 @@ function _pushCursor(data, dx, dy) {
       }
       return 'intersection moving right'
     } else if (data.x > data.bbox.middle.x) {
-      _push(data, dx, dy, 'topbottom', 'left')
+      _push(dx, dy, 'topbottom', 'left')
       // Overshot the intersection and appears to be trying to turn
       if (data.x < data.bbox.middle.x && Math.abs(dy) * turnMod > Math.abs(dx)) {
         data.y += Math.sign(dy) * (data.bbox.middle.x - data.x)
@@ -546,7 +468,7 @@ function _pushCursor(data, dx, dy) {
       return 'intersection moving left'
     }
     if (data.y < data.bbox.middle.y) {
-      _push(data, dx, dy, 'leftright', 'bottom')
+      _push(dx, dy, 'leftright', 'bottom')
       // Overshot the intersection and appears to be trying to turn
       if (data.y > data.bbox.middle.y && Math.abs(dx) * turnMod > Math.abs(dy)) {
         data.x += Math.sign(dx) * (data.y - data.bbox.middle.y)
@@ -555,7 +477,7 @@ function _pushCursor(data, dx, dy) {
       }
       return 'intersection moving down'
     } else if (data.y > data.bbox.middle.y) {
-      _push(data, dx, dy, 'leftright', 'top')
+      _push(dx, dy, 'leftright', 'top')
       // Overshot the intersection and appears to be trying to turn
       if (data.y < data.bbox.middle.y && Math.abs(dx) * turnMod > Math.abs(dy)) {
         data.x += Math.sign(dx) * (data.bbox.middle.y - data.y)
@@ -598,7 +520,7 @@ function _gapCollision() {
 
 // Change actual puzzle cells, and limit motion to only puzzle cells.
 // Returns the direction moved, or null otherwise.
-function _move(data) {
+function _move() {
   var lastDir = data.path[data.path.length - 1].dir
 
   if (data.x < data.bbox.x1 + 12) { // Moving left
@@ -641,7 +563,19 @@ function _move(data) {
   return 'none'
 }
 
-function _changePos(data, moveDir) {
+function _changePos(moveDir) {
+  var lastDir = data.path[data.path.length - 1].dir
+
+  var backedUp = (
+    (moveDir === 'left' && lastDir === 'right') ||
+    (moveDir === 'right' && lastDir === 'left') ||
+    (moveDir === 'top' && lastDir === 'bottom') ||
+    (moveDir === 'bottom' && lastDir === 'top'))
+
+  if (backedUp) { // Exited cell, mark as unvisited
+    data.path.pop().destroy()
+    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+  }
   if (moveDir === 'left') {
     data.pos.x--
     if (data.puzzle.pillar && data.pos.x < 0) { // Wrap around the left
@@ -649,6 +583,7 @@ function _changePos(data, moveDir) {
       data.pos.x += data.puzzle.grid.length
       data.bbox.shift('right', data.puzzle.grid.length * 41 - 82)
       data.bbox.shift('right', 58)
+      data.cursor.setAttribute('cx', data.x)
     } else {
       data.bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
     }
@@ -672,5 +607,10 @@ function _changePos(data, moveDir) {
 
   if (data.pos.x%2 === 1 && data.pos.y%2 === 1) {
     console.error('Cursor went out of bounds (into a cell)!')
+  }
+
+  if (!backedUp) { // Entered a new cell, mark as visited
+    data.path.push(new PathSegment(moveDir))
+    data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
   }
 }
