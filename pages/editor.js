@@ -600,23 +600,27 @@ function resizePuzzle(dx, dy, id) {
   var xOffset = (id.includes('left') ? dx : 0)
   var yOffset = (id.includes('top') ? dy : 0)
 
+  console.log('Shifting contents by', xOffset, yOffset)
+
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
   for (var x=0; x<width; x++) {
     for (var y=0; y<height; y++) {
       var cell = savedGrid[x][y]
-      if (cell == undefined || cell.end == undefined) continue
-      var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
-      if (validDirs.length === 0) {
-        console.debug('Endpoint at', x, y, 'no longer fits on the grid')
-        continue
+      if (cell == undefined) continue
+      if (cell.end != undefined) {
+        var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
+        if (validDirs.length === 0) {
+          console.log('Endpoint at', x, y, 'no longer fits on the grid')
+          continue
+        }
+        if (!validDirs.includes(cell.end)) {
+          console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
+          cell.end = validDirs[0]
+        }
       }
-      if (!validDirs.includes(cell.end)) {
-        console.debug('Changing direct of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
-        cell.end = validDirs[0]
-      }
-      puzzle.setCell(x + xOffset, y + yOffset, cell)
+      puzzle.updateCell(x + xOffset, y + yOffset, cell)
     }
   }
 
