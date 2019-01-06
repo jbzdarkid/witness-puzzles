@@ -24,10 +24,11 @@ function _solveLoop(puzzle, x, y, solutions) {
   if (puzzle.symmetry != undefined) {
     // Get the symmetrical position, and try coloring it
     var sym = puzzle.getSymmetricalPos(x, y)
+    var oldColor = puzzle.getLine(sym.x, sym.y)
     puzzle.updateCell(sym.x, sym.y, {'color':3})
     // If we collide with our immediate reflection, ourselves, or our reflection elsewhere
     if (cell.color !== 0) {
-      puzzle.updateCell(sym.x, sym.y, {'color':0})
+      puzzle.updateCell(sym.x, sym.y, {'color':oldColor})
       return
     }
     puzzle.updateCell(x, y, {'color':2}) // Otherwise, keep going.
@@ -63,4 +64,8 @@ function _solveLoop(puzzle, x, y, solutions) {
     _solveLoop(puzzle, x, y + 1, solutions)
   }
   puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+  if (puzzle.symmetry != undefined) {
+    var sym = puzzle.getSymmetricalPos(x, y)
+    puzzle.updateCell(sym.x, sym.y, {'color':0})
+  }
 }

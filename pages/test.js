@@ -545,7 +545,7 @@ var tests = {
     puzzle.grid[2][0].end = 'top'
     return [puzzle, 1]
   }, 'symmetry-2': function() {
-    setLogLevel('debug')
+    setLogLevel('spam')
     var puzzle = new Puzzle(2, 2)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][4].start = true
