@@ -38,9 +38,9 @@
         <input type="submit" value="Publish">
       </form>
       <br>
-      <input class="checkbox" type="checkbox" id="hSymBox" onchange="setHSymmetry(this.checked)">
+      <input class="checkbox" type="checkbox" id="hSymBox" onchange="setSymmetry(this.checked, null)">
       <label cellpadding="10" for="hSymBox" style="margin-right: 20">Horizontal Symmetry</label>
-      <input class="checkbox" type="checkbox" id="vSymBox" onchange="setVSymmetry(this.checked)" disabled>
+      <input class="checkbox" type="checkbox" id="vSymBox" onchange="setSymmetry(null, this.checked)">
       <label for="vSymBox" style="margin-right: 20">Vertical Symmetry</label>
       <input class="checkbox" type="checkbox" id="pillarBox" onchange="setPillar(this.checked)">
       <label for="pillarBox">Pillar</label>

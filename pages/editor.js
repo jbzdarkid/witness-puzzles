@@ -156,23 +156,17 @@ function solvePuzzle() {
   _showSolution(0, puzzle)
 }
 
-function setHSymmetry(value) {
-  if (value === true) {
-    if (puzzle.symmetry == undefined) {
-      puzzle.symmetry = {}
-    }
-    puzzle.symmetry.x = true
+function setSymmetry(x, y) {
+  var symmetry = {'x':false, 'y':false}
+  if (puzzle.symmetry != undefined) symmetry = puzzle.symmetry
+  if (x !== null) symmetry.x = (x === true)
+  if (y !== null) symmetry.y = (y === true)
+  // @Future: && puzzle.pillar === false
+  if (symmetry.x === false && symmetry.y === false) {
+    puzzle.symmetry = undefined
   } else {
-    if (puzzle.symmetry != undefined && puzzle.symmetry.y === true) {
-      puzzle.symmetry.x = false
-    } else {
-      puzzle.symmetry = undefined
-    }
+    puzzle.symmetry = symmetry
   }
-  _enforceSymmetry()
-}
-
-function setVSymmetry(value) {
   _enforceSymmetry()
 }
 
