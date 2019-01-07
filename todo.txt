@@ -22,7 +22,6 @@ In vague order of importance.
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
 
-- Add a start-grow animation
 - Fix generation colors / general improvements to random puzzles
 - Favicon still needs improving
 - Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf

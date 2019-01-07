@@ -69,16 +69,18 @@ class PathSegment {
     data.svg.insertBefore(this.poly2, data.cursor)
     this.circ.setAttribute('cx', data.bbox.middle.x)
     this.circ.setAttribute('cy', data.bbox.middle.y)
-    if (this.dir === 'none') { // Start point
-      this.circ.setAttribute('r', 24)
-    } else {
-      this.circ.setAttribute('r', 12)
-    }
 
     if (data.puzzle.symmetry == undefined) {
       this.poly1.setAttribute('class', 'line-1 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-1 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-1 ' + data.svg.id)
+
+      if (this.dir === 'none') { // Start point
+        this.circ.setAttribute('r', 24)
+        this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
+      } else {
+        this.circ.setAttribute('r', 12)
+      }
     } else {
       this.poly1.setAttribute('class', 'line-2 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-2 ' + data.svg.id)
@@ -104,6 +106,16 @@ class PathSegment {
       this.symcursor.setAttribute('cx', refl.x)
       this.symcursor.setAttribute('cy', refl.y)
       this.symcursor.setAttribute('r', 12)
+
+      if (this.dir === 'none') { // Start point
+        this.circ.setAttribute('r', 24)
+        this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
+        this.symcirc.setAttribute('r', 24)
+        this.symcirc.setAttribute('class', this.symcirc.getAttribute('class') + ' start')
+      } else {
+        this.circ.setAttribute('r', 12)
+        this.symcirc.setAttribute('r', 12)
+      }
     }
   }
 
@@ -285,6 +297,8 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
     onTraceStart(puzzle, pos, svg, start, symStart)
+    // 1/6 sec = 150ms
+    data.animations.insertRule('.' + svg.id + '.start {animation: 0.15s 1 forwards start-grow}')
     start.requestPointerLock()
   } else {
     event.stopPropagation()
@@ -306,11 +320,12 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
       if (puzzle.valid) {
         window.PLAY_SOUND('success')
         window.TELEMETRY('stop_trace_success')
-        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success}')
+        // !important to override the child animation
+        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success !important}')
       } else {
         window.PLAY_SOUND('fail')
         window.TELEMETRY('stop_trace_fail')
-        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail}')
+        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
           data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}')

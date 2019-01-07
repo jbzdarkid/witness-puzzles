@@ -102,13 +102,8 @@ var animations =
 '@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}' +
 '@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}' +
 '@keyframes error {to {fill: red;}}' +
-'@keyframes fade {to {opacity: 0.35;}}'
-/* @Bug: This is trace1/display1 syntax.
-'@keyframes start-grow {' +
-'  from {height: 12; width: 12; top: 6; left: 6;}' +
-'  to {height: 48; width: 48; top: -12; left: -12;}' +
-'}' +
-*/
+'@keyframes fade {to {opacity: 0.35;}}' +
+'@keyframes start-grow {from {r:12;} to {r: 24;}}'
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
