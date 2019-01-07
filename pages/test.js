@@ -264,10 +264,10 @@ var tests = {
     puzzle.grid[0][3].dot = 1
     puzzle.grid[1][0].dot = 1
     puzzle.grid[3][0].dot = 1
-    puzzle.grid[1][2].gap = true
-    puzzle.grid[2][1].gap = true
-    puzzle.grid[2][3].gap = true
-    puzzle.grid[3][2].gap = true
+    puzzle.grid[1][2].gap = 1
+    puzzle.grid[2][1].gap = 1
+    puzzle.grid[2][3].gap = 1
+    puzzle.grid[3][2].gap = 1
     return [puzzle, 1]
   }, 'completely-cancel': function() {
     var puzzle = new Puzzle(2, 2)
@@ -305,7 +305,7 @@ var tests = {
     puzzle.grid[5][5] = {'type':'ylop', 'color':'blue'  , 'polyshape':1}
     puzzle.grid[1][7] = {'type':'poly', 'color':'yellow', 'polyshape':50}
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':51}
-    puzzle.grid[5][4].gap = true
+    puzzle.grid[5][4].gap = 1
     return [puzzle, 17]
   }, 'simple-rpoly': function() {
     var puzzle = new Puzzle(2, 2)
@@ -390,8 +390,8 @@ var tests = {
     var puzzle = new Puzzle(2, 1, true)
     puzzle.grid[0][2].start = true
     puzzle.grid[2][0].end = 'top'
-    puzzle.grid[1][0].gap = true
-    puzzle.grid[1][2].gap = true
+    puzzle.grid[1][0].gap = 1
+    puzzle.grid[1][2].gap = 1
     return [puzzle, 2]
   }, 'pillar-with-stones': function() {
     var puzzle = new Puzzle(2, 1, true)
@@ -536,6 +536,13 @@ var tests = {
     puzzle.grid[4][0].end = 'top'
     puzzle.grid[6][0].end = 'top'
     return [puzzle, 2320]
+  }, 'missing-segments': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.grid[0][6].start = true
+    puzzle.grid[0][1].gap = 2
+    puzzle.grid[1][0].gap = 2
+    puzzle.grid[6][0].end = 'right'
+    return [puzzle, 108]
   }, 'symmetry-1': function() {
     var puzzle = new Puzzle(1, 1)
     puzzle.symmetry = {'x':true, 'y':false}

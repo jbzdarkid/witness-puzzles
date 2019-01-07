@@ -18,7 +18,7 @@ function validate(puzzle) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (cell.type === 'line') {
-        if (cell.gap === true && cell.color > 0) {
+        if (cell.gap > 0 && cell.color > 0) {
           console.log('Gap at', x, y, 'is covered')
           puzzle.valid = false
         }

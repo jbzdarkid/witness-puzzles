@@ -314,6 +314,14 @@ function _redraw(puzzle) {
   }
 }
 
+// Returns the next value in the list.
+// If the value is not found, defaults to the first element.
+// If the value is found, but is the last value, returns undefined.
+function _getNextValue(list, value) {
+  var index = list.indexOf(value)
+  return validDirs[index + 1]
+}
+
 function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
@@ -329,17 +337,11 @@ function _onElementClicked(x, y) {
   } else if (activeParams.type === 'end') {
     if (x%2 === 1 && y%2 === 1) return
     var validDirs = puzzle.getValidEndDirs(x, y)
-    if (validDirs.length === 0) return
 
-    // Choose the first valid direction
-    var dir = validDirs[0]
     // If (x, y) is an endpoint, loop to the next direction
-    var index = validDirs.indexOf(puzzle.grid[x][y].end)
-    if (index !== -1) {
-      dir = validDirs[index + 1]
-    }
     // If the direction loops past the end (or there are no valid directions),
     // remove the endpoint by setting to undefined.
+    var dir = _getNextValue(validDirs, puzzle.grid[x][y].end)
     puzzle.grid[x][y].end = dir
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
@@ -354,21 +356,10 @@ function _onElementClicked(x, y) {
       dotColors.push(3)
     }
     dotColors.push(4)
-
-    var index = dotColors.indexOf(puzzle.grid[x][y].dot)
-    if (index !== -1) {
-      var color = dotColors[index + 1]
-    }
-
-    puzzle.grid[x][y].dot = color
+    puzzle.grid[x][y].dot = _getNextValue(dotColors, puzzle.grid[x][y].dot)
   } else if (activeParams.type === 'gap') {
     if (x%2 === y%2) return
-    if (puzzle.grid[x][y].gap === true) {
-      puzzle.grid[x][y].gap = undefined
-    } else {
-      puzzle.grid[x][y].dot = undefined
-      puzzle.grid[x][y].gap = true
-    }
+    puzzle.grid[x][y].gap = _getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match

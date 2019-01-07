@@ -64,9 +64,13 @@ class Puzzle {
     // Lines default to {'type':'line', 'color':0}
     for (var x=0; x<puzzle.grid.length; x++) {
       for (var y=0; y<puzzle.grid[x].length; y++) {
-        if (puzzle.grid[x][y] === false) {
+        var cell = puzzle.grid[x][y]
+        if (cell === false) {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
           else puzzle.grid[x][y] = {'type':'line', 'color':0}
+        } else if (cell != undefined && cell.gap === true) {
+          // @Legacy: Gaps used to be undefined/true, are now undefined/1/2
+          puzzle.grid[x][y].gap = 1
         }
       }
     }
@@ -99,7 +103,7 @@ class Puzzle {
     }
     if (parsed.gaps) {
       for (var gap of parsed.gaps) {
-        puzzle.grid[gap.x][gap.y].gap = true
+        puzzle.grid[gap.x][gap.y].gap = 1
       }
     }
     puzzle.regionCache = parsed.regionCache
@@ -230,7 +234,7 @@ class Puzzle {
   // Returns the shown hint.
   showHint(hint) {
     if (hint != undefined) {
-      this.grid[hint.x][hint.y].gap = true
+      this.grid[hint.x][hint.y].gap = 1
       return
     }
 
@@ -252,7 +256,7 @@ class Puzzle {
     } else {
       return
     }
-    this.grid[hint.x][hint.y].gap = true
+    this.grid[hint.x][hint.y].gap = 1
     this.hints = badHints.concat(goodHints)
     return hint
   }

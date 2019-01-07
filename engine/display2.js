@@ -41,6 +41,8 @@ function draw(puzzle, target='puzzle') {
 function _drawGrid(puzzle, svg) {
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell != undefined && cell.gap === 2) continue
       var line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
@@ -126,7 +128,7 @@ function _drawSymbols(puzzle, svg, target) {
           }
         }
         drawSymbolWithSvg(svg, params)
-      } else if (cell.gap) {
+      } else if (cell.gap === 1) {
         params.type = 'gap'
         if (x%2 === 0 && y%2 === 1) params.rot = 1
         drawSymbolWithSvg(svg, params)

@@ -499,22 +499,25 @@ function _pushCursor(dx, dy, width, height) {
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
   if (cell == undefined) return
 
-  if (!data.puzzle.pillar) { // Left/right walls are inner if we're a pillar
-    if ([undefined, 'top', 'bottom'].includes(cell.end)) {
-      // Only consider non-endpoints or endpoints which are parallel
-      if (data.pos.x === 0) { // Against left wall
-        if (_push(dx, dy, 'left', 'top')) return 'left outer wall'
-      }
-      if (data.pos.x === data.puzzle.grid.length - 1) { // Against right wall
-        if (_push(dx, dy, 'right', 'top')) return 'right outer wall'
-      }
+  // Only consider non-endpoints or endpoints which are parallel
+  if ([undefined, 'top', 'bottom'].includes(cell.end)) {
+    var leftCell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
+    if (leftCell == undefined || leftCell.gap === 2) {
+      if (_push(dx, dy, 'left', 'top')) return 'left outer wall'
+    }
+    var rightCell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
+    if (rightCell == undefined || rightCell.gap === 2) {
+      if (_push(dx, dy, 'right', 'top')) return 'right outer wall'
     }
   }
+  // Only consider non-endpoints or endpoints which are parallel
   if ([undefined, 'left', 'right'].includes(cell.end)) {
-    if (data.pos.y === 0) { // Against top wall
+    var topCell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
+    if (topCell == undefined || topCell.gap === 2) {
       if (_push(dx, dy, 'top', 'right')) return 'top outer wall'
     }
-    if (data.pos.y === data.puzzle.grid[data.pos.x].length - 1) { // Against bottom wall
+    var bottomCell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
+    if (bottomCell == undefined || bottomCell.gap === 2) {
       if (_push(dx, dy, 'bottom', 'right')) return 'bottom outer wall'
     }
   }
@@ -600,7 +603,7 @@ function _gapAndSymmetryCollision() {
   if (cell == undefined) return
 
   var gapSize = 0
-  if (cell.gap === true) {
+  if (cell.gap === 1) {
     gapSize = 21
   } else if (data.puzzle.symmetry != undefined) {
     var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
@@ -627,37 +630,37 @@ function _move() {
   var lastDir = data.path[data.path.length - 1].dir
 
   if (data.x < data.bbox.x1 + 12) { // Moving left
-    var line = data.puzzle.getLine(data.pos.x - 1, data.pos.y)
-    if (line == undefined) {
+    var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
+    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
       data.x = data.bbox.x1 + 12
-    } else if (line > 0 && lastDir !== 'right') {
+    } else if (cell.color > 0 && lastDir !== 'right') {
       data.x = data.bbox.x1 + 12
     } else if (data.x < data.bbox.x1) {
       return 'left'
     }
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
-    var line = data.puzzle.getLine(data.pos.x + 1, data.pos.y)
-    if (line == undefined) {
+    var cell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
+    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
       data.x = data.bbox.x2 - 12
-    } else if (line > 0 && lastDir !== 'left') {
+    } else if (cell.color > 0 && lastDir !== 'left') {
       data.x = data.bbox.x2 - 12
     } else if (data.x > data.bbox.x2) {
       return 'right'
     }
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
-    var line = data.puzzle.getLine(data.pos.x, data.pos.y - 1)
-    if (line == undefined) {
+    var cell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
+    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
       data.y = data.bbox.y1 + 12
-    } else if (line > 0 && lastDir !== 'bottom') {
+    } else if (cell.color > 0 && lastDir !== 'bottom') {
       data.y = data.bbox.y1 + 12
     } else if (data.y < data.bbox.y1) {
       return 'top'
     }
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
-    var line = data.puzzle.getLine(data.pos.x, data.pos.y + 1)
-    if (line == undefined) {
+    var cell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
+    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
       data.y = data.bbox.y2 - 12
-    } else if (line > 0 && lastDir !== 'top') {
+    } else if (cell.color > 0 && lastDir !== 'top') {
       data.y = data.bbox.y2 - 12
     } else if (data.y > data.bbox.y2) {
       return 'bottom'
