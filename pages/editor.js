@@ -319,7 +319,7 @@ function _redraw(puzzle) {
 // If the value is found, but is the last value, returns undefined.
 function _getNextValue(list, value) {
   var index = list.indexOf(value)
-  return validDirs[index + 1]
+  return list[index + 1]
 }
 
 function _onElementClicked(x, y) {
