@@ -2,6 +2,9 @@ In vague order of importance.
 
 - Symmetry [WIP]
 -- Pillars in general
+--- Create data.symbbox
+--- Wire up inverse shifting (getSymDir)
+--- Make path segment _reflect use data.symbbox instead of data.sumX/sumY
 
 - Rich line data -> Done
 -- Formal object, maybe?

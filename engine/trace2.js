@@ -244,7 +244,7 @@ class PathSegment {
   _reflect(x, y) {
     if (data.puzzle.symmetry != undefined) {
       // @Future: Symmetry + pillars = :(
-      // if (this.pillar) x = x + (this.grid.length - 1)/2
+      // if (this.pillar) x = this.grid.length/2 - 1
       if (data.puzzle.symmetry.x === true) {
         x = data.sumX - x
       }
