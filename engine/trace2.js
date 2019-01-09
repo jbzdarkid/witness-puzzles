@@ -1,4 +1,4 @@
-window.BBOX_DEBUG = false
+window.BBOX_DEBUG = true
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
@@ -86,6 +86,13 @@ class PathSegment {
       this.circ.setAttribute('class', 'line-2 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-2 ' + data.svg.id)
 
+      if (this.dir === 'none') { // Start point
+        this.circ.setAttribute('r', 24)
+        this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
+      } else {
+        this.circ.setAttribute('r', 12)
+      }
+
       this.sympoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       this.symcirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
       this.sympoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
@@ -99,12 +106,11 @@ class PathSegment {
       this.sympoly2.setAttribute('class', 'line-3 ' + data.svg.id)
       this.symcursor.setAttribute('class', 'line-3 ' + data.svg.id)
 
-      var refl = this._reflect(data.bbox.middle.x, data.bbox.middle.y)
-      this.symcirc.setAttribute('cx', refl.x)
-      this.symcirc.setAttribute('cy', refl.y)
+      this.symcirc.setAttribute('cx', data.symbbox.middle.x)
+      this.symcirc.setAttribute('cy', data.symbbox.middle.y)
       this.symcirc.setAttribute('r', this.circ.getAttribute('r'))
-      this.symcursor.setAttribute('cx', refl.x)
-      this.symcursor.setAttribute('cy', refl.y)
+      this.symcursor.setAttribute('cx', data.symbbox.middle.x)
+      this.symcursor.setAttribute('cy', data.symbbox.middle.y)
       this.symcursor.setAttribute('r', 12)
 
       if (this.dir === 'none') { // Start point
@@ -199,6 +205,7 @@ class PathSegment {
       this.circ.setAttribute('opacity', 1)
       this.poly2.setAttribute('opacity', 1)
     }
+    /* @Cleanup: This is a bit more complicated, and also a bit easier.
     if (data.puzzle.symmetry != undefined) {
       var refl1 = this._reflect(points1.x1, points1.y1)
       var refl2 = this._reflect(points1.x2, points1.y2)
@@ -239,6 +246,7 @@ class PathSegment {
       this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
       this.sympoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
     }
+    */
   }
 
   _reflect(x, y) {
@@ -262,6 +270,10 @@ function _clearGrid(svg, puzzle) {
   if (data.bboxDebug != undefined) {
     data.svg.removeChild(data.bboxDebug)
     data.bboxDebug = undefined
+  }
+  if (data.symbboxDebug != undefined) {
+    data.svg.removeChild(data.symbboxDebug)
+    data.symbboxDebug = undefined
   }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
@@ -376,10 +388,6 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     'puzzle':puzzle,
     'path':[],
   }
-  data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-  svg.appendChild(data.bboxDebug)
-  data.bboxDebug.setAttribute('fill', 'white')
-  data.bboxDebug.setAttribute('opacity', 0.3)
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
   } else if (pos.y % 2 === 1) { // Start point is on a vertical segment
@@ -400,17 +408,32 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
       data.animations.deleteRule(i--)
     }
   }
+
+  data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  svg.appendChild(data.bboxDebug)
+  data.bboxDebug.setAttribute('opacity', 0.3)
   if (puzzle.symmetry == undefined) {
+    data.bboxDebug.setAttribute('fill', 'white')
     data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
   } else {
+    data.bboxDebug.setAttribute('fill', 'blue')
+
+    data.symbboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+    svg.appendChild(data.symbboxDebug)
+    data.symbboxDebug.setAttribute('opacity', 0.3)
+    data.symbboxDebug.setAttribute('fill', 'orange')
+
     data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':2})
     var sym = data.puzzle.getSymmetricalPos(pos.x, pos.y)
     data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
 
-    data.sumX = parseFloat(symStart.getAttribute('cx')) + x
-    data.sumY = parseFloat(symStart.getAttribute('cy')) + y
+    var dx = parseFloat(symStart.getAttribute('cx')) - data.x
+    var dy = parseFloat(symStart.getAttribute('cy')) - data.y
+    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
+    //data.sumX = parseFloat(symStart.getAttribute('cx')) + x
+    //data.sumY = parseFloat(symStart.getAttribute('cy')) + y
   }
-  data.path.push(new PathSegment('none')) // Must be after data.sumX/sumY
+  data.path.push(new PathSegment('none')) // Must be created after initializing data.symbbox
 }
 
 document.onpointerlockchange = function() {
@@ -447,7 +470,40 @@ function onMove(dx, dy) {
     data.path[data.path.length - 1].redraw()
     if (moveDir === 'none') break
     console.debug('Moved', moveDir)
-    _changePos(moveDir)
+
+    var lastDir = data.path[data.path.length - 1].dir
+    var backedUp = (
+      (moveDir === 'left' && lastDir === 'right') ||
+      (moveDir === 'right' && lastDir === 'left') ||
+      (moveDir === 'top' && lastDir === 'bottom') ||
+      (moveDir === 'bottom' && lastDir === 'top'))
+
+    if (data.puzzle.symmetry == undefined) {
+      if (backedUp) { // Exited cell, mark as unvisited
+        data.path.pop().destroy()
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+      }
+      _changePos(data.bbox, data.pos, moveDir)
+      if (!backedUp) { // Entered a new cell, mark as visited
+        data.path.push(new PathSegment(moveDir))
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+      }
+    } else { // data.puzzle.symmetry != undefined
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
+      if (backedUp) {
+        data.path.pop().destroy()
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+        data.puzzle.updateCell(sym.x, sym.y, {'color':0})
+      }
+      _changePos(data.bbox, data.pos, moveDir)
+      _changePos(data.symbbox, sym, symMoveDir)
+      if (!backedUp) {
+        data.path.push(new PathSegment(moveDir))
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
+        data.puzzle.updateCell(sym.x, sym.y, {'color':3})
+      }
+    }
   }
 
   // Move the cursor
@@ -459,6 +515,13 @@ function onMove(dx, dy) {
     data.bboxDebug.setAttribute('y', data.bbox.y1)
     data.bboxDebug.setAttribute('width', data.bbox.x2 - data.bbox.x1)
     data.bboxDebug.setAttribute('height', data.bbox.y2 - data.bbox.y1)
+    if (data.puzzle.symmetry != undefined)
+    {
+      data.symbboxDebug.setAttribute('x', data.symbbox.x1)
+      data.symbboxDebug.setAttribute('y', data.symbbox.y1)
+      data.symbboxDebug.setAttribute('width', data.symbbox.x2 - data.symbbox.x1)
+      data.symbboxDebug.setAttribute('height', data.symbbox.y2 - data.symbbox.y1)
+    }
   }
 }
 
@@ -684,65 +747,36 @@ function _move() {
   return 'none'
 }
 
-function _changePos(moveDir) {
-  var lastDir = data.path[data.path.length - 1].dir
-
-  var backedUp = (
-    (moveDir === 'left' && lastDir === 'right') ||
-    (moveDir === 'right' && lastDir === 'left') ||
-    (moveDir === 'top' && lastDir === 'bottom') ||
-    (moveDir === 'bottom' && lastDir === 'top'))
-
-  if (backedUp) { // Exited cell, mark as unvisited
-    data.path.pop().destroy()
-    if (data.puzzle.symmetry == undefined) {
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-    } else {
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
-      data.puzzle.updateCell(sym.x, sym.y, {'color':0})
-    }
-  }
+function _changePos(bbox, pos, moveDir) {
   if (moveDir === 'left') {
-    data.pos.x--
-    if (data.puzzle.pillar && data.pos.x < 0) { // Wrap around the left
+    pos.x--
+    if (data.puzzle.pillar && pos.x < 0) { // Wrap around the left
       data.x += data.puzzle.grid.length * 41
-      data.pos.x += data.puzzle.grid.length
-      data.bbox.shift('right', data.puzzle.grid.length * 41 - 82)
-      data.bbox.shift('right', 58)
+      pos.x += data.puzzle.grid.length
+      bbox.shift('right', data.puzzle.grid.length * 41 - 82)
+      bbox.shift('right', 58)
     } else {
-      data.bbox.shift('left', (data.pos.x%2 === 0 ? 24 : 58))
+      bbox.shift('left', (pos.x%2 === 0 ? 24 : 58))
     }
   } else if (moveDir === 'right') {
-    data.pos.x++
-    if (data.puzzle.pillar && data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
+    pos.x++
+    if (data.puzzle.pillar && pos.x >= data.puzzle.grid.length) { // Wrap around to the right
       data.x -= data.puzzle.grid.length * 41
-      data.pos.x -= data.puzzle.grid.length
-      data.bbox.shift('left', data.puzzle.grid.length * 41 - 82)
-      data.bbox.shift('left', 24)
+      pos.x -= data.puzzle.grid.length
+      bbox.shift('left', data.puzzle.grid.length * 41 - 82)
+      bbox.shift('left', 24)
     } else {
-      data.bbox.shift('right', (data.pos.x%2 === 0 ? 24 : 58))
+      bbox.shift('right', (pos.x%2 === 0 ? 24 : 58))
     }
   } else if (moveDir === 'top') {
-    data.pos.y--
-    data.bbox.shift('top', (data.pos.y%2 === 0 ? 24 : 58))
+    pos.y--
+    bbox.shift('top', (pos.y%2 === 0 ? 24 : 58))
   } else if (moveDir === 'bottom') {
-    data.pos.y++
-    data.bbox.shift('bottom', (data.pos.y%2 === 0 ? 24 : 58))
+    pos.y++
+    bbox.shift('bottom', (pos.y%2 === 0 ? 24 : 58))
   }
 
-  if (data.pos.x%2 === 1 && data.pos.y%2 === 1) {
+  if (pos.x%2 === 1 && pos.y%2 === 1) {
     console.error('Cursor went out of bounds (into a cell)!')
-  }
-
-  if (!backedUp) { // Entered a new cell, mark as visited
-    data.path.push(new PathSegment(moveDir))
-    if (data.puzzle.symmetry == undefined) {
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
-    } else {
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
-      data.puzzle.updateCell(sym.x, sym.y, {'color':3})
-    }
   }
 }
