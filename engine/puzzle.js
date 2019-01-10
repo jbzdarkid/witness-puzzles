@@ -163,15 +163,17 @@ class Puzzle {
   }
 
   getSymmetricalDir(dir) {
-    if (this.symmetry == undefined) return dir
-    if (this.symmetry.x === true) {
-      if (dir === 'left') return 'right'
-      if (dir === 'right') return 'left'
+    if (this.symmetry != undefined) {
+      if (this.symmetry.x === true) {
+        if (dir === 'left') return 'right'
+        if (dir === 'right') return 'left'
+      }
+      if (this.symmetry.y === true) {
+        if (dir === 'top') return 'bottom'
+        if (dir === 'bottom') return 'top'
+      }
     }
-    if (this.symmetry.y === true) {
-      if (dir === 'top') return 'bottom'
-      if (dir === 'bottom') return 'top'
-    }
+    return dir
   }
 
   getSymmetricalPos(x, y) {
@@ -184,7 +186,7 @@ class Puzzle {
         y = (this.grid[0].length - 1) - y
       }
     }
-    return {'x':x, 'y':y}
+    return {'x':this._mod(x), 'y':y}
   }
 
   // A variant of getCell which specifically returns line values,

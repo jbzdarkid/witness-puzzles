@@ -205,7 +205,6 @@ class PathSegment {
       this.circ.setAttribute('opacity', 1)
       this.poly2.setAttribute('opacity', 1)
     }
-    /* @Cleanup: This is a bit more complicated, and also a bit easier.
     if (data.puzzle.symmetry != undefined) {
       var refl1 = this._reflect(points1.x1, points1.y1)
       var refl2 = this._reflect(points1.x2, points1.y2)
@@ -246,18 +245,19 @@ class PathSegment {
       this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
       this.sympoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
     }
-    */
   }
 
   _reflect(x, y) {
     if (data.puzzle.symmetry != undefined) {
-      // @Future: Symmetry + pillars = :(
-      // if (this.pillar) x = this.grid.length/2 - 1
       if (data.puzzle.symmetry.x === true) {
-        x = data.sumX - x
+        x = data.bbox.middle.x - x + data.symbbox.middle.x
+      } else {
+        x = x - data.bbox.middle.x + data.symbbox.middle.x
       }
       if (data.puzzle.symmetry.y === true) {
-        y = data.sumY - y
+        y = data.bbox.middle.y - y + data.symbbox.middle.y
+      } else {
+        y = y - data.bbox.middle.y + data.symbbox.middle.y
       }
     }
     return {'x':x, 'y':y}
@@ -491,6 +491,8 @@ function onMove(dx, dy) {
     } else { // data.puzzle.symmetry != undefined
       var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
       var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
+      console.log(sym)
+      console.debug('Symmetry moved', symMoveDir)
       if (backedUp) {
         data.path.pop().destroy()
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
