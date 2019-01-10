@@ -614,6 +614,6 @@ var tests = {
     puzzle.grid[4][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[4][0].end = 'top'
-    return [puzzle, 0]
+    return [puzzle, 2]
   }
 }
