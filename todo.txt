@@ -1,10 +1,15 @@
 In vague order of importance.
 
-- Symmetry [WIP]
--- Pillars in general
---- Create data.symbbox
---- Wire up inverse shifting (getSymDir)
---- Make path segment _reflect use data.symbbox instead of data.sumX/sumY
+- Tracing/etc
+-- _changePos is modifying data.x on pillar wrap
+-- Pillar wrap should be relative
+-- PathSegtment should own cursor movement
+-- Symcursor should exist on data for simplicity / prevent dupes
+-- bboxDebug should be owned by bbox, and only created when setting is enabled
+--- and only updated in shift() when object exists
+-- Readme should explain the different types of positional tracking in trace
+-- Once the above is done, I should ensure/cleanup which functions use which kinds of tracking.
+   Ideally this simplifies tracing a bit too, though main loop might stay big 
 
 - Rich line data -> Done
 -- Formal object, maybe?
@@ -27,13 +32,17 @@ In vague order of importance.
 
 - Fix generation colors / general improvements to random puzzles
 - Favicon still needs improving
+-- RM the dot, it's invisible
+-- Figure out something better for the tri (star?)
 - Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
 - Editor dragging has deadzone -- there should be a magic pixel (or they should be much closer.)
 - Hide solution (puzzleData) from global scope
 - Finish documenting files (at least the engine, cmon)
+-- In fact, I think the engine is all that needs documenting, other files are self-documenting and not that complex.
 - Any time I pass (x, y) as parameters, I should probably pass {'x':x, 'y':y}
 -- Risky, means pass-by-reference
 - JS supports 'format strings', via `foo ${bar}`
+-- Too modern? Should check avail on my target platforms, specifically mobile
 - Add "title" to editor buttons
 - Tracing down against walls and gap-2 is awkward
 
