@@ -44,15 +44,21 @@ The key bit of logic here is polyominoFromPolyshape, which converts one of these
 Tracing (drawing lines on the grid) is one of the most complex parts of this engine. While drawing a line, yoru position is tracked in four ways:
 First, data.pos tracks your position in the puzzle grid.
 Second, data.x and data.y track the position of the cursor in the rendered puzzle.
-Third, data.bbox tracks the edges of the current cell.
+Third, data.bbox (bounding box) tracks the edges of the current cell.
 Fourth, data.path keeps track of the movement through the grid, and also handles all of the actual drawn paths
 
 Tracing takes the following steps:
-1. Handle wall collision and determine in which direction the excess movement should be redirected. This also includes turning at intersections.
-At this point, all of the movement is linear, though the direction is not explicitly known.
-1a. Modify the path?
+1. Handle wall collision and determine in which direction the excess motion should be redirected. This also detects if you should turn at an intersection.
+At this point, all of the resulting movement is linear, though the direction is not explicitly known. data.x/data.y will now be the 'final' location of the cursor, and the bounding box/path/position will play catch-up.
 2. Handle gap collision and collision with the symmetrical line. This needs to be comptuted at every cell to ensure that moving multiple cells in one frame doesn't skip over gaps.
-3. Determine if the position has changed cells -- if so, compute the direction which we moved
+3. Determine if the position has changed cells -- if so, compute the direction which we moved.
+3a. If this direction is the opposite of the last direction, we backed up into the previous cell. In this case, we remove a segment from the path and then change direction (4)
+3b. If this direction is not the opposite, we entered a new cell. In this case, we change direction (4) and then add a segment to the path.
+
+
+2. Redraw the latest path segment and potentially add a new one
+
+
 4. Determine if movement has caused a pillar rotation, and handle that edge case
 5. Move the location to the next cell, and modify the puzzle object
 

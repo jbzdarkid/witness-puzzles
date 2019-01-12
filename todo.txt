@@ -1,11 +1,10 @@
 In vague order of importance.
 
 - Tracing/etc
--- _changePos is modifying data.x on pillar wrap
 -- Pillar wrap should be relative
 -- Readme should explain the different types of positional tracking in trace
 -- Once the above is done, I should ensure/cleanup which functions use which kinds of tracking.
-   Ideally this simplifies tracing a bit too, though main loop might stay big 
+   Ideally this simplifies tracing a bit too, though main loop might stay big
 
 - Rich line data -> Done
 -- Formal object, maybe?

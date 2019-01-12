@@ -481,43 +481,50 @@ function onMove(dx, dy) {
   var colliedWith = _pushCursor(dx, dy)
   console.spam('Collided with', colliedWith)
 
-  // Potentially move the location to a new cell, and make absolute boundary checks
   while (true) {
     _gapAndSymmetryCollision()
+
+    // Potentially move the location to a new cell, and make absolute boundary checks
     var moveDir = _move()
     data.path[data.path.length - 1].redraw()
     if (moveDir === 'none') break
+
     console.debug('Moved', moveDir)
-
     var lastDir = data.path[data.path.length - 1].dir
-    var backedUp = (
-      (moveDir === 'left' && lastDir === 'right') ||
-      (moveDir === 'right' && lastDir === 'left') ||
-      (moveDir === 'top' && lastDir === 'bottom') ||
-      (moveDir === 'bottom' && lastDir === 'top'))
+    var backedUp = ((moveDir === 'left' && lastDir === 'right')
+                 || (moveDir === 'right' && lastDir === 'left')
+                 || (moveDir === 'top' && lastDir === 'bottom')
+                 || (moveDir === 'bottom' && lastDir === 'top'))
 
-    if (data.puzzle.symmetry == undefined) {
-      if (backedUp) { // Exited cell, mark as unvisited
-        data.path.pop().destroy()
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-      }
-      _changePos(data.bbox, data.pos, moveDir)
-      if (!backedUp) { // Entered a new cell, mark as visited
-        data.path.push(new PathSegment(moveDir))
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
-      }
-    } else { // data.puzzle.symmetry != undefined
+    if (data.puzzle.symmetry != undefined) {
       var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
       var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
-      if (backedUp) {
-        data.path.pop().destroy()
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+    }
+
+    // If we backed up, remove a path segment and mark the old cell as unvisited
+    if (backedUp) {
+      data.path.pop().destroy()
+      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+      if (data.puzzle.symmetry != undefined) {
         data.puzzle.updateCell(sym.x, sym.y, {'color':0})
       }
-      _changePos(data.bbox, data.pos, moveDir)
+    }
+
+    // Potentially adjust data.x/data.y if our position went around a pillar
+    if (data.puzzle.pillar) _pillarWrap()
+
+    // Move to the next cell
+    _changePos(data.bbox, data.pos, moveDir)
+    if (data.puzzle.symmetry != undefined) {
       _changePos(data.symbbox, sym, symMoveDir)
-      if (!backedUp) {
-        data.path.push(new PathSegment(moveDir))
+    }
+
+    // If we didn't back up, add a path segment and mark the new cell as visited
+    if (!backedUp) {
+      data.path.push(new PathSegment(moveDir))
+      if (data.puzzle.symmetry == undefined) {
+        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+      } else {
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
         data.puzzle.updateCell(sym.x, sym.y, {'color':3})
       }
@@ -573,9 +580,6 @@ function _push(dx, dy, dir, targetDir) {
 }
 
 function _pushCursor(dx, dy) {
-  var width = (data.pos.x%2 === 0 ? 24 : 58)
-  var height = (data.pos.y%2 === 0 ? 24 : 58)
-
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
   if (cell == undefined) return
@@ -750,13 +754,21 @@ function _move() {
   return 'none'
 }
 
+function _pillarWrap() {
+  if (data.pos.x < 0) { // Wrap around the left
+    // @Bug: This isn't precise... right? We should be doing bbox-based adjustments?
+    data.x += data.puzzle.grid.length * 41
+  }
+  if (data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
+    data.x -= data.puzzle.grid.length * 41
+  }
+}
+
 function _changePos(bbox, pos, moveDir) {
   if (moveDir === 'left') {
     pos.x--
     if (data.puzzle.pillar && pos.x < 0) { // Wrap around the left
-      // @Bug: We're adjusting data.x but we do this in symmetry too!
-      // @Bug: This isn't precise... right? We should be doing bbox-based adjustments?
-      data.x += data.puzzle.grid.length * 41
+      // @Cleanup: pos.x += data.puzzle.grid.length + 1 and try to shift once, to prepare for the shift back.
       pos.x += data.puzzle.grid.length
       bbox.shift('right', data.puzzle.grid.length * 41 - 82)
       bbox.shift('right', 58)
@@ -766,7 +778,6 @@ function _changePos(bbox, pos, moveDir) {
   } else if (moveDir === 'right') {
     pos.x++
     if (data.puzzle.pillar && pos.x >= data.puzzle.grid.length) { // Wrap around to the right
-      data.x -= data.puzzle.grid.length * 41
       pos.x -= data.puzzle.grid.length
       bbox.shift('left', data.puzzle.grid.length * 41 - 82)
       bbox.shift('left', 24)
