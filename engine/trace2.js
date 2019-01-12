@@ -294,15 +294,14 @@ class PathSegment {
 var data = {}
 
 function _clearGrid(svg, puzzle) {
-  // @Bug: How do I still do this?
-  // if (data.bbox.debug != undefined) {
-  //   data.svg.removeChild(data.bbox.debug)
-  //   data.bbox.debug = undefined
-  // }
-  // if (data.symbbox.debug != undefined) {
-  //   data.svg.removeChild(data.symbbox.debug)
-  //   data.symbbox.debug = undefined
-  // }
+  if (data.bbox != undefined && data.bbox.debug != undefined) {
+    data.svg.removeChild(data.bbox.debug)
+    data.bbox.debug = undefined
+  }
+  if (data.symbbox != undefined && data.symbbox.debug != undefined) {
+    data.svg.removeChild(data.symbbox.debug)
+    data.symbbox.debug = undefined
+  }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
     svg.getElementsByClassName('cursor')[0].remove()
