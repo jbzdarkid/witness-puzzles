@@ -3,8 +3,6 @@ In vague order of importance.
 - Tracing/etc
 -- _changePos is modifying data.x on pillar wrap
 -- Pillar wrap should be relative
--- PathSegtment should own cursor movement
--- Symcursor should exist on data for simplicity / prevent dupes
 -- bboxDebug should be owned by bbox, and only created when setting is enabled
 --- and only updated in shift() when object exists
 -- Readme should explain the different types of positional tracking in trace

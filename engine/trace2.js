@@ -96,22 +96,16 @@ class PathSegment {
       this.sympoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       this.symcirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
       this.sympoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      this.symcursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
       data.svg.insertBefore(this.sympoly1, data.cursor)
       data.svg.insertBefore(this.symcirc, data.cursor)
       data.svg.insertBefore(this.sympoly2, data.cursor)
-      data.svg.insertBefore(this.symcursor, data.cursor)
       this.sympoly1.setAttribute('class', 'line-3 ' + data.svg.id)
       this.symcirc.setAttribute('class', 'line-3 ' + data.svg.id)
       this.sympoly2.setAttribute('class', 'line-3 ' + data.svg.id)
-      this.symcursor.setAttribute('class', 'line-3 ' + data.svg.id)
 
       this.symcirc.setAttribute('cx', data.symbbox.middle.x)
       this.symcirc.setAttribute('cy', data.symbbox.middle.y)
       this.symcirc.setAttribute('r', this.circ.getAttribute('r'))
-      this.symcursor.setAttribute('cx', data.symbbox.middle.x)
-      this.symcursor.setAttribute('cy', data.symbbox.middle.y)
-      this.symcursor.setAttribute('r', 12)
 
       if (this.dir === 'none') { // Start point
         this.circ.setAttribute('r', 24)
@@ -133,11 +127,22 @@ class PathSegment {
       data.svg.removeChild(this.sympoly1)
       data.svg.removeChild(this.symcirc)
       data.svg.removeChild(this.sympoly2)
-      data.svg.removeChild(this.symcursor)
     }
   }
 
   redraw() { // Uses raw bbox because of endpoints
+    // Move the cursor
+    var x = data.x.clamp(data.bbox.x1, data.bbox.x2)
+    var y = data.y.clamp(data.bbox.y1, data.bbox.y2)
+    data.cursor.setAttribute('cx', x)
+    data.cursor.setAttribute('cy', y)
+    if (data.puzzle.symmetry != undefined) {
+      var refl = this._reflect(x, y)
+      data.symcursor.setAttribute('cx', refl.x)
+      data.symcursor.setAttribute('cy', refl.y)
+    }
+
+    // Draw the first-half box
     var points1 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (this.dir === 'left') {
       points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
@@ -198,13 +203,16 @@ class PathSegment {
       points2.x2 + ' ' + points2.y1
     )
 
-    if (firstHalf && this.dir !== 'none') { // Doesn't apply to the startpoint
+    // Hide the central circle in the first half (but not for startpoints)
+    if (firstHalf && this.dir !== 'none') {
       this.circ.setAttribute('opacity', 0)
       this.poly2.setAttribute('opacity', 0)
     } else {
       this.circ.setAttribute('opacity', 1)
       this.poly2.setAttribute('opacity', 1)
     }
+
+    // Draw the symmetrical path based on the original one
     if (data.puzzle.symmetry != undefined) {
       var refl1 = this._reflect(points1.x1, points1.y1)
       var refl2 = this._reflect(points1.x2, points1.y2)
@@ -234,13 +242,9 @@ class PathSegment {
         points2.x2 + ' ' + points2.y1
       )
 
-      if (this.dir !== 'none') {
-        var x = data.x.clamp(data.bbox.x1, data.bbox.x2)
-        var y = data.y.clamp(data.bbox.y1, data.bbox.y2)
-        var refl = this._reflect(x, y)
-        this.symcursor.setAttribute('cx', refl.x)
-        this.symcursor.setAttribute('cy', refl.y)
-      }
+      // @Robustness: Why do we not render the cursor in the startpoint?
+      // if (this.dir !== 'none') {
+      // }
 
       this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
       this.sympoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
@@ -430,8 +434,13 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     var dx = parseFloat(symStart.getAttribute('cx')) - data.x
     var dy = parseFloat(symStart.getAttribute('cy')) - data.y
     data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
-    //data.sumX = parseFloat(symStart.getAttribute('cx')) + x
-    //data.sumY = parseFloat(symStart.getAttribute('cy')) + y
+
+    data.symcursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    svg.appendChild(data.symcursor)
+    data.symcursor.setAttribute('class', 'line-3 ' + data.svg.id)
+    data.symcursor.setAttribute('cx', symStart.getAttribute('cx'))
+    data.symcursor.setAttribute('cy', symStart.getAttribute('cy'))
+    data.symcursor.setAttribute('r', 12)
   }
   data.path.push(new PathSegment('none')) // Must be created after initializing data.symbbox
 }
@@ -456,11 +465,8 @@ document.onpointerlockchange = function() {
 
 function onMove(dx, dy) {
   if (!data.tracing) return
-  var width = (data.pos.x%2 === 0 ? 24 : 58)
-  var height = (data.pos.y%2 === 0 ? 24 : 58)
-
   // Also handles some collision
-  var colliedWith = _pushCursor(dx, dy, width, height)
+  var colliedWith = _pushCursor(dx, dy)
   console.spam('Collided with', colliedWith)
 
   // Potentially move the location to a new cell, and make absolute boundary checks
@@ -491,8 +497,6 @@ function onMove(dx, dy) {
     } else { // data.puzzle.symmetry != undefined
       var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
       var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
-      console.log(sym)
-      console.debug('Symmetry moved', symMoveDir)
       if (backedUp) {
         data.path.pop().destroy()
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
@@ -507,10 +511,6 @@ function onMove(dx, dy) {
       }
     }
   }
-
-  // Move the cursor
-  data.cursor.setAttribute('cx', data.x)
-  data.cursor.setAttribute('cy', data.y)
 
   if (window.BBOX_DEBUG) {
     data.bboxDebug.setAttribute('x', data.bbox.x1)
@@ -574,7 +574,10 @@ function _push(dx, dy, dir, targetDir) {
   return false
 }
 
-function _pushCursor(dx, dy, width, height) {
+function _pushCursor(dx, dy) {
+  var width = (data.pos.x%2 === 0 ? 24 : 58)
+  var height = (data.pos.y%2 === 0 ? 24 : 58)
+
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
   if (cell == undefined) return
@@ -753,6 +756,8 @@ function _changePos(bbox, pos, moveDir) {
   if (moveDir === 'left') {
     pos.x--
     if (data.puzzle.pillar && pos.x < 0) { // Wrap around the left
+      // @Bug: We're adjusting data.x but we do this in symmetry too!
+      // @Bug: This isn't precise... right? We should be doing bbox-based adjustments?
       data.x += data.puzzle.grid.length * 41
       pos.x += data.puzzle.grid.length
       bbox.shift('right', data.puzzle.grid.length * 41 - 82)

@@ -41,5 +41,12 @@ Polyominos in this engine are represented by bitmask -- each one fits into 16 bi
 The key bit of logic here is polyominoFromPolyshape, which converts one of these masks (very small, easy to manage) into a list of grid locations. Recall that the grid is double-sized, so this also does the job of filling out the spaces between the polyomino's "squares".
 
 ## trace2.js
+Tracing (drawing lines on the grid) is one of the most complex parts of this engine. It follows these steps:
+1. Handle wall collision and determine in which direction the excess movement should be redirected. This also includes turning at intersections.
+At this point, all of the movement is linear, though the direction is not explicitly known.
+2. Handle gap collision and collision with the symmetrical line. This needs to be comptuted at every cell to ensure that moving multiple cells in one frame doesn't skip over gaps.
+3. Determine if the position has changed cells -- if so, compute the direction which we moved
+4. Determine if movement has caused a pillar rotation, and handle that edge case
+5. Move the location to the next cell, and modify the puzzle object
 
 ## solve.js
