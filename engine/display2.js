@@ -33,7 +33,7 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
-    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start)
+    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start, startData.symStart)
     _drawSolution(puzzle, startData.x, startData.y)
   }
 }
@@ -208,7 +208,7 @@ function _drawStartAndEnd(puzzle, svg) {
         var bottomCell = puzzle.getCell(x, y + 1)
         if (bottomCell != undefined && bottomCell.dir === 'top') continue
 
-        startData = {'x':x, 'y':y, 'start':start}
+        startData = {'x':x, 'y':y, 'start':start, 'symStart': symStart}
       }
     }
   }
