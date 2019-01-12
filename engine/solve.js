@@ -21,20 +21,21 @@ function _solveLoop(puzzle, x, y, solutions) {
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
 
-  if (puzzle.symmetry != undefined) {
+  if (puzzle.symmetry == undefined) {
+    if (cell.color !== 0) return // Collided with ourselves
+    puzzle.updateCell(x, y, {'color':1}) // Otherwise, mark this cell as visited
+  } else {
     // Get the symmetrical position, and try coloring it
     var sym = puzzle.getSymmetricalPos(x, y)
     var oldColor = puzzle.getLine(sym.x, sym.y)
     puzzle.updateCell(sym.x, sym.y, {'color':3})
-    // If we collide with our immediate reflection, ourselves, or our reflection elsewhere
+
+    // Collided with ourselves or our reflection
     if (cell.color !== 0) {
       puzzle.updateCell(sym.x, sym.y, {'color':oldColor})
       return
     }
-    puzzle.updateCell(x, y, {'color':2}) // Otherwise, keep going.
-  } else {
-    if (cell.color !== 0) return
-    puzzle.updateCell(x, y, {'color':1})
+    puzzle.updateCell(x, y, {'color':2}) // Otherwise, mark this cell as visited
   }
 
   if (cell.end != undefined) {
@@ -63,6 +64,8 @@ function _solveLoop(puzzle, x, y, solutions) {
     puzzle.updateCell(x, y, {'dir':'bottom'})
     _solveLoop(puzzle, x, y + 1, solutions)
   }
+
+  // Tail recursion: Back out of this cell
   puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
   if (puzzle.symmetry != undefined) {
     var sym = puzzle.getSymmetricalPos(x, y)

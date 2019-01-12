@@ -52,14 +52,13 @@ Tracing takes the following steps:
 At this point, all of the resulting movement is linear, though the direction is not explicitly known. data.x/data.y will now be the 'final' location of the cursor, and the bounding box/path/position will play catch-up.
 2. Handle gap collision and collision with the symmetrical line. This needs to be comptuted at every cell to ensure that moving multiple cells in one frame doesn't skip over gaps.
 3. Determine if the position has changed cells -- if so, compute the direction which we moved.
-3a. If this direction is the opposite of the last direction, we backed up into the previous cell. In this case, we remove a segment from the path and then change direction (4)
-3b. If this direction is not the opposite, we entered a new cell. In this case, we change direction (4) and then add a segment to the path.
-
-
-2. Redraw the latest path segment and potentially add a new one
-
-
-4. Determine if movement has caused a pillar rotation, and handle that edge case
-5. Move the location to the next cell, and modify the puzzle object
+Additionally, prevent the cursor from leaving the grid if the momentum is too serious.
+If the direction is none, we stop the loop at this time.
+4. If we moved to wrap around a pillar, update data.x to account for this motion.
+5a. If this direction is the opposite of the last direction, we backed up into the previous cell. In this case, we remove a segment from the path and then change data.pos (our location in the grid).
+5b. If this direction is not the opposite, we entered a new cell. In this case, change data.pos and then add a segment to the path.
+6. Goto 2
 
 ## solve.js
+This is a very straightforwards brute-force solver. We do depth-first recursive backtracking to try every single solution to the puzzle. We compute if the current cell is valid (not already colored), and then recurse in all 4 directions.
+The solution path is saved on the grid to allow for easy re-tracing.

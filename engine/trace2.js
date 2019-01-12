@@ -331,6 +331,7 @@ function addTraceStart(puzzle, pos, start, symStart=undefined) {
 function trace(event, puzzle, pos, start, symStart=undefined) {
   var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
+    data.tracing = true
     window.PLAY_SOUND('start')
     window.TELEMETRY('start_trace')
     // Cleans drawn lines & puzzle state
@@ -403,7 +404,14 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   cursor.setAttribute('cx', x)
   cursor.setAttribute('cy', y)
 
-  data = {
+  data.svg = svg
+  data.cursor = cursor
+  data.x = x
+  data.y = y
+  data.pos = pos
+  data.puzzle = puzzle
+  data.path = []
+  /*data = {
     'tracing':true,
     'svg':svg,
     // Cursor element and location
@@ -414,7 +422,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     'pos':pos,
     'puzzle':puzzle,
     'path':[],
-  }
+  }*/
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
   } else if (pos.y % 2 === 1) { // Start point is on a vertical segment
@@ -488,8 +496,11 @@ function onMove(dx, dy) {
     var moveDir = _move()
     data.path[data.path.length - 1].redraw()
     if (moveDir === 'none') break
-
     console.debug('Moved', moveDir)
+
+    // Potentially adjust data.x/data.y if our position went around a pillar
+    if (data.puzzle.pillar) _pillarWrap()
+
     var lastDir = data.path[data.path.length - 1].dir
     var backedUp = ((moveDir === 'left' && lastDir === 'right')
                  || (moveDir === 'right' && lastDir === 'left')
@@ -505,24 +516,18 @@ function onMove(dx, dy) {
     if (backedUp) {
       data.path.pop().destroy()
       data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-      if (data.puzzle.symmetry != undefined) {
-        data.puzzle.updateCell(sym.x, sym.y, {'color':0})
-      }
+      if (sym != undefined) data.puzzle.updateCell(sym.x, sym.y, {'color':0})
     }
-
-    // Potentially adjust data.x/data.y if our position went around a pillar
-    if (data.puzzle.pillar) _pillarWrap()
 
     // Move to the next cell
     _changePos(data.bbox, data.pos, moveDir)
-    if (data.puzzle.symmetry != undefined) {
-      _changePos(data.symbbox, sym, symMoveDir)
-    }
+    if (sym != undefined) _changePos(data.symbbox, sym, symMoveDir)
+
 
     // If we didn't back up, add a path segment and mark the new cell as visited
     if (!backedUp) {
       data.path.push(new PathSegment(moveDir))
-      if (data.puzzle.symmetry == undefined) {
+      if (sym == undefined) {
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
       } else {
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
@@ -754,12 +759,12 @@ function _move() {
   return 'none'
 }
 
-function _pillarWrap() {
-  if (data.pos.x < 0) { // Wrap around the left
-    // @Bug: This isn't precise... right? We should be doing bbox-based adjustments?
+// Adjust data.x by the width of the grid. This does preserve momentum around the edge.
+function _pillarWrap(moveDir) {
+  if (moveDir === 'left' && data.pos.x === 0) {
     data.x += data.puzzle.grid.length * 41
   }
-  if (data.pos.x >= data.puzzle.grid.length) { // Wrap around to the right
+  if (moveDir === 'right' && data.pos.x >= data.puzzle.grid.length) {
     data.x -= data.puzzle.grid.length * 41
   }
 }
@@ -768,7 +773,6 @@ function _changePos(bbox, pos, moveDir) {
   if (moveDir === 'left') {
     pos.x--
     if (data.puzzle.pillar && pos.x < 0) { // Wrap around the left
-      // @Cleanup: pos.x += data.puzzle.grid.length + 1 and try to shift once, to prepare for the shift back.
       pos.x += data.puzzle.grid.length
       bbox.shift('right', data.puzzle.grid.length * 41 - 82)
       bbox.shift('right', 58)
