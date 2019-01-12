@@ -176,11 +176,18 @@ class Puzzle {
     return dir
   }
 
+  // @Cleanup: This has duplication now.
   getSymmetricalPos(x, y) {
     if (this.symmetry != undefined) {
-      if (this.pillar) x += this.grid.length/2 - 1
-      if (this.symmetry.x === true) {
-        x = (this.grid.length - 1) - x
+      if (this.pillar === true) {
+        x += this.grid.length/2
+        if (this.symmetry.x === true) {
+          x = this.grid.length - x
+        }
+      } else {
+        if (this.symmetry.x === true) {
+          x = (this.grid.length - 1) - x
+        }
       }
       if (this.symmetry.y === true) {
         y = (this.grid[0].length - 1) - y

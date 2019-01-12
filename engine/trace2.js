@@ -1,4 +1,4 @@
-window.BBOX_DEBUG = true
+window.BBOX_DEBUG = false
 
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
@@ -56,6 +56,7 @@ class BoundingBox {
     this.x2 = this.raw.x2
     this.y1 = this.raw.y1
     this.y2 = this.raw.y2
+    // @Bug: This is technically wrong for the symmetrical box... it might not matter though.
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
     if (cell.end === 'left') {
       this.x1 -= 24
@@ -296,11 +297,11 @@ var data = {}
 function _clearGrid(svg, puzzle) {
   if (data.bbox != undefined && data.bbox.debug != undefined) {
     data.svg.removeChild(data.bbox.debug)
-    data.bbox.debug = undefined
+    data.bbox = undefined
   }
   if (data.symbbox != undefined && data.symbbox.debug != undefined) {
     data.svg.removeChild(data.symbbox.debug)
-    data.symbbox.debug = undefined
+    data.symbbox = undefined
   }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
@@ -499,7 +500,7 @@ function onMove(dx, dy) {
     console.debug('Moved', moveDir)
 
     // Potentially adjust data.x/data.y if our position went around a pillar
-    if (data.puzzle.pillar) _pillarWrap()
+    if (data.puzzle.pillar) _pillarWrap(moveDir)
 
     var lastDir = data.path[data.path.length - 1].dir
     var backedUp = ((moveDir === 'left' && lastDir === 'right')
@@ -761,12 +762,14 @@ function _move() {
 
 // Adjust data.x by the width of the grid. This does preserve momentum around the edge.
 function _pillarWrap(moveDir) {
+  console.log(data.x, moveDir, data.pos.x)
   if (moveDir === 'left' && data.pos.x === 0) {
     data.x += data.puzzle.grid.length * 41
   }
-  if (moveDir === 'right' && data.pos.x >= data.puzzle.grid.length) {
+  if (moveDir === 'right' && data.pos.x === data.puzzle.grid.length - 1) {
     data.x -= data.puzzle.grid.length * 41
   }
+  console.log(data.x)
 }
 
 function _changePos(bbox, pos, moveDir) {

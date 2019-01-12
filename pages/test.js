@@ -17,8 +17,8 @@ window.onload = function() {
       var puzzleData = tests[testName]()
       var puzzle = puzzleData[0]
       var expectedSolutions = puzzleData[1]
-      var solutions = window.solve(puzzle)
       window.draw(puzzle, testName)
+      var solutions = window.solve(puzzle)
       if (solutions.length !== expectedSolutions) {
         console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
         for (var solution of solutions) {
@@ -607,7 +607,7 @@ var tests = {
     puzzle.grid[6][4].dot = 4
     puzzle.grid[6][2].dot = 4
     return [puzzle, 56]
-  }, 'symmetry-pillar-h': function() {
+  }, 'symmetry-pillar-horizontal': function() {
     var puzzle = new Puzzle(4, 4, true)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][8].start = true
@@ -615,5 +615,29 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[4][0].end = 'top'
     return [puzzle, 2]
+  }, 'symmetry-pillar-vertical': function() {
+    var puzzle = new Puzzle(4, 4, true)
+    puzzle.symmetry = {'x':false, 'y':true}
+    puzzle.grid[0][8].start = true
+    puzzle.grid[4][0].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][8].end = 'bottom'
+    return [puzzle, 186]
+  }, 'symmetry-pillar-rotation': function() {
+    var puzzle = new Puzzle(4, 4, true)
+    puzzle.symmetry = {'x':true, 'y':true}
+    puzzle.grid[0][8].start = true
+    puzzle.grid[4][0].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][8].end = 'bottom'
+    return [puzzle, 50]
+  }, 'symmetry-pillar-none': function() {
+    var puzzle = new Puzzle(4, 4, true)
+    puzzle.symmetry = {'x':false, 'y':false}
+    puzzle.grid[0][8].start = true
+    puzzle.grid[4][8].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][0].end = 'top'
+    return [puzzle, 242]
   }
 }
