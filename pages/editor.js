@@ -95,6 +95,7 @@ function deletePuzzleAndLoadNext() {
   _removePuzzleFromList(activePuzzle)
 
   var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
+  if (puzzleList == null) puzzleList = []
   while (puzzleList.length > 0) {
     var serialized = window.localStorage.getItem(puzzleList[0])
     if (_tryUpdatePuzzle(serialized)) break
@@ -275,10 +276,8 @@ function _tryUpdatePuzzle(serialized) {
 function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   document.getElementById('pillarBox').checked = puzzle.pillar
-  if (puzzle.symmetry != undefined) {
-    document.getElementById('hSymBox').checked = puzzle.symmetry.x
-    document.getElementById('vSymBox').checked = puzzle.symmetry.y
-  }
+  document.getElementById('hSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.x
+  document.getElementById('vSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.y
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
