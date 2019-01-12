@@ -248,7 +248,6 @@ function _drawSolution(puzzle, x, y) {
 
   // Limited because there is a chance of infinite looping with bad input data.
   for (var i=0; i<1000; i++) {
-    console.log(puzzle.grid[8][8])
     var cell = puzzle.getCell(x, y)
     if (cell == undefined) {
       console.error('Solution trace went out of bounds at', x, y)
