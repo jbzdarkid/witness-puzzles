@@ -3,6 +3,22 @@ window.BBOX_DEBUG = true
 class BoundingBox {
   constructor(x1, x2, y1, y2) {
     this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
+    if (window.BBOX_DEBUG === true) {
+      this.debug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      data.svg.appendChild(this.debug)
+      this.debug.setAttribute('opacity', 0.5)
+      this.debug.setAttribute('style', 'pointer-events: none;')
+      if (data.puzzle.symmetry == undefined) {
+        this.debug.setAttribute('fill', 'white')
+      } else {
+        // Symbbox is constructed second, so data.bbox will already be defined.
+        if (data.bbox == undefined) {
+          this.debug.setAttribute('fill', 'blue')
+        } else {
+          this.debug.setAttribute('fill', 'orange')
+        }
+      }
+    }
     this._update()
   }
 
@@ -54,6 +70,13 @@ class BoundingBox {
     this.middle = { // Note: Middle of the raw object
       'x':(this.raw.x1 + this.raw.x2)/2,
       'y':(this.raw.y1 + this.raw.y2)/2
+    }
+
+    if (this.debug != undefined) {
+      this.debug.setAttribute('x', this.x1)
+      this.debug.setAttribute('y', this.y1)
+      this.debug.setAttribute('width', this.x2 - this.x1)
+      this.debug.setAttribute('height', this.y2 - this.y1)
     }
   }
 }
@@ -271,14 +294,15 @@ class PathSegment {
 var data = {}
 
 function _clearGrid(svg, puzzle) {
-  if (data.bboxDebug != undefined) {
-    data.svg.removeChild(data.bboxDebug)
-    data.bboxDebug = undefined
-  }
-  if (data.symbboxDebug != undefined) {
-    data.svg.removeChild(data.symbboxDebug)
-    data.symbboxDebug = undefined
-  }
+  // @Bug: How do I still do this?
+  // if (data.bbox.debug != undefined) {
+  //   data.svg.removeChild(data.bbox.debug)
+  //   data.bbox.debug = undefined
+  // }
+  // if (data.symbbox.debug != undefined) {
+  //   data.svg.removeChild(data.symbbox.debug)
+  //   data.symbbox.debug = undefined
+  // }
 
   while (svg.getElementsByClassName('cursor').length > 0) {
     svg.getElementsByClassName('cursor')[0].remove()
@@ -413,20 +437,9 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
     }
   }
 
-  data.bboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-  svg.appendChild(data.bboxDebug)
-  data.bboxDebug.setAttribute('opacity', 0.3)
   if (puzzle.symmetry == undefined) {
-    data.bboxDebug.setAttribute('fill', 'white')
     data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
   } else {
-    data.bboxDebug.setAttribute('fill', 'blue')
-
-    data.symbboxDebug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-    svg.appendChild(data.symbboxDebug)
-    data.symbboxDebug.setAttribute('opacity', 0.3)
-    data.symbboxDebug.setAttribute('fill', 'orange')
-
     data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':2})
     var sym = data.puzzle.getSymmetricalPos(pos.x, pos.y)
     data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
@@ -509,20 +522,6 @@ function onMove(dx, dy) {
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
         data.puzzle.updateCell(sym.x, sym.y, {'color':3})
       }
-    }
-  }
-
-  if (window.BBOX_DEBUG) {
-    data.bboxDebug.setAttribute('x', data.bbox.x1)
-    data.bboxDebug.setAttribute('y', data.bbox.y1)
-    data.bboxDebug.setAttribute('width', data.bbox.x2 - data.bbox.x1)
-    data.bboxDebug.setAttribute('height', data.bbox.y2 - data.bbox.y1)
-    if (data.puzzle.symmetry != undefined)
-    {
-      data.symbboxDebug.setAttribute('x', data.symbbox.x1)
-      data.symbboxDebug.setAttribute('y', data.symbbox.y1)
-      data.symbboxDebug.setAttribute('width', data.symbbox.x2 - data.symbbox.x1)
-      data.symbboxDebug.setAttribute('height', data.symbbox.y2 - data.symbbox.y1)
     }
   }
 }
