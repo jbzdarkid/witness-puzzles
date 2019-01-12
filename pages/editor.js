@@ -174,9 +174,11 @@ function _enforceSymmetry() {
   // Ensure puzzle is symmetrical
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
-      if (x%2 == 1 && y%2 == 1) continue // Ignore cells
+      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
       if (puzzle.symmetry == undefined) {
-        if (puzzle.grid[x][y].dot > 1) puzzle.grid[x][y].dot = 1
+        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
+          puzzle.grid[x][y].dot = 1
+        }
       } else {
         var sym = puzzle.getSymmetricalPos(x, y)
         if (puzzle.grid[x][y].start === true) {
