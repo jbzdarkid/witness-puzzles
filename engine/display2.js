@@ -121,7 +121,6 @@ function _drawSymbols(puzzle, svg, target) {
         else if (cell.dot === 4) {
           params.color = window.FOREGROUND
           // This makes the invisible dots visible, only while we're in the editor.
-          // @Robustness: Some way this can't be cheated?
           if (window.activeParams != undefined) {
             params.stroke = 'black'
             params.strokeWidth = '2px'
@@ -147,6 +146,14 @@ function _drawStartAndEnd(puzzle, svg) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (cell.end != undefined) {
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          var symCell = puzzle.getCell(sym.x, sym.y)
+          if (symCell.end == undefined) {
+            console.error('Found an endpoint at', x, y, 'but there was no symmetrical endpoint at', sym.x, sym.y)
+          }
+        }
+
         window.drawSymbolWithSvg(svg, {
           'type':'end',
           'width': 58,
