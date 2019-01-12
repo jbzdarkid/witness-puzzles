@@ -95,6 +95,7 @@ function deletePuzzleAndLoadNext() {
   _removePuzzleFromList(activePuzzle)
 
   var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
+  if (puzzleList == null) puzzleList = []
   while (puzzleList.length > 0) {
     var serialized = window.localStorage.getItem(puzzleList[0])
     if (_tryUpdatePuzzle(serialized)) break
@@ -174,9 +175,11 @@ function _enforceSymmetry() {
   // Ensure puzzle is symmetrical
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
-      if (x%2 == 1 && y%2 == 1) continue // Ignore cells
+      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
       if (puzzle.symmetry == undefined) {
-        if (puzzle.grid[x][y].dot > 1) puzzle.grid[x][y].dot = 1
+        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
+          puzzle.grid[x][y].dot = 1
+        }
       } else {
         var sym = puzzle.getSymmetricalPos(x, y)
         if (puzzle.grid[x][y].start === true) {
@@ -273,10 +276,8 @@ function _tryUpdatePuzzle(serialized) {
 function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   document.getElementById('pillarBox').checked = puzzle.pillar
-  if (puzzle.symmetry != undefined) {
-    document.getElementById('hSymBox').checked = puzzle.symmetry.x
-    document.getElementById('vSymBox').checked = puzzle.symmetry.y
-  }
+  document.getElementById('hSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.x
+  document.getElementById('vSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.y
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
