@@ -416,18 +416,18 @@ function _onElementClicked(x, y) {
 }
 
 var symbolData = {
-  'start': {'type':'start'},
-  'end': {'type':'end', 'y':18, 'dir':'top'},
-  'gap': {'type':'gap'},
-  'dot': {'type':'dot'},
-  'square': {'type':'square'},
-  'star': {'type':'star'},
-  'nega': {'type':'nega'},
-  'triangle': {'type':'triangle', 'count':1},
-  'poly': {'type':'poly', 'rot':0, 'polyshape':71},
-  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71},
-  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71},
-  'rylop': {'type':'ylop', 'rot':'all', 'polyshape':71},
+  'start': {'type':'start', 'title':'Start point'},
+  'end': {'type':'end', 'y':18, 'dir':'top', 'title':'End point'},
+  'gap': {'type':'gap', 'title':'Line break'},
+  'dot': {'type':'dot', 'title':'Dot'},
+  'square': {'type':'square', 'title':'Square'},
+  'star': {'type':'star', 'title':'Star'},
+  'nega': {'type':'nega', 'title':'Negation'},
+  'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
+  'poly': {'type':'poly', 'rot':0, 'polyshape':71, 'title':'Polyomino'},
+  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71, 'title':'Negation polyomino'},
+  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71, 'title':'Rotatable polyomino'},
+  'rylop': {'type':'ylop', 'rot':'all', 'polyshape':71, 'title':'Rotatable negation polyomino'},
 }
 function _drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -447,6 +447,7 @@ function _drawSymbolButtons() {
     button.style.border = params.border
     button.style.height = params.height + 2*params.border
     button.style.width = params.width + 2*params.border
+    button.title = params.title
     button.params = params
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape

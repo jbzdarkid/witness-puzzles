@@ -30,7 +30,6 @@ In vague order of importance.
 -- Risky, means pass-by-reference
 - JS supports 'format strings', via `foo ${bar}`
 -- Too modern? Should check avail on my target platforms, specifically mobile
-- Add "title" to editor buttons
 - Tracing down against walls and gap-2 is awkward
 
 !- Small things / Bugs
