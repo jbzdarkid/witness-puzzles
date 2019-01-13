@@ -217,10 +217,14 @@ class Puzzle {
     if (!this._safeCell(x, y)) return []
 
     var dirs = []
-    if (x === 0 && !this.pillar) dirs.push('left')
-    if (y === 0) dirs.push('top')
-    if (x === this.grid.length - 1 && !this.pillar) dirs.push('right')
-    if (y === this.grid[x].length - 1) dirs.push('bottom')
+    var leftCell = this.getCell(x - 1, y)
+    if (leftCell == undefined || leftCell.gap === 2) dirs.push('left')
+    var rightCell = this.getCell(x + 1, y)
+    if (rightCell == undefined || rightCell.gap === 2) dirs.push('right')
+    var topCell = this.getCell(x, y - 1)
+    if (topCell == undefined || topCell.gap === 2) dirs.push('top')
+    var bottomCell = this.getCell(x, y + 1)
+    if (bottomCell == undefined || bottomCell.gap === 2) dirs.push('bottom')
     return dirs
   }
 

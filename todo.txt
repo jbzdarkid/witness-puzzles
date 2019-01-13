@@ -31,6 +31,7 @@ In vague order of importance.
 - JS supports 'format strings', via `foo ${bar}`
 -- Too modern? Should check avail on my target platforms, specifically mobile
 - Tracing down against walls and gap-2 is awkward
+- Test for internal endpoint
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?
