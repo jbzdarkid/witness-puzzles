@@ -161,7 +161,14 @@ function setStyle(style) {
   }
 
   resizePuzzle(width - puzzle.grid.length, 0, 'right')
+  _enforceSymmetry()
+  _setActivePuzzle(puzzle)
+  savePuzzle()
+}
 
+// @Future: This should be more intelligent, maybe something like 'dedupe symmetrical elements on the old grid,
+// then re-dupe new elements'?
+function _enforceSymmetry() {
   // Ensure dots are not colored
   // Ensure start/end are appropriately paired
   for (var x=0; x<puzzle.grid.length; x++) {
@@ -186,9 +193,6 @@ function setStyle(style) {
       }
     }
   }
-
-  _setActivePuzzle(puzzle)
-  savePuzzle()
 }
 
 
@@ -262,6 +266,7 @@ function _tryLoadSerializedPuzzle(serialized) {
   if (!serialized) return false
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
+    _enforceSymmetry()
     _setActivePuzzle(newPuzzle)
     puzzle = newPuzzle
     return true
@@ -273,7 +278,6 @@ function _tryLoadSerializedPuzzle(serialized) {
 }
 
 // Sets the active editor puzzle. Also updates the dropdown for puzzle style and adds the editor hotspots.
-// @Bug: This needs to call _enforceSymmetry() or whatever. I should also look into making said enforcement smarter.
 // @Cleanup: Confusingly, this does not modify the localStorage value for activePuzzle...
 function _setActivePuzzle(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
@@ -349,6 +353,7 @@ function _getNextValue(list, value) {
   return list[index + 1]
 }
 
+// @Cleanup: Could I just envoke "_enforceSymmetry" here?
 function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
@@ -689,6 +694,7 @@ function _dragMove(event, elem) {
 
   if (Math.abs(dx) >= xLim || Math.abs(dy) >= 41) {
     if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/41), elem.id)) return
+    _enforceSymmetry()
     _setActivePuzzle(puzzle)
     savePuzzle()
 
