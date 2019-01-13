@@ -161,9 +161,8 @@ class PathSegment {
     data.cursor.setAttribute('cx', x)
     data.cursor.setAttribute('cy', y)
     if (data.puzzle.symmetry != undefined) {
-      var refl = this._reflect(x, y)
-      data.symcursor.setAttribute('cx', refl.x)
-      data.symcursor.setAttribute('cy', refl.y)
+      data.symcursor.setAttribute('cx', this._reflX(x))
+      data.symcursor.setAttribute('cy', this._reflY(y))
     }
 
     // Draw the first-half box
@@ -238,32 +237,18 @@ class PathSegment {
 
     // Draw the symmetrical path based on the original one
     if (data.puzzle.symmetry != undefined) {
-      var refl1 = this._reflect(points1.x1, points1.y1)
-      var refl2 = this._reflect(points1.x2, points1.y2)
-      points1.x1 = refl2.x
-      points1.x2 = refl1.x
-      points1.y1 = refl2.y
-      points1.y2 = refl1.y
-
       this.sympoly1.setAttribute('points',
-        points1.x1 + ' ' + points1.y1 + ',' +
-        points1.x1 + ' ' + points1.y2 + ',' +
-        points1.x2 + ' ' + points1.y2 + ',' +
-        points1.x2 + ' ' + points1.y1
+        this._reflX(points1.x2) + ' ' + this._reflY(points1.y2) + ',' +
+        this._reflX(points1.x2) + ' ' + this._reflY(points1.y1) + ',' +
+        this._reflX(points1.x1) + ' ' + this._reflY(points1.y1) + ',' +
+        this._reflX(points1.x1) + ' ' + this._reflY(points1.y2)
       )
 
-      var refl1 = this._reflect(points2.x1, points2.y1)
-      var refl2 = this._reflect(points2.x2, points2.y2)
-      points2.x1 = refl2.x
-      points2.x2 = refl1.x
-      points2.y1 = refl2.y
-      points2.y2 = refl1.y
-
       this.sympoly2.setAttribute('points',
-        points2.x1 + ' ' + points2.y1 + ',' +
-        points2.x1 + ' ' + points2.y2 + ',' +
-        points2.x2 + ' ' + points2.y2 + ',' +
-        points2.x2 + ' ' + points2.y1
+        this._reflX(points2.x2) + ' ' + this._reflY(points2.y2) + ',' +
+        this._reflX(points2.x2) + ' ' + this._reflY(points2.y1) + ',' +
+        this._reflX(points2.x1) + ' ' + this._reflY(points2.y1) + ',' +
+        this._reflX(points2.x1) + ' ' + this._reflY(points2.y2)
       )
 
       this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
@@ -271,20 +256,24 @@ class PathSegment {
     }
   }
 
-  _reflect(x, y) {
-    if (data.puzzle.symmetry != undefined) {
-      if (data.puzzle.symmetry.x === true) {
-        x = data.bbox.middle.x - x + data.symbbox.middle.x
-      } else {
-        x = x - data.bbox.middle.x + data.symbbox.middle.x
-      }
-      if (data.puzzle.symmetry.y === true) {
-        y = data.bbox.middle.y - y + data.symbbox.middle.y
-      } else {
-        y = y - data.bbox.middle.y + data.symbbox.middle.y
-      }
+  _reflX(x) {
+    if (data.puzzle.symmetry == undefined) return x
+    if (data.puzzle.symmetry.x === true) {
+      // Mirror position inside the bounding box
+      return (data.bbox.middle.x - x) + data.symbbox.middle.x
     }
-    return {'x':x, 'y':y}
+    // Copy position inside the bounding box
+    return (x - data.bbox.middle.x) + data.symbbox.middle.x
+  }
+
+  _reflY(y) {
+    if (data.puzzle.symmetry == undefined) return y
+    if (data.puzzle.symmetry.y === true) {
+      // Mirror position inside the bounding box
+      return (data.bbox.middle.y - y) + data.symbbox.middle.y
+    }
+    // Copy position inside the bounding box
+    return (y - data.bbox.middle.y) + data.symbbox.middle.y
   }
 }
 
@@ -703,14 +692,18 @@ function _gapAndSymmetryCollision() {
 
 // Change actual puzzle cells, and limit motion to only puzzle cells.
 // Returns the direction moved, or null otherwise.
+// @Bug: Handle start-point collision here.
 function _move() {
   var lastDir = data.path[data.path.length - 1].dir
 
+  // @Bug: This might be doing outer-wall collision against inner walls...?
   if (data.x < data.bbox.x1 + 12) { // Moving left
     var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
     if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+      console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x1 + 12
     } else if (cell.color > 0 && lastDir !== 'right') {
+      console.spam('Collided with other line', cell.color)
       data.x = data.bbox.x1 + 12
     } else if (data.x < data.bbox.x1) {
       return 'left'
@@ -718,8 +711,10 @@ function _move() {
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
     var cell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
     if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+      console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x2 - 12
     } else if (cell.color > 0 && lastDir !== 'left') {
+      console.spam('Collided with other line', cell.color)
       data.x = data.bbox.x2 - 12
     } else if (data.x > data.bbox.x2) {
       return 'right'
@@ -727,8 +722,10 @@ function _move() {
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
     if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+      console.spam('Collided with outside / gap-2', cell)
       data.y = data.bbox.y1 + 12
     } else if (cell.color > 0 && lastDir !== 'bottom') {
+      console.spam('Collided with other line', cell.color)
       data.y = data.bbox.y1 + 12
     } else if (data.y < data.bbox.y1) {
       return 'top'
@@ -736,8 +733,10 @@ function _move() {
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
     if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+      console.spam('Collided with outside / gap-2')
       data.y = data.bbox.y2 - 12
     } else if (cell.color > 0 && lastDir !== 'top') {
+      console.spam('Collided with other line', cell.color)
       data.y = data.bbox.y2 - 12
     } else if (data.y > data.bbox.y2) {
       return 'bottom'
@@ -748,14 +747,12 @@ function _move() {
 
 // Adjust data.x by the width of the grid. This does preserve momentum around the edge.
 function _pillarWrap(moveDir) {
-  console.log(data.x, moveDir, data.pos.x)
   if (moveDir === 'left' && data.pos.x === 0) {
     data.x += data.puzzle.grid.length * 41
   }
   if (moveDir === 'right' && data.pos.x === data.puzzle.grid.length - 1) {
     data.x -= data.puzzle.grid.length * 41
   }
-  console.log(data.x)
 }
 
 function _changePos(bbox, pos, moveDir) {

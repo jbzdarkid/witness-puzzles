@@ -33,7 +33,6 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
-    // @Bug: This is not working, some/all of the time. Maybe just pillars?
     window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start, startData.symStart)
     _drawSolution(puzzle, startData.x, startData.y)
   }
@@ -121,7 +120,7 @@ function _drawSymbols(puzzle, svg, target) {
         else if (cell.dot === 3) params.color = window.LINE_SECONDARY
         else if (cell.dot === 4) {
           params.color = window.FOREGROUND
-          // This makes the invisible dots visible, only while we're in the editor.
+          // This makes the invisible dots visible, but only while we're in the editor.
           if (window.activeParams != undefined) {
             params.stroke = 'black'
             params.strokeWidth = '2px'
@@ -291,6 +290,5 @@ function _drawSolution(puzzle, x, y) {
     puzzle.updateCell(x, y, {'color':0})
     onMove(41 * dx, 41 * dy)
     puzzle.updateCell(x, y, {'color':1})
-    console.log(data.x, data.y)
   }
 }

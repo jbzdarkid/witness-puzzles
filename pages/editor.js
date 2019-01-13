@@ -111,6 +111,18 @@ function deletePuzzleAndLoadNext() {
   window.localStorage.setItem('activePuzzle', puzzleList[0])
 }
 
+function importPuzzle() {
+  var serialized = prompt('Paste your puzzle here:')
+  if (!_tryLoadSerializedPuzzle(serialized)) {
+    // Only alert if user tried to enter data
+    if (serialized) alert('Not a valid puzzle!')
+    return
+  }
+  var savedPuzzle = puzzle.name + ' on ' + (new Date()).toLocaleString()
+  _addPuzzleToList(savedPuzzle)
+  window.localStorage.setItem(savedPuzzle, serialized)
+}
+
 function setStyle(style) {
   console.log(style)
   if (style === 'Default') {
@@ -166,8 +178,8 @@ function setStyle(style) {
   savePuzzle()
 }
 
-// @Future: This should be more intelligent, maybe something like 'dedupe symmetrical elements on the old grid,
-// then re-dupe new elements'?
+// @Future: This should be more intelligent, maybe something like
+// 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
 function _enforceSymmetry() {
   // Ensure dots are not colored
   // Ensure start/end are appropriately paired
@@ -194,7 +206,6 @@ function _enforceSymmetry() {
     }
   }
 }
-
 
 function solvePuzzle() {
   // If the puzzle has symbols and is large, issue a warning
@@ -279,6 +290,7 @@ function _tryLoadSerializedPuzzle(serialized) {
 
 // Sets the active editor puzzle. Also updates the dropdown for puzzle style and adds the editor hotspots.
 // @Cleanup: Confusingly, this does not modify the localStorage value for activePuzzle...
+// ^ I should clarify my scenarios for the editor. It looks like there are too many functions, which leads to confusion and bugs.
 function _setActivePuzzle(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
@@ -353,7 +365,7 @@ function _getNextValue(list, value) {
   return list[index + 1]
 }
 
-// @Cleanup: Could I just envoke "_enforceSymmetry" here?
+// Note: I cannot call _enforceSymmetry here, because we don't know which modification (to an endpoint, e.g.) is definitive
 function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return

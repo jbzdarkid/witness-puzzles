@@ -5,6 +5,7 @@ window.NEGATIONS_CANCEL_NEGATIONS = true
 // valid: Whether or not the puzzle is valid
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
 // negations: Negation symbols and their targets (for the purpose of darkening)
+// @Performance: Consider implementing a "no-ui/silent" validation mode which exits after the first error.
 function validate(puzzle) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
