@@ -39,6 +39,8 @@ function newPuzzle() {
   puzzle.name = 'Unnamed Puzzle'
   _redraw(puzzle)
   window.localStorage.setItem('activePuzzle', '')
+  // @Cleanup: Goes away when loadPuzzle works properly --- so it's probably redraw's fault
+  document.getElementById('puzzleStyle').value = 'Default'
 }
 
 function savePuzzle() {
@@ -110,31 +112,107 @@ function deletePuzzleAndLoadNext() {
   window.localStorage.setItem('activePuzzle', puzzleList[0])
 }
 
-function importPuzzle() {
-  var serialized = prompt('Paste your puzzle here:')
-  if (!_tryUpdatePuzzle(serialized)) {
-    // Only alert if user tried to enter data
-    if (serialized) alert('Not a valid puzzle!')
+/*
+if (value === false && puzzle.grid.length%2 === 0) { // Non-pillar
+  puzzle.pillar = false
+  resizePuzzle(1, 0, 'right')
+} else if (value === true && puzzle.grid.length%2 === 1) { // Pillar
+  // If puzzle is not wide enough to shrink (1xN), then prevent pillar-izing, and uncheck the box.
+  if (puzzle.grid.length <= 1) {
+    document.getElementById('pillarBox').checked = false
     return
   }
-  var savedPuzzle = puzzle.name + ' on ' + (new Date()).toLocaleString()
-  _addPuzzleToList(savedPuzzle)
-  window.localStorage.setItem(savedPuzzle, serialized)
+
+  puzzle.pillar = true
+  resizePuzzle(-1, 0, 'right')
 }
 
-function exportPuzzle() {
-  var elem = document.getElementById('export')
-  elem.value = puzzle.serialize()
-  elem.style.display = null
-  elem.select()
-  document.execCommand('copy')
-  elem.style.display = 'none'
-  alert('Puzzle copied to clipboard.')
+*/
+
+// @Bug: Dragging also should learn to go by 2s when both pillar & symmmetry are on
+// ^ Might need to adjust start/endpoints when I do this. Not sure how to do that safely.
+// @Bug: Load pillar (maybe redraw?) needs to set the select back
+function setStyle(style) {
+  console.log(style)
+  if (style === 'Default') {
+    puzzle.pillar = false
+    puzzle.symmetry = undefined
+  } else if (style === 'Horizontal Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':true, 'y':false}
+  } else if (style === 'Vertical Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':false, 'y':true}
+  } else if (style === 'Rotational Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':true, 'y':true}
+  } else if (style === 'Pillar') {
+    puzzle.pillar = true
+    puzzle.symmetry = undefined
+  } else if (style === 'Pillar (H Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':true, 'y':false}
+  } else if (style === 'Pillar (V Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':false, 'y':true}
+  } else if (style === 'Pillar (R Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':true, 'y':true}
+  } else if (style === 'Pillar (Two Lines)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':false, 'y':false}
+  } else {
+    console.error('Attempted to set unknown style', style)
+    return
+  }
+  var width = puzzle.grid.length
+  debugger;
+
+  // Non-pillar to pillar
+  if (puzzle.pillar === true) {
+    if (width === 1) {
+      width = 2
+    } else {
+      width -= width % 2 // Width must be a multiple of 2
+    }
+    if (puzzle.symmetry != undefined) {
+      width -= width % 4 // Width must be a multiple of 4
+    }
+  } else if (puzzle.pillar === false) {
+    width += 1 - width % 2
+  }
+
+  resizePuzzle(width - puzzle.grid.length, 0, 'right')
+
+  // Ensure dots are not colored
+  // Ensure start/end are appropriately paired
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
+      if (puzzle.symmetry == undefined) {
+        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
+          console.debug('Replacing dot at', x, y, 'colored', puzzle.grid[x][y].dot, 'with color 1')
+          puzzle.grid[x][y].dot = 1
+        }
+      } else {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        if (puzzle.grid[x][y].start === true) {
+          puzzle.updateCell(sym.x, sym.y, {'start':true})
+          console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
+        }
+        if (puzzle.grid[x][y].end != undefined) {
+          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
+          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+          console.debug('Addding symmetrical endpoint at', sym.x, sym.y, 'direction', symmetricalDir)
+        }
+      }
+    }
+  }
+
+  savePuzzle()
+  _redraw(puzzle)
 }
 
-function playPuzzle() {
-  window.location.href = 'index.html?puzzle=' + puzzle.serialize()
-}
 
 function solvePuzzle() {
   // If the puzzle has symbols and is large, issue a warning
@@ -155,61 +233,6 @@ function solvePuzzle() {
   }
   solutions = window.solve(puzzle)
   _showSolution(0, puzzle)
-}
-
-function setSymmetry(x, y) {
-  var symmetry = {'x':false, 'y':false}
-  if (puzzle.symmetry != undefined) symmetry = puzzle.symmetry
-  if (x !== null) symmetry.x = (x === true)
-  if (y !== null) symmetry.y = (y === true)
-  // @Future: && puzzle.pillar === false
-  if (symmetry.x === false && symmetry.y === false) {
-    puzzle.symmetry = undefined
-  } else {
-    puzzle.symmetry = symmetry
-  }
-  _enforceSymmetry()
-}
-
-function _enforceSymmetry() {
-  // Ensure puzzle is symmetrical
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
-      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
-      if (puzzle.symmetry == undefined) {
-        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
-          puzzle.grid[x][y].dot = 1
-        }
-      } else {
-        var sym = puzzle.getSymmetricalPos(x, y)
-        if (puzzle.grid[x][y].start === true) {
-          puzzle.updateCell(sym.x, sym.y, {'start':true})
-        }
-        if (puzzle.grid[x][y].end != undefined) {
-          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
-          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
-        }
-      }
-    }
-  }
-  savePuzzle()
-  _redraw(puzzle)
-}
-
-function setPillar(value) {
-  if (value === false && puzzle.grid.length%2 === 0) { // Non-pillar
-    puzzle.pillar = false
-    resizePuzzle(1, 0, 'right')
-  } else if (value === true && puzzle.grid.length%2 === 1) { // Pillar
-    // If puzzle is not wide enough to shrink (1xN), then prevent pillar-izing, and uncheck the box.
-    if (puzzle.grid.length <= 1) {
-      document.getElementById('pillarBox').checked = false
-      return
-    }
-
-    puzzle.pillar = true
-    resizePuzzle(-1, 0, 'right')
-  }
 }
 
 function _showSolution(num, puzzle) {
@@ -275,9 +298,11 @@ function _tryUpdatePuzzle(serialized) {
 
 function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
+  /*
   document.getElementById('pillarBox').checked = puzzle.pillar
   document.getElementById('hSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.x
   document.getElementById('vSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.y
+  */
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
@@ -617,9 +642,6 @@ function resizePuzzle(dx, dy, id) {
       puzzle.updateCell(x + xOffset, y + yOffset, cell)
     }
   }
-
-  savePuzzle()
-  _redraw(puzzle)
   return true
 }
 
@@ -660,6 +682,9 @@ function _dragMove(event, elem) {
 
   if (Math.abs(dx) >= 82 || Math.abs(dy) >= 82) {
     if (!resizePuzzle(2*Math.round(dx/82), 2*Math.round(dy/82), elem.id)) return
+    savePuzzle()
+    _redraw(puzzle)
+
     // If resize succeeded, set a new reference point for future drag operations
     dragging.x = event.clientX
     dragging.y = event.clientY

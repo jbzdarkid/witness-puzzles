@@ -33,6 +33,7 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
+    // @Bug: This is not working, some/all of the time. Maybe just pillars?
     window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start, startData.symStart)
     _drawSolution(puzzle, startData.x, startData.y)
   }

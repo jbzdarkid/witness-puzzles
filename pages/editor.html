@@ -26,24 +26,24 @@
       <button onclick="newPuzzle()">New</button>
       <button onclick="loadPuzzle()">Load</button>
       <button onclick="deletePuzzleAndLoadNext()">Delete</button>
-      <button onclick="importPuzzle()">Import</button>
-      <!--
-      <button onclick="exportPuzzle()">Export</button>
-      <textarea style="display:none" id="export"></textarea>
-      <button onclick="playPuzzle()">Play</button>
-      -->
       <button onclick="solvePuzzle()">Solve</button>
       <form style="display:inline" method="post" action="publish">
         <input type="text" style="display:none" name="publishData" id="publishData">
         <input type="submit" value="Publish">
       </form>
       <br>
-      <input class="checkbox" type="checkbox" id="hSymBox" onchange="setSymmetry(this.checked, null)">
-      <label cellpadding="10" for="hSymBox" style="margin-right: 20">Horizontal Symmetry</label>
-      <input class="checkbox" type="checkbox" id="vSymBox" onchange="setSymmetry(null, this.checked)">
-      <label for="vSymBox" style="margin-right: 20">Vertical Symmetry</label>
-      <input class="checkbox" type="checkbox" id="pillarBox" onchange="setPillar(this.checked)">
-      <label for="pillarBox">Pillar</label>
+      <label for="puzzleStyle">Puzzle Style: </label>
+      <select id="puzzleStyle" onchange="setStyle(this.value)">
+        <option>Default</option>
+        <option>Horizontal Symmetry</option>
+        <option>Vertical Symmetry</option>
+        <option>Rotational Symmetry</option>
+        <option>Pillar</option>
+        <option>Pillar (H Symmetry)</option>
+        <option>Pillar (V Symmetry)</option>
+        <option>Pillar (R Symmetry)</option>
+        <option>Pillar (Two Lines)</option>
+      </select>
     </div>
 
     <table id="meta">

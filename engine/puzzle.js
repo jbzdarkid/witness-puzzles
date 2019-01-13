@@ -176,7 +176,7 @@ class Puzzle {
     return dir
   }
 
-  // @Cleanup: This has duplication now.
+  // @Cleanup: Avoid duplicating x symmetry?
   getSymmetricalPos(x, y) {
     if (this.symmetry != undefined) {
       if (this.pillar === true) {
