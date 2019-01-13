@@ -39,8 +39,6 @@ function newPuzzle() {
   puzzle.name = 'Unnamed Puzzle'
   _redraw(puzzle)
   window.localStorage.setItem('activePuzzle', '')
-  // @Cleanup: Goes away when loadPuzzle works properly --- so it's probably redraw's fault
-  document.getElementById('puzzleStyle').value = 'Default'
 }
 
 function savePuzzle() {
@@ -112,26 +110,8 @@ function deletePuzzleAndLoadNext() {
   window.localStorage.setItem('activePuzzle', puzzleList[0])
 }
 
-/*
-if (value === false && puzzle.grid.length%2 === 0) { // Non-pillar
-  puzzle.pillar = false
-  resizePuzzle(1, 0, 'right')
-} else if (value === true && puzzle.grid.length%2 === 1) { // Pillar
-  // If puzzle is not wide enough to shrink (1xN), then prevent pillar-izing, and uncheck the box.
-  if (puzzle.grid.length <= 1) {
-    document.getElementById('pillarBox').checked = false
-    return
-  }
-
-  puzzle.pillar = true
-  resizePuzzle(-1, 0, 'right')
-}
-
-*/
-
 // @Bug: Dragging also should learn to go by 2s when both pillar & symmmetry are on
 // ^ Might need to adjust start/endpoints when I do this. Not sure how to do that safely.
-// @Bug: Load pillar (maybe redraw?) needs to set the select back
 function setStyle(style) {
   console.log(style)
   if (style === 'Default') {
@@ -298,14 +278,34 @@ function _tryUpdatePuzzle(serialized) {
 
 function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
-  /*
-  document.getElementById('pillarBox').checked = puzzle.pillar
-  document.getElementById('hSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.x
-  document.getElementById('vSymBox').checked = puzzle.symmetry != undefined && puzzle.symmetry.y
-  */
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
+  var puzzleStyle = document.getElementById('puzzleStyle')
+  if (puzzle.pillar === false) {
+    if (puzzle.symmetry == undefined) {
+      puzzleStyle.value = 'Default'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === false) {
+      puzzleStyle.value = 'Horizontal Symmetry'
+    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Vertical Symmetry'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Rotational Symmetry'
+    }
+  } else if (puzzle.pillar === true) {
+    if (puzzle.symmetry == undefined) {
+      puzzleStyle.value = 'Pillar'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === false) {
+      puzzleStyle.value = 'Pillar (H Symmetry)'
+    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Pillar (V Symmetry)'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Pillar (R Symmetry)'
+    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === false) {
+      puzzleStyle.value = 'Pillar (Two Lines)'
+    }
+  }
+  console.log(puzzleStyle.value)
 
   var puzzleElement = document.getElementById('puzzle')
   for (var child of puzzleElement.children) {

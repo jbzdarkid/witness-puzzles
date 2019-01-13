@@ -62,14 +62,6 @@ function TELEMETRY(type) {
   )
 }
 
-// @Deprecated: Colors aren't generated any more...
-window.WHITE = 'white'
-window.BLACK = 'black'
-window.RED = 'red'
-window.BLUE = 'blue'
-window.ORANGE = 'orange'
-window.YELLOW = 'yellow'
-
 window.LINE_PRIMARY = '#8FF'
 window.LINE_SECONDARY = '#FF2'
 

@@ -266,10 +266,6 @@ class PathSegment {
         points2.x2 + ' ' + points2.y1
       )
 
-      // @Robustness: Why do we not render the cursor in the startpoint?
-      // if (this.dir !== 'none') {
-      // }
-
       this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
       this.sympoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
     }
