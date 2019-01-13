@@ -291,5 +291,6 @@ function _drawSolution(puzzle, x, y) {
     puzzle.updateCell(x, y, {'color':0})
     onMove(41 * dx, 41 * dy)
     puzzle.updateCell(x, y, {'color':1})
+    console.log(data.x, data.y)
   }
 }

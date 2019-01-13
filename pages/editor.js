@@ -1,7 +1,7 @@
 window.DISABLE_CACHE = true
 var activeParams = {'id':'', 'color':'black', 'polyshape': 71}
 var puzzle
-var dragging = false
+var dragging
 var solutions = []
 
 window.onload = function() {
@@ -9,7 +9,7 @@ window.onload = function() {
   var serialized = window.localStorage.getItem(activePuzzle)
 
   newPuzzle() // Load an empty puzzle so that we have a fall-back
-  if (_tryUpdatePuzzle(serialized)) {
+  if (_tryLoadSerializedPuzzle(serialized)) {
     window.localStorage.setItem('activePuzzle', activePuzzle)
   }
 
@@ -37,11 +37,13 @@ function newPuzzle() {
   puzzle.grid[0][8].start = true
   puzzle.grid[8][0].end = 'right'
   puzzle.name = 'Unnamed Puzzle'
-  _redraw(puzzle)
+  _setActivePuzzle(puzzle)
+  // This ensures that new puzzles are not added to the puzzleList until they are modified
   window.localStorage.setItem('activePuzzle', '')
 }
 
 function savePuzzle() {
+  console.spam('Saving puzzle', puzzle.name)
   // Delete the old puzzle & add the current
   var activePuzzle = window.localStorage.getItem('activePuzzle')
   window.localStorage.removeItem(activePuzzle)
@@ -49,8 +51,7 @@ function savePuzzle() {
 
   // Save the new version
   puzzle.name = document.getElementById('puzzleName').innerText
-  // console.log('Saving puzzle', puzzle.name)
-  // TODO: Some intelligence about showing day / month / etc depending on date age
+  // @Robustness: Some intelligence about showing day / month / etc depending on date age
   var savedPuzzle = puzzle.name + ' on ' + (new Date()).toLocaleString()
   _addPuzzleToList(savedPuzzle)
   var serialized = puzzle.serialize()
@@ -79,7 +80,7 @@ function loadPuzzle() {
     _addPuzzleToList(this.value)
 
     var serialized = window.localStorage.getItem(this.value)
-    if (!_tryUpdatePuzzle(serialized)) {
+    if (!_tryLoadSerializedPuzzle(serialized)) {
       deletePuzzleAndLoadNext()
     }
 
@@ -90,7 +91,7 @@ function loadPuzzle() {
 
 function deletePuzzleAndLoadNext() {
   var activePuzzle = window.localStorage.getItem('activePuzzle')
-  // console.log('Deleting', activePuzzle)
+  console.spam('Deleting', activePuzzle)
   window.localStorage.removeItem(activePuzzle)
   _removePuzzleFromList(activePuzzle)
 
@@ -98,7 +99,7 @@ function deletePuzzleAndLoadNext() {
   if (puzzleList == null) puzzleList = []
   while (puzzleList.length > 0) {
     var serialized = window.localStorage.getItem(puzzleList[0])
-    if (_tryUpdatePuzzle(serialized)) break
+    if (_tryLoadSerializedPuzzle(serialized)) break
     puzzleList.shift()
   }
 
@@ -110,8 +111,6 @@ function deletePuzzleAndLoadNext() {
   window.localStorage.setItem('activePuzzle', puzzleList[0])
 }
 
-// @Bug: Dragging also should learn to go by 2s when both pillar & symmmetry are on
-// ^ Might need to adjust start/endpoints when I do this. Not sure how to do that safely.
 function setStyle(style) {
   console.log(style)
   if (style === 'Default') {
@@ -146,7 +145,6 @@ function setStyle(style) {
     return
   }
   var width = puzzle.grid.length
-  debugger;
 
   // Non-pillar to pillar
   if (puzzle.pillar === true) {
@@ -189,8 +187,8 @@ function setStyle(style) {
     }
   }
 
+  _setActivePuzzle(puzzle)
   savePuzzle()
-  _redraw(puzzle)
 }
 
 
@@ -237,7 +235,7 @@ function _showSolution(num, puzzle) {
   }
   if (solutions[num] != undefined) {
     solutions[num].name = puzzle.name
-    _redraw(solutions[num])
+    _setActivePuzzle(solutions[num])
   }
   document.getElementById('solutionViewer').style.display = null
 }
@@ -251,7 +249,7 @@ function _addPuzzleToList(puzzleName) {
 }
 
 function _removePuzzleFromList(puzzleName) {
-  // console.log('Removing puzzle', puzzleName)
+  console.spam('Removing puzzle', puzzleName)
   var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
   if (!puzzleList) puzzleList = []
   var index = puzzleList.indexOf(puzzleName)
@@ -260,27 +258,29 @@ function _removePuzzleFromList(puzzleName) {
   window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
 
-function _tryUpdatePuzzle(serialized) {
+function _tryLoadSerializedPuzzle(serialized) {
   if (!serialized) return false
-  var savedPuzzle = puzzle
   try {
-    puzzle = Puzzle.deserialize(serialized)
-    _redraw(puzzle) // Will throw for most invalid puzzles
-    document.getElementById('puzzleName').innerText = puzzle.name
+    var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
+    _setActivePuzzle(newPuzzle)
+    puzzle = newPuzzle
     return true
   } catch (e) {
-    console.log(e)
-    puzzle = savedPuzzle
-    _redraw(puzzle)
-    return false
+    console.error('Failed to load serialized puzzle', e)
   }
+  _setActivePuzzle(puzzle) // Reload the old puzzle in case we got halfway through drawing the new one
+  return false
 }
 
-function _redraw(puzzle) {
+// Sets the active editor puzzle. Also updates the dropdown for puzzle style and adds the editor hotspots.
+// @Bug: This needs to call _enforceSymmetry() or whatever. I should also look into making said enforcement smarter.
+// @Cleanup: Confusingly, this does not modify the localStorage value for activePuzzle...
+function _setActivePuzzle(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
+
   var puzzleStyle = document.getElementById('puzzleStyle')
   if (puzzle.pillar === false) {
     if (puzzle.symmetry == undefined) {
@@ -305,8 +305,9 @@ function _redraw(puzzle) {
       puzzleStyle.value = 'Pillar (Two Lines)'
     }
   }
-  console.log(puzzleStyle.value)
+  console.log('Computed puzzle style', puzzleStyle.value)
 
+  // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
   var puzzleElement = document.getElementById('puzzle')
   for (var child of puzzleElement.children) {
     child.onclick = null
@@ -437,7 +438,7 @@ function _onElementClicked(x, y) {
   }
 
   savePuzzle()
-  _redraw(puzzle)
+  _setActivePuzzle(puzzle)
 }
 
 var symbolData = {
@@ -659,14 +660,14 @@ function _dragStart(event, elem) {
   anchor.style.cursor = elem.style.cursor
   anchor.onmousemove = function(event) {_dragMove(event, elem)}
   anchor.onmouseup = function() {
-    dragging = false
+    dragging = undefined
     var anchor = document.getElementById('anchor')
     anchor.parentElement.removeChild(anchor)
   }
 }
 
 function _dragMove(event, elem) {
-  if (!dragging) return
+  if (dragging == undefined) return
   var dx = 0
   var dy = 0
   if (elem.id.includes('left')) {
@@ -680,10 +681,16 @@ function _dragMove(event, elem) {
     dy = event.clientY - dragging.y
   }
 
-  if (Math.abs(dx) >= 82 || Math.abs(dy) >= 82) {
-    if (!resizePuzzle(2*Math.round(dx/82), 2*Math.round(dy/82), elem.id)) return
+  var xLim = 41
+  // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
+  if (puzzle.symmetry != undefined && puzzle.pillar === true) {
+    xLim = 82
+  }
+
+  if (Math.abs(dx) >= xLim || Math.abs(dy) >= 41) {
+    if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/41), elem.id)) return
+    _setActivePuzzle(puzzle)
     savePuzzle()
-    _redraw(puzzle)
 
     // If resize succeeded, set a new reference point for future drag operations
     dragging.x = event.clientX

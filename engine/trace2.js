@@ -408,18 +408,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   data.pos = pos
   data.puzzle = puzzle
   data.path = []
-  /*data = {
-    'tracing':true,
-    'svg':svg,
-    // Cursor element and location
-    'cursor': cursor,
-    'x':x,
-    'y':y,
-    // Position within puzzle.grid
-    'pos':pos,
-    'puzzle':puzzle,
-    'path':[],
-  }*/
+
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
   } else if (pos.y % 2 === 1) { // Start point is on a vertical segment
@@ -463,7 +452,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
 }
 
 document.onpointerlockchange = function() {
-  if (document.pointerLockElement == null ) {
+  if (document.pointerLockElement == null) {
     document.onmousemove = null
     document.ontouchmove = null
     document.onclick = null
@@ -471,6 +460,8 @@ document.onpointerlockchange = function() {
   } else {
     var sens = parseFloat(document.getElementById('sens').value)
     document.onmousemove = function(event) {
+      // Working around a race condition where movement events fire after the handler is removed.
+      if (data.tracing !== true) return
       onMove(sens * event.movementX, sens * event.movementY)
     }
     document.ontouchmove = function(event) {
@@ -481,7 +472,6 @@ document.onpointerlockchange = function() {
 }
 
 function onMove(dx, dy) {
-  if (!data.tracing) return
   // Also handles some collision
   var colliedWith = _pushCursor(dx, dy)
   console.spam('Collided with', colliedWith)
