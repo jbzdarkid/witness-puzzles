@@ -33,7 +33,7 @@ function draw(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   _drawSymbols(puzzle, svg, target)
   if (startData) {
-    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start)
+    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start, startData.symStart)
     _drawSolution(puzzle, startData.x, startData.y)
   }
 }
@@ -41,6 +41,8 @@ function draw(puzzle, target='puzzle') {
 function _drawGrid(puzzle, svg) {
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell != undefined && cell.gap === 2) continue
       var line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
@@ -114,11 +116,18 @@ function _drawSymbols(puzzle, svg, target) {
       if (cell.dot > 0) {
         params.type = 'dot'
         if (cell.dot === 1) params.color = 'black'
-        // @Future: When I implement 2-color dots
-        // if (cell.dot === 2) params.color = 'blue'
-        // if (cell.dot === 3) params.color = 'orange'
+        else if (cell.dot === 2) params.color = window.LINE_PRIMARY
+        else if (cell.dot === 3) params.color = window.LINE_SECONDARY
+        else if (cell.dot === 4) {
+          params.color = window.FOREGROUND
+          // This makes the invisible dots visible, but only while we're in the editor.
+          if (window.activeParams != undefined) {
+            params.stroke = 'black'
+            params.strokeWidth = '2px'
+          }
+        }
         drawSymbolWithSvg(svg, params)
-      } else if (cell.gap) {
+      } else if (cell.gap === 1) {
         params.type = 'gap'
         if (x%2 === 0 && y%2 === 1) params.rot = 1
         drawSymbolWithSvg(svg, params)
@@ -137,6 +146,14 @@ function _drawStartAndEnd(puzzle, svg) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (cell.end != undefined) {
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          var symCell = puzzle.getCell(sym.x, sym.y)
+          if (symCell.end == undefined) {
+            console.error('Found an endpoint at', x, y, 'but there was no symmetrical endpoint at', sym.x, sym.y)
+          }
+        }
+
         window.drawSymbolWithSvg(svg, {
           'type':'end',
           'width': 58,
@@ -146,7 +163,27 @@ function _drawStartAndEnd(puzzle, svg) {
           'y': y*41 + 23,
         })
       }
+
       if (cell.start === true) {
+        var symStart = undefined
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          var symCell = puzzle.getCell(sym.x, sym.y)
+          if (symCell.start !== true) {
+            console.error('Found a startpoint at', x, y, 'but there was no symmetrical startpoint at', sym.x, sym.y)
+          }
+
+          window.drawSymbolWithSvg(svg, {
+            'type':'start',
+            'width': 58,
+            'height': 58,
+            'x': sym.x*41 + 23,
+            'y': sym.y*41 + 23,
+          })
+          symStart = svg.lastChild
+          symStart.style.display = 'none'
+        }
+
         window.drawSymbolWithSvg(svg, {
           'type':'start',
           'width': 58,
@@ -154,12 +191,16 @@ function _drawStartAndEnd(puzzle, svg) {
           'x': x*41 + 23,
           'y': y*41 + 23,
         })
-        var start = svg.lastChild
-        window.addTraceStart(puzzle, {'x':x, 'y':y}, start)
+        var start = svg.lastChild;
+
+        (function(puzzle, x, y, start, symStart) {
+          start.onclick = function(event) {
+            trace(event, puzzle, {'x':x, 'y':y}, start, symStart)
+          }
+        })(puzzle, x, y, start, symStart)
 
         // The startpoint must have a primary line through it
-        // @Future: if (cell.color !== 1 || cell.color !== 2) continue
-        if (cell.color !== 1) continue
+        if (cell.color !== 1 && cell.color !== 2) continue
 
         // And that line must not be coming from any adjacent cells
         var leftCell = puzzle.getCell(x - 1, y)
@@ -174,7 +215,7 @@ function _drawStartAndEnd(puzzle, svg) {
         var bottomCell = puzzle.getCell(x, y + 1)
         if (bottomCell != undefined && bottomCell.dir === 'top') continue
 
-        startData = {'x':x, 'y':y, 'start':start}
+        startData = {'x':x, 'y':y, 'start':start, 'symStart': symStart}
       }
     }
   }
@@ -214,7 +255,6 @@ function _drawSolution(puzzle, x, y) {
 
   // Limited because there is a chance of infinite looping with bad input data.
   for (var i=0; i<1000; i++) {
-    console.log(puzzle.grid[8][8])
     var cell = puzzle.getCell(x, y)
     if (cell == undefined) {
       console.error('Solution trace went out of bounds at', x, y)

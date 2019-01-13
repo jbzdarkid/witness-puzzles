@@ -64,9 +64,13 @@ class Puzzle {
     // Lines default to {'type':'line', 'color':0}
     for (var x=0; x<puzzle.grid.length; x++) {
       for (var y=0; y<puzzle.grid[x].length; y++) {
-        if (puzzle.grid[x][y] === false) {
+        var cell = puzzle.grid[x][y]
+        if (cell === false) {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
           else puzzle.grid[x][y] = {'type':'line', 'color':0}
+        } else if (cell != undefined && cell.gap === true) {
+          // @Legacy: Gaps used to be undefined/true, are now undefined/1/2
+          puzzle.grid[x][y].gap = 1
         }
       }
     }
@@ -99,11 +103,12 @@ class Puzzle {
     }
     if (parsed.gaps) {
       for (var gap of parsed.gaps) {
-        puzzle.grid[gap.x][gap.y].gap = true
+        puzzle.grid[gap.x][gap.y].gap = 1
       }
     }
     puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
+    puzzle.symmetry = parsed.symmetry
     return puzzle
   }
 
@@ -157,6 +162,40 @@ class Puzzle {
     this.grid[x][y] = value
   }
 
+  getSymmetricalDir(dir) {
+    if (this.symmetry != undefined) {
+      if (this.symmetry.x === true) {
+        if (dir === 'left') return 'right'
+        if (dir === 'right') return 'left'
+      }
+      if (this.symmetry.y === true) {
+        if (dir === 'top') return 'bottom'
+        if (dir === 'bottom') return 'top'
+      }
+    }
+    return dir
+  }
+
+  // @Cleanup: Avoid duplicating x symmetry?
+  getSymmetricalPos(x, y) {
+    if (this.symmetry != undefined) {
+      if (this.pillar === true) {
+        x += this.grid.length/2
+        if (this.symmetry.x === true) {
+          x = this.grid.length - x
+        }
+      } else {
+        if (this.symmetry.x === true) {
+          x = (this.grid.length - 1) - x
+        }
+      }
+      if (this.symmetry.y === true) {
+        y = (this.grid[0].length - 1) - y
+      }
+    }
+    return {'x':this._mod(x), 'y':y}
+  }
+
   // A variant of getCell which specifically returns line values,
   // and treats objects as being out-of-bounds
   getLine(x, y) {
@@ -185,16 +224,6 @@ class Puzzle {
     return dirs
   }
 
-  clone() {
-    var copy = new Puzzle(0, 0)
-    // @Performance: This is only used when making the solution array, to my knowledge.
-    copy.grid = JSON.parse(JSON.stringify(this.grid))
-    copy.regionCache = this.regionCache
-    copy.pillar = this.pillar
-    copy.hints = this.hints
-    return copy
-  }
-
   // Called on a solution. Computes a list of gaps to show as hints which *do not*
   // break the path.
   loadHints() {
@@ -214,7 +243,7 @@ class Puzzle {
   // Returns the shown hint.
   showHint(hint) {
     if (hint != undefined) {
-      this.grid[hint.x][hint.y].gap = true
+      this.grid[hint.x][hint.y].gap = 1
       return
     }
 
@@ -236,7 +265,7 @@ class Puzzle {
     } else {
       return
     }
-    this.grid[hint.x][hint.y].gap = true
+    this.grid[hint.x][hint.y].gap = 1
     this.hints = badHints.concat(goodHints)
     return hint
   }
@@ -298,6 +327,8 @@ class Puzzle {
   }
 
   logGrid() {
+    // If the log level is too low, skip this
+    if (console.log.toString().length == 13) return
     var output = ''
     for (var y=0; y<this.grid[0].length; y++) {
       for (var x=0; x<this.grid.length; x++) {

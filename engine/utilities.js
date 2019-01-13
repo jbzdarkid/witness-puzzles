@@ -62,12 +62,8 @@ function TELEMETRY(type) {
   )
 }
 
-window.WHITE = 'white'
-window.BLACK = 'black'
-window.RED = 'red'
-window.BLUE = 'blue'
-window.ORANGE = 'orange'
-window.YELLOW = 'yellow'
+window.LINE_PRIMARY = '#8FF'
+window.LINE_SECONDARY = '#FF2'
 
 if (localStorage.theme === 'true') { // Dark scheme
   window.BACKGROUND      = '#221' // '#000'
@@ -90,32 +86,16 @@ if (localStorage.theme === 'true') { // Dark scheme
   window.TEXT_COLOR      = '#000'
   window.PAGE_BACKGROUND = '#FFF'
 }
-
+// pointer-events: none; allows for onclick events to bubble up
 var animations =
-'.line {' +
-'  fill: ' + window.LINE_DEFAULT + ';' +
-'  pointer-events: none;' +
-'}' +
-'@keyframes line-success {' +
-'  from {fill: ' + window.LINE_DEFAULT + ';}' +
-'  to {fill: ' + window.LINE_SUCCESS + ';}' +
-'}' +
-'@keyframes line-fail {' +
-'  from {fill: ' + window.LINE_DEFAULT + ';}' +
-'  to {fill: ' + window.LINE_FAIL + ';}' +
-'}' +
-'@keyframes start-grow {' +
-'  from {height: 12; width: 12; top: 6; left: 6;}' +
-'  to {height: 48; width: 48; top: -12; left: -12;}' +
-'}' +
-'@keyframes error {' +
-'  from {}' +
-'  to {fill: red;}' +
-'}' +
-'@keyframes fade {' +
-'  from {}' +
-'  to {opacity: 0.35;}' +
-'}'
+'.line-1 {fill: ' + window.LINE_DEFAULT + '; pointer-events: none;}' +
+'.line-2 {fill: ' + window.LINE_PRIMARY + '; pointer-events: none;}' +
+'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none;}' +
+'@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}' +
+'@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}' +
+'@keyframes error {to {fill: red;}}' +
+'@keyframes fade {to {opacity: 0.35;}}' +
+'@keyframes start-grow {from {r:12;} to {r: 24;}}'
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'

@@ -1,7 +1,7 @@
 window.DISABLE_CACHE = true
 var activeParams = {'id':'', 'color':'black', 'polyshape': 71}
 var puzzle
-var dragging = false
+var dragging
 var solutions = []
 
 window.onload = function() {
@@ -9,7 +9,7 @@ window.onload = function() {
   var serialized = window.localStorage.getItem(activePuzzle)
 
   newPuzzle() // Load an empty puzzle so that we have a fall-back
-  if (_tryUpdatePuzzle(serialized)) {
+  if (_tryLoadSerializedPuzzle(serialized)) {
     window.localStorage.setItem('activePuzzle', activePuzzle)
   }
 
@@ -37,11 +37,13 @@ function newPuzzle() {
   puzzle.grid[0][8].start = true
   puzzle.grid[8][0].end = 'right'
   puzzle.name = 'Unnamed Puzzle'
-  _redraw(puzzle)
+  _setActivePuzzle(puzzle)
+  // This ensures that new puzzles are not added to the puzzleList until they are modified
   window.localStorage.setItem('activePuzzle', '')
 }
 
 function savePuzzle() {
+  console.spam('Saving puzzle', puzzle.name)
   // Delete the old puzzle & add the current
   var activePuzzle = window.localStorage.getItem('activePuzzle')
   window.localStorage.removeItem(activePuzzle)
@@ -49,8 +51,7 @@ function savePuzzle() {
 
   // Save the new version
   puzzle.name = document.getElementById('puzzleName').innerText
-  // console.log('Saving puzzle', puzzle.name)
-  // TODO: Some intelligence about showing day / month / etc depending on date age
+  // @Robustness: Some intelligence about showing day / month / etc depending on date age
   var savedPuzzle = puzzle.name + ' on ' + (new Date()).toLocaleString()
   _addPuzzleToList(savedPuzzle)
   var serialized = puzzle.serialize()
@@ -79,7 +80,7 @@ function loadPuzzle() {
     _addPuzzleToList(this.value)
 
     var serialized = window.localStorage.getItem(this.value)
-    if (!_tryUpdatePuzzle(serialized)) {
+    if (!_tryLoadSerializedPuzzle(serialized)) {
       deletePuzzleAndLoadNext()
     }
 
@@ -90,14 +91,15 @@ function loadPuzzle() {
 
 function deletePuzzleAndLoadNext() {
   var activePuzzle = window.localStorage.getItem('activePuzzle')
-  // console.log('Deleting', activePuzzle)
+  console.spam('Deleting', activePuzzle)
   window.localStorage.removeItem(activePuzzle)
   _removePuzzleFromList(activePuzzle)
 
   var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
+  if (puzzleList == null) puzzleList = []
   while (puzzleList.length > 0) {
     var serialized = window.localStorage.getItem(puzzleList[0])
-    if (_tryUpdatePuzzle(serialized)) break
+    if (_tryLoadSerializedPuzzle(serialized)) break
     puzzleList.shift()
   }
 
@@ -111,7 +113,7 @@ function deletePuzzleAndLoadNext() {
 
 function importPuzzle() {
   var serialized = prompt('Paste your puzzle here:')
-  if (!_tryUpdatePuzzle(serialized)) {
+  if (!_tryLoadSerializedPuzzle(serialized)) {
     // Only alert if user tried to enter data
     if (serialized) alert('Not a valid puzzle!')
     return
@@ -121,18 +123,88 @@ function importPuzzle() {
   window.localStorage.setItem(savedPuzzle, serialized)
 }
 
-function exportPuzzle() {
-  var elem = document.getElementById('export')
-  elem.value = puzzle.serialize()
-  elem.style.display = null
-  elem.select()
-  document.execCommand('copy')
-  elem.style.display = 'none'
-  alert('Puzzle copied to clipboard.')
+function setStyle(style) {
+  console.log(style)
+  if (style === 'Default') {
+    puzzle.pillar = false
+    puzzle.symmetry = undefined
+  } else if (style === 'Horizontal Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':true, 'y':false}
+  } else if (style === 'Vertical Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':false, 'y':true}
+  } else if (style === 'Rotational Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':true, 'y':true}
+  } else if (style === 'Pillar') {
+    puzzle.pillar = true
+    puzzle.symmetry = undefined
+  } else if (style === 'Pillar (H Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':true, 'y':false}
+  } else if (style === 'Pillar (V Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':false, 'y':true}
+  } else if (style === 'Pillar (R Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':true, 'y':true}
+  } else if (style === 'Pillar (Two Lines)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':false, 'y':false}
+  } else {
+    console.error('Attempted to set unknown style', style)
+    return
+  }
+  var width = puzzle.grid.length
+
+  // Non-pillar to pillar
+  if (puzzle.pillar === true) {
+    if (width === 1) {
+      width = 2
+    } else {
+      width -= width % 2 // Width must be a multiple of 2
+    }
+    if (puzzle.symmetry != undefined) {
+      width -= width % 4 // Width must be a multiple of 4
+    }
+  } else if (puzzle.pillar === false) {
+    width += 1 - width % 2
+  }
+
+  resizePuzzle(width - puzzle.grid.length, 0, 'right')
+  _enforceSymmetry()
+  _setActivePuzzle(puzzle)
+  savePuzzle()
 }
 
-function playPuzzle() {
-  window.location.href = 'index.html?puzzle=' + puzzle.serialize()
+// @Future: This should be more intelligent, maybe something like
+// 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
+function _enforceSymmetry() {
+  // Ensure dots are not colored
+  // Ensure start/end are appropriately paired
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
+      if (puzzle.symmetry == undefined) {
+        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
+          console.debug('Replacing dot at', x, y, 'colored', puzzle.grid[x][y].dot, 'with color 1')
+          puzzle.grid[x][y].dot = 1
+        }
+      } else {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        if (puzzle.grid[x][y].start === true) {
+          puzzle.updateCell(sym.x, sym.y, {'start':true})
+          console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
+        }
+        if (puzzle.grid[x][y].end != undefined) {
+          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
+          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+          console.debug('Addding symmetrical endpoint at', sym.x, sym.y, 'direction', symmetricalDir)
+        }
+      }
+    }
+  }
 }
 
 function solvePuzzle() {
@@ -154,30 +226,6 @@ function solvePuzzle() {
   }
   solutions = window.solve(puzzle)
   _showSolution(0, puzzle)
-}
-
-function setHSymmetry(value) {
-
-}
-
-function setVSymmetry(value) {
-
-}
-
-function setPillar(value) {
-  if (value === false && puzzle.grid.length%2 === 0) { // Non-pillar
-    puzzle.pillar = false
-    resizePuzzle(1, 0, 'right')
-  } else if (value === true && puzzle.grid.length%2 === 1) { // Pillar
-    // If puzzle is not wide enough to shrink (1xN), then prevent pillar-izing, and uncheck the box.
-    if (puzzle.grid.length <= 1) {
-      document.getElementById('pillarBox').checked = false
-      return
-    }
-
-    puzzle.pillar = true
-    resizePuzzle(-1, 0, 'right')
-  }
 }
 
 function _showSolution(num, puzzle) {
@@ -202,7 +250,7 @@ function _showSolution(num, puzzle) {
   }
   if (solutions[num] != undefined) {
     solutions[num].name = puzzle.name
-    _redraw(solutions[num])
+    _setActivePuzzle(solutions[num])
   }
   document.getElementById('solutionViewer').style.display = null
 }
@@ -216,7 +264,7 @@ function _addPuzzleToList(puzzleName) {
 }
 
 function _removePuzzleFromList(puzzleName) {
-  // console.log('Removing puzzle', puzzleName)
+  console.spam('Removing puzzle', puzzleName)
   var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
   if (!puzzleList) puzzleList = []
   var index = puzzleList.indexOf(puzzleName)
@@ -225,32 +273,64 @@ function _removePuzzleFromList(puzzleName) {
   window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
 
-function _tryUpdatePuzzle(serialized) {
+function _tryLoadSerializedPuzzle(serialized) {
   if (!serialized) return false
-  var savedPuzzle = puzzle
   try {
-    puzzle = Puzzle.deserialize(serialized)
-    _redraw(puzzle) // Will throw for most invalid puzzles
-    document.getElementById('puzzleName').innerText = puzzle.name
+    var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
+    _enforceSymmetry()
+    _setActivePuzzle(newPuzzle)
+    puzzle = newPuzzle
     return true
   } catch (e) {
-    console.log(e)
-    puzzle = savedPuzzle
-    _redraw(puzzle)
-    return false
+    console.error('Failed to load serialized puzzle', e)
   }
+  _setActivePuzzle(puzzle) // Reload the old puzzle in case we got halfway through drawing the new one
+  return false
 }
 
-function _redraw(puzzle) {
+// Sets the active editor puzzle. Also updates the dropdown for puzzle style and adds the editor hotspots.
+// @Cleanup: Confusingly, this does not modify the localStorage value for activePuzzle...
+// ^ I should clarify my scenarios for the editor. It looks like there are too many functions, which leads to confusion and bugs.
+function _setActivePuzzle(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
-  document.getElementById('pillarBox').checked = puzzle.pillar
   window.draw(puzzle)
   document.getElementById('publishData').setAttribute('value', puzzle.serialize())
   document.getElementById('solutionViewer').style.display = 'none'
 
+  var puzzleStyle = document.getElementById('puzzleStyle')
+  if (puzzle.pillar === false) {
+    if (puzzle.symmetry == undefined) {
+      puzzleStyle.value = 'Default'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === false) {
+      puzzleStyle.value = 'Horizontal Symmetry'
+    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Vertical Symmetry'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Rotational Symmetry'
+    }
+  } else if (puzzle.pillar === true) {
+    if (puzzle.symmetry == undefined) {
+      puzzleStyle.value = 'Pillar'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === false) {
+      puzzleStyle.value = 'Pillar (H Symmetry)'
+    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Pillar (V Symmetry)'
+    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === true) {
+      puzzleStyle.value = 'Pillar (R Symmetry)'
+    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === false) {
+      puzzleStyle.value = 'Pillar (Two Lines)'
+    }
+  }
+  console.log('Computed puzzle style', puzzleStyle.value)
+
+  // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
   var puzzleElement = document.getElementById('puzzle')
   for (var child of puzzleElement.children) {
     child.onclick = null
+  }
+
+  var addOnClick = function(elem, x, y) {
+    elem.onclick = function() {_onElementClicked(x, y)}
   }
 
   var xPos = 40
@@ -269,8 +349,7 @@ function _redraw(puzzle) {
       rect.setAttribute('fill', 'white')
       rect.setAttribute('opacity', 0)
       yPos += height
-      rect.id = x + '_' + y
-      rect.onclick = function() {_onElementClicked(this)}
+      addOnClick(rect, x, y)
       rect.onmouseover = function() {this.setAttribute('opacity', 0.1)}
       rect.onmouseout = function() {this.setAttribute('opacity', 0)}
     }
@@ -278,10 +357,16 @@ function _redraw(puzzle) {
   }
 }
 
-function _onElementClicked(elem) {
-  var x = parseInt(elem.id.split('_')[0], 10)
-  var y = parseInt(elem.id.split('_')[1], 10)
+// Returns the next value in the list.
+// If the value is not found, defaults to the first element.
+// If the value is found, but is the last value, returns undefined.
+function _getNextValue(list, value) {
+  var index = list.indexOf(value)
+  return list[index + 1]
+}
 
+// Note: I cannot call _enforceSymmetry here, because we don't know which modification (to an endpoint, e.g.) is definitive
+function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].start == undefined) {
@@ -289,38 +374,36 @@ function _onElementClicked(elem) {
     } else {
       puzzle.grid[x][y].start = undefined
     }
+    if (puzzle.symmetry != undefined) {
+      var sym = puzzle.getSymmetricalPos(x, y)
+      puzzle.updateCell(sym.x, sym.y, {'start':puzzle.grid[x][y].start})
+    }
   } else if (activeParams.type === 'end') {
     if (x%2 === 1 && y%2 === 1) return
     var validDirs = puzzle.getValidEndDirs(x, y)
-    if (validDirs.length === 0) return
 
-    // Choose the first valid direction
-    var dir = validDirs[0]
     // If (x, y) is an endpoint, loop to the next direction
-    var index = validDirs.indexOf(puzzle.grid[x][y].end)
-    if (index !== -1) {
-      dir = validDirs[index + 1]
-    }
     // If the direction loops past the end (or there are no valid directions),
     // remove the endpoint by setting to undefined.
+    var dir = _getNextValue(validDirs, puzzle.grid[x][y].end)
     puzzle.grid[x][y].end = dir
+    if (puzzle.symmetry != undefined) {
+      var sym = puzzle.getSymmetricalPos(x, y)
+      var symmetricalDir = puzzle.getSymmetricalDir(dir)
+      puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+    }
   } else if (activeParams.type === 'dot') {
     if (x%2 === 1 && y%2 === 1) return
-    // @Future: Some way to toggle colors, should be cognizant of symmetry mode.
-    if (puzzle.grid[x][y].dot === 1) {
-      puzzle.grid[x][y].dot = undefined
-    } else {
-      puzzle.grid[x][y].gap = undefined
-      puzzle.grid[x][y].dot = 1
+    var dotColors = [undefined, 1]
+    if (puzzle.symmetry != undefined) {
+      dotColors.push(2)
+      dotColors.push(3)
     }
+    dotColors.push(4)
+    puzzle.grid[x][y].dot = _getNextValue(dotColors, puzzle.grid[x][y].dot)
   } else if (activeParams.type === 'gap') {
     if (x%2 === y%2) return
-    if (puzzle.grid[x][y].gap === true) {
-      puzzle.grid[x][y].gap = undefined
-    } else {
-      puzzle.grid[x][y].dot = undefined
-      puzzle.grid[x][y].gap = true
-    }
+    puzzle.grid[x][y].gap = _getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
@@ -372,22 +455,22 @@ function _onElementClicked(elem) {
   }
 
   savePuzzle()
-  _redraw(puzzle)
+  _setActivePuzzle(puzzle)
 }
 
 var symbolData = {
-  'start': {'type':'start'},
-  'end': {'type':'end', 'y':18, 'dir':'top'},
-  'gap': {'type':'gap'},
-  'dot': {'type':'dot'},
-  'square': {'type':'square'},
-  'star': {'type':'star'},
-  'nega': {'type':'nega'},
-  'triangle': {'type':'triangle', 'count':1},
-  'poly': {'type':'poly', 'rot':0, 'polyshape':71},
-  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71},
-  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71},
-  'rylop': {'type':'ylop', 'rot':'all', 'polyshape':71},
+  'start': {'type':'start', 'title':'Start point'},
+  'end': {'type':'end', 'y':18, 'dir':'top', 'title':'End point'},
+  'gap': {'type':'gap', 'title':'Line break'},
+  'dot': {'type':'dot', 'title':'Dot'},
+  'square': {'type':'square', 'title':'Square'},
+  'star': {'type':'star', 'title':'Star'},
+  'nega': {'type':'nega', 'title':'Negation'},
+  'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
+  'poly': {'type':'poly', 'rot':0, 'polyshape':71, 'title':'Polyomino'},
+  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71, 'title':'Negation polyomino'},
+  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71, 'title':'Rotatable polyomino'},
+  'rylop': {'type':'ylop', 'rot':'all', 'polyshape':71, 'title':'Rotatable negation polyomino'},
 }
 function _drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -407,6 +490,7 @@ function _drawSymbolButtons() {
     button.style.border = params.border
     button.style.height = params.height + 2*params.border
     button.style.width = params.width + 2*params.border
+    button.title = params.title
     button.params = params
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape
@@ -553,28 +637,29 @@ function resizePuzzle(dx, dy, id) {
   var xOffset = (id.includes('left') ? dx : 0)
   var yOffset = (id.includes('top') ? dy : 0)
 
+  console.log('Shifting contents by', xOffset, yOffset)
+
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
   for (var x=0; x<width; x++) {
     for (var y=0; y<height; y++) {
       var cell = savedGrid[x][y]
-      if (cell == undefined || cell.end == undefined) continue
-      var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
-      if (validDirs.length === 0) {
-        console.debug('Endpoint at', x, y, 'no longer fits on the grid')
-        continue
+      if (cell == undefined) continue
+      if (cell.end != undefined) {
+        var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
+        if (validDirs.length === 0) {
+          console.log('Endpoint at', x, y, 'no longer fits on the grid')
+          continue
+        }
+        if (!validDirs.includes(cell.end)) {
+          console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
+          cell.end = validDirs[0]
+        }
       }
-      if (!validDirs.includes(cell.end)) {
-        console.debug('Changing direct of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
-        cell.end = validDirs[0]
-      }
-      puzzle.setCell(x + xOffset, y + yOffset, cell)
+      puzzle.updateCell(x + xOffset, y + yOffset, cell)
     }
   }
-
-  savePuzzle()
-  _redraw(puzzle)
   return true
 }
 
@@ -592,14 +677,14 @@ function _dragStart(event, elem) {
   anchor.style.cursor = elem.style.cursor
   anchor.onmousemove = function(event) {_dragMove(event, elem)}
   anchor.onmouseup = function() {
-    dragging = false
+    dragging = undefined
     var anchor = document.getElementById('anchor')
     anchor.parentElement.removeChild(anchor)
   }
 }
 
 function _dragMove(event, elem) {
-  if (!dragging) return
+  if (dragging == undefined) return
   var dx = 0
   var dy = 0
   if (elem.id.includes('left')) {
@@ -613,8 +698,18 @@ function _dragMove(event, elem) {
     dy = event.clientY - dragging.y
   }
 
-  if (Math.abs(dx) >= 82 || Math.abs(dy) >= 82) {
-    if (!resizePuzzle(2*Math.round(dx/82), 2*Math.round(dy/82), elem.id)) return
+  var xLim = 41
+  // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
+  if (puzzle.symmetry != undefined && puzzle.pillar === true) {
+    xLim = 82
+  }
+
+  if (Math.abs(dx) >= xLim || Math.abs(dy) >= 41) {
+    if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/41), elem.id)) return
+    _enforceSymmetry()
+    _setActivePuzzle(puzzle)
+    savePuzzle()
+
     // If resize succeeded, set a new reference point for future drag operations
     dragging.x = event.clientX
     dragging.y = event.clientY

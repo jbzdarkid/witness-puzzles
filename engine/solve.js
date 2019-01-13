@@ -19,43 +19,56 @@ function solve(puzzle) {
 function _solveLoop(puzzle, x, y, solutions) {
   if (window.MAX_SOLUTIONS !== -1 && solutions.length >= window.MAX_SOLUTIONS) return
   var cell = puzzle.getCell(x, y)
+  if (cell == undefined) return
+
+  if (puzzle.symmetry == undefined) {
+    if (cell.color !== 0) return // Collided with ourselves
+    puzzle.updateCell(x, y, {'color':1}) // Otherwise, mark this cell as visited
+  } else {
+    // Get the symmetrical position, and try coloring it
+    var sym = puzzle.getSymmetricalPos(x, y)
+    var oldColor = puzzle.getLine(sym.x, sym.y)
+    puzzle.updateCell(sym.x, sym.y, {'color':3})
+
+    // Collided with ourselves or our reflection
+    if (cell.color !== 0) {
+      puzzle.updateCell(sym.x, sym.y, {'color':oldColor})
+      return
+    }
+    puzzle.updateCell(x, y, {'color':2}) // Otherwise, mark this cell as visited
+  }
+
   if (cell.end != undefined) {
-    // Reached an endpoint, validate solution and tail recurse
-    puzzle.updateCell(x, y, {'color':1, 'dir':'none'})
+    // Reached an endpoint, validate solution and keep going -- there may be other endpoints
+    puzzle.updateCell(x, y, {'dir':'none'})
     window.validate(puzzle)
     if (puzzle.valid) {
-      solutions.push(puzzle.clone())
+      solutions.push(Puzzle.deserialize(puzzle.serialize()))
     }
-    puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
   }
-  // @Cleanup: Maybe I *can* move stuff into the recursion, by using updateCell?
-  // That way, I could remove a lot of the redundant getLine calls.
   // @Performance: @Sanity: Don't allow the line to go through gaps.
   // @Performance: Before trying the above, figure out why 5x5 with 2x gap over start point is 20s.
 
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-  // Extend path left
-  if (y%2 === 0 && puzzle.getLine(x - 1, y) === 0) {
-    puzzle.updateCell(x--, y, {'color':1, 'dir':'left'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(++x, y, {'color':0, 'dir':undefined})
+  // Extend path left and right
+  if (y%2 === 0) {
+    puzzle.updateCell(x, y, {'dir':'left'})
+    _solveLoop(puzzle, x - 1, y, solutions)
+    puzzle.updateCell(x, y, {'dir':'right'})
+    _solveLoop(puzzle, x + 1, y, solutions)
   }
-  // Extend path right
-  if (y%2 === 0 && puzzle.getLine(x + 1, y) === 0) {
-    puzzle.updateCell(x++, y, {'color':1, 'dir':'right'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(--x, y, {'color':0, 'dir':undefined})
+  // Extend path up and down
+  if (x%2 === 0) {
+    puzzle.updateCell(x, y, {'dir':'top'})
+    _solveLoop(puzzle, x, y - 1, solutions)
+    puzzle.updateCell(x, y, {'dir':'bottom'})
+    _solveLoop(puzzle, x, y + 1, solutions)
   }
-  // Extend path up
-  if (x%2 === 0 && puzzle.getLine(x, y - 1) === 0) {
-    puzzle.updateCell(x, y--, {'color':1, 'dir':'top'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(x, ++y, {'color':0, 'dir':undefined})
-  }
-  // Extend path down
-  if (x%2 === 0 && puzzle.getLine(x, y + 1) === 0) {
-    puzzle.updateCell(x, y++, {'color':1, 'dir':'bottom'})
-    _solveLoop(puzzle, x, y, solutions)
-    puzzle.updateCell(x, --y, {'color':0, 'dir':undefined})
+
+  // Tail recursion: Back out of this cell
+  puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+  if (puzzle.symmetry != undefined) {
+    var sym = puzzle.getSymmetricalPos(x, y)
+    puzzle.updateCell(sym.x, sym.y, {'color':0})
   }
 }
