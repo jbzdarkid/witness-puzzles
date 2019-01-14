@@ -44,6 +44,7 @@ In vague order of importance.
 - 1-wide puzzles are about 10px too small, which makes the right-drag incorrect.
 - gap-2 sometimes looks like an endpoint. Consider making them flat.
 - Add tests for mid-segment start/end + polyominos (or regions in general)
+- Set width to 1, change default -> P+H symmetry, throws.
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?
