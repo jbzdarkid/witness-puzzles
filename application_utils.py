@@ -1,5 +1,12 @@
 from flask import Flask, request, redirect, send_from_directory
 import os
+from selenium.webdriver import Chrome
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
+from PIL import Image
+from io import BytesIO
 
 application = Flask(__name__, template_folder='pages')
 
@@ -71,3 +78,34 @@ def host_statically(path, serverpath=None, protected=False):
   if not serverpath:
     serverpath = f'/{path}'
   application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
+
+# @Cleanup: Calling driver.quit() all over the place
+def bar(display_hash):
+  driver = Chrome()
+  driver.set_window_size(2000, 2000)
+  driver.get(f'{request.url_root}validate/{display_hash}')
+  print('--- Javascript console ---')
+  for line in driver.get_log('browser'):
+    print(line)
+  print('=== Javascript console ===')
+
+  condition = EC.presence_of_element_located((By.ID, 'result'))
+  try:
+    result = WebDriverWait(driver, 60).until(condition) # 1 minute wait
+  except TimeoutException:
+    driver.quit()
+    return 'Puzzle validation timed out.'
+
+  if not result.get_attribute('valid'):
+    driver.quit()
+    return 'Solution is not valid.'
+
+  puzzle = driver.find_element_by_id('puzzle')
+  img = Image.open(BytesIO(puzzle.screenshot_as_png))
+  driver.quit()
+  if not os.path.exists(f'images/{display_hash[:2]}'):
+    try:
+      os.makedirs(f'images/{display_hash[:2]}')
+      img.save(f'images/{display_hash[:2]}/{display_hash}.png')
+    except OSError as e:
+      return 'Unable to save puzzle, please try again.'

@@ -348,6 +348,7 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
         window.TELEMETRY('stop_trace_success')
         // !important to override the child animation
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success !important}')
+        if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
       } else {
         window.PLAY_SOUND('fail')
         window.TELEMETRY('stop_trace_fail')

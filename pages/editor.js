@@ -37,7 +37,7 @@ function newPuzzle() {
   puzzle.grid[0][8].start = true
   puzzle.grid[8][0].end = 'right'
   puzzle.name = 'Unnamed Puzzle'
-  _setActivePuzzle(puzzle)
+  _redraw(puzzle)
   // This ensures that new puzzles are not added to the puzzleList until they are modified
   window.localStorage.setItem('activePuzzle', '')
 }
@@ -174,7 +174,7 @@ function setStyle(style) {
 
   resizePuzzle(width - puzzle.grid.length, 0, 'right')
   _enforceSymmetry()
-  _setActivePuzzle(puzzle)
+  _redraw(puzzle)
   savePuzzle()
 }
 
@@ -207,23 +207,23 @@ function _enforceSymmetry() {
   }
 }
 
+function setSolveMode(value) {
+  document.getElementById('solveMode').checked = value
+  if (value === true) {
+    window.TRACE_COMPLETION_FUNC = function(solution) {
+      puzzle = solution
+      document.getElementById('publish').disabled = false
+    }
+    window.draw(puzzle)
+  } else {
+    puzzle.clearLines()
+    window.TRACE_COMPLETION_FUNC = undefined
+    _redraw(puzzle)
+  }
+}
+
 function solvePuzzle() {
-  // If the puzzle has symbols and is large, issue a warning
-  var puzzleHasSymbols = false
-  for (var x=1; x<puzzle.grid.length; x+=2) {
-    for (var y=1; y<puzzle.grid[x].length; y+=2) {
-      if (puzzle.getCell(x, y) != undefined && puzzle.type !== 'line') {
-        puzzleHasSymbols = true
-        break
-      }
-    }
-  }
-  if (puzzleHasSymbols && puzzle.grid.length * puzzle.grid[0].length > 121) {
-    // Larger than 5x5 (internal 11x11)
-    if (!confirm('Caution: You are solving a large puzzle (>25 cells). This will take more than 5 minutes to run.')) {
-      return
-    }
-  }
+  setSolveMode(false)
   solutions = window.solve(puzzle)
   _showSolution(0, puzzle)
 }
@@ -250,9 +250,46 @@ function _showSolution(num, puzzle) {
   }
   if (solutions[num] != undefined) {
     solutions[num].name = puzzle.name
-    _setActivePuzzle(solutions[num])
+    _redraw(solutions[num])
+    puzzle = solutions[num]
+    document.getElementById('publish').disabled = false
   }
   document.getElementById('solutionViewer').style.display = null
+}
+
+var currentPublishRequest
+function publishPuzzle() {
+  var serialied = puzzle.serialize()
+
+  var request = new XMLHttpRequest()
+  request.onreadystatechange = function() {
+    if (this !== currentPublishRequest) return
+    if (this.readyState != XMLHttpRequest.DONE) return
+
+    console.error(this.response, this.responseText)
+    var publish = document.getElementById('publish')
+    if (this.status == 200) {
+      publish.innerText = 'Published, click here to play your puzzle!'
+      var url = '/play/' + this.responseText
+      publish.onclick = function() {
+        window.location = url
+      }
+    } else {
+      publish.innerText = 'Error: ' + this.responseText
+    }
+  }
+  request.timeout = 120000 // 120,000 milliseconds = 2 minutes
+  request.open('POST', '/publish', true)
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  var requestBody = 'solution=' + puzzle.serialize()
+  puzzle.clearLines()
+  requestBody += '&puzzle=' + puzzle.serialize()
+  request.send(requestBody)
+  currentPublishRequest = request
+
+  var publish = document.getElementById('publish')
+  publish.onclick = null
+  publish.innerText = 'Validating puzzle...'
 }
 
 function _addPuzzleToList(puzzleName) {
@@ -278,24 +315,37 @@ function _tryLoadSerializedPuzzle(serialized) {
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
     _enforceSymmetry()
-    _setActivePuzzle(newPuzzle)
+    _redraw(newPuzzle)
     puzzle = newPuzzle
     return true
   } catch (e) {
     console.error('Failed to load serialized puzzle', e)
   }
-  _setActivePuzzle(puzzle) // Reload the old puzzle in case we got halfway through drawing the new one
+  _redraw(puzzle) // Reload the old puzzle in case we got halfway through drawing the new one
   return false
 }
 
 // Sets the active editor puzzle. Also updates the dropdown for puzzle style and adds the editor hotspots.
 // @Cleanup: Confusingly, this does not modify the localStorage value for activePuzzle...
 // ^ I should clarify my scenarios for the editor. It looks like there are too many functions, which leads to confusion and bugs.
-function _setActivePuzzle(puzzle) {
+function _redraw(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
-  document.getElementById('publishData').setAttribute('value', puzzle.serialize())
+  // @Cleanup: Solution viewer should probably move graphically.
   document.getElementById('solutionViewer').style.display = 'none'
+
+  if (puzzle.grid.length * puzzle.grid[0].length > 121) {
+    // Puzzle larger than 5x5
+    document.getElementById('solveAuto').disabled = true
+  } else {
+    // Puzzle smaller than or equal to 5x5
+    document.getElementById('solveAuto').disabled = false
+  }
+  var publish = document.getElementById('publish')
+  publish.disabled = true
+  publish.innerText = 'Publish'
+  publish.onclick = function() {publishPuzzle()}
+  currentPublishRequest = undefined
 
   var puzzleStyle = document.getElementById('puzzleStyle')
   if (puzzle.pillar === false) {
@@ -325,6 +375,7 @@ function _setActivePuzzle(puzzle) {
 
   // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
   var puzzleElement = document.getElementById('puzzle')
+  // Remove all 'onTraceStart' calls, they should be interacted through solveManually only.
   for (var child of puzzleElement.children) {
     child.onclick = null
   }
@@ -452,10 +503,13 @@ function _onElementClicked(x, y) {
         'count':activeParams.count
       }
     }
+  } else {
+    console.debug('OnElementClick called but no active parameter type recognized')
+    return
   }
 
   savePuzzle()
-  _setActivePuzzle(puzzle)
+  _redraw(puzzle)
 }
 
 var symbolData = {
@@ -468,8 +522,8 @@ var symbolData = {
   'nega': {'type':'nega', 'title':'Negation'},
   'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
   'poly': {'type':'poly', 'rot':0, 'polyshape':71, 'title':'Polyomino'},
-  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71, 'title':'Negation polyomino'},
-  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71, 'title':'Rotatable polyomino'},
+  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71, 'title':'Rotatable polyomino'},
+  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71, 'title':'Negation polyomino'},
   'rylop': {'type':'ylop', 'rot':'all', 'polyshape':71, 'title':'Rotatable negation polyomino'},
 }
 function _drawSymbolButtons() {
@@ -707,7 +761,7 @@ function _dragMove(event, elem) {
   if (Math.abs(dx) >= xLim || Math.abs(dy) >= 41) {
     if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/41), elem.id)) return
     _enforceSymmetry()
-    _setActivePuzzle(puzzle)
+    _redraw(puzzle)
     savePuzzle()
 
     // If resize succeeded, set a new reference point for future drag operations

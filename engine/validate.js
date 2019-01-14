@@ -6,6 +6,7 @@ window.NEGATIONS_CANCEL_NEGATIONS = true
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
 // negations: Negation symbols and their targets (for the purpose of darkening)
 // @Performance: Consider implementing a "no-ui/silent" validation mode which exits after the first error.
+// @Bug: If there is no line on the grid, validate returns true! It should ensure that at least one start point and end point have a line.
 function validate(puzzle) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element

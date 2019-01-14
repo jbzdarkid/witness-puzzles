@@ -10,6 +10,7 @@ from application_utils import *
 
 host_statically('data')
 host_statically('engine')
+host_statically('images')
 host_statically('pages/editor.html', '/editor.html')
 host_statically('pages/editor.js', '/editor.js')
 host_statically('pages/test.html', '/test.html', protected=True)
@@ -21,20 +22,39 @@ def page_not_found(error):
 
 # Publishing puzzles
 def publish():
-  data = request.form['publishData']
-  display_hash = create_puzzle(data)
-  return redirect(f'/play/{display_hash}')
+  puzzle_json = request.form['puzzle']
+  solution_json = request.form['solution']
+
+  display_hash = create_puzzle(puzzle_json, solution_json)
+  error = bar(display_hash) # Also saves the image
+
+  if error:
+    delete_puzzle(display_hash)
+    return error, 400
+
+  return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
+
+# Validating "semi-published" puzzles
+def foo(display_hash):
+  puzzle = get_puzzle(display_hash) # This should never fail, and if it does, a 500 is ok.
+  return render_template('validate_template.html', solution=puzzle.solution_json)
+application.add_url_rule('/validate/<display_hash>', 'validate', foo)
 
 # Playing published puzzles
 def play(display_hash):
   puzzle = get_puzzle(display_hash)
-  if not puzzle or not puzzle.data:
+  if not puzzle or not puzzle.puzzle_json:
     return render_template('404_puzzle.html', display_hash=display_hash)
 
   session_id = uuid4()
   start_session(session_id)
-  return render_template('play_template.html', puzzle=puzzle.data, display_hash=display_hash, session_id=session_id)
+  return render_template('play_template.html',
+    puzzle=puzzle.puzzle_json,
+    display_hash=display_hash,
+    session_id=session_id,
+    image=f'/images/{display_hash[:2]}/{display_hash}.png'
+  )
 application.add_url_rule('/play/<display_hash>', 'play', play)
 
 # Firing telemetry

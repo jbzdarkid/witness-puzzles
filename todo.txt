@@ -31,7 +31,19 @@ In vague order of importance.
 - JS supports 'format strings', via `foo ${bar}`
 -- Too modern? Should check avail on my target platforms, specifically mobile
 - Tracing down against walls and gap-2 is awkward
+- Replace XMLHttpRequest with Fetch?
+- mid-segment starts are still graphically buggy
 - Test for internal endpoint
+-- (editor) Internal endpoint can still overlap if object is placed second, _enforceEndpoints?
+- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
+-- If it makes it easier, rm cursor when finishing
+- Crazyhorse-style "edge-trapping" doesn't work with gap-2
+- Look into "cancel" solving? Might be hard, since I'm on main thread.
+- (editor) Ensure that start/endpoints can't be placed on gap-2 (or when all adjent edges are gap-2)
+- Save puzzle title separately for meta:title?
+- 1-wide puzzles are about 10px too small, which makes the right-drag incorrect.
+- gap-2 sometimes looks like an endpoint. Consider making them flat.
+- Add tests for mid-segment start/end + polyominos (or regions in general)
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?

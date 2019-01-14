@@ -21,34 +21,33 @@
       <button id="nextSolution">&rarr;</button>
     </div>
     <label id="puzzleName" contentEditable=true style="font-size: 72">Unnamed Puzzle</label>
-    <br>
-    <div id="metaButtons" style="display:inline">
-      <button onclick="newPuzzle()">New</button>
-      <button onclick="loadPuzzle()">Load</button>
-      <button onclick="deletePuzzleAndLoadNext()">Delete</button>
-      <button onclick="importPuzzle()">Import</button>
-      <button onclick="solvePuzzle()">Solve</button>
-      <form style="display:inline" method="post" action="publish">
-        <input type="text" style="display:none" name="publishData" id="publishData">
-        <input type="submit" value="Publish">
-      </form>
-      <br>
-      <label for="puzzleStyle">Puzzle Style: </label>
-      <select id="puzzleStyle" onchange="setStyle(this.value)">
-        <option>Default</option>
-        <option>Horizontal Symmetry</option>
-        <option>Vertical Symmetry</option>
-        <option>Rotational Symmetry</option>
-        <option>Pillar</option>
-        <option>Pillar (H Symmetry)</option>
-        <option>Pillar (V Symmetry)</option>
-        <option>Pillar (R Symmetry)</option>
-        <option>Pillar (Two Lines)</option>
-      </select>
-    </div>
 
     <table id="meta">
       <tr>
+        <td colspan="3" style="text-align: center;">
+          <div id="metaButtons" style="display:inline">
+            <button onclick="newPuzzle()">New</button>
+            <button onclick="loadPuzzle()">Load</button>
+            <button onclick="deletePuzzleAndLoadNext()">Delete</button>
+            <button onclick="importPuzzle()">Import</button>
+          </div>
+        </td>
+      </tr><tr>
+        <td colspan="3" style="text-align: center;">
+          <label for="puzzleStyle">Puzzle Style: </label>
+          <select id="puzzleStyle" onchange="setStyle(this.value)">
+            <option>Default</option>
+            <option>Horizontal Symmetry</option>
+            <option>Vertical Symmetry</option>
+            <option>Rotational Symmetry</option>
+            <option>Pillar</option>
+            <option>Pillar (H Symmetry)</option>
+            <option>Pillar (V Symmetry)</option>
+            <option>Pillar (R Symmetry)</option>
+            <option>Pillar (Two Lines)</option>
+          </select>
+        </td>
+      </tr><tr>
         <td>
           <table id="symbolButtons" style="display:none" cellpadding="4" cellspacing="0">
             <tr>
@@ -94,6 +93,16 @@
             <tr><td><button id="blue"></button></td></tr>
             <tr><td><button id="purple"></button></td></tr>
           </table>
+        </td>
+      </tr><tr>
+        <td colspan="3" style="text-align:center;">
+          <input class="checkbox" type="checkbox" id="solveMode" onchange="setSolveMode(this.checked)">
+          <label for="solveMode">Solve (manually)</label>
+          <button id="solveAuto" onclick="solvePuzzle()">Solve (automatically)</button>
+        </td>
+      </tr><tr>
+        <td colspan="3" style="text-align:center;">
+          <button id="publish" onclick="publishPuzzle()" disabled>Publish</button>
         </td>
       </tr>
     </table>

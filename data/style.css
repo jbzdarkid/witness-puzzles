@@ -1,5 +1,5 @@
 @font-face { src: url('Constantia.ttf'); }
-label, button, select, option, input {
+label, button, select, option, input, a {
   font-family: Constantia;
   font-variant: small-caps;
   font-weight: bold;
