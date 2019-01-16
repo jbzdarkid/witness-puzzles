@@ -45,6 +45,7 @@ In vague order of importance.
 - gap-2 sometimes looks like an endpoint. Consider making them flat.
 - Add tests for mid-segment start/end + polyominos (or regions in general)
 - Set width to 1, change default -> P+H symmetry, throws.
+- (editor) Gaps and breaks aren't mutually exclusive anymore? Probably when I split the logic...
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?
