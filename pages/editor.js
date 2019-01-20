@@ -4,336 +4,108 @@ var puzzle
 var dragging
 var solutions = []
 
-window.onload = function() {
-  var activePuzzle = window.localStorage.getItem('activePuzzle')
-  var serialized = window.localStorage.getItem(activePuzzle)
-
-  newPuzzle() // Load an empty puzzle so that we have a fall-back
-  if (_tryLoadSerializedPuzzle(serialized)) {
-    window.localStorage.setItem('activePuzzle', activePuzzle)
-  }
-
-  _drawSymbolButtons()
-  _drawColorButtons()
-  var puzzleName = document.getElementById('puzzleName')
-  puzzleName.oninput = function() {savePuzzle()}
-  puzzleName.onkeypress = function(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      this.blur()
-    }
-    if (this.innerText.length >= 50) {
-      event.preventDefault()
-    }
-  }
-
-  for (var resize of document.getElementsByClassName('resize')) {
-    resize.onmousedown = function(event) {_dragStart(event, this)}
+function _readPuzzleList() {
+  try {
+    var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
+    if (puzzleList == null || !Array.isArray(puzzleList)) return []
+    return puzzleList
+  } catch {
+    return []
   }
 }
 
-function newPuzzle() {
-  puzzle = new Puzzle(4, 4)
-  puzzle.grid[0][8].start = true
-  puzzle.grid[8][0].end = 'right'
-  puzzle.name = 'Unnamed Puzzle'
-  _redraw(puzzle)
-  // This ensures that new puzzles are not added to the puzzleList until they are modified
-  window.localStorage.setItem('activePuzzle', '')
+function _writePuzzleList(puzzleList) {
+  if (puzzleList == undefined) throw "Attempted to write puzzle list but none was provided"
+  window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
 
-function savePuzzle() {
-  console.spam('Saving puzzle', puzzle.name)
-  // Delete the old puzzle & add the current
-  var activePuzzle = window.localStorage.getItem('activePuzzle')
-  window.localStorage.removeItem(activePuzzle)
-  _removePuzzleFromList(activePuzzle)
-
-  // Save the new version
-  puzzle.name = document.getElementById('puzzleName').innerText
-  // @Robustness: Some intelligence about showing day / month / etc depending on date age
-  var savedPuzzle = puzzle.name + ' on ' + (new Date()).toLocaleString()
-  _addPuzzleToList(savedPuzzle)
-  var serialized = puzzle.serialize()
-  window.localStorage.setItem(savedPuzzle, serialized)
-}
-
-function loadPuzzle() {
-  var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
-  if (!puzzleList) return
-
-  var buttons = document.getElementById('metaButtons')
-  var loadList = document.createElement('select')
-  document.body.insertBefore(loadList, buttons)
-  loadList.style.width = buttons.offsetWidth
-  buttons.style.display = 'none'
-
-  for (var puzzleName of puzzleList) {
-    var option = document.createElement('option')
-    option.innerText = puzzleName
-    loadList.appendChild(option)
-  }
-
-  loadList.value = '' // Forces onchange to fire for any selection
-  loadList.onchange = function() {
-    _removePuzzleFromList(this.value)
-    _addPuzzleToList(this.value)
-
-    var serialized = window.localStorage.getItem(this.value)
-    if (!_tryLoadSerializedPuzzle(serialized)) {
-      deletePuzzleAndLoadNext()
-    }
-
-    document.body.removeChild(buttons.previousSibling)
-    document.getElementById('metaButtons').style.display = 'inline'
-  }
-}
-
-function deletePuzzleAndLoadNext() {
-  var activePuzzle = window.localStorage.getItem('activePuzzle')
-  console.spam('Deleting', activePuzzle)
-  window.localStorage.removeItem(activePuzzle)
-  _removePuzzleFromList(activePuzzle)
-
-  var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
-  if (puzzleList == null) puzzleList = []
-  while (puzzleList.length > 0) {
-    var serialized = window.localStorage.getItem(puzzleList[0])
-    if (_tryLoadSerializedPuzzle(serialized)) break
-    puzzleList.shift()
-  }
-
+// Read the first puzzle in the list, and try to load it.
+// Recurses until success or the list is exhausted, in which case we make an empty puzzle.
+function _readPuzzle() {
+  console.log('Trying to read first puzzle')
+  var puzzleList = _readPuzzleList()
   if (puzzleList.length === 0) {
+    console.log('No puzzles left, clearing storage and creating new one')
     window.localStorage.clear()
-    newPuzzle()
+    createEmptyPuzzle()
     return
   }
-  window.localStorage.setItem('activePuzzle', puzzleList[0])
-}
-
-function importPuzzle() {
-  var serialized = prompt('Paste your puzzle here:')
-  if (!_tryLoadSerializedPuzzle(serialized)) {
-    // Only alert if user tried to enter data
-    if (serialized) alert('Not a valid puzzle!')
-    return
-  }
-  var savedPuzzle = puzzle.name + ' on ' + (new Date()).toLocaleString()
-  _addPuzzleToList(savedPuzzle)
-  window.localStorage.setItem(savedPuzzle, serialized)
-}
-
-function setStyle(style) {
-  console.log(style)
-  if (style === 'Default') {
-    puzzle.pillar = false
-    puzzle.symmetry = undefined
-  } else if (style === 'Horizontal Symmetry') {
-    puzzle.pillar = false
-    puzzle.symmetry = {'x':true, 'y':false}
-  } else if (style === 'Vertical Symmetry') {
-    puzzle.pillar = false
-    puzzle.symmetry = {'x':false, 'y':true}
-  } else if (style === 'Rotational Symmetry') {
-    puzzle.pillar = false
-    puzzle.symmetry = {'x':true, 'y':true}
-  } else if (style === 'Pillar') {
-    puzzle.pillar = true
-    puzzle.symmetry = undefined
-  } else if (style === 'Pillar (H Symmetry)') {
-    puzzle.pillar = true
-    puzzle.symmetry = {'x':true, 'y':false}
-  } else if (style === 'Pillar (V Symmetry)') {
-    puzzle.pillar = true
-    puzzle.symmetry = {'x':false, 'y':true}
-  } else if (style === 'Pillar (R Symmetry)') {
-    puzzle.pillar = true
-    puzzle.symmetry = {'x':true, 'y':true}
-  } else if (style === 'Pillar (Two Lines)') {
-    puzzle.pillar = true
-    puzzle.symmetry = {'x':false, 'y':false}
-  } else {
-    console.error('Attempted to set unknown style', style)
-    return
-  }
-  var width = puzzle.grid.length
-
-  // Non-pillar to pillar
-  if (puzzle.pillar === true) {
-    if (width === 1) {
-      width = 2
-    } else {
-      width -= width % 2 // Width must be a multiple of 2
-    }
-    if (puzzle.symmetry != undefined) {
-      width -= width % 4 // Width must be a multiple of 4
-    }
-  } else if (puzzle.pillar === false) {
-    width += 1 - width % 2
-  }
-
-  resizePuzzle(width - puzzle.grid.length, 0, 'right')
-  _enforceSymmetry()
-  _redraw(puzzle)
-  savePuzzle()
-}
-
-// @Future: This should be more intelligent, maybe something like
-// 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
-function _enforceSymmetry() {
-  // Ensure dots are not colored
-  // Ensure start/end are appropriately paired
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
-      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
-      if (puzzle.symmetry == undefined) {
-        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
-          console.debug('Replacing dot at', x, y, 'colored', puzzle.grid[x][y].dot, 'with color 1')
-          puzzle.grid[x][y].dot = 1
-        }
-      } else {
-        var sym = puzzle.getSymmetricalPos(x, y)
-        if (puzzle.grid[x][y].start === true) {
-          puzzle.updateCell(sym.x, sym.y, {'start':true})
-          console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
-        }
-        if (puzzle.grid[x][y].end != undefined) {
-          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
-          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
-          console.debug('Addding symmetrical endpoint at', sym.x, sym.y, 'direction', symmetricalDir)
-        }
-      }
-    }
+  try {
+    console.log('Reading puzzle', puzzleList[0])
+    var serialized = window.localStorage.getItem(puzzleList[0])
+    puzzle = Puzzle.deserialize(serialized)
+    _drawPuzzle(puzzle)
+  } catch (e) {
+    console.log(e)
+    console.log('Could not parse puzzle, deleting')
+    deletePuzzle() // Will call readPuzzle() again
   }
 }
 
-function setSolveMode(value) {
-  document.getElementById('solveMode').checked = value
-  if (value === true) {
-    window.TRACE_COMPLETION_FUNC = function(solution) {
-      puzzle = solution
-      document.getElementById('publish').disabled = false
-    }
-    window.draw(puzzle)
-  } else {
-    puzzle.clearLines()
-    window.TRACE_COMPLETION_FUNC = undefined
-    _redraw(puzzle)
-  }
+// The global puzzle object has been modified, serialize it to localStorage.
+// We sanitize it to ensure no bad puzzles are written down.
+// Finally, we redraw the puzzle (in case modifications were made) unless the callers asks us not to.
+function _writePuzzle(redraw=true) {
+  var puzzleList = _readPuzzleList()
+  _sanitizePuzzle()
+  console.log('Writing puzzle', puzzle)
+
+  // @Robustness: Some intelligence about showing day / month / etc depending on date age
+  puzzleList[0] = puzzle.name + ' on ' + (new Date()).toLocaleString()
+  window.localStorage.setItem(puzzleList[0], puzzle.serialize())
+  _writePuzzleList(puzzleList)
+
+  if (redraw) _drawPuzzle(puzzle)
 }
 
-function solvePuzzle() {
-  setSolveMode(false)
-  solutions = window.solve(puzzle)
-  _showSolution(0, puzzle)
+// Create a new puzzle. If none is provided, a default, empty puzzle is created.
+// Note that this is not idempotent; you can create as many new puzzles as you want.
+function _createPuzzle(newPuzzle) {
+  console.log('Creating puzzle', newPuzzle)
+  // Make way for the new puzzle
+  var puzzleList = _readPuzzleList()
+  puzzleList.unshift(undefined)
+  _writePuzzleList(puzzleList)
+
+  puzzle = newPuzzle
+  _writePuzzle()
 }
 
-function _showSolution(num, puzzle) {
-  if (num < 0) num = solutions.length - 1
-  if (num >= solutions.length) num = 0
-
-  var previousSolution = document.getElementById('previousSolution')
-  var solutionCount = document.getElementById('solutionCount')
-  var nextSolution = document.getElementById('nextSolution')
-
-  // Buttons & text
-  if (solutions.length < 2) { // 0 or 1 solution(s), arrows are useless
-    solutionCount.innerText = solutions.length + ' of ' + solutions.length
-    previousSolution.disabled = true
-    nextSolution.disabled = true
-  } else {
-    solutionCount.innerText = (num + 1) + ' of ' + solutions.length
-    previousSolution.disabled = null
-    nextSolution.disabled = null
-    previousSolution.onclick = function() {_showSolution(num - 1, puzzle)}
-    nextSolution.onclick = function() {_showSolution(num + 1, puzzle)}
-  }
-  if (solutions[num] != undefined) {
-    solutions[num].name = puzzle.name
-    _redraw(solutions[num])
-    puzzle = solutions[num]
-    document.getElementById('publish').disabled = false
-  }
-  document.getElementById('solutionViewer').style.display = null
-}
-
-var currentPublishRequest
-function publishPuzzle() {
-  var serialied = puzzle.serialize()
-
-  var request = new XMLHttpRequest()
-  request.onreadystatechange = function() {
-    if (this !== currentPublishRequest) return
-    if (this.readyState != XMLHttpRequest.DONE) return
-
-    console.error(this.response, this.responseText)
-    var publish = document.getElementById('publish')
-    if (this.status == 200) {
-      publish.innerText = 'Published, click here to play your puzzle!'
-      var url = '/play/' + this.responseText
-      publish.onclick = function() {
-        window.location = url
-      }
-    } else {
-      publish.innerText = 'Error: ' + this.responseText
-    }
-  }
-  request.timeout = 120000 // 120,000 milliseconds = 2 minutes
-  request.open('POST', '/publish', true)
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  var requestBody = 'solution=' + puzzle.serialize()
-  puzzle.clearLines()
-  requestBody += '&puzzle=' + puzzle.serialize()
-  request.send(requestBody)
-  currentPublishRequest = request
-
-  var publish = document.getElementById('publish')
-  publish.onclick = null
-  publish.innerText = 'Validating puzzle...'
-}
-
-function _addPuzzleToList(puzzleName) {
-  var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
-  if (!puzzleList) puzzleList = []
-  puzzleList.unshift(puzzleName)
-  window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
-  window.localStorage.setItem('activePuzzle', puzzleName)
-}
-
-function _removePuzzleFromList(puzzleName) {
-  console.spam('Removing puzzle', puzzleName)
-  var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
-  if (!puzzleList) puzzleList = []
-  var index = puzzleList.indexOf(puzzleName)
-  if (index === -1) return
-  puzzleList.splice(index, 1)
-  window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
-}
-
-function _tryLoadSerializedPuzzle(serialized) {
-  if (!serialized) return false
+// Create a new puzzle from serialized. Note that this may fail!
+function _createSerializedPuzzle(serialized) {
+  console.log('Creating puzzle from serialized', serialized)
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
-    _enforceSymmetry()
-    _redraw(newPuzzle)
-    puzzle = newPuzzle
-    return true
   } catch (e) {
     console.error('Failed to load serialized puzzle', e)
+    return false
   }
-  _redraw(puzzle) // Reload the old puzzle in case we got halfway through drawing the new one
-  return false
+  _createPuzzle(newPuzzle)
+  return true
 }
 
-// Sets the active editor puzzle. Also updates the dropdown for puzzle style and adds the editor hotspots.
-// @Cleanup: Confusingly, this does not modify the localStorage value for activePuzzle...
-// ^ I should clarify my scenarios for the editor. It looks like there are too many functions, which leads to confusion and bugs.
-function _redraw(puzzle) {
+// Delete the active puzzle then read the next one.
+function deletePuzzle() {
+  var puzzleList = _readPuzzleList()
+  if (puzzleList.length === 0) return
+  var puzzleName = puzzleList.shift()
+  console.log('Removing puzzle', puzzleName)
+  window.localStorage.removeItem(puzzleName)
+  _writePuzzleList(puzzleList)
+
+  // Try to read the next puzzle from the list.
+  _readPuzzle()
+}
+
+// Redraws the puzzle.
+// Also updates the dropdown for puzzle style and adds the editor hotspots.
+function _drawPuzzle(puzzle) {
   document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
   // @Cleanup: Solution viewer should probably move graphically.
   document.getElementById('solutionViewer').style.display = 'none'
 
+  // @Robustness: Pillars are not the same requirements. Figure this out.
   if (puzzle.grid.length * puzzle.grid[0].length > 121) {
     // Puzzle larger than 5x5
     document.getElementById('solveAuto').disabled = true
@@ -408,6 +180,255 @@ function _redraw(puzzle) {
   }
 }
 
+//** Buttons which the user can click on
+function createEmptyPuzzle() {
+  console.log('Creating empty puzzle')
+  newPuzzle = new Puzzle(4, 4)
+  newPuzzle.grid[0][8].start = true
+  newPuzzle.grid[8][0].end = 'right'
+  newPuzzle.name = 'Unnamed Puzzle'
+  _createPuzzle(newPuzzle)
+}
+
+function loadPuzzle() {
+  var puzzleList = _readPuzzleList()
+  if (puzzleList.length === 0) return
+
+  var buttons = document.getElementById('metaButtons')
+  var loadList = document.createElement('select')
+  buttons.parentElement.insertBefore(loadList, buttons)
+  loadList.style.width = buttons.offsetWidth
+  buttons.style.display = 'none'
+
+  for (var puzzleName of puzzleList) {
+    var option = document.createElement('option')
+    option.innerText = puzzleName
+    loadList.appendChild(option)
+  }
+
+  loadList.value = '' // Forces onchange to fire for any selection
+  loadList.onchange = function() {
+    console.log('Loading puzzle', this.value)
+
+    // Re-order to the front of the list
+    var puzzleList = _readPuzzleList()
+    var index = puzzleList.indexOf(this.value)
+    puzzleList.unshift(puzzleList.splice(index, 1)[0])
+    _writePuzzleList(puzzleList)
+
+    // Then try reading the first puzzle
+    _readPuzzle()
+
+    buttons.parentElement.removeChild(buttons.previousSibling)
+    document.getElementById('metaButtons').style.display = 'inline'
+  }
+}
+
+function importPuzzle() {
+  var serialized = prompt('Paste your puzzle here:')
+  if (!_createSerializedPuzzle(serialized)) {
+    // Only alert if user tried to enter data
+    if (serialized) alert('Not a valid puzzle!')
+    return
+  }
+}
+
+function setStyle(style) {
+  console.log(style)
+  if (style === 'Default') {
+    puzzle.pillar = false
+    puzzle.symmetry = undefined
+  } else if (style === 'Horizontal Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':true, 'y':false}
+  } else if (style === 'Vertical Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':false, 'y':true}
+  } else if (style === 'Rotational Symmetry') {
+    puzzle.pillar = false
+    puzzle.symmetry = {'x':true, 'y':true}
+  } else if (style === 'Pillar') {
+    puzzle.pillar = true
+    puzzle.symmetry = undefined
+  } else if (style === 'Pillar (H Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':true, 'y':false}
+  } else if (style === 'Pillar (V Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':false, 'y':true}
+  } else if (style === 'Pillar (R Symmetry)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':true, 'y':true}
+  } else if (style === 'Pillar (Two Lines)') {
+    puzzle.pillar = true
+    puzzle.symmetry = {'x':false, 'y':false}
+  } else {
+    console.error('Attempted to set unknown style', style)
+    return
+  }
+  var width = puzzle.grid.length
+
+  // Non-pillar to pillar
+  if (puzzle.pillar === true) {
+    if (width === 1) {
+      width = 2
+    } else {
+      width -= width % 2 // Width must be a multiple of 2
+    }
+    if (puzzle.symmetry != undefined) {
+      width -= width % 4 // Width must be a multiple of 4
+    }
+  } else if (puzzle.pillar === false) {
+    width += 1 - width % 2
+  }
+
+  resizePuzzle(width - puzzle.grid.length, 0, 'right')
+  _writePuzzle()
+}
+
+function setSolveMode(value) {
+  document.getElementById('solveMode').checked = value
+  if (value === true) {
+    window.TRACE_COMPLETION_FUNC = function(solution) {
+      puzzle = solution
+      document.getElementById('publish').disabled = false
+    }
+    window.draw(puzzle)
+  } else {
+    puzzle.clearLines()
+    window.TRACE_COMPLETION_FUNC = undefined
+    _drawPuzzle(puzzle)
+  }
+}
+
+function solvePuzzle() {
+  setSolveMode(false)
+  solutions = window.solve(puzzle)
+  _showSolution(0, puzzle)
+}
+//** End of user interaction points
+
+window.onload = function() {
+  _readPuzzle() // Will fall back to a new puzzle if needed.
+
+  _drawSymbolButtons()
+  _drawColorButtons()
+
+  var puzzleName = document.getElementById('puzzleName')
+  puzzleName.oninput = function() {
+    puzzle.name = this.innerText
+    _writePuzzle(false)
+  }
+  puzzleName.onkeypress = function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      this.blur()
+    }
+    if (this.innerText.length >= 50) {
+      event.preventDefault()
+    }
+  }
+
+  for (var resize of document.getElementsByClassName('resize')) {
+    resize.onmousedown = function(event) {_dragStart(event, this)}
+  }
+}
+
+// @Future: This should be more intelligent, maybe something like
+// 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
+// @Future: Sanitize should also ensure endpoints are still in valid directions
+function _sanitizePuzzle() {
+  console.log('Sanitizing puzzle', puzzle)
+  // Ensure dots are not colored
+  // Ensure start/end are appropriately paired
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
+      if (puzzle.symmetry == undefined) {
+        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
+          console.debug('Replacing dot at', x, y, 'colored', puzzle.grid[x][y].dot, 'with color 1')
+          puzzle.grid[x][y].dot = 1
+        }
+      } else {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        if (puzzle.grid[x][y].start === true) {
+          puzzle.updateCell(sym.x, sym.y, {'start':true})
+          console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
+        }
+        if (puzzle.grid[x][y].end != undefined) {
+          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
+          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+          console.debug('Addding symmetrical endpoint at', sym.x, sym.y, 'direction', symmetricalDir)
+        }
+      }
+    }
+  }
+}
+
+function _showSolution(num, puzzle) {
+  if (num < 0) num = solutions.length - 1
+  if (num >= solutions.length) num = 0
+
+  var previousSolution = document.getElementById('previousSolution')
+  var solutionCount = document.getElementById('solutionCount')
+  var nextSolution = document.getElementById('nextSolution')
+
+  // Buttons & text
+  if (solutions.length < 2) { // 0 or 1 solution(s), arrows are useless
+    solutionCount.innerText = solutions.length + ' of ' + solutions.length
+    previousSolution.disabled = true
+    nextSolution.disabled = true
+  } else {
+    solutionCount.innerText = (num + 1) + ' of ' + solutions.length
+    previousSolution.disabled = null
+    nextSolution.disabled = null
+    previousSolution.onclick = function() {_showSolution(num - 1, puzzle)}
+    nextSolution.onclick = function() {_showSolution(num + 1, puzzle)}
+  }
+  if (solutions[num] != undefined) {
+    solutions[num].name = puzzle.name
+    _drawPuzzle(solutions[num])
+    puzzle = solutions[num]
+    document.getElementById('publish').disabled = false
+  }
+  document.getElementById('solutionViewer').style.display = null
+}
+
+var currentPublishRequest
+function publishPuzzle() {
+  var serialied = puzzle.serialize()
+
+  var request = new XMLHttpRequest()
+  request.onreadystatechange = function() {
+    if (this !== currentPublishRequest) return
+    if (this.readyState != XMLHttpRequest.DONE) return
+
+    console.error(this.response, this.responseText)
+    var publish = document.getElementById('publish')
+    if (this.status == 200) {
+      publish.innerText = 'Published, click here to play your puzzle!'
+      var url = '/play/' + this.responseText
+      publish.onclick = function() {
+        window.location = url
+      }
+    } else {
+      publish.innerText = 'Error: ' + this.responseText
+    }
+  }
+  request.timeout = 120000 // 120,000 milliseconds = 2 minutes
+  request.open('POST', '/publish', true)
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  var requestBody = 'solution=' + puzzle.serialize()
+  puzzle.clearLines()
+  requestBody += '&puzzle=' + puzzle.serialize()
+  request.send(requestBody)
+  currentPublishRequest = request
+
+  var publish = document.getElementById('publish')
+  publish.onclick = null
+  publish.innerText = 'Validating puzzle...'
+}
+
 // Returns the next value in the list.
 // If the value is not found, defaults to the first element.
 // If the value is found, but is the last value, returns undefined.
@@ -416,7 +437,8 @@ function _getNextValue(list, value) {
   return list[index + 1]
 }
 
-// Note: I cannot call _enforceSymmetry here, because we don't know which modification (to an endpoint, e.g.) is definitive
+// Note: I cannot merely call _sanitizePuzzle here, because we don't know which modification (to an endpoint, e.g.) is definitive
+// I do still call _sanitizePuzzle (inside _writePuzzle), but we make the copy operations first.
 function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
@@ -508,8 +530,7 @@ function _onElementClicked(x, y) {
     return
   }
 
-  savePuzzle()
-  _redraw(puzzle)
+  _writePuzzle()
 }
 
 var symbolData = {
@@ -760,9 +781,7 @@ function _dragMove(event, elem) {
 
   if (Math.abs(dx) >= xLim || Math.abs(dy) >= 41) {
     if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/41), elem.id)) return
-    _enforceSymmetry()
-    _redraw(puzzle)
-    savePuzzle()
+    _writePuzzle()
 
     // If resize succeeded, set a new reference point for future drag operations
     dragging.x = event.clientX

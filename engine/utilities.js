@@ -176,6 +176,7 @@ function showSettings() {
   toggle.style.top = '-10px'
 }
 
+// @Cleanup: Settings should live in one variable in localStorage, it makes it easier to save them / persist them across clears
 function loadSettings() {
   var parentDiv = document.createElement('div')
   document.body.appendChild(parentDiv)

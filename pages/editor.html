@@ -20,15 +20,15 @@
       <label id="solutionCount"></label>
       <button id="nextSolution">&rarr;</button>
     </div>
-    <label id="puzzleName" contentEditable=true style="font-size: 72">Unnamed Puzzle</label>
+    <label id="puzzleName" contentEditable=true style="font-size: 72"></label>
 
     <table id="meta">
       <tr>
         <td colspan="3" style="text-align: center;">
           <div id="metaButtons" style="display:inline">
-            <button onclick="newPuzzle()">New</button>
+            <button onclick="createEmptyPuzzle()">New</button>
             <button onclick="loadPuzzle()">Load</button>
-            <button onclick="deletePuzzleAndLoadNext()">Delete</button>
+            <button onclick="deletePuzzle()">Delete</button>
             <button onclick="importPuzzle()">Import</button>
           </div>
         </td>
