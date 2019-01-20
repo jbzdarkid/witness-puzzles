@@ -2,6 +2,7 @@ window.DISABLE_CACHE = true
 var activeParams = {'id':'', 'color':'black', 'polyshape': 71}
 var puzzle
 var dragging
+// @Cleanup: Can this be non-global?
 var solutions = []
 
 function _readPuzzleList() {
@@ -34,7 +35,7 @@ function _readPuzzle() {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
     puzzle = Puzzle.deserialize(serialized)
-    _drawPuzzle(puzzle)
+    _drawPuzzle()
   } catch (e) {
     console.log(e)
     console.log('Could not parse puzzle, deleting')
@@ -58,7 +59,7 @@ function _writePuzzle(redraw=true) {
   if (redraw) {
     // @Hack: This doesn't feel like the right place...
     setSolveMode(false)
-    // _drawPuzzle(puzzle)
+    // _drawPuzzle()
   }
 }
 
@@ -103,7 +104,7 @@ function deletePuzzle() {
 
 // Redraws the puzzle.
 // Also updates the dropdown for puzzle style and adds the editor hotspots.
-function _drawPuzzle(puzzle) {
+function _drawPuzzle() {
   document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
   // @Cleanup: Solution viewer should probably move graphically.
@@ -298,19 +299,19 @@ function setSolveMode(value) {
       document.getElementById('publish').disabled = false
     }
     // @Hack: I should write an function to clear editor interaction points, and then use that here.
-    _drawPuzzle(puzzle)
+    _drawPuzzle()
     window.draw(puzzle)
   } else {
     puzzle.clearLines()
     window.TRACE_COMPLETION_FUNC = undefined
-    _drawPuzzle(puzzle)
+    _drawPuzzle()
   }
 }
 
 function solvePuzzle() {
   setSolveMode(false)
   solutions = window.solve(puzzle)
-  _showSolution(0, puzzle)
+  _showSolution(0)
 }
 //** End of user interaction points
 
@@ -344,11 +345,14 @@ window.onload = function() {
 // 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
 // @Future: Sanitize should also ensure endpoints are still in valid directions
 // This function:
-// - Ensure dots are not colored (if symmetry is off)
-// - Ensure endpoints are facing valid directions
-// - Ensure start/end are appropriately paired (if symmetry is on)
+// - Clears all lines from the puzzle (if a solution was showing)
+// - Ensures dots are not colored (if symmetry is off)
+// - Ensures endpoints are facing valid directions
+// - Ensures start/end are appropriately paired (if symmetry is on)
 function _sanitizePuzzle() {
   console.log('Sanitizing puzzle', puzzle)
+  puzzle.clearLines()
+
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       if (x%2 === 1 && y%2 === 1) continue // Ignore cells
@@ -384,7 +388,7 @@ function _sanitizePuzzle() {
   }
 }
 
-function _showSolution(num, puzzle) {
+function _showSolution(num) {
   if (num < 0) num = solutions.length - 1
   if (num >= solutions.length) num = 0
 
@@ -401,13 +405,13 @@ function _showSolution(num, puzzle) {
     solutionCount.innerText = (num + 1) + ' of ' + solutions.length
     previousSolution.disabled = null
     nextSolution.disabled = null
-    previousSolution.onclick = function() {_showSolution(num - 1, puzzle)}
-    nextSolution.onclick = function() {_showSolution(num + 1, puzzle)}
+    previousSolution.onclick = function() {_showSolution(num - 1)}
+    nextSolution.onclick = function() {_showSolution(num + 1)}
   }
   if (solutions[num] != undefined) {
     solutions[num].name = puzzle.name
-    _drawPuzzle(solutions[num])
     puzzle = solutions[num]
+    _drawPuzzle()
     document.getElementById('publish').disabled = false
   }
   document.getElementById('solutionViewer').style.display = null
@@ -415,7 +419,11 @@ function _showSolution(num, puzzle) {
 
 var currentPublishRequest
 function publishPuzzle() {
-  var serialied = puzzle.serialize()
+  if (document.getElementById('solveMode').checked === true) {
+    var serialied = puzzle.serialize()
+  } else {
+
+  }
 
   var request = new XMLHttpRequest()
   request.onreadystatechange = function() {

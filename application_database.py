@@ -39,7 +39,7 @@ def get_puzzle(display_hash):
   return db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).first()
 
 def delete_puzzle(display_hash):
-  get_puzzle(display_hash).delete()
+  db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).delete()
 
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)

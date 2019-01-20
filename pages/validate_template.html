@@ -1,7 +1,5 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
   <head>
-    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
-    <link rel="icon" type="image/png" href="/data/favicon.png">
     <script type="text/javascript" src="/engine/polyominos.js"></script>
     <script type="text/javascript" src="/engine/utilities.js"></script>
     <script type="text/javascript" src="/engine/puzzle.js"></script>
@@ -14,21 +12,19 @@
   </body>
   <script>
     window.onload = function() {
-      window.setLogLevel('debug')
+      var result = document.createElement('p')
+      result.id = 'result'
       try {
         var solution = Puzzle.deserialize({{ solution|tojson }})
         validate(solution)
-        console.error(JSON.stringify(solution.grid))
-        console.error(solution.valid)
+        result.valid = solution.valid
         solution.clearLines()
         draw(solution)
-      } catch {
-        var solution = {'valid':false}
+      } catch (e) {
+        result.valid = false
+        result.reason = e.getMessage()
       }
 
-      var result = document.createElement('p')
-      result.id = 'result'
-      result.valid = solution.valid
       document.body.append(result)
     }
   </script>

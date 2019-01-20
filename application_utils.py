@@ -80,14 +80,17 @@ def host_statically(path, serverpath=None, protected=False):
   application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
 
 # @Cleanup: Calling driver.quit() all over the place
+# @Cleanup: bar?
 def bar(display_hash):
   driver = Chrome()
   driver.set_window_size(2000, 2000)
   driver.get(f'{request.url_root}validate/{display_hash}')
+  """
   print('--- Javascript console ---')
   for line in driver.get_log('browser'):
     print(line)
   print('=== Javascript console ===')
+  """
 
   condition = EC.presence_of_element_located((By.ID, 'result'))
   try:
@@ -96,9 +99,13 @@ def bar(display_hash):
     driver.quit()
     return 'Puzzle validation timed out.'
 
-  if not result.get_attribute('valid'):
+  valid = result.get_attribute('valid')
+  if valid == None or valid == 'false':
+    reason = result.get_attribute('reason')
+    if reason == None:
+      reason = 'Solution is not valid.'
     driver.quit()
-    return 'Solution is not valid.'
+    return reason
 
   puzzle = driver.find_element_by_id('puzzle')
   img = Image.open(BytesIO(puzzle.screenshot_as_png))
