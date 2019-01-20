@@ -11,9 +11,10 @@ function getPolySize(polyshape) {
 function _mask(x, y) {
   return 1 << (x*4 + y)
 }
+
 function _isSet(polyshape, x, y) {
   if (x < 0 || y < 0) return false
-  if (x > 4 || y > 4) return false
+  if (x >= 4 || y >= 4) return false
   return (polyshape & _mask(x, y)) !== 0
 }
 
