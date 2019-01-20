@@ -387,14 +387,14 @@ var tests = {
     puzzle.grid[5][5] = {'type':'nega', 'color':'white'}
     return [puzzle, 0]
   }, 'pillar-with-gap': function() {
-    var puzzle = new Puzzle(2, 1, true)
+    var puzzle = new Puzzle(2, 1, pillar=true)
     puzzle.grid[0][2].start = true
     puzzle.grid[2][0].end = 'top'
     puzzle.grid[1][0].gap = 1
     puzzle.grid[1][2].gap = 1
     return [puzzle, 2]
   }, 'pillar-with-stones': function() {
-    var puzzle = new Puzzle(2, 1, true)
+    var puzzle = new Puzzle(2, 1, pillar=true)
     puzzle.grid[2][2].start = true
     puzzle.grid[2][0].end = 'top'
     puzzle.grid[1][1] = {'type':'square', 'color':'white'}
@@ -402,13 +402,13 @@ var tests = {
     puzzle.end = {'x':2, 'y':0}
     return [puzzle, 0]
   }, 'pillar-with-poly': function() {
-    var puzzle = new Puzzle(2, 2, true)
+    var puzzle = new Puzzle(2, 2, pillar=true)
     puzzle.grid[2][4].start = true
     puzzle.grid[2][0].end = 'top'
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':49}
     return [puzzle, 0]
   }, 'pillar-with-stars': function() {
-    var puzzle = new Puzzle(2, 1, true)
+    var puzzle = new Puzzle(2, 1, pillar=true)
     puzzle.grid[2][2].start = true
     puzzle.grid[2][0].end = 'top'
     puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
@@ -444,7 +444,7 @@ var tests = {
     puzzle.grid[6][0].end = 'right'
     return [puzzle, 1]
   }, 'pillar-square-bug': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.grid[0][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[3][1] = {'type':'square', 'color':'black'}
@@ -458,7 +458,7 @@ var tests = {
     puzzle.end = {'x':0, 'y':0, 'dir':'top'}
     return [puzzle, 40]
   }, 'simpler-pillar-square-bug': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.grid[0][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[3][7] = {'type':'square', 'color':'black'}
@@ -466,7 +466,7 @@ var tests = {
     puzzle.end = {'x':0, 'y':0, 'dir':'top'}
     return [puzzle, 1373]
   }, 'pillar-poly-bug': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.grid[0][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':17}
@@ -474,7 +474,7 @@ var tests = {
     return [puzzle, 0]
   }, 'pillar-triangles-bug-NOCACHE': function() {
     window.DISABLE_CACHE = false
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.grid[0][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':3}
@@ -482,7 +482,7 @@ var tests = {
     return [puzzle, 111]
   }, 'pillar-triangles-bug': function() {
     window.DISABLE_CACHE = true
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.grid[0][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':3}
@@ -490,7 +490,7 @@ var tests = {
     return [puzzle, 111]
   }, 'small-pillar-triangles-bug-NOCACHE': function() {
     window.DISABLE_CACHE = false
-    var puzzle = new Puzzle(3, 2, true)
+    var puzzle = new Puzzle(3, 2, pillar=true)
     puzzle.grid[0][4].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':2}
@@ -498,14 +498,14 @@ var tests = {
     return [puzzle, 7]
   }, 'small-pillar-triangles-bug': function() {
     window.DISABLE_CACHE = true
-    var puzzle = new Puzzle(3, 2, true)
+    var puzzle = new Puzzle(3, 2, pillar=true)
     puzzle.grid[0][4].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':2}
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':2}
     return [puzzle, 7]
   }, 'laser-key-pillar': function() {
-    var puzzle = new Puzzle(1, 3, true)
+    var puzzle = new Puzzle(1, 3, pillar=true)
     puzzle.grid[0][6].start = true
     puzzle.grid[0][0].end = 'top'
     return [puzzle, 1]
@@ -608,7 +608,7 @@ var tests = {
     puzzle.grid[6][2].dot = 4
     return [puzzle, 56]
   }, 'symmetry-pillar-horizontal': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.symmetry = {'x':true, 'y':false}
     puzzle.grid[0][8].start = true
     puzzle.grid[4][8].start = true
@@ -616,7 +616,7 @@ var tests = {
     puzzle.grid[4][0].end = 'top'
     return [puzzle, 2]
   }, 'symmetry-pillar-vertical': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.symmetry = {'x':false, 'y':true}
     puzzle.grid[0][8].start = true
     puzzle.grid[4][0].start = true
@@ -624,7 +624,7 @@ var tests = {
     puzzle.grid[4][8].end = 'bottom'
     return [puzzle, 186]
   }, 'symmetry-pillar-rotation': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.symmetry = {'x':true, 'y':true}
     puzzle.grid[0][8].start = true
     puzzle.grid[4][0].start = true
@@ -632,7 +632,7 @@ var tests = {
     puzzle.grid[4][8].end = 'bottom'
     return [puzzle, 50]
   }, 'symmetry-pillar-none': function() {
-    var puzzle = new Puzzle(4, 4, true)
+    var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.symmetry = {'x':false, 'y':false}
     puzzle.grid[1][8].start = true
     puzzle.grid[5][8].start = true
@@ -640,7 +640,17 @@ var tests = {
     puzzle.grid[5][0].end = 'top'
     return [puzzle, 432]
   }, 'ezra333-quad-start-end-offset': function() {
-    return [Puzzle.deserialize("{\"grid\":[[{\"type\":\"line\",\"color\":0,\"end\":\"top\",\"start\":true},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0,\"start\":true,\"end\":\"bottom\"}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0,\"start\":true,\"end\":\"top\"},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0,\"end\":\"bottom\",\"start\":true}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}]],\"regionCache\":{},\"pillar\":true,\"name\":\"Unnamed Puzzle\",\"symmetry\":{\"x\":false,\"y\":true}}"), 0]
+    var puzzle = new Puzzle(4, 4, pillar=true)
+    puzzle.symmetry = {'x':false, 'y':true}
+    puzzle.grid[0][0].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][0].start = true
+    puzzle.grid[4][0].end = 'top'
+    puzzle.grid[0][8].start = true
+    puzzle.grid[0][8].end = 'bottom'
+    puzzle.grid[4][8].start = true
+    puzzle.grid[4][8].end = 'bottom'
+    return [puzzle, 0]
   }, 'ezra333-4x4-poly-is-offcenter': function() {
     var puzzle = new Puzzle(2, 1)
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':65535}
