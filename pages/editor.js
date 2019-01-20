@@ -55,7 +55,11 @@ function _writePuzzle(redraw=true) {
   window.localStorage.setItem(puzzleList[0], puzzle.serialize())
   _writePuzzleList(puzzleList)
 
-  if (redraw) _drawPuzzle(puzzle)
+  if (redraw) {
+    // @Hack: This doesn't feel like the right place...
+    setSolveMode(false)
+    // _drawPuzzle(puzzle)
+  }
 }
 
 // Create a new puzzle. If none is provided, a default, empty puzzle is created.
@@ -351,30 +355,27 @@ function _sanitizePuzzle() {
 
       if (cell.dot === 2 || cell.dot === 3) {
         if (puzzle.symmetry == undefined) {
-          console.debug('Replacing dot at', x, y, 'colored', puzzle.grid[x][y].dot, 'with color 1')
-          // @Test: Does this actually modify the grid object?
+          console.debug('Replacing dot at', x, y, 'colored', cell.dot, 'with color 1')
+          // NB: This modifies the original grid object
           cell.dot = 1
         }
       } else if (cell.end != undefined) {
         var validDirs = puzzle.getValidEndDirs(x, y)
         var index = validDirs.indexOf(cell.end)
         if (index == -1) {
-          // @Cleanup: Modifying an object for 'cleanliness'
           cell.end = _getNextValue(validDirs, cell.end)
-          puzzle.grid[x][y].end = cell.end
         }
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
+          console.debug('Enforcing symmetrical endpoint at', sym.x, sym.y)
           var symmetricalDir = puzzle.getSymmetricalDir(cell.end)
           puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
         }
       } else if (cell.start === true) {
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
-          if (puzzle.grid[x][y].start === true) {
-            puzzle.updateCell(sym.x, sym.y, {'start':true})
-            console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
-          }
+          console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
+          puzzle.updateCell(sym.x, sym.y, {'start':true})
         }
       }
     }
@@ -490,9 +491,11 @@ function _onElementClicked(x, y) {
     }
     dotColors.push(4)
     puzzle.grid[x][y].dot = _getNextValue(dotColors, puzzle.grid[x][y].dot)
+    puzzle.grid[x][y].gap = undefined
   } else if (activeParams.type === 'gap') {
     if (x%2 === y%2) return
     puzzle.grid[x][y].gap = _getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
+    puzzle.grid[x][y].dot = undefined
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
