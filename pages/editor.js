@@ -337,28 +337,44 @@ window.onload = function() {
 // @Future: This should be more intelligent, maybe something like
 // 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
 // @Future: Sanitize should also ensure endpoints are still in valid directions
+// This function:
+// - Ensure dots are not colored (if symmetry is off)
+// - Ensure endpoints are facing valid directions
+// - Ensure start/end are appropriately paired (if symmetry is on)
 function _sanitizePuzzle() {
   console.log('Sanitizing puzzle', puzzle)
-  // Ensure dots are not colored
-  // Ensure start/end are appropriately paired
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       if (x%2 === 1 && y%2 === 1) continue // Ignore cells
-      if (puzzle.symmetry == undefined) {
-        if (puzzle.grid[x][y].dot === 2 || puzzle.grid[x][y].dot === 3) {
+      var cell = puzzle.grid[x][y]
+      if (cell == undefined) continue
+
+      if (cell.dot === 2 || cell.dot === 3) {
+        if (puzzle.symmetry == undefined) {
           console.debug('Replacing dot at', x, y, 'colored', puzzle.grid[x][y].dot, 'with color 1')
-          puzzle.grid[x][y].dot = 1
+          // @Test: Does this actually modify the grid object?
+          cell.dot = 1
         }
-      } else {
-        var sym = puzzle.getSymmetricalPos(x, y)
-        if (puzzle.grid[x][y].start === true) {
-          puzzle.updateCell(sym.x, sym.y, {'start':true})
-          console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
+      } else if (cell.end != undefined) {
+        var validDirs = puzzle.getValidEndDirs(x, y)
+        var index = validDirs.indexOf(cell.end)
+        if (index == -1) {
+          // @Cleanup: Modifying an object for 'cleanliness'
+          cell.end = _getNextValue(validDirs, cell.end)
+          puzzle.grid[x][y].end = cell.end
         }
-        if (puzzle.grid[x][y].end != undefined) {
-          var symmetricalDir = puzzle.getSymmetricalDir(puzzle.grid[x][y].end)
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          var symmetricalDir = puzzle.getSymmetricalDir(cell.end)
           puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
-          console.debug('Addding symmetrical endpoint at', sym.x, sym.y, 'direction', symmetricalDir)
+        }
+      } else if (cell.start === true) {
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          if (puzzle.grid[x][y].start === true) {
+            puzzle.updateCell(sym.x, sym.y, {'start':true})
+            console.debug('Addding symmetrical startpoint at', sym.x, sym.y)
+          }
         }
       }
     }
@@ -513,7 +529,7 @@ function _onElementClicked(x, y) {
     if (puzzle.grid[x][y] != undefined
      && puzzle.grid[x][y].type === activeParams.type
      && puzzle.grid[x][y].color === activeParams.color) {
-      puzzle.grid[x][y].count = puzzle.grid[x][y].count % 3 + 1
+      puzzle.grid[x][y].count = puzzle.grid[x][y].count % 4 + 1
       // Remove when it matches activeParams -- this allows fluid cycling
       if (puzzle.grid[x][y].count === activeParams.count) {
         puzzle.grid[x][y] = undefined
@@ -581,7 +597,7 @@ function _drawSymbolButtons() {
     } else if (button.id === 'triangle') {
       button.onclick = function() {
         if (activeParams.id === this.id) {
-          symbolData.triangle.count = symbolData.triangle.count % 3 + 1
+          symbolData.triangle.count = symbolData.triangle.count % 4 + 1
           activeParams.count = symbolData.triangle.count
         }
         activeParams = Object.assign(activeParams, this.params)

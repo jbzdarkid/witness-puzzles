@@ -209,7 +209,11 @@ class Puzzle {
   updateCell(x, y, properties) {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
-    Object.assign(this.grid[x][y], properties)
+    if (this.grid[x][y] == undefined) {
+      this.grid[x][y] = properties
+    } else {
+      Object.assign(this.grid[x][y], properties)
+    }
   }
 
   getValidEndDirs(x, y) {
