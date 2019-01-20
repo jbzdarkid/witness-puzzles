@@ -32,9 +32,7 @@ In vague order of importance.
 -- Too modern? Should check avail on my target platforms, specifically mobile
 - Tracing down against walls and gap-2 is awkward
 - Replace XMLHttpRequest with Fetch?
-- mid-segment starts are still graphically buggy
 - Test for internal endpoint
--- (editor) Internal endpoint can still overlap if object is placed second, _enforceEndpoints?
 - "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
 -- If it makes it easier, rm cursor when finishing
 - Crazyhorse-style "edge-trapping" doesn't work with gap-2

@@ -634,11 +634,11 @@ var tests = {
   }, 'symmetry-pillar-none': function() {
     var puzzle = new Puzzle(4, 4, true)
     puzzle.symmetry = {'x':false, 'y':false}
-    puzzle.grid[0][8].start = true
-    puzzle.grid[4][8].start = true
-    puzzle.grid[0][0].end = 'top'
-    puzzle.grid[4][0].end = 'top'
-    return [puzzle, 242]
+    puzzle.grid[1][8].start = true
+    puzzle.grid[5][8].start = true
+    puzzle.grid[1][0].end = 'top'
+    puzzle.grid[5][0].end = 'top'
+    return [puzzle, 432]
   }, 'ezra333-quad-start-end-offset': function() {
     return [Puzzle.deserialize("{\"grid\":[[{\"type\":\"line\",\"color\":0,\"end\":\"top\",\"start\":true},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0,\"start\":true,\"end\":\"bottom\"}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0,\"start\":true,\"end\":\"top\"},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0,\"end\":\"bottom\",\"start\":true}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}]],\"regionCache\":{},\"pillar\":true,\"name\":\"Unnamed Puzzle\",\"symmetry\":{\"x\":false,\"y\":true}}"), 0]
   }, 'ezra333-4x4-poly-is-offcenter': function() {

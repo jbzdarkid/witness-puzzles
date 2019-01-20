@@ -88,7 +88,6 @@ class PathSegment {
     this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.dir = dir
-    data.svg.insertBefore(this.poly1, data.cursor)
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
     this.circ.setAttribute('cx', data.bbox.middle.x)
@@ -103,6 +102,8 @@ class PathSegment {
         this.circ.setAttribute('r', 24)
         this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
       } else {
+        // Only insert poly1 in non-startpoints
+        data.svg.insertBefore(this.poly1, data.cursor)
         this.circ.setAttribute('r', 12)
       }
     } else {
@@ -114,13 +115,14 @@ class PathSegment {
         this.circ.setAttribute('r', 24)
         this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
       } else {
+        // Only insert poly1 in non-startpoints
+        data.svg.insertBefore(this.poly1, data.cursor)
         this.circ.setAttribute('r', 12)
       }
 
       this.sympoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       this.symcirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
       this.sympoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      data.svg.insertBefore(this.sympoly1, data.cursor)
       data.svg.insertBefore(this.symcirc, data.cursor)
       data.svg.insertBefore(this.sympoly2, data.cursor)
       this.sympoly1.setAttribute('class', 'line-3 ' + data.svg.id)
@@ -137,6 +139,8 @@ class PathSegment {
         this.symcirc.setAttribute('r', 24)
         this.symcirc.setAttribute('class', this.symcirc.getAttribute('class') + ' start')
       } else {
+        // Only insert poly1 in non-startpoints
+        data.svg.insertBefore(this.sympoly1, data.cursor)
         this.circ.setAttribute('r', 12)
         this.symcirc.setAttribute('r', 12)
       }
@@ -183,9 +187,9 @@ class PathSegment {
       points1.x2 + ' ' + points1.y1
     )
 
-    // The second half of the line uses the raw so that it can enter the endpoint properly.
     var firstHalf = false
     var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != undefined)
+    // The second half of the line uses the raw so that it can enter the endpoint properly.
     var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
       points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
@@ -215,7 +219,7 @@ class PathSegment {
         points2.x1 += 17
         points2.x2 -= 17
       }
-    } else if (this.dir !== 'none') { // Start point always has circle visible
+    } else {
       firstHalf = true
     }
 
@@ -226,13 +230,13 @@ class PathSegment {
       points2.x2 + ' ' + points2.y1
     )
 
-    // Hide the central circle in the first half (but not for startpoints)
+    // Show the second poly only in the second half of the cell
+    this.poly2.setAttribute('opacity', (firstHalf ? 0 : 1))
+    // Show the circle in the second half of the cell AND in the start
     if (firstHalf && this.dir !== 'none') {
       this.circ.setAttribute('opacity', 0)
-      this.poly2.setAttribute('opacity', 0)
     } else {
       this.circ.setAttribute('opacity', 1)
-      this.poly2.setAttribute('opacity', 1)
     }
 
     // Draw the symmetrical path based on the original one
