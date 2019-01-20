@@ -297,6 +297,8 @@ function setSolveMode(value) {
       puzzle = solution
       document.getElementById('publish').disabled = false
     }
+    // @Hack: I should write an function to clear editor interaction points, and then use that here.
+    _drawPuzzle(puzzle)
     window.draw(puzzle)
   } else {
     puzzle.clearLines()
@@ -420,7 +422,6 @@ function publishPuzzle() {
     if (this !== currentPublishRequest) return
     if (this.readyState != XMLHttpRequest.DONE) return
 
-    console.error(this.response, this.responseText)
     var publish = document.getElementById('publish')
     if (this.status == 200) {
       publish.innerText = 'Published, click here to play your puzzle!'
