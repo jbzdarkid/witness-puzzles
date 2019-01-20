@@ -44,7 +44,7 @@ function validate(puzzle) {
   }
 
   if (!puzzleHasSymbols) { // No additional symbols, and we already checked dots & gaps
-    puzzle.valid &= (puzzle.invalidElements.length === 0)
+    puzzle.valid = puzzle.valid && (puzzle.invalidElements.length === 0)
   } else { // Additional symbols, so we need to discard dots & divide them by region
     puzzle.invalidElements = []
     var regions = puzzle.getRegions()
@@ -67,7 +67,7 @@ function validate(puzzle) {
       }
       puzzle.negations = puzzle.negations.concat(regionData.negations)
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-      puzzle.valid &= regionData.valid
+      puzzle.valid = puzzle.valid && regionData.valid
     }
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
