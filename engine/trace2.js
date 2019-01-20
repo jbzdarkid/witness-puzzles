@@ -1,8 +1,9 @@
 window.BBOX_DEBUG = false
 
 class BoundingBox {
-  constructor(x1, x2, y1, y2) {
+  constructor(x1, x2, y1, y2, sym=false) {
     this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
+    this.sym = sym
     if (window.BBOX_DEBUG === true) {
       this.debug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
       data.svg.appendChild(this.debug)
@@ -11,8 +12,7 @@ class BoundingBox {
       if (data.puzzle.symmetry == undefined) {
         this.debug.setAttribute('fill', 'white')
       } else {
-        // Symbbox is constructed second, so data.bbox will already be defined.
-        if (data.bbox == undefined) {
+        if (this.sym !== true) {
           this.debug.setAttribute('fill', 'blue')
         } else {
           this.debug.setAttribute('fill', 'orange')
@@ -56,8 +56,12 @@ class BoundingBox {
     this.x2 = this.raw.x2
     this.y1 = this.raw.y1
     this.y2 = this.raw.y2
-    // @Bug: This is technically wrong for the symmetrical box... it might not matter though.
-    var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+    if (this.sym !== true) {
+      var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+    } else {
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+      var cell = data.puzzle.getCell(sym.x, sym.y)
+    }
     if (cell.end === 'left') {
       this.x1 -= 24
     } else if (cell.end === 'right') {
@@ -433,7 +437,12 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
 
     var dx = parseFloat(symStart.getAttribute('cx')) - data.x
     var dy = parseFloat(symStart.getAttribute('cy')) - data.y
-    data.symbbox = new BoundingBox(data.bbox.x1 + dx, data.bbox.x2 + dx, data.bbox.y1 + dy, data.bbox.y2 + dy)
+    data.symbbox = new BoundingBox(
+      data.bbox.raw.x1 + dx,
+      data.bbox.raw.x2 + dx,
+      data.bbox.raw.y1 + dy,
+      data.bbox.raw.y2 + dy,
+      sym=true)
 
     data.symcursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     svg.appendChild(data.symcursor)
