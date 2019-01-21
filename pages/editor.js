@@ -107,7 +107,6 @@ function deletePuzzle() {
 function _drawPuzzle() {
   document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
-  // @Cleanup: Solution viewer should probably move graphically.
   document.getElementById('solutionViewer').style.display = 'none'
 
   // @Robustness: Pillars are not the same requirements. Figure this out.
