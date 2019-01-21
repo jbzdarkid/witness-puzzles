@@ -148,25 +148,24 @@ function _regionCheckNegations(puzzle, region) {
 
 // Checks if a region (series of cells) is valid.
 // Since the path must be complete at this point, returns only true or false
-// @Performance: We're iterating region.cells a bunch of times, these loops could be merged
 function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
   var invalidElements = []
 
-  // Check for uncovered dots
+  var coloredObjects = {}
+  var squareColors = {}
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined || cell.type !== 'line') continue
-    if (cell.dot > 0) {
+    if (cell == undefined) continue
+
+    // Check for uncovered dots
+    if (cell.type === 'line' && cell.dot > 0) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
       invalidElements.push(pos)
     }
-  }
 
-  // Check for triangles
-  for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell != undefined && cell.type === 'triangle') {
+    // Check for triangles
+    if (cell.type === 'triangle') {
       var count = 0
       if (puzzle.getLine(pos.x - 1, pos.y) > 0) count++
       if (puzzle.getLine(pos.x + 1, pos.y) > 0) count++
@@ -177,14 +176,8 @@ function _regionCheck(puzzle, region) {
         invalidElements.push(pos)
       }
     }
-  }
 
-  // Check for color-based elements
-  var coloredObjects = {}
-  var squareColors = {}
-  for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
+    // Count color-based elements
     if (coloredObjects[cell.color] == undefined) {
       coloredObjects[cell.color] = 0
     }
@@ -224,6 +217,8 @@ function _regionCheck(puzzle, region) {
   return invalidElements
 }
 
+// @Cleanup: Let's not write 'wrapper' methods.
+// @Cleanup: Maybe this should move into polyominos.js?
 function _polyWrapper(region, puzzle) {
   var polys = []
   var ylops = []
@@ -244,7 +239,6 @@ function _polyWrapper(region, puzzle) {
   for (var pos of region.cells) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
   }
-
   if (polys.length + ylops.length === 0) {
     console.log('No polyominos or onimylops inside the region, vacuously true')
     return true
@@ -253,14 +247,12 @@ function _polyWrapper(region, puzzle) {
     console.log('Combined size of polyominos', polyCount, 'does not match region size', regionSize)
     return false
   }
-
-  // For polyominos, we clear the grid to mark it up again:
   if (polyCount < 0) {
-    // This is an early exit, if there's bad counts.
     console.log('More onimoylops than polyominos by', -polyCount)
     return false
   }
 
+  // For polyominos, we clear the grid to mark it up again:
   var savedGrid = puzzle.grid
   puzzle.newGrid()
   // First, we mark all cells as 0: Cells outside the target region should be unaffected.
