@@ -34,7 +34,9 @@ function _readPuzzle() {
   try {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
+    // @Cleanup: This logic is duplicated from createSerializedPuzzle
     puzzle = Puzzle.deserialize(serialized)
+    _sanitizePuzzle()
     _drawPuzzle()
   } catch (e) {
     console.log(e)
@@ -346,6 +348,7 @@ window.onload = function() {
 // - Clears all lines from the puzzle (if a solution was showing)
 // - Ensures dots are not colored (if symmetry is off)
 // - Ensures endpoints are facing valid directions
+// - Ensures startpoints are not totally isolated by gap-2
 // - Ensures start/end are appropriately paired (if symmetry is on)
 function _sanitizePuzzle() {
   console.log('Sanitizing puzzle', puzzle)
@@ -357,6 +360,19 @@ function _sanitizePuzzle() {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
 
+      var isIsolated = false
+      if (x%2 == 0 && y%2 == 0) {
+        var leftCell = puzzle.getCell(x - 1, y)
+        var rightCell = puzzle.getCell(x + 1, y)
+        var topCell = puzzle.getCell(x, y - 1)
+        var bottomCell = puzzle.getCell(x, y + 1)
+        isIsolated = (
+         (leftCell == undefined || leftCell.gap === 2) &&
+         (rightCell == undefined || rightCell.gap === 2) &&
+         (topCell == undefined || topCell.gap === 2) &&
+         (bottomCell == undefined || bottomCell.gap === 2))
+      }
+
       if (cell.dot === 2 || cell.dot === 3) {
         if (puzzle.symmetry == undefined) {
           console.debug('Replacing dot at', x, y, 'colored', cell.dot, 'with color 1')
@@ -364,10 +380,14 @@ function _sanitizePuzzle() {
           cell.dot = 1
         }
       } else if (cell.end != undefined) {
-        var validDirs = puzzle.getValidEndDirs(x, y)
-        var index = validDirs.indexOf(cell.end)
-        if (index == -1) {
-          cell.end = _getNextValue(validDirs, cell.end)
+        if (isIsolated) {
+          cell.end = undefined
+        } else {
+          var validDirs = puzzle.getValidEndDirs(x, y)
+          var index = validDirs.indexOf(cell.end)
+          if (index == -1) {
+            cell.end = _getNextValue(validDirs, cell.end)
+          }
         }
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
@@ -376,10 +396,13 @@ function _sanitizePuzzle() {
           puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
         }
       } else if (cell.start === true) {
+        if (isIsolated) {
+          puzzle.grid[x][y].start = false
+        }
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
           console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
-          puzzle.updateCell(sym.x, sym.y, {'start':true})
+          puzzle.updateCell(sym.x, sym.y, {'start':cell.start})
         }
       }
     }
@@ -466,6 +489,8 @@ function _getNextValue(list, value) {
 function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
+    if (puzzle.grid[x][y].gap != undefined) return
+
     if (puzzle.grid[x][y].start == undefined) {
       puzzle.grid[x][y].start = true
     } else {
@@ -477,6 +502,8 @@ function _onElementClicked(x, y) {
     }
   } else if (activeParams.type === 'end') {
     if (x%2 === 1 && y%2 === 1) return
+    if (puzzle.grid[x][y].gap != undefined) return
+
     var validDirs = puzzle.getValidEndDirs(x, y)
 
     // If (x, y) is an endpoint, loop to the next direction
@@ -503,6 +530,13 @@ function _onElementClicked(x, y) {
     if (x%2 === y%2) return
     puzzle.grid[x][y].gap = _getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
     puzzle.grid[x][y].dot = undefined
+    puzzle.grid[x][y].start = undefined
+    puzzle.grid[x][y].end = undefined
+    if (puzzle.symmetry != undefined) {
+      var sym = puzzle.getSymmetricalPos(x, y)
+      puzzle.grid[sym.x][sym.y].start = undefined
+      puzzle.grid[sym.x][sym.y].end = undefined
+    }
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
