@@ -9,6 +9,8 @@ window.onload = function() {
     var testName = testNames[i]
 
     var cell = table.rows[table.rows.length - 1].insertCell()
+    cell.style.textAlign = 'center'
+    cell.width = '33%'
     var puzzleSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     puzzleSvg.id = testName
     cell.appendChild(puzzleSvg)
@@ -70,6 +72,29 @@ var tests = {
     puzzle.grid[2][1].end = 'right'
     puzzle.grid[2][2].start = true
     return [puzzle, 32]
+  }, 'gap-2-internal-end': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.grid[0][0].start = true
+    puzzle.grid[0][4].start = true
+    puzzle.grid[4][0].start = true
+    puzzle.grid[4][4].start = true
+    puzzle.grid[1][2].gap = 2
+    puzzle.grid[2][1].gap = 2
+    puzzle.grid[2][3].gap = 2
+    puzzle.grid[3][2].gap = 2
+    puzzle.grid[0][1].end = 'right'
+    puzzle.grid[0][2].end = 'right'
+    puzzle.grid[0][3].end = 'right'
+    puzzle.grid[1][0].end = 'bottom'
+    puzzle.grid[2][0].end = 'bottom'
+    puzzle.grid[3][0].end = 'bottom'
+    puzzle.grid[4][1].end = 'left'
+    puzzle.grid[4][2].end = 'left'
+    puzzle.grid[4][3].end = 'left'
+    puzzle.grid[1][4].end = 'top'
+    puzzle.grid[2][4].end = 'top'
+    puzzle.grid[3][4].end = 'top'
+    return [puzzle, 96]
   }, 'negation-with-dots': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true
