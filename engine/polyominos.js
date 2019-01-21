@@ -163,11 +163,16 @@ function polyFit(region, puzzle) {
 }
 // If false, poly doesn't fit and grid is unmodified
 // If true, poly fits and grid is modified (with the placement)
-// @Performance: I'm making cells here because polyFromPolyshape is complicated.
-//  If I merge that into here, I can keep this cleaner (?)
 function _tryPlacePolyshape(cells, x, y, puzzle, sign) {
-  if (!fitsGrid(cells, x, y, puzzle)) return false
-  for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y] += sign
+  console.spam('Placing at', x, y, 'with sign', sign)
+  for (var i=0; i<cells.length; i++) {
+    var cell = puzzle.getCell(cells[i].x + x, cells[i].y + y)
+    if (cell == undefined) return false
+    cells[i].value = cell
+  }
+  for (var i=0; i<cells.length; i++) {
+    puzzle.setCell(cells[i].x + x, cells[i].y + y, cells[i].value + sign)
+  }
   return true
 }
 
@@ -185,9 +190,9 @@ function _placeYlops(ylops, polys, puzzle) {
       for (var polyshape of ylopRotations) {
         var cells = polyominoFromPolyshape(polyshape, true)
         if (!_tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
-        console.group()
+        console.group('')
         if (_placeYlops(ylops, polys, puzzle)) return true
-        console.groupEnd()
+        console.groupEnd('')
         if (!_tryPlacePolyshape(cells, x, y, puzzle, +1)) continue
       }
     }
@@ -234,7 +239,6 @@ function _placePolys(polys, puzzle) {
     }
   }
 
-  // @Bug: This isn't considering pillars...
   for (var i=0; i<polys.length; i++) {
     var poly = polys.splice(i, 1)[0]
     console.spam('Selected poly', poly)
