@@ -6,7 +6,6 @@ window.NEGATIONS_CANCEL_NEGATIONS = true
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
 // negations: Negation symbols and their targets (for the purpose of darkening)
 // @Performance: Consider implementing a "no-ui/silent" validation mode which exits after the first error.
-// @Bug: If there is no line on the grid, validate returns true! It should ensure that at least one start point and end point have a line.
 function validate(puzzle) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
@@ -14,6 +13,8 @@ function validate(puzzle) {
   puzzle.negations = []
 
   var puzzleHasSymbols = false
+  var puzzleHasStart = false
+  var puzzleHasEnd = false
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
@@ -36,11 +37,17 @@ function validate(puzzle) {
             puzzle.valid = false
           }
         }
+        if (cell.start === true && cell.color !== 0) puzzleHasStart = true
+        if (cell.end != undefined && cell.color !== 0) puzzleHasEnd = true
       } else if (cell.type != undefined) {
         // Perf optimization: We can skip computing regions if the grid has no symbols.
         puzzleHasSymbols = true
       }
     }
+  }
+  if (!puzzleHasStart || !puzzleHasStart) {
+    console.log('There is no covered start or endpoint')
+    puzzle.valid = false
   }
 
   if (!puzzleHasSymbols) { // No additional symbols, and we already checked dots & gaps

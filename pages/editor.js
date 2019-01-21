@@ -343,7 +343,6 @@ window.onload = function() {
 
 // @Future: This should be more intelligent, maybe something like
 // 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
-// @Future: Sanitize should also ensure endpoints are still in valid directions
 // This function:
 // - Clears all lines from the puzzle (if a solution was showing)
 // - Ensures dots are not colored (if symmetry is off)

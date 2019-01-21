@@ -21,12 +21,14 @@ def page_not_found(error):
   return render_template('404_generic.html'), 404
 
 # Publishing puzzles
+# This is a bit awkward, since in order to load the puzzle it has to exist somewhere,
+# so I save the puzzle then quickly verify and delete it if it's invalid.
 def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
 
   display_hash = create_puzzle(puzzle_json, solution_json)
-  error = bar(display_hash) # Also saves the image
+  error = get_validation_error(display_hash) # Also saves the image
 
   if error:
     delete_puzzle(display_hash)
@@ -36,10 +38,10 @@ def publish():
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
 
 # Validating "semi-published" puzzles
-def foo(display_hash):
+def validate(display_hash):
   puzzle = get_puzzle(display_hash) # This should never fail, and if it does, a 500 is ok.
   return render_template('validate_template.html', solution=puzzle.solution_json)
-application.add_url_rule('/validate/<display_hash>', 'validate', foo)
+application.add_url_rule('/validate/<display_hash>', 'validate', validate)
 
 # Playing published puzzles
 def play(display_hash):

@@ -79,9 +79,8 @@ def host_statically(path, serverpath=None, protected=False):
     serverpath = f'/{path}'
   application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
 
-# @Cleanup: Calling driver.quit() all over the place
 # @Cleanup: bar?
-def bar(display_hash):
+def get_validation_error(display_hash):
   driver = Chrome()
   driver.set_window_size(2000, 2000)
   driver.get(f'{request.url_root}validate/{display_hash}')
