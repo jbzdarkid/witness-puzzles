@@ -19,9 +19,13 @@ class Region {
     return ((val % mod) + mod) % mod
   }
 
+  getCell(x, y) {
+    return ((this.grid[x] & (1 << y)) !== 0)
+  }
+
   setCell(x, y) {
     x = this._mod(x)
-    if ((this.grid[x] & (1 << y)) !== 0) return
+    if (this.getCell(x, y)) return
     this.grid[x] |= (1 << y)
     this.cells.push({'x':x, 'y':y})
   }

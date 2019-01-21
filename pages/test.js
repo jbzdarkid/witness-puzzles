@@ -19,18 +19,19 @@ window.onload = function() {
       var expectedSolutions = puzzleData[1]
       window.draw(puzzle, testName)
       var solutions = window.solve(puzzle)
-      if (solutions.length !== expectedSolutions) {
-        console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
-        for (var solution of solutions) {
-          solution.logGrid()
-        }
-        var border = puzzleSvg.firstChild
-        border.setAttribute('stroke', 'red')
-        numFailures++
-      }
     } catch (e) {
-      console.error('Test', testName, 'errored!')
-      cell.innerHTML = e.stack || 'ERROR: ' + e
+      console.error('Test', testName, 'errored:', e)
+      var border = puzzleSvg.firstChild
+      border.setAttribute('stroke', 'red')
+      numFailures++
+    }
+    if (solutions.length !== expectedSolutions) {
+      console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
+      for (var solution of solutions) {
+        solution.logGrid()
+      }
+      var border = puzzleSvg.firstChild
+      border.setAttribute('stroke', 'red')
       numFailures++
     }
   }
