@@ -1,5 +1,9 @@
 In vague order of importance.
 
+- Find some way to view contents of tables. Telemetry dashboard should be working.
+- Find a way to modify tables / export contents / or just delete if we're in beta (especially if there aren't any puzzles, see above)
+- Find a way in python to modify or just drop tables (we're in beta?!)
+
 - Rich line data -> Done
 -- Formal object, maybe?
 - Better UI for "draggable edge" (editor)

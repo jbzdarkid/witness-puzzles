@@ -104,7 +104,7 @@ function _regionCheckNegations(puzzle, region) {
   // If there are not enough elements to pair, return
   if (negationSymbols.length === 0 ||
      (invalidElements.length === 0 && (negationSymbols.length < 2 || !window.NEGATIONS_CANCEL_NEGATIONS))) {
-    console.debug('Not enough elements left to create a pair')
+    console.debug('Not enough elements left to create a negation pair')
     invalidElements = invalidElements.concat(negationSymbols)
     return {'invalidElements':invalidElements, 'negations':[]}
   }
@@ -334,6 +334,7 @@ function _polyFit(polys, puzzle) {
     }
   }
 
+  // @Bug: This isn't considering pillars...
   for (var i=0; i<polys.length; i++) {
     var poly = polys.splice(i, 1)[0]
     console.spam('Selected poly', poly)

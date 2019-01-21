@@ -650,7 +650,7 @@ var tests = {
     puzzle.grid[0][8].end = 'bottom'
     puzzle.grid[4][8].start = true
     puzzle.grid[4][8].end = 'bottom'
-    return [puzzle, 155]
+    return [puzzle, 376]
   }, 'ezra333-4x4-poly-is-offcenter': function() {
     var puzzle = new Puzzle(2, 1)
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':65535}
