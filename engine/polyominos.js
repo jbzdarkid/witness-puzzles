@@ -161,6 +161,15 @@ function polyFit(region, puzzle) {
   puzzle.grid = savedGrid
   return ret
 }
+// If false, poly doesn't fit and grid is unmodified
+// If true, poly fits and grid is modified (with the placement)
+// @Performance: I'm making cells here because polyFromPolyshape is complicated.
+//  If I merge that into here, I can keep this cleaner (?)
+function _tryPlacePolyshape(cells, x, y, puzzle, sign) {
+  if (!fitsGrid(cells, x, y, puzzle)) return false
+  for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y] += sign
+  return true
+}
 
 // Places the ylops such that they are inside of the grid, then checks if the polys
 // zero the region.
@@ -175,12 +184,11 @@ function _placeYlops(ylops, polys, puzzle) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
         var cells = polyominoFromPolyshape(polyshape, true)
-        if (!fitsGrid(cells, x, y, puzzle)) continue
-        for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]--
+        if (!_tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
         console.group()
         if (_placeYlops(ylops, polys, puzzle)) return true
         console.groupEnd()
-        for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]++
+        if (!_tryPlacePolyshape(cells, x, y, puzzle, +1)) continue
       }
     }
   }
@@ -232,13 +240,11 @@ function _placePolys(polys, puzzle) {
     console.spam('Selected poly', poly)
     for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
       var cells = polyominoFromPolyshape(polyshape)
-      if (!fitsGrid(cells, pos.x, pos.y, puzzle)) continue
-      console.spam('Placing at', pos.x, pos.y)
-      for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]++
+      if (!_tryPlacePolyshape(cells, pos.x, pos.y, puzzle, +1)) continue
       console.group('')
       if (_placePolys(polys, puzzle)) return true
       console.groupEnd('')
-      for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]--
+      if (!_tryPlacePolyshape(cells, pos.x, pos.y, puzzle, -1)) continue
     }
     polys.splice(i, 0, poly)
   }
