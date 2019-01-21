@@ -204,7 +204,7 @@ function _regionCheck(puzzle, region) {
     }
   }
 
-  if (!window._polyWrapper(region, puzzle)) {
+  if (!window.polyFit(region, puzzle)) {
     for (var pos of region.cells) {
       var cell = puzzle.getCell(pos.x, pos.y)
       if (cell == undefined) continue

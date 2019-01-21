@@ -91,6 +91,7 @@ function polyominoFromPolyshape(polyshape, ylop=false) {
   return polyomino
 }
 
+// @Cleanup: I don't *really* need these right now.
 window.POLYOMINOS = {
   '1':[1],
   '2':[3, 17, 33, 18],
@@ -103,8 +104,12 @@ window.POLYOMINOS = {
   '11':[32614],
 }
 
-// @Cleanup: Let's not write 'wrapper' methods.
-function _polyWrapper(region, puzzle) {
+// Attempt to fit polyominos in a region into the puzzle.
+// This function checks for early exits, and cleans up the grid to a numerical representation:
+// * 0 represents a square that does not need to be covered (outside the region)
+// * -1 represents a square that needs to be covered once (inside the region)
+// * 1 represents a square that has been double-covered (by two polyominos, e.g.)
+function polyFit(region, puzzle) {
   var polys = []
   var ylops = []
   var polyCount = 0
@@ -114,10 +119,10 @@ function _polyWrapper(region, puzzle) {
     if (cell.polyshape === 0) continue
     if (cell.type === 'poly') {
       polys.push(cell)
-      polyCount += window.getPolySize(cell.polyshape)
+      polyCount += getPolySize(cell.polyshape)
     } else if (cell.type === 'ylop') {
       ylops.push(cell)
-      polyCount -= window.getPolySize(cell.polyshape)
+      polyCount -= getPolySize(cell.polyshape)
     }
   }
   var regionSize = 0
@@ -152,26 +157,28 @@ function _polyWrapper(region, puzzle) {
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
-  var ret = _ylopFit(ylops.slice(), polys.slice(), puzzle)
+  var ret = _placeYlops(ylops.slice(), polys.slice(), puzzle)
   puzzle.grid = savedGrid
   return ret
 }
 
 // Places the ylops such that they are inside of the grid, then checks if the polys
 // zero the region.
-function _ylopFit(ylops, polys, puzzle) {
-  if (ylops.length === 0) return _polyFit(polys, puzzle)
+function _placeYlops(ylops, polys, puzzle) {
+  // Base case: No more ylops to place, start placing polys
+  if (ylops.length === 0) return _placePolys(polys, puzzle)
+
   var ylop = ylops.pop()
-  var ylopRotations = window.getRotations(ylop.polyshape, ylop.rot)
+  var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
   for (var x=1; x<puzzle.grid.length; x+=2) {
     for (var y=1; y<puzzle.grid[x].length; y+=2) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
-        var cells = window.polyominoFromPolyshape(polyshape, true)
-        if (!window.fitsGrid(cells, x, y, puzzle)) continue
+        var cells = polyominoFromPolyshape(polyshape, true)
+        if (!fitsGrid(cells, x, y, puzzle)) continue
         for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]--
         console.group()
-        if (_ylopFit(ylops, polys, puzzle)) return true
+        if (_placeYlops(ylops, polys, puzzle)) return true
         console.groupEnd()
         for (var cell of cells) puzzle.grid[cell.x + x][cell.y + y]++
       }
@@ -183,7 +190,7 @@ function _ylopFit(ylops, polys, puzzle) {
 // Returns whether or not a set of polyominos fit into a region.
 // Solves via recursive backtracking: Some piece must fill the top left square,
 // so try every piece to fill it, then recurse.
-function _polyFit(polys, puzzle) {
+function _placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
   for (var y=0; y<puzzle.grid[0].length; y++) {
     for (var x=0; x<puzzle.grid.length; x++) {
@@ -223,13 +230,13 @@ function _polyFit(polys, puzzle) {
   for (var i=0; i<polys.length; i++) {
     var poly = polys.splice(i, 1)[0]
     console.spam('Selected poly', poly)
-    for (var polyshape of window.getRotations(poly.polyshape, poly.rot)) {
-      var cells = window.polyominoFromPolyshape(polyshape)
-      if (!window.fitsGrid(cells, pos.x, pos.y, puzzle)) continue
+    for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
+      var cells = polyominoFromPolyshape(polyshape)
+      if (!fitsGrid(cells, pos.x, pos.y, puzzle)) continue
       console.spam('Placing at', pos.x, pos.y)
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]++
       console.group('')
-      if (_polyFit(polys, puzzle)) return true
+      if (_placePolys(polys, puzzle)) return true
       console.groupEnd('')
       for (var cell of cells) puzzle.grid[cell.x + pos.x][cell.y + pos.y]--
     }
