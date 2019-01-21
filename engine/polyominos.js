@@ -229,7 +229,7 @@ function _placePolys(polys, puzzle) {
   // top-most open row
   var openCells = []
   for (var y=1; y<puzzle.grid[0].length; y+=2) {
-    for (var x=1; x<puzzle.grid[0].length; x+=2) {
+    for (var x=1; x<puzzle.grid.length; x+=2) {
       if (puzzle.getCell(x, y) >= 0) continue
       openCells.push({'x':x, 'y':y})
       if (!puzzle.pillar) break
