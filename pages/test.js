@@ -657,7 +657,15 @@ var tests = {
     puzzle.grid[3][1] = {'type':'poly', 'color':'black', 'polyshape':38505}
     return [puzzle, 0]
   }, 'hecklechet-r-symmetry-double-r-poly': function() {
+    puzzle = new Puzzle(4, 4, pillar=true)
+    puzzle.symmetry ={'x':true, 'y':true}
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[4][8].end = 'bottom'
+    puzzle.grid[6][0].start = true
+    puzzle.grid[6][8].start = true
+    puzzle.grid[3][1] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
+    puzzle.grid[7][7] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
     // Solution should include <D L DD L D R>
-    return [Puzzle.deserialize("{\"grid\":[[{\"type\":\"line\",\"color\":0,\"end\":\"top\"},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"poly\",\"color\":\"black\",\"polyshape\":116,\"rot\":\"all\"},{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0,\"end\":\"bottom\"}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0}],[{\"type\":\"line\",\"color\":0,\"start\":true},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0},{\"type\":\"line\",\"color\":0,\"start\":true}],[{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},null,{\"type\":\"line\",\"color\":0},{\"type\":\"poly\",\"color\":\"black\",\"polyshape\":116,\"rot\":\"all\"},{\"type\":\"line\",\"color\":0}]],\"regionCache\":{},\"pillar\":true,\"name\":\"Unnamed Puzzle\",\"symmetry\":{\"x\":true,\"y\":true},\"valid\":1,\"invalidElements\":[],\"negations\":[]}"), 0]
+    return [puzzle, 1]
   }
 }
