@@ -224,34 +224,53 @@ function _placePolys(polys, puzzle) {
     return true
   }
 
-  // TODO: Might be a bit of perf to pass pos around, rather than rediscover?
-  var pos = {'x':1, 'y':1}
-  // Find the next open cell
-  while (puzzle.getCell(pos.x, pos.y) >= 0) {
-    pos.x += 2
-    if (pos.x >= puzzle.grid.length) {
-      pos.x = 1
-      pos.y += 2
+  // The top-left (first open cell) must be filled by a polyomino.
+  // However in the case of pillars, there is no top-left, so we try all open cells in the
+  // top-most open row
+  var openCells = []
+  for (var y=1; y<puzzle.grid[0].length; y+=2) {
+    for (var x=1; x<puzzle.grid[0].length; x+=2) {
+      if (puzzle.getCell(x, y) >= 0) continue
+      openCells.push({'x':x, 'y':y})
+      if (!puzzle.pillar) break
     }
-    if (pos.y >= puzzle.grid[0].length) {
-      console.log('Polys remaining but grid full')
-      return false
-    }
+    if (openCells.length > 0) break
   }
 
-  for (var i=0; i<polys.length; i++) {
-    var poly = polys.splice(i, 1)[0]
-    console.spam('Selected poly', poly)
-    for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
-      var cells = polyominoFromPolyshape(polyshape)
-      if (!_tryPlacePolyshape(cells, pos.x, pos.y, puzzle, +1)) continue
-      console.group('')
-      if (_placePolys(polys, puzzle)) return true
-      console.groupEnd('')
-      if (!_tryPlacePolyshape(cells, pos.x, pos.y, puzzle, -1)) continue
+  if (openCells.length === 0) {
+    console.log('Polys remaining but grid full')
+    return false
+  }
+
+  for (var openCell of openCells) {
+    for (var i=0; i<polys.length; i++) {
+      var poly = polys.splice(i, 1)[0]
+      console.spam('Selected poly', poly)
+      for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
+        var cells = polyominoFromPolyshape(polyshape)
+        if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) continue
+        console.group('')
+        if (_placePolys(polys, puzzle)) return true
+        console.groupEnd('')
+        if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, -1)) continue
+      }
+      polys.splice(i, 0, poly)
     }
-    polys.splice(i, 0, poly)
   }
   console.log('Grid non-empty with >0 polys, but no valid recursion.')
   return false
+}
+
+function _logPolyGrid(puzzle) {
+  var output = ''
+  for (var y=0; y<puzzle.grid[0].length; y++) {
+    for (var x=0; x<puzzle.grid.length; x++) {
+      var cell = puzzle.grid[x][y]
+      if (cell === -1) output += '-'
+      if (cell === 0) output += '0'
+      if (cell === 1) output += '1'
+    }
+    output += '\n'
+  }
+  console.log(output)
 }

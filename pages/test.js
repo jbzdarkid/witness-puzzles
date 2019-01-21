@@ -472,7 +472,7 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':17}
     puzzle.end = {'x':0, 'y':0, 'dir':'top'}
-    return [puzzle, 0]
+    return [puzzle, 467]
   }, 'pillar-triangles-bug-NOCACHE': function() {
     window.DISABLE_CACHE = false
     var puzzle = new Puzzle(4, 4, pillar=true)
@@ -666,7 +666,6 @@ var tests = {
     puzzle.grid[6][8].start = true
     puzzle.grid[3][1] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
     puzzle.grid[7][7] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
-    // Solution should include <D L DD L D R>
-    return [puzzle, 1]
+    return [puzzle, 2]
   }
 }
