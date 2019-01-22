@@ -91,62 +91,87 @@ class PathSegment {
     this.poly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+    this.pillarCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     this.dir = dir
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
+    data.svg.insertBefore(this.pillarCirc, data.cursor)
     this.circ.setAttribute('cx', data.bbox.middle.x)
     this.circ.setAttribute('cy', data.bbox.middle.y)
+
+    if (data.puzzle.pillar === true) {
+      // cx/cy are updated in redraw(), since pillarCirc tracks the cursor
+      this.pillarCirc.setAttribute('cy', data.bbox.middle.y)
+      this.pillarCirc.setAttribute('r', 12)
+      if (data.pos.x === 0 && this.dir === 'right') {
+        this.pillarCirc.setAttribute('cx', data.bbox.x1)
+        this.pillarCirc.setAttribute('static', true)
+      } else if (data.pos.x === data.puzzle.grid.length - 1 && this.dir === 'left') {
+        this.pillarCirc.setAttribute('cx', data.bbox.x2)
+        this.pillarCirc.setAttribute('static', true)
+      } else {
+        this.pillarCirc.setAttribute('cx', data.bbox.middle.x)
+      }
+    }
+
+    if (this.dir === 'none') { // Start point
+      this.circ.setAttribute('r', 24)
+      this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
+    } else {
+      // Only insert poly1 in non-startpoints
+      data.svg.insertBefore(this.poly1, data.cursor)
+      this.circ.setAttribute('r', 12)
+    }
 
     if (data.puzzle.symmetry == undefined) {
       this.poly1.setAttribute('class', 'line-1 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-1 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-1 ' + data.svg.id)
-
-      if (this.dir === 'none') { // Start point
-        this.circ.setAttribute('r', 24)
-        this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
-      } else {
-        // Only insert poly1 in non-startpoints
-        data.svg.insertBefore(this.poly1, data.cursor)
-        this.circ.setAttribute('r', 12)
-      }
+      this.pillarCirc.setAttribute('class', 'line-1 ' + data.svg.id)
     } else {
       this.poly1.setAttribute('class', 'line-2 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-2 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-2 ' + data.svg.id)
+      this.pillarCirc.setAttribute('class', 'line-2 ' + data.svg.id)
 
-      if (this.dir === 'none') { // Start point
-        this.circ.setAttribute('r', 24)
-        this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
-      } else {
-        // Only insert poly1 in non-startpoints
-        data.svg.insertBefore(this.poly1, data.cursor)
-        this.circ.setAttribute('r', 12)
+      this.symPoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      this.symCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      this.symPoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      this.symPillarCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      data.svg.insertBefore(this.symCirc, data.cursor)
+      data.svg.insertBefore(this.symPoly2, data.cursor)
+      data.svg.insertBefore(this.symPillarCirc, data.cursor)
+      this.symPoly1.setAttribute('class', 'line-3 ' + data.svg.id)
+      this.symCirc.setAttribute('class', 'line-3 ' + data.svg.id)
+      this.symPoly2.setAttribute('class', 'line-3 ' + data.svg.id)
+      this.symPillarCirc.setAttribute('class', 'line-3 ' + data.svg.id)
+
+      this.symCirc.setAttribute('cx', data.symbbox.middle.x)
+      this.symCirc.setAttribute('cy', data.symbbox.middle.y)
+      this.symCirc.setAttribute('r', this.circ.getAttribute('r'))
+
+      if (data.puzzle.pillar === true) {
+        // cx/cy are updated in redraw(), since symPillarCirc tracks the cursor
+        this.symPillarCirc.setAttribute('cy', data.symbbox.middle.y)
+        this.symPillarCirc.setAttribute('r', 12)
+        var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
+        var symmetricalDir = data.puzzle.getSymmetricalDir(this.dir)
+        if (sym.x === 0 && symmetricalDir === 'right') {
+          this.symPillarCirc.setAttribute('cx', data.symbbox.x1)
+          this.symPillarCirc.setAttribute('static', true)
+        } else if (sym.x === data.puzzle.grid.length - 1 && symmetricalDir === 'left') {
+          this.symPillarCirc.setAttribute('cx', data.symbbox.x2)
+          this.symPillarCirc.setAttribute('static', true)
+        } else {
+          this.symPillarCirc.setAttribute('cx', data.symbbox.middle.x)
+        }
       }
 
-      this.sympoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      this.symcirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      this.sympoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      data.svg.insertBefore(this.symcirc, data.cursor)
-      data.svg.insertBefore(this.sympoly2, data.cursor)
-      this.sympoly1.setAttribute('class', 'line-3 ' + data.svg.id)
-      this.symcirc.setAttribute('class', 'line-3 ' + data.svg.id)
-      this.sympoly2.setAttribute('class', 'line-3 ' + data.svg.id)
-
-      this.symcirc.setAttribute('cx', data.symbbox.middle.x)
-      this.symcirc.setAttribute('cy', data.symbbox.middle.y)
-      this.symcirc.setAttribute('r', this.circ.getAttribute('r'))
-
       if (this.dir === 'none') { // Start point
-        this.circ.setAttribute('r', 24)
-        this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
-        this.symcirc.setAttribute('r', 24)
-        this.symcirc.setAttribute('class', this.symcirc.getAttribute('class') + ' start')
+        this.symCirc.setAttribute('class', this.symCirc.getAttribute('class') + ' start')
       } else {
         // Only insert poly1 in non-startpoints
-        data.svg.insertBefore(this.sympoly1, data.cursor)
-        this.circ.setAttribute('r', 12)
-        this.symcirc.setAttribute('r', 12)
+        data.svg.insertBefore(this.symPoly1, data.cursor)
       }
     }
   }
@@ -155,15 +180,17 @@ class PathSegment {
     data.svg.removeChild(this.poly1)
     data.svg.removeChild(this.circ)
     data.svg.removeChild(this.poly2)
+    data.svg.removeChild(this.pillarCirc)
     if (data.puzzle.symmetry != undefined) {
-      data.svg.removeChild(this.sympoly1)
-      data.svg.removeChild(this.symcirc)
-      data.svg.removeChild(this.sympoly2)
+      data.svg.removeChild(this.symPoly1)
+      data.svg.removeChild(this.symCirc)
+      data.svg.removeChild(this.symPoly2)
+      data.svg.removeChild(this.symPillarCirc)
     }
   }
 
   redraw() { // Uses raw bbox because of endpoints
-    // Move the cursor
+    // Move the cursor and related objects
     var x = data.x.clamp(data.bbox.x1, data.bbox.x2)
     var y = data.y.clamp(data.bbox.y1, data.bbox.y2)
     data.cursor.setAttribute('cx', x)
@@ -171,6 +198,18 @@ class PathSegment {
     if (data.puzzle.symmetry != undefined) {
       data.symcursor.setAttribute('cx', this._reflX(x))
       data.symcursor.setAttribute('cy', this._reflY(y))
+    }
+    if (data.puzzle.pillar === true) {
+      if (this.pillarCirc.getAttribute('static') == undefined) {
+        this.pillarCirc.setAttribute('cx', x)
+        this.pillarCirc.setAttribute('cy', y)
+      }
+      if (data.puzzle.symmetry != undefined) {
+        if (this.symPillarCirc.getAttribute('static') == undefined) {
+          this.symPillarCirc.setAttribute('cx', this._reflX(x))
+          this.symPillarCirc.setAttribute('cy', this._reflY(y))
+        }
+      }
     }
 
     // Draw the first-half box
@@ -245,22 +284,22 @@ class PathSegment {
 
     // Draw the symmetrical path based on the original one
     if (data.puzzle.symmetry != undefined) {
-      this.sympoly1.setAttribute('points',
+      this.symPoly1.setAttribute('points',
         this._reflX(points1.x2) + ' ' + this._reflY(points1.y2) + ',' +
         this._reflX(points1.x2) + ' ' + this._reflY(points1.y1) + ',' +
         this._reflX(points1.x1) + ' ' + this._reflY(points1.y1) + ',' +
         this._reflX(points1.x1) + ' ' + this._reflY(points1.y2)
       )
 
-      this.sympoly2.setAttribute('points',
+      this.symPoly2.setAttribute('points',
         this._reflX(points2.x2) + ' ' + this._reflY(points2.y2) + ',' +
         this._reflX(points2.x2) + ' ' + this._reflY(points2.y1) + ',' +
         this._reflX(points2.x1) + ' ' + this._reflY(points2.y1) + ',' +
         this._reflX(points2.x1) + ' ' + this._reflY(points2.y2)
       )
 
-      this.symcirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
-      this.sympoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
+      this.symCirc.setAttribute('opacity', this.circ.getAttribute('opacity'))
+      this.symPoly2.setAttribute('opacity', this.poly2.getAttribute('opacity'))
     }
   }
 

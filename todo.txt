@@ -48,6 +48,8 @@ In vague order of importance.
 - (editor) Swapping symmetry modes can wind up with not having valid pairings?
 - Background validation should *stop* returning internal errors. Who needs to see them?
 - Consider changing UUIDType to just be a string -- it's pain to read.
+- Just compute sym every frame and update it (immediately after data.pos). It's expensive to recompute this always.
+-- Ditto for symmetricalDir
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?

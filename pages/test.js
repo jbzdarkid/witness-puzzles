@@ -731,6 +731,6 @@ var tests = {
     puzzle.grid[8][1].gap = 2
     puzzle.grid[8][7].gap = 2
     */
-    return [puzzle, 1]
+    return [puzzle, 0]
   }
 }

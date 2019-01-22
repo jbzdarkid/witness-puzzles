@@ -49,47 +49,15 @@ function _drawGrid(puzzle, svg) {
       line.setAttribute('stroke', window.FOREGROUND)
       if (x%2 === 1 && y%2 === 0) { // Horizontal
         line.setAttribute('x1', (x-1)*41 + 52)
-        if (puzzle.pillar && x === puzzle.grid.length - 1) {
-          line.setAttribute('x2', (x+1)*41 + 28)
+        // Adjust the length if it's a pillar -- the grid is not as wide!
+        if (puzzle.pillar === true && x === puzzle.grid.length - 1) {
+          line.setAttribute('x2', (x+1)*41 + 40)
         } else {
           line.setAttribute('x2', (x+1)*41 + 52)
         }
         line.setAttribute('y1', y*41 + 52)
         line.setAttribute('y2', y*41 + 52)
         svg.appendChild(line)
-
-        /* Try:
-        if (puzzle.pillar && x === 1) {
-          line.setAttribute('x1', (x-1)*41 + 40)
-        } else {
-          line.setAttribute('x1', (x-1)*41 + 52)
-        }
-        if (puzzle.pillar && x === puzzle.grid.length - 1) {
-          line.setAttribute('x2', (x+1)*41 + 40)
-        } else {
-          line.setAttribute('x2', (x+1)*41 + 52)
-        } */
-
-        if (puzzle.pillar) {
-          if (x === 1) {
-            var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-            rect.setAttribute('x', (x-1)*41 + 40)
-            rect.setAttribute('y', y*41 + 40)
-            rect.setAttribute('width', 24)
-            rect.setAttribute('height', 24)
-            rect.setAttribute('fill', window.FOREGROUND)
-            svg.appendChild(rect)
-          }
-          if (x === puzzle.grid.length - 1) {
-            var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-            rect.setAttribute('x', (x+1)*41 + 16)
-            rect.setAttribute('y', y*41 + 40)
-            rect.setAttribute('width', 24)
-            rect.setAttribute('height', 24)
-            rect.setAttribute('fill', window.FOREGROUND)
-            svg.appendChild(rect)
-          }
-        }
       } else if (x%2 === 0 && y%2 === 1) { // Vertical
         line.setAttribute('x1', x*41 + 52)
         line.setAttribute('x2', x*41 + 52)
@@ -120,6 +88,23 @@ function _drawGrid(puzzle, svg) {
           }
         }
       }
+    }
+  }
+  // Determine if left-side needs a 'wrap indicator'
+  if (puzzle.pillar === true) {
+    var x = 0;
+    for (var y=0; y<puzzle.grid[0].length; y+=2) {
+      var cell = puzzle.getCell(x-1, y)
+      if (cell == undefined || cell.gap === 2) continue
+      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      line.setAttribute('stroke-width', 24)
+      line.setAttribute('stroke-linecap', 'round')
+      line.setAttribute('stroke', window.FOREGROUND)
+      line.setAttribute('x1', x*41 + 40)
+      line.setAttribute('x2', x*41 + 52)
+      line.setAttribute('y1', y*41 + 52)
+      line.setAttribute('y2', y*41 + 52)
+      svg.appendChild(line)
     }
   }
 }
