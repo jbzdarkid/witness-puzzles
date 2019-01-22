@@ -96,6 +96,29 @@ function _drawGrid(puzzle, svg) {
         line.setAttribute('y1', (y-1)*41 + 52)
         line.setAttribute('y2', (y+1)*41 + 52)
         svg.appendChild(line)
+      } else if (x%2 === 0 && y%2 === 0) { // Intersection
+        var cell = puzzle.getCell(x, y)
+        // Only for non-endpoints
+        if (cell != undefined && cell.end == undefined) {
+          var surroundingLines = 0
+          var leftCell = puzzle.getCell(x - 1, y)
+          if (leftCell != undefined && leftCell.gap !== 2) surroundingLines++
+          var rightCell = puzzle.getCell(x + 1, y)
+          if (rightCell != undefined && rightCell.gap !== 2) surroundingLines++
+          var topCell = puzzle.getCell(x, y - 1)
+          if (topCell != undefined && topCell.gap !== 2) surroundingLines++
+          var bottomCell = puzzle.getCell(x, y + 1)
+          if (bottomCell != undefined && bottomCell.gap !== 2) surroundingLines++
+          if (surroundingLines === 1) {
+            var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+            rect.setAttribute('x', x*41 + 40)
+            rect.setAttribute('y', y*41 + 40)
+            rect.setAttribute('width', 24)
+            rect.setAttribute('height', 24)
+            rect.setAttribute('fill', window.FOREGROUND)
+            svg.appendChild(rect)
+          }
+        }
       }
     }
   }

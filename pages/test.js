@@ -692,5 +692,45 @@ var tests = {
     puzzle.grid[3][1] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
     puzzle.grid[7][7] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
     return [puzzle, 2]
+  }, 'gap-2-looks-like-endpoint': function() {
+    puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][3].gap = 2
+    puzzle.grid[0][7].gap = 2
+    puzzle.grid[0][8].start = true
+    puzzle.grid[1][6].gap = 2
+    puzzle.grid[2][1].gap = 2
+    puzzle.grid[2][5].gap = 2
+    puzzle.grid[3][2].gap = 2
+    puzzle.grid[3][8].gap = 2
+    puzzle.grid[4][1].gap = 2
+    puzzle.grid[6][1].gap = 2
+    puzzle.grid[6][5].gap = 2
+    puzzle.grid[7][2].gap = 2
+    puzzle.grid[7][4].gap = 2
+    puzzle.grid[8][0].end = 'top'
+    puzzle.grid[8][1].gap = 2
+    puzzle.grid[8][7].gap = 2
+    return [puzzle, 1]
+  }, 'gap-2-looks-like-endpoint-pillar': function() {
+    puzzle = new Puzzle(4, 4, pillar=true)
+    puzzle.grid[0][3].gap = 2
+    puzzle.grid[0][7].gap = 2
+    puzzle.grid[0][8].start = true
+    puzzle.grid[1][6].gap = 2
+    puzzle.grid[2][1].gap = 2
+    puzzle.grid[2][5].gap = 2
+    puzzle.grid[3][2].gap = 2
+    puzzle.grid[3][8].gap = 2
+    puzzle.grid[4][1].gap = 2
+    puzzle.grid[6][1].gap = 2
+    puzzle.grid[6][5].gap = 2
+    puzzle.grid[7][2].gap = 2
+    puzzle.grid[7][4].gap = 2
+    /*
+    puzzle.grid[8][0].end = 'top'
+    puzzle.grid[8][1].gap = 2
+    puzzle.grid[8][7].gap = 2
+    */
+    return [puzzle, 1]
   }
 }

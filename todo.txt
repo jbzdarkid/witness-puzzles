@@ -46,6 +46,8 @@ In vague order of importance.
 - Add tests for mid-segment start/end + polyominos (or regions in general)
 - Set width to 1, change default -> P+H symmetry, throws.
 - (editor) Swapping symmetry modes can wind up with not having valid pairings?
+- Background validation should *stop* returning internal errors. Who needs to see them?
+- Consider changing UUIDType to just be a string -- it's pain to read.
 
 !- Small things / Bugs
 - What uses getRotations? Why do we need rot=null?
