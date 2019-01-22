@@ -489,7 +489,7 @@ function onMove(dx, dy) {
     console.debug('Moved', moveDir)
 
     // Potentially adjust data.x/data.y if our position went around a pillar
-    if (data.puzzle.pillar) _pillarWrap(moveDir)
+    if (data.puzzle.pillar === true) _pillarWrap(moveDir)
 
     var lastDir = data.path[data.path.length - 1].dir
     var backedUp = ((moveDir === 'left' && lastDir === 'right')
@@ -772,7 +772,8 @@ function _pillarWrap(moveDir) {
 function _changePos(bbox, pos, moveDir) {
   if (moveDir === 'left') {
     pos.x--
-    if (data.puzzle.pillar && pos.x < 0) { // Wrap around the left
+    // Wrap around the left
+    if (data.puzzle.pillar === true && pos.x < 0) {
       pos.x += data.puzzle.grid.length
       bbox.shift('right', data.puzzle.grid.length * 41 - 82)
       bbox.shift('right', 58)
@@ -781,7 +782,8 @@ function _changePos(bbox, pos, moveDir) {
     }
   } else if (moveDir === 'right') {
     pos.x++
-    if (data.puzzle.pillar && pos.x >= data.puzzle.grid.length) { // Wrap around to the right
+    // Wrap around to the right
+    if (data.puzzle.pillar === true && pos.x >= data.puzzle.grid.length) {
       pos.x -= data.puzzle.grid.length
       bbox.shift('left', data.puzzle.grid.length * 41 - 82)
       bbox.shift('left', 24)

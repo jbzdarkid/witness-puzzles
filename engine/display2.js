@@ -4,7 +4,7 @@ function draw(puzzle, target='puzzle') {
   console.info('Drawing', puzzle, 'into', svg)
   while (svg.firstChild) svg.removeChild(svg.firstChild)
 
-  if (puzzle.pillar) {
+  if (puzzle.pillar === true) {
     // 41*(width-1) + 30*2 (padding) + 10*2 (border)
     var pixelWidth = 41*puzzle.grid.length + 80
   } else {

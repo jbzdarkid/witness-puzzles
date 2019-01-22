@@ -232,7 +232,7 @@ function _placePolys(polys, puzzle) {
     for (var x=1; x<puzzle.grid.length; x+=2) {
       if (puzzle.getCell(x, y) >= 0) continue
       openCells.push({'x':x, 'y':y})
-      if (!puzzle.pillar) break
+      if (puzzle.pillar === false) break
     }
     if (openCells.length > 0) break
   }

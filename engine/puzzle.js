@@ -49,7 +49,7 @@ class Region {
 // Cells will contain an object if there is an element in them
 class Puzzle {
   constructor(width, height, pillar=false) {
-    if (pillar) {
+    if (pillar === true) {
       this.newGrid(2 * width, 2 * height + 1)
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
@@ -139,7 +139,7 @@ class Puzzle {
 
   // Wrap a value around at the width of the grid. No-op if not in pillar mode.
   _mod(val) {
-    if (!this.pillar) return val
+    if (this.pillar === false) return val
     // @Performance: Pre-compute a large, safe modulo value (maybe width * height * 2?)
     // return (val + largezero) % this.grid.length
     var mod = this.grid.length
