@@ -21,6 +21,7 @@ def disable_caching(request):
   request.headers['Cache-Control'] = 'no-cache'
   return request
 
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 if 'RDS_DB_NAME' in os.environ: # Running on AWS
   application.config.update({
     'SQLALCHEMY_DATABASE_URI':'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
@@ -40,6 +41,7 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
   application.before_request(http_to_https)
 else: # Running locally
   application.config.update({
+    'SQLALCHEMY_DATABASE_URI':'sqlite:///:memory:',
     'SECRET_KEY': 'default',
   })
   application.after_request(disable_caching)
