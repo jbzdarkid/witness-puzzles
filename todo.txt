@@ -33,6 +33,7 @@ Editor
 
 Server
 -- A whole bunch of UI for browsing puzzles
+-- Start versioning JS? That way caching works and doesn't shoot me in the foot.
 -- Signin?
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
