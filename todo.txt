@@ -5,7 +5,6 @@ High Prio
 -- Formal object for lines?
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 -- Recompute solve limits for pillars, symmetry, and symmetrical pillars
--- Add tests for mid-segment start/end + polyominos (or regions in general)
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward

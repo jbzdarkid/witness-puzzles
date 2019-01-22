@@ -732,5 +732,33 @@ var tests = {
     puzzle.grid[8][7].gap = 2
     */
     return [puzzle, 0]
+  }, 'mid-segment-polyominos': function() {
+    puzzle = new Puzzle(2, 4)
+    puzzle.grid[0][5].start = true
+    puzzle.grid[1][1] = {'type':'poly', 'polyshape':1, 'color':'yellow'}
+    puzzle.grid[3][0].end = 'top'
+    puzzle.grid[3][3] = {'type':'poly', 'polyshape':113, 'color':'yellow'}
+    return [puzzle, 6]
+  }, 'identical-1x1': function() {
+    puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':1}
+    puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':2}
+    puzzle.grid[1][5] = {'type':'poly', 'color':'yellow', 'polyshape':4}
+    puzzle.grid[1][7] = {'type':'poly', 'color':'yellow', 'polyshape':8}
+    puzzle.grid[3][1] = {'type':'poly', 'color':'yellow', 'polyshape':16}
+    puzzle.grid[3][3] = {'type':'poly', 'color':'yellow', 'polyshape':32}
+    puzzle.grid[3][5] = {'type':'poly', 'color':'yellow', 'polyshape':64}
+    puzzle.grid[3][7] = {'type':'poly', 'color':'yellow', 'polyshape':128}
+    puzzle.grid[5][1] = {'type':'poly', 'color':'yellow', 'polyshape':256}
+    puzzle.grid[5][3] = {'type':'poly', 'color':'yellow', 'polyshape':512}
+    puzzle.grid[5][5] = {'type':'poly', 'color':'yellow', 'polyshape':1024}
+    puzzle.grid[5][7] = {'type':'poly', 'color':'yellow', 'polyshape':2048}
+    puzzle.grid[7][1] = {'type':'poly', 'color':'yellow', 'polyshape':4096}
+    puzzle.grid[7][3] = {'type':'poly', 'color':'yellow', 'polyshape':8192}
+    puzzle.grid[7][5] = {'type':'poly', 'color':'yellow', 'polyshape':16384}
+    puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':32768}
+    puzzle.grid[8][0].end = 'right'
+    return [puzzle, 8512]
   }
 }
