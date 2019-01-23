@@ -2,6 +2,7 @@ In vague order of importance.
 
 High Prio
 -- Crazyhorse-style "edge-trapping" doesn't work with gap-2
+-- mid segment start/end should not limit region? Colors don't feel like they should be trapped, but polys feel like they should.
 -- Formal object for lines?
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 -- Recompute solve limits for pillars, symmetry, and symmetrical pillars
@@ -55,3 +56,9 @@ Low Prio
     Maybe have a class="centered"
 -- transform: scale(2) doesn't work on safari?
     Checkboxes are terrible. Maybe write my own?
+-- random generation for challenges
+    copy game RNG should be easy (now that I do it myself)
+    use trace callback func
+    maze can be 'click to reveal' like memory card game
+    should play the music if I can
+-- add a volume slider in settings
