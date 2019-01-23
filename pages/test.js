@@ -760,5 +760,52 @@ var tests = {
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':32768}
     puzzle.grid[8][0].end = 'right'
     return [puzzle, 8512]
+  }, 'regions-with-mid-start': function() {
+    var puzzle = new Puzzle(2, 1)
+    puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
+    puzzle.grid[2][1].start = true
+    puzzle.grid[3][1] = {'type':'star', 'color':'orange'}
+    puzzle.grid[4][1].end = 'right'
+    return [puzzle, 4]
+  }, 'polyominos-with-mid-start': function() {
+    var puzzle = new Puzzle(2, 1)
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':17}
+    puzzle.grid[2][1].start = true
+    puzzle.grid[4][1].end = 'right'
+    return [puzzle, 0]
+  }, 'gap2-should-adjust-edge': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][1].gap = 2
+    puzzle.grid[0][3].gap = 2
+    puzzle.grid[0][8].start = true
+    puzzle.grid[1][0].gap = 2
+    puzzle.grid[1][2].gap = 2
+    puzzle.grid[1][7] = {'type':'poly', 'color':'yellow', 'polyshape':51}
+    puzzle.grid[2][1].gap = 2
+    puzzle.grid[2][3].gap = 2
+    puzzle.grid[3][0].gap = 2
+    puzzle.grid[3][2].gap = 2
+    puzzle.grid[4][1].gap = 2
+    puzzle.grid[4][3].gap = 2
+    puzzle.grid[5][0].gap = 2
+    puzzle.grid[5][2].gap = 2
+    puzzle.grid[6][1].gap = 2
+    puzzle.grid[6][3].gap = 2
+    puzzle.grid[7][0].gap = 2
+    puzzle.grid[7][2].gap = 2
+    puzzle.grid[8][1].gap = 2
+    puzzle.grid[8][3].gap = 2
+    puzzle.grid[8][4].end = 'right'
+    return [puzzle, 8]
+  }, 'gap2-internal-should-do-nothing': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[3][3] = {'type':'poly', 'color':'yellow', 'polyshape':119}
+    puzzle.grid[3][4].gap = 2
+    puzzle.grid[4][3].gap = 2
+    puzzle.grid[4][5].gap = 2
+    puzzle.grid[5][4].gap = 2
+    puzzle.grid[8][0].end = 'right'
+    return [puzzle, 2]
   }
 }
