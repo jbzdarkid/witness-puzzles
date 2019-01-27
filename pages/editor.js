@@ -333,17 +333,34 @@ window.onload = function() {
   _drawColorButtons()
 
   var puzzleName = document.getElementById('puzzleName')
-  puzzleName.oninput = function() {
+  // Use oninput for default processing
+  puzzleName.oninput = function(event) {
+    // Prevent newlines in titles
+    if (this.innerText.includes('\n')) {
+      this.innerText = this.innerText.replace('\n', '')
+    }
+    // Ensure that puzzle names are non-empty (input box would disappear)
+    if (this.innerText.length === 0) {
+      this.innerText = 'Unnamed Puzzle'
+    }
+    // This only fires if onkeypress is bypassed somehow (e.g. paste)
+    if (this.innerText.length >= 50) {
+      this.innerText = this.innerText.substring(0, 50)
+    }
+    // Update the puzzle with the new name
     puzzle.name = this.innerText
     _writePuzzle(false)
   }
+  // Use onkeypress when you need to prevent an action
   puzzleName.onkeypress = function(event) {
+    // If the user tries to type past 50 characters
+    if (this.innerText.length >= 50) {
+      event.preventDefault()
+    }
+    // Allow using the enter key to confirm the puzzle name
     if (event.key === 'Enter') {
       event.preventDefault()
       this.blur()
-    }
-    if (this.innerText.length >= 50) {
-      event.preventDefault()
     }
   }
 
