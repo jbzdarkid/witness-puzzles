@@ -59,8 +59,7 @@ class BoundingBox {
     if (this.sym !== true) {
       var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
     } else {
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
-      var cell = data.puzzle.getCell(sym.x, sym.y)
+      var cell = data.puzzle.getSymmetricalCell(data.sym.x, data.sym.y)
     }
     if (cell.end === 'left') {
       this.x1 -= 24
@@ -154,12 +153,11 @@ class PathSegment {
         // cx/cy are updated in redraw(), since symPillarCirc tracks the cursor
         this.symPillarCirc.setAttribute('cy', data.symbbox.middle.y)
         this.symPillarCirc.setAttribute('r', 12)
-        var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
         var symmetricalDir = data.puzzle.getSymmetricalDir(this.dir)
-        if (sym.x === 0 && symmetricalDir === 'right') {
+        if (data.sym.x === 0 && symmetricalDir === 'right') {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x1)
           this.symPillarCirc.setAttribute('static', true)
-        } else if (sym.x === data.puzzle.grid.length - 1 && symmetricalDir === 'left') {
+        } else if (data.sym.x === data.puzzle.grid.length - 1 && symmetricalDir === 'left') {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x2)
           this.symPillarCirc.setAttribute('static', true)
         } else {
@@ -443,6 +441,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   data.x = x
   data.y = y
   data.pos = pos
+  data.sym = puzzle.getSymmetricalPos(pos.x, pos.y)
   data.puzzle = puzzle
   data.path = []
 
@@ -468,11 +467,10 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   }
 
   if (puzzle.symmetry == undefined) {
-    data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':1})
+    data.puzzle.updateCell(data.pos.x, data.pos.y, {'type':'line', 'color':1})
   } else {
-    data.puzzle.updateCell(pos.x, pos.y, {'type':'line', 'color':2})
-    var sym = data.puzzle.getSymmetricalPos(pos.x, pos.y)
-    data.puzzle.updateCell(sym.x, sym.y, {'type':'line', 'color':3})
+    data.puzzle.updateCell(data.pos.x, data.pos.y, {'type':'line', 'color':2})
+    data.puzzle.updateCell(data.sym.x, data.sym.y, {'type':'line', 'color':3})
 
     var dx = parseFloat(symStart.getAttribute('cx')) - data.x
     var dy = parseFloat(symStart.getAttribute('cy')) - data.y
@@ -537,7 +535,6 @@ function onMove(dx, dy) {
                  || (moveDir === 'bottom' && lastDir === 'top'))
 
     if (data.puzzle.symmetry != undefined) {
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
       var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
     }
 
@@ -545,22 +542,25 @@ function onMove(dx, dy) {
     if (backedUp) {
       data.path.pop().destroy()
       data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
-      if (sym != undefined) data.puzzle.updateCell(sym.x, sym.y, {'color':0})
+      if (data.puzzle.symmetry != undefined) {
+        data.puzzle.updateCell(data.sym.x, data.sym.y, {'color':0})
+      }
     }
 
     // Move to the next cell
     _changePos(data.bbox, data.pos, moveDir)
-    if (sym != undefined) _changePos(data.symbbox, sym, symMoveDir)
-
+    if (data.puzzle.symmetry != undefined) {
+      _changePos(data.symbbox, data.sym, symMoveDir)
+    }
 
     // If we didn't back up, add a path segment and mark the new cell as visited
     if (!backedUp) {
       data.path.push(new PathSegment(moveDir))
-      if (sym == undefined) {
+      if (data.puzzle.symmetry == undefined) {
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
       } else {
         data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
-        data.puzzle.updateCell(sym.x, sym.y, {'color':3})
+        data.puzzle.updateCell(data.sym.x, data.sym.y, {'color':3})
       }
     }
   }
@@ -725,12 +725,11 @@ function _gapAndSymmetryCollision() {
   if (cell.gap === 1) {
     gapSize = 21
   } else if (data.puzzle.symmetry != undefined) {
-    var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y)
-    if (sym.x === data.pos.x && sym.y === data.pos.y) {
+    if (data.sym.x === data.pos.x && data.sym.y === data.pos.y) {
       gapSize = 13
     }
     // Symmetrical line hit a gap
-    if (data.puzzle.getCell(sym.x, sym.y).gap === 1) {
+    if (data.puzzle.getCell(data.sym.x, data.sym.y).gap === 1) {
       gapSize = 21
     }
   }
@@ -764,8 +763,7 @@ function _move() {
       console.spam('Collided with other line', cell.color)
       data.x = data.bbox.x1 + 12
     } else if (data.puzzle.symmetry != undefined) {
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x - 1, data.pos.y)
-      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      var symCell = data.puzzle.getSymmetricalCell(data.pos.x - 1, data.pos.y)
       if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.x = data.bbox.x1 + 12
@@ -783,8 +781,7 @@ function _move() {
       console.spam('Collided with other line', cell.color)
       data.x = data.bbox.x2 - 12
     } else if (data.puzzle.symmetry != undefined) {
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x + 1, data.pos.y)
-      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      var symCell = data.puzzle.getSymmetricalCell(data.pos.x + 1, data.pos.y)
       if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.x = data.bbox.x2 - 12
@@ -802,8 +799,7 @@ function _move() {
       console.spam('Collided with other line', cell.color)
       data.y = data.bbox.y1 + 12
     } else if (data.puzzle.symmetry != undefined) {
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y - 1)
-      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      var symCell = data.puzzle.getSymmetricalCell(data.pos.x, data.pos.y - 1)
       if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.y = data.bbox.y1 + 12
@@ -820,9 +816,8 @@ function _move() {
     } else if (cell.color > 0 && lastDir !== 'top') {
       console.spam('Collided with other line', cell.color)
       data.y = data.bbox.y2 - 12
-        } else if (data.puzzle.symmetry != undefined) {
-      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y + 1)
-      var symCell = data.puzzle.getCell(sym.x, sym.y)
+    } else if (data.puzzle.symmetry != undefined) {
+      var symCell = data.puzzle.getSymmetricalCell(data.pos.x, data.pos.y + 1)
       if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.y = data.bbox.y2 - 12

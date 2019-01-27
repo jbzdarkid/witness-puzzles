@@ -200,6 +200,11 @@ class Puzzle {
     return {'x':this._mod(x), 'y':y}
   }
 
+  getSymmetricalCell(x, y) {
+    var pos = this.getSymmetricalPos(x, y)
+    return this.getCell(pos.x, pos.y)
+  }
+
   // A variant of getCell which specifically returns line values,
   // and treats objects as being out-of-bounds
   getLine(x, y) {
