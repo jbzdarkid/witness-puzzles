@@ -17,7 +17,7 @@ function solve(puzzle) {
 }
 
 function _solveLoop(puzzle, x, y, solutions) {
-  if (window.MAX_SOLUTIONS !== -1 && solutions.length >= window.MAX_SOLUTIONS) return
+  if (solutions.length >= window.MAX_SOLUTIONS) return
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
 
