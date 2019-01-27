@@ -657,6 +657,7 @@ function _drawSymbolButtons() {
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape
       button.onclick = function() {
+        setSolveMode(false)
         if (activeParams.id === this.id) {
           activeParams = Object.assign(activeParams, this.params)
           _shapeChooser()
@@ -667,6 +668,7 @@ function _drawSymbolButtons() {
       }
     } else if (button.id === 'triangle') {
       button.onclick = function() {
+        setSolveMode(false)
         if (activeParams.id === this.id) {
           symbolData.triangle.count = symbolData.triangle.count % 4 + 1
           activeParams.count = symbolData.triangle.count
@@ -676,6 +678,7 @@ function _drawSymbolButtons() {
       }
     } else {
       button.onclick = function() {
+        setSolveMode(false)
         activeParams = Object.assign(activeParams, this.params)
         _drawSymbolButtons()
       }
@@ -689,6 +692,7 @@ function _drawColorButtons() {
   var colorTable = document.getElementById('colorButtons')
   colorTable.style.display = null
   var changeActiveColor = function() {
+    setSolveMode(false)
     activeParams.color = this.id
     _drawColorButtons()
   }

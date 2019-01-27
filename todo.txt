@@ -5,7 +5,6 @@ High Prio
 -- mid segment start/end should not limit region? Colors don't feel like they should be trapped, but polys feel like they should.
 -- Formal object for lines?
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
--- Recompute solve limits for pillars, symmetry, and symmetrical pillars
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward
@@ -13,6 +12,7 @@ Tracing
     If it makes it easier, rm cursor when finishing
 -- Just compute sym every frame and update it (immediately after data.pos). It's expensive to recompute this always.
     Ditto for symmetricalDir
+-- Tracing doesn't respect the idea that symmetrical path can collide with a gap1/gap2
 
 Background validation
 -- Replace XMLHttpRequest with Fetch?
@@ -62,3 +62,4 @@ Low Prio
     maze can be 'click to reveal' like memory card game
     should play the music if I can
 -- add a volume slider in settings
+-- Animation for start-grow isn't playing for primary line
