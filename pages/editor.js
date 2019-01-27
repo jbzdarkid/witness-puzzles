@@ -111,14 +111,24 @@ function _drawPuzzle() {
   window.draw(puzzle)
   document.getElementById('solutionViewer').style.display = 'none'
 
-  // @Robustness: Pillars are not the same requirements. Figure this out.
-  if (puzzle.grid.length * puzzle.grid[0].length > 121) {
-    // Puzzle larger than 5x5
-    document.getElementById('solveAuto').disabled = true
+  document.getElementById('solveAuto').disabled = false
+  if (puzzle.symmetry != undefined) {
+    // 6x6 is the max for symmetry puzzles
+    if (puzzle.grid.length > 13 || puzzle.grid[0].length > 13) {
+      document.getElementById('solveAuto').disabled = true
+    }
+  } else if (puzzle.pillar != undefined) {
+    // 4x4 is the max for non-symmetry pillar puzzles
+    if (puzzle.grid.length > 9 || puzzle.grid[0].length > 9) {
+      document.getElementById('solveAuto').disabled = true
+    }
   } else {
-    // Puzzle smaller than or equal to 5x5
-    document.getElementById('solveAuto').disabled = false
+    // 5x5 is the max for non-symmetry, non-pillar puzzles
+    if (puzzle.grid.length > 11 || puzzle.grid[0].length > 11) {
+      document.getElementById('solveAuto').disabled = true
+    }
   }
+
   var publish = document.getElementById('publish')
   publish.disabled = true
   publish.innerText = 'Publish'
@@ -424,8 +434,8 @@ function _showSolution(num) {
     nextSolution.disabled = true
   } else {
     solutionCount.innerText = (num + 1) + ' of ' + solutions.length
-    previousSolution.disabled = null
-    nextSolution.disabled = null
+    previousSolution.disabled = false
+    nextSolution.disabled = false
     previousSolution.onclick = function() {_showSolution(num - 1)}
     nextSolution.onclick = function() {_showSolution(num + 1)}
   }
