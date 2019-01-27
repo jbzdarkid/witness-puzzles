@@ -36,7 +36,6 @@ function _readPuzzle() {
     var serialized = window.localStorage.getItem(puzzleList[0])
     // @Cleanup: This logic is duplicated from createSerializedPuzzle
     puzzle = Puzzle.deserialize(serialized)
-    _sanitizePuzzle()
     _drawPuzzle()
   } catch (e) {
     console.log(e)
@@ -46,13 +45,13 @@ function _readPuzzle() {
 }
 
 // The global puzzle object has been modified, serialize it to localStorage.
-// We sanitize it to ensure no bad puzzles are written down.
-// Finally, we redraw the puzzle (in case modifications were made) unless the callers asks us not to.
+// Finally, we redraw the puzzle (in case modifications were made) unless the caller asks us not to.
+// We also any potential solution lines from the puzzle
 function _writePuzzle(redraw=true) {
-  var puzzleList = _readPuzzleList()
-  _sanitizePuzzle()
   console.log('Writing puzzle', puzzle)
+  puzzle.clearLines()
 
+  var puzzleList = _readPuzzleList()
   // @Robustness: Some intelligence about showing day / month / etc depending on date age
   puzzleList[0] = puzzle.name + ' on ' + (new Date()).toLocaleString()
   window.localStorage.setItem(puzzleList[0], puzzle.serialize())
@@ -249,41 +248,52 @@ function importPuzzle() {
   }
 }
 
+// Set the symmetry and pillar style, and ensure the puzzle is updated to match
 function setStyle(style) {
-  console.log(style)
-  if (style === 'Default') {
-    puzzle.pillar = false
+  console.log('Setting style to', style)
+  if (style === 'Default' || style === 'Pillar') {
     puzzle.symmetry = undefined
-  } else if (style === 'Horizontal Symmetry') {
-    puzzle.pillar = false
+  } else if (style === 'Horizontal Symmetry' || style === 'Pillar (H Symmetry)') {
     puzzle.symmetry = {'x':true, 'y':false}
-  } else if (style === 'Vertical Symmetry') {
-    puzzle.pillar = false
+  } else if (style === 'Vertical Symmetry' || style === 'Pillar (V Symmetry)') {
     puzzle.symmetry = {'x':false, 'y':true}
-  } else if (style === 'Rotational Symmetry') {
-    puzzle.pillar = false
-    puzzle.symmetry = {'x':true, 'y':true}
-  } else if (style === 'Pillar') {
-    puzzle.pillar = true
-    puzzle.symmetry = undefined
-  } else if (style === 'Pillar (H Symmetry)') {
-    puzzle.pillar = true
-    puzzle.symmetry = {'x':true, 'y':false}
-  } else if (style === 'Pillar (V Symmetry)') {
-    puzzle.pillar = true
-    puzzle.symmetry = {'x':false, 'y':true}
-  } else if (style === 'Pillar (R Symmetry)') {
-    puzzle.pillar = true
+  } else if (style === 'Rotational Symmetry' || style === 'Pillar (R Symmetry)') {
     puzzle.symmetry = {'x':true, 'y':true}
   } else if (style === 'Pillar (Two Lines)') {
-    puzzle.pillar = true
     puzzle.symmetry = {'x':false, 'y':false}
   } else {
     console.error('Attempted to set unknown style', style)
     return
   }
-  var width = puzzle.grid.length
 
+  // If the puzzle is in non-symmetry mode, replace all colored dots with black
+  for (var x=0; x<puzzle.grid.length; x++) {
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell == undefined || cell.type != 'line') continue
+      if (puzzle.symmetry == undefined) {
+        if (cell.dot === 2 || cell.dot === 3) {
+          puzzle.grid[x][y].dot = 1
+        }
+      } else {
+        if (cell.start === true) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          console.debug('Copying startpoint from', x, y, 'to', sym.x, sym.y)
+          puzzle.updateCell(sym.x, sym.y, {'start':true})
+        } else if (cell.end != undefined) {
+          var sym = puzzle.getSymmetricalPos(x, y)
+          console.debug('Copying endpoint from', x, y, 'to', sym.x, sym.y)
+          puzzle.updateCell(sym.x, sym.y, {'end':puzzle.getSymmetricalDir(cell.end)})
+        }
+      }
+    }
+  }
+
+  // Delayed until after symmetry enforcement to avoid oob
+  puzzle.pillar = style.includes('Pillar')
+
+  // @Robustness: I think this has a bug with 1xN
+  var width = puzzle.grid.length
   // Non-pillar to pillar
   if (puzzle.pillar === true) {
     if (width === 1) {
@@ -369,73 +379,6 @@ window.onload = function() {
   }
 }
 
-// @Future: This should be more intelligent, maybe something like
-// 'dedupe symmetrical elements on the old grid, then re-dupe new elements'?
-// This function:
-// - Clears all lines from the puzzle (if a solution was showing)
-// - Ensures dots are not colored (if symmetry is off)
-// - Ensures endpoints are facing valid directions
-// - Ensures startpoints are not totally isolated by gap-2
-// - Ensures start/end are appropriately paired (if symmetry is on)
-function _sanitizePuzzle() {
-  console.log('Sanitizing puzzle', puzzle)
-  puzzle.clearLines()
-
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
-      if (x%2 === 1 && y%2 === 1) continue // Ignore cells
-      var cell = puzzle.grid[x][y]
-      if (cell == undefined) continue
-
-      var isIsolated = false
-      if (x%2 == 0 && y%2 == 0) {
-        var leftCell = puzzle.getCell(x - 1, y)
-        var rightCell = puzzle.getCell(x + 1, y)
-        var topCell = puzzle.getCell(x, y - 1)
-        var bottomCell = puzzle.getCell(x, y + 1)
-        isIsolated = (
-         (leftCell == undefined || leftCell.gap === 2) &&
-         (rightCell == undefined || rightCell.gap === 2) &&
-         (topCell == undefined || topCell.gap === 2) &&
-         (bottomCell == undefined || bottomCell.gap === 2))
-      }
-
-      if (cell.dot === 2 || cell.dot === 3) {
-        if (puzzle.symmetry == undefined) {
-          console.debug('Replacing dot at', x, y, 'colored', cell.dot, 'with color 1')
-          // NB: This modifies the original grid object
-          cell.dot = 1
-        }
-      } else if (cell.end != undefined) {
-        if (isIsolated) {
-          cell.end = undefined
-        } else {
-          var validDirs = puzzle.getValidEndDirs(x, y)
-          var index = validDirs.indexOf(cell.end)
-          if (index == -1) {
-            cell.end = _getNextValue(validDirs, cell.end)
-          }
-        }
-        if (puzzle.symmetry != undefined) {
-          var sym = puzzle.getSymmetricalPos(x, y)
-          console.debug('Enforcing symmetrical endpoint at', sym.x, sym.y)
-          var symmetricalDir = puzzle.getSymmetricalDir(cell.end)
-          puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
-        }
-      } else if (cell.start === true) {
-        if (isIsolated) {
-          puzzle.grid[x][y].start = false
-        }
-        if (puzzle.symmetry != undefined) {
-          var sym = puzzle.getSymmetricalPos(x, y)
-          console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
-          puzzle.updateCell(sym.x, sym.y, {'start':cell.start})
-        }
-      }
-    }
-  }
-}
-
 function _showSolution(num) {
   if (num < 0) num = solutions.length - 1
   if (num >= solutions.length) num = 0
@@ -511,8 +454,10 @@ function _getNextValue(list, value) {
   return list[index + 1]
 }
 
-// Note: I cannot merely call _sanitizePuzzle here, because we don't know which modification (to an endpoint, e.g.) is definitive
-// I do still call _sanitizePuzzle (inside _writePuzzle), but we make the copy operations first.
+// Called whenever a grid cell is clicked. Uses the global activeParams to know
+// what combination of shape & color are currently selected.
+// This function also ensures that the resulting puzzle is still sane, and will modify
+// the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
 function _onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
@@ -559,10 +504,34 @@ function _onElementClicked(x, y) {
     puzzle.grid[x][y].dot = undefined
     puzzle.grid[x][y].start = undefined
     puzzle.grid[x][y].end = undefined
+    // Ensure that a symmetrical start or end is no longer impossible
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
       puzzle.grid[sym.x][sym.y].start = undefined
       puzzle.grid[sym.x][sym.y].end = undefined
+    }
+
+    // This potentially isolated a start/endpoint, so ensure that they are removed.
+    for (var i=x-1; i<x+2; i++) {
+      for (var j=y-1; j<y+2; j++) {
+        if (i%2 !== 0 || j%2 !== 0) continue
+        var leftCell = puzzle.getCell(i - 1, j)
+        if (leftCell != undefined && leftCell.gap !== 2) continue
+        var rightCell = puzzle.getCell(i + 1, j)
+        if (rightCell != undefined && rightCell.gap !== 2) continue
+        var topCell = puzzle.getCell(i, j - 1)
+        if (topCell != undefined && topCell.gap !== 2) continue
+        var bottomCell = puzzle.getCell(i, j + 1)
+        if (bottomCell != undefined && bottomCell.gap !== 2) continue
+
+        // At this point, the cell has no defined or non-gap2 neighbors (isolated)
+        puzzle.updateCell(i, j, {'start':false, 'end':undefined})
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(i, j)
+          console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
+          puzzle.updateCell(sym.x, sym.y, {'start':false, 'end':undefined})
+        }
+      }
     }
   } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
@@ -617,6 +586,21 @@ function _onElementClicked(x, y) {
     return
   }
 
+  // Ensure adjacent endpoints are still pointing in a valid direction.
+  for (var i=x-1; i<x+2; i++) {
+    for (var j=y-1; j<y+2; j++) {
+      var cell = puzzle.getCell(i, j)
+      if (cell == undefined || cell.end == undefined) continue
+      var validDirs = puzzle.getValidEndDirs(i, j)
+      if (!validDirs.includes(cell.end)) {
+        puzzle.grid[i][j].end = validDirs[0]
+        if (puzzle.symmetry != undefined) {
+          var sym = puzzle.getSymmetricalPos(i, j)
+          puzzle.grid[sym.x][sym.y] = validDirs[0]
+        }
+      }
+    }
+  }
   _writePuzzle()
 }
 
@@ -788,8 +772,9 @@ function _shapeChooserClick(event, cell) {
 }
 
 // All puzzle elements remain fixed, the edge you're dragging is where the new
-// row/column is added. The endpoint will try to stay fixed, but will be pulled
-// to remain against the edge.
+// row/column is added. The endpoint will try to stay fixed, but may be re-oriented.
+// In symmetry mode, we will preserve symmetry and try to guess how best to keep start
+// and endpoints in sync with the original design.
 function resizePuzzle(dx, dy, id) {
   var width = puzzle.grid.length
   var height = puzzle.grid[0].length
@@ -818,12 +803,48 @@ function resizePuzzle(dx, dy, id) {
           console.log('Endpoint at', x, y, 'no longer fits on the grid')
           continue
         }
+        // @Cleanup: This is duplicated in onElementClicked, maybe this function should be smarter?
         if (!validDirs.includes(cell.end)) {
           console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
           cell.end = validDirs[0]
         }
       }
       puzzle.updateCell(x + xOffset, y + yOffset, cell)
+    }
+  }
+
+  // Symmetry copies one half of the grid to the other, and selects the far side from the
+  // dragging edge to be the master copy.
+  // @Cleanup: This needs to implement ranges for pillars.
+  if (puzzle.symmetry != undefined) {
+    if (id.includes('right')) {
+      var xIter = [0, (newWidth-1)/2, 1]
+    } else if (id.includes('left')) {
+      var xIter = [newWidth-1, (newWidth-1)/2, -1]
+    } else {
+      var xIter = [0, newWidth-1, 1]
+    }
+    if (id.includes('bottom')) {
+      var yIter = [0, (newHeight-1)/2, 1]
+    } else if (id.includes('top')) {
+      var yIter = [newHeight-1, (newHeight-1)/2, -1]
+    } else {
+      var yIter = [0, newHeight, 1]
+    }
+    console.debug('Half-copying grid in range', xIter, yIter)
+
+    for (var x = xIter[0]; x != xIter[1]; x += xIter[2]) {
+      for (var y = yIter[0]; y != yIter[1]; y += yIter[2]) {
+        if ((x%2 === 1 || x%2 === -1) && y%2 === 1) continue
+        var cell = puzzle.getCell(x, y)
+        var sym = puzzle.getSymmetricalPos(x, y)
+        console.spam('Copying cell', JSON.stringify(cell), 'at', x, y)
+        puzzle.updateCell(sym.x, sym.y, {
+          'start':cell.start,
+          'end':puzzle.getSymmetricalDir(cell.end),
+        })
+        console.spam('Updated cell', JSON.stringify(puzzle.getCell(sym.x, sym.y)), 'at', sym.x, sym.y)
+      }
     }
   }
   return true
