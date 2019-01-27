@@ -729,6 +729,10 @@ function _gapAndSymmetryCollision() {
     if (sym.x === data.pos.x && sym.y === data.pos.y) {
       gapSize = 13
     }
+    // Symmetrical line hit a gap
+    if (data.puzzle.getCell(sym.x, sym.y).gap === 1) {
+      gapSize = 21
+    }
   }
   if (gapSize === 0) return
 
@@ -750,6 +754,7 @@ function _move() {
   var lastDir = data.path[data.path.length - 1].dir
 
   // @Bug: This might be doing outer-wall collision against inner walls...?
+  // ^ Unlikely. This is absolute collision.
   if (data.x < data.bbox.x1 + 12) { // Moving left
     var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
     if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
@@ -758,7 +763,15 @@ function _move() {
     } else if (cell.color > 0 && lastDir !== 'right') {
       console.spam('Collided with other line', cell.color)
       data.x = data.bbox.x1 + 12
-    } else if (data.x < data.bbox.x1) {
+    } else if (data.puzzle.symmetry != undefined) {
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x - 1, data.pos.y)
+      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+        console.spam('Collided with symmetrical outside / gap-2', cell)
+        data.x = data.bbox.x1 + 12
+      }
+    }
+    if (data.x < data.bbox.x1) {
       return 'left'
     }
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
@@ -769,7 +782,15 @@ function _move() {
     } else if (cell.color > 0 && lastDir !== 'left') {
       console.spam('Collided with other line', cell.color)
       data.x = data.bbox.x2 - 12
-    } else if (data.x > data.bbox.x2) {
+    } else if (data.puzzle.symmetry != undefined) {
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x + 1, data.pos.y)
+      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+        console.spam('Collided with symmetrical outside / gap-2', cell)
+        data.x = data.bbox.x2 - 12
+      }
+    }
+    if (data.x > data.bbox.x2) {
       return 'right'
     }
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
@@ -780,7 +801,15 @@ function _move() {
     } else if (cell.color > 0 && lastDir !== 'bottom') {
       console.spam('Collided with other line', cell.color)
       data.y = data.bbox.y1 + 12
-    } else if (data.y < data.bbox.y1) {
+    } else if (data.puzzle.symmetry != undefined) {
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y - 1)
+      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+        console.spam('Collided with symmetrical outside / gap-2', cell)
+        data.y = data.bbox.y1 + 12
+      }
+    }
+    if (data.y < data.bbox.y1) {
       return 'top'
     }
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
@@ -791,7 +820,15 @@ function _move() {
     } else if (cell.color > 0 && lastDir !== 'top') {
       console.spam('Collided with other line', cell.color)
       data.y = data.bbox.y2 - 12
-    } else if (data.y > data.bbox.y2) {
+        } else if (data.puzzle.symmetry != undefined) {
+      var sym = data.puzzle.getSymmetricalPos(data.pos.x, data.pos.y + 1)
+      var symCell = data.puzzle.getCell(sym.x, sym.y)
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+        console.spam('Collided with symmetrical outside / gap-2', cell)
+        data.y = data.bbox.y2 - 12
+      }
+    }
+    if (data.y > data.bbox.y2) {
       return 'bottom'
     }
   }

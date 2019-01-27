@@ -11,8 +11,8 @@ Tracing
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
     If it makes it easier, rm cursor when finishing
 -- Just compute sym every frame and update it (immediately after data.pos). It's expensive to recompute this always.
+    Maybe I should just have "getSymmetricalCell"?
     Ditto for symmetricalDir
--- Tracing doesn't respect the idea that symmetrical path can collide with a gap1/gap2
 
 Background validation
 -- Replace XMLHttpRequest with Fetch?

@@ -807,5 +807,15 @@ var tests = {
     puzzle.grid[5][4].gap = 2
     puzzle.grid[8][0].end = 'right'
     return [puzzle, 2]
+  }, 'gap1-gap2-symmetrical-tracing': function() {
+    var puzzle = new Puzzle(2, 3)
+    puzzle.symmetry = {'y':true}
+    puzzle.grid[0][0].start = true
+    puzzle.grid[0][6].start = true
+    puzzle.grid[1][0].gap = 1
+    puzzle.grid[3][6].gap = 2
+    puzzle.grid[4][0].end = 'right'
+    puzzle.grid[4][6].end = 'right'
+    return [puzzle, 2]
   }
 }
