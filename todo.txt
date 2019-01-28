@@ -1,7 +1,6 @@
 In vague order of importance.
 
 High Prio
--- Crazyhorse-style "edge-trapping" doesn't work with gap-2
 -- Formal object for lines?
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 

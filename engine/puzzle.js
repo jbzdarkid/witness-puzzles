@@ -296,20 +296,42 @@ class Puzzle {
     }
   }
 
+  // The grid contains 4 colors:
+  // undefined: Out of bounds or already processed
+  // 0: In bounds, awaiting processing, but should not be part of the final region.
+  // 1: In bounds, awaiting processing
+  // 2: Gap-2, but not out of bounds so should be treated normally
   _floodFill(x, y, region) {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
-    if (this.grid[x][y] === undefined) return
-    if (this.grid[x][y] === 0) {
+    var cell = this.grid[x][y]
+    if (cell === undefined) return
+    if (cell !== 0) {
       region.setCell(x, y)
     }
-    this.setCell(x, y, undefined)
+    this.grid[x][y] = undefined
 
     // @Performance: Why is this ordered TLBR?
     this._floodFill(x, y + 1, region)
     this._floodFill(x + 1, y, region)
     this._floodFill(x, y - 1, region)
     this._floodFill(x - 1, y, region)
+  }
+
+  // Re-uses the same grid, but only called on edges which border the outside
+  _floodFillOutside(x, y) {
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return
+    var cell = this.grid[x][y]
+    if (cell === undefined) return
+    if (x%2 !== y%2 && cell !== 2) return
+    this.grid[x][y] = undefined
+
+    // @Performance: Why is this ordered TLBR?
+    this._floodFillOutside(x, y + 1)
+    this._floodFillOutside(x + 1, y)
+    this._floodFillOutside(x, y - 1)
+    this._floodFillOutside(x - 1, y)
   }
 
   getRegions() {
@@ -325,15 +347,30 @@ class Puzzle {
           // Traced lines should not be a part of the region
           if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
             // Traced lines which are mid-segment start or end points should not separate the region
-            this.grid[x][y] = 1
+            this.grid[x][y] = 0
           } else {
             this.grid[x][y] = undefined
           }
+        } else if (cell != undefined && cell.type === 'line' && cell.gap === 2) {
+          this.grid[x][y] = 2
         } else {
           // Indicates that this cell will be a part of the region
-          this.grid[x][y] = 0
+          this.grid[x][y] = 1
         }
       }
+    }
+
+    // Left and right edges
+    if (this.pillar === false) {
+      for (var y=1; y<savedGrid[0].length; y+=2) {
+        this._floodFillOutside(0, y)
+        this._floodFillOutside(savedGrid.length - 1, y)
+      }
+    }
+    // Top and bottom edges
+    for (var x=1; x<savedGrid.length; x+=2) {
+      this._floodFillOutside(x, 0)
+      this._floodFillOutside(x, savedGrid[0].length - 1)
     }
 
     var regions = []

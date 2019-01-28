@@ -814,7 +814,7 @@ var tests = {
     puzzle.grid[8][1].gap = 2
     puzzle.grid[8][3].gap = 2
     puzzle.grid[8][4].end = 'right'
-    return [puzzle, 8]
+    return [puzzle, 7]
   }, 'gap2-internal-should-do-nothing': function() {
     var puzzle = new Puzzle(4, 4)
     puzzle.grid[0][8].start = true
