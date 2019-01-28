@@ -2,12 +2,12 @@ In vague order of importance.
 
 High Prio
 -- Crazyhorse-style "edge-trapping" doesn't work with gap-2
--- mid segment start/end should not limit region? Colors don't feel like they should be trapped, but polys feel like they should.
 -- Formal object for lines?
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward
+    The game is awful at this too.
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
     If it makes it easier, rm cursor when finishing
 -- Consider computing symmetricalDir once, then saving it in data?

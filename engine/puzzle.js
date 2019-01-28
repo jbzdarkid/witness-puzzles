@@ -113,6 +113,7 @@ class Puzzle {
     puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
+    puzzle.largezero = puzzle.grid.length * puzzle.grid
     return puzzle
   }
 
@@ -135,15 +136,14 @@ class Puzzle {
         else this.grid[x][y] = {'type':'line', 'color':0}
       }
     }
+    // Performance: A large value which is === 0 to be used for pillar wrapping.
+    this.largezero = width * height * 2
   }
 
   // Wrap a value around at the width of the grid. No-op if not in pillar mode.
   _mod(val) {
     if (this.pillar === false) return val
-    // @Performance: Pre-compute a large, safe modulo value (maybe width * height * 2?)
-    // return (val + largezero) % this.grid.length
-    var mod = this.grid.length
-    return ((val % mod) + mod) % mod
+    return (val + this.largezero) % this.grid.length
   }
 
   // Determine if an x, y pair is a safe reference inside the grid. This should be invoked at the start of every
@@ -300,7 +300,9 @@ class Puzzle {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
     if (this.grid[x][y] === undefined) return
-    region.setCell(x, y)
+    if (this.grid[x][y] === 0) {
+      region.setCell(x, y)
+    }
     this.setCell(x, y, undefined)
 
     // @Performance: Why is this ordered TLBR?
@@ -320,9 +322,16 @@ class Puzzle {
       for (var y=0; y<savedGrid[x].length; y++) {
         var cell = savedGrid[x][y]
         if (cell != undefined && cell.type === 'line' && cell.color > 0) {
-          this.grid[x][y] = undefined
+          // Traced lines should not be a part of the region
+          if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
+            // Traced lines which are mid-segment start or end points should not separate the region
+            this.grid[x][y] = 1
+          } else {
+            this.grid[x][y] = undefined
+          }
         } else {
-          this.grid[x][y] = true
+          // Indicates that this cell will be a part of the region
+          this.grid[x][y] = 0
         }
       }
     }

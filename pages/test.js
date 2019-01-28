@@ -535,6 +535,11 @@ var tests = {
     puzzle.grid[0][6].start = true
     puzzle.grid[0][0].end = 'top'
     return [puzzle, 1]
+  }, 'laser-key-pillar-2': function() {
+    var puzzle = new Puzzle(2, 5, pillar=true)
+    puzzle.grid[0][10].start = true
+    puzzle.grid[0][0].end = 'top'
+    return [puzzle, 365]
   }, 'multistart-simple': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true
@@ -772,6 +777,19 @@ var tests = {
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':17}
     puzzle.grid[2][1].start = true
     puzzle.grid[4][1].end = 'right'
+    return [puzzle, 0]
+  }, 'regions-with-mid-end': function() {
+    var puzzle = new Puzzle(3, 1)
+    puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
+    puzzle.grid[2][1].end = 'right'
+    puzzle.grid[5][1] = {'type':'star', 'color':'orange'}
+    puzzle.grid[6][1].start = true
+    return [puzzle, 4]
+  }, 'polyominos-with-mid-end': function() {
+    var puzzle = new Puzzle(2, 1)
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':17}
+    puzzle.grid[2][1].end = 'right'
+    puzzle.grid[4][1].start = true
     return [puzzle, 0]
   }, 'gap2-should-adjust-edge': function() {
     var puzzle = new Puzzle(4, 4)
