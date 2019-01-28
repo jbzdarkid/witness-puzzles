@@ -43,7 +43,7 @@ function PLAY_SOUND(track) {
     audio.pause()
     audio.currentTime = 0
   }
-  tracks[track].volume = 0.1
+  tracks[track].volume = localStorage.volume
   tracks[track].play()
 }
 
@@ -172,7 +172,7 @@ function showSettings() {
   toggle.innerHTML = '&ndash; &nbsp; &nbsp; &nbsp; &nbsp;settings&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; '
   toggle.onclick = function(){ hideSettings() }
   toggle.parentElement.style.width = '250px'
-  toggle.parentElement.style.height = '150px'
+  toggle.parentElement.style.height = null
   toggle.style.top = '-10px'
 }
 
@@ -246,5 +246,24 @@ function loadSettings() {
   sens.value = localStorage.sensitivity
   sens.onchange = function() {
     localStorage.sensitivity = this.value
+  }
+
+  // Volume
+  var volumeLabel = document.createElement('label')
+  settings.appendChild(volumeLabel)
+  volumeLabel.for = 'volume'
+  volumeLabel.innerText = 'Volume'
+
+  var volume = document.createElement('input')
+  settings.appendChild(volume)
+  volume.style.width = '100%'
+  volume.type = 'range'
+  volume.id = 'volume'
+  volume.min = '0'
+  volume.max = '0.24'
+  volume.step = '0.02'
+  volume.value = localStorage.volume
+  volume.onchange = function() {
+    localStorage.volume = this.value
   }
 }

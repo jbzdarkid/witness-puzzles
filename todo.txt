@@ -23,7 +23,6 @@ Editor
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- 1-wide puzzles are about 10px too small, which makes the right-drag incorrect.
--- Swapping symmetry modes can wind up with not having valid pairings?
 -- Better UI for "draggable edge"
 -- Set width to 1, change default -> P+H symmetry, throws.
 -- Shape chooser is not centered
@@ -59,5 +58,4 @@ Low Prio
     use trace callback func
     maze can be 'click to reveal' like memory card game
     should play the music if I can
--- add a volume slider in settings
 -- Animation for start-grow isn't playing for primary line
