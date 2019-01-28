@@ -343,15 +343,15 @@ class Puzzle {
     for (var x=0; x<savedGrid.length; x++) {
       for (var y=0; y<savedGrid[x].length; y++) {
         var cell = savedGrid[x][y]
-        if (cell != undefined && cell.type === 'line' && cell.color > 0) {
-          // Traced lines should not be a part of the region
+        if (cell != undefined && cell.color > 0) {
           if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
             // Traced lines which are mid-segment start or end points should not separate the region
             this.grid[x][y] = 0
           } else {
+            // Traced lines should not be a part of the region
             this.grid[x][y] = undefined
           }
-        } else if (cell != undefined && cell.type === 'line' && cell.gap === 2) {
+        } else if (cell != undefined && cell.gap === 2) {
           this.grid[x][y] = 2
         } else {
           // Indicates that this cell will be a part of the region

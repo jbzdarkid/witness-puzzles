@@ -20,29 +20,29 @@ function validate(puzzle) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
-      if (cell.type === 'line') {
-        if (cell.gap > 0 && cell.color > 0) {
-          console.log('Gap at', x, y, 'is covered')
-          puzzle.valid = false
-        }
-        if (cell.dot > 0) {
-          if (cell.color === 0) {
-            console.log('Dot at', x, y, 'is not covered')
-            puzzle.invalidElements.push({'x':x, 'y':y})
-          } else if (cell.color === 2 && cell.dot === 3) {
-            console.log('Yellow dot at', x, y, 'is covered by blue line')
-            puzzle.valid = false
-          } else if (cell.color === 3 && cell.dot === 2) {
-            console.log('Blue dot at', x, y, 'is covered by yellow line')
-            puzzle.valid = false
-          }
-        }
-        if (cell.start === true && cell.color !== 0) puzzleHasStart = true
-        if (cell.end != undefined && cell.color !== 0) puzzleHasEnd = true
-      } else if (cell.type != undefined) {
+      if (cell.type !== 'line') {
         // Perf optimization: We can skip computing regions if the grid has no symbols.
         puzzleHasSymbols = true
+        continue
       }
+      if (cell.gap > 0 && cell.color > 0) {
+        console.log('Gap at', x, y, 'is covered')
+        puzzle.valid = false
+      }
+      if (cell.dot > 0) {
+        if (cell.color === 0) {
+          console.log('Dot at', x, y, 'is not covered')
+          puzzle.invalidElements.push({'x':x, 'y':y})
+        } else if (cell.color === 2 && cell.dot === 3) {
+          console.log('Yellow dot at', x, y, 'is covered by blue line')
+          puzzle.valid = false
+        } else if (cell.color === 3 && cell.dot === 2) {
+          console.log('Blue dot at', x, y, 'is covered by yellow line')
+          puzzle.valid = false
+        }
+      }
+      if (cell.start === true && cell.color !== 0) puzzleHasStart = true
+      if (cell.end != undefined && cell.color !== 0) puzzleHasEnd = true
     }
   }
   if (!puzzleHasStart || !puzzleHasStart) {
@@ -159,7 +159,7 @@ function _regionCheck(puzzle, region) {
     if (cell == undefined) continue
 
     // Check for uncovered dots
-    if (cell.type === 'line' && cell.dot > 0) {
+    if (cell.dot > 0) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
       invalidElements.push(pos)
     }
