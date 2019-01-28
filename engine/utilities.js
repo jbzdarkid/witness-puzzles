@@ -235,6 +235,7 @@ function loadSettings() {
   sensLabel.for = 'sens'
   sensLabel.innerText = 'Mouse Speed 2D'
 
+  if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
   var sens = document.createElement('input')
   settings.appendChild(sens)
   sens.style.width = '100%'
@@ -254,6 +255,7 @@ function loadSettings() {
   volumeLabel.for = 'volume'
   volumeLabel.innerText = 'Volume'
 
+  if (localStorage.volume == undefined) localStorage.volume = 0.12
   var volume = document.createElement('input')
   settings.appendChild(volume)
   volume.style.width = '100%'
