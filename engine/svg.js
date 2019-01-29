@@ -85,7 +85,7 @@ function _poly(svg, params) {
     var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
     svg.appendChild(rect)
     var transform = 'translate(' + (centerX + pos.x*offset) + ', ' + (centerY + pos.y*offset) + ')'
-    if (params.rot === 'all') {
+    if (isRotated(params.polyshape)) {
       // -30 degree rotation around the midpoint of the square
       transform = 'rotate(-30, ' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ') ' + transform
     }
@@ -124,7 +124,7 @@ function _ylop(svg, params) {
     ]
     poly.setAttribute('points', points.join(', '))
     var transform = 'translate(' + (centerX + pos.x*offset) + ', ' + (centerY + pos.y*offset) + ')'
-    if (params.rot === 'all') {
+    if (isRotated(params.polyshape)) {
       // -30 degree rotation around the midpoint of the square
       transform = 'rotate(-30, ' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ') ' + transform
     }

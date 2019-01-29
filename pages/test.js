@@ -337,7 +337,7 @@ var tests = {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[0][4].start = true
     puzzle.grid[4][0].end = 'right'
-    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':35, 'rot':'all'}
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':1048611}
     return [puzzle, 5]
   }, 'negation-with-stars': function() {
     var puzzle = new Puzzle(2, 2)
@@ -694,8 +694,8 @@ var tests = {
     puzzle.grid[4][8].end = 'bottom'
     puzzle.grid[6][0].start = true
     puzzle.grid[6][8].start = true
-    puzzle.grid[3][1] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
-    puzzle.grid[7][7] = {'type':'poly', 'color':'black', 'polyshape':116, 'rot':'all'}
+    puzzle.grid[3][1] = {'type':'poly', 'color':'black', 'polyshape':1048692}
+    puzzle.grid[7][7] = {'type':'poly', 'color':'black', 'polyshape':1048692}
     return [puzzle, 2]
   }, 'gap-2-looks-like-endpoint': function() {
     puzzle = new Puzzle(4, 4)

@@ -46,9 +46,6 @@ Low Prio
 -- Hide solution (puzzleData) from global scope
 -- JS supports 'format strings', via `foo ${bar}`
     Too modern? Should check avail on my target platforms, specifically mobile
--- What uses getRotations? Why do we need rot=null?
-    This is legacy from before polyshape. Ints go to 2^32, so I can use a further bit in the mask to simplify.
-    Write a public func called 'isPolyshapeRotation' or something
 -- change all divs to auto-centering? It's all I seem to use them for rn
     Maybe have a class="centered"
 -- transform: scale(2) doesn't work on safari?

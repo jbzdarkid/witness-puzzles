@@ -18,8 +18,14 @@ function _isSet(polyshape, x, y) {
   return (polyshape & _mask(x, y)) !== 0
 }
 
-function getRotations(polyshape, rot=null) {
-  if (rot !== 'all') return [polyshape]
+ROTATION_BIT = _mask(5, 0)
+
+function isRotated(polyshape) {
+  return (polyshape & ROTATION_BIT) !== 0
+}
+
+function getRotations(polyshape) {
+  if (!isRotated(polyshape)) return [polyshape]
 
   var rotations = [0, 0, 0, 0]
   for (var x=0; x<4; x++) {

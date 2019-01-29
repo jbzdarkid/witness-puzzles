@@ -1,5 +1,5 @@
 window.DISABLE_CACHE = true
-var activeParams = {'id':'', 'color':'black', 'polyshape': 71}
+var activeParams = {'id':'', 'color':'black', 'polyshape':71}
 var puzzle
 var dragging
 // @Cleanup: Can this be non-global?
@@ -552,15 +552,13 @@ function _onElementClicked(x, y) {
     if (puzzle.grid[x][y] != undefined
      && puzzle.grid[x][y].type === activeParams.type
      && puzzle.grid[x][y].color === activeParams.color
-     && puzzle.grid[x][y].polyshape === activeParams.polyshape
-     && puzzle.grid[x][y].rot === activeParams.rot) {
+     && puzzle.grid[x][y].polyshape === activeParams.polyshape) {
       puzzle.grid[x][y] = undefined
     } else {
       puzzle.grid[x][y] = {
         'type': activeParams.type,
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
-        'rot': activeParams.rot,
       }
     }
   } else if (activeParams.type === 'triangle') {
@@ -613,10 +611,10 @@ var symbolData = {
   'star': {'type':'star', 'title':'Star'},
   'nega': {'type':'nega', 'title':'Negation'},
   'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
-  'poly': {'type':'poly', 'rot':0, 'polyshape':71, 'title':'Polyomino'},
-  'rpoly': {'type':'poly', 'rot':'all', 'polyshape':71, 'title':'Rotatable polyomino'},
-  'ylop': {'type':'ylop', 'rot':0, 'polyshape':71, 'title':'Negation polyomino'},
-  'rylop': {'type':'ylop', 'rot':'all', 'polyshape':71, 'title':'Rotatable negation polyomino'},
+  'poly': {'type':'poly', 'title':'Polyomino'},
+  'rpoly': {'type':'poly', 'title':'Rotatable polyomino'},
+  'ylop': {'type':'ylop', 'title':'Negation polyomino'},
+  'rylop': {'type':'ylop', 'title':'Rotatable negation polyomino'},
 }
 function _drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -640,6 +638,11 @@ function _drawSymbolButtons() {
     button.params = params
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape
+      if (button.id[0] == 'r') {
+        button.params.polyshape |= window.ROTATION_BIT
+      } else {
+        button.params.polyshape &= ~window.ROTATION_BIT
+      }
       button.onclick = function() {
         setSolveMode(false)
         if (activeParams.id === this.id) {
