@@ -2,24 +2,12 @@ In vague order of importance.
 
 High Prio
 -- Formal object for lines?
+    Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
-
-Tracing
--- Tracing down against walls and gap-2 is awkward
-    The game is awful at this too.
--- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
-    If it makes it easier, rm cursor when finishing
--- Consider computing symmetricalDir once, then saving it in data?
-    I guess this was referring to the path segment, actually
-
-Background validation
--- Replace XMLHttpRequest with Fetch?
--- Preview images for puzzles (meta:og tag) [WIP]
-   Still need to fix chrome on the server (try phantomjs again?)
--- Background validation should *stop* returning internal errors. Who needs to see them?
 
 Editor
 -- Editor dragging has deadzone -- there should be a magic pixel (or they should be much closer.)
+    Fixed?
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- 1-wide puzzles are about 10px too small, which makes the right-drag incorrect.
@@ -28,14 +16,28 @@ Editor
 -- Shape chooser is not centered
 -- Crayons could be colored in, maybe.
 
+Tracing
+-- Consider computing symmetricalDir once, then saving it in data?
+    I guess this was referring to the path segment, actually
+-- Tracing down against walls and gap-2 is awkward
+    The game is awful at this too.
+-- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
+    If it makes it easier, rm cursor when finishing
+
+Background validation
+-- Replace XMLHttpRequest with Fetch?
+-- Preview images for puzzles (meta:og tag) [WIP]
+   Still need to fix chrome on the server (try phantomjs again?)
+-- Background validation should *stop* returning internal errors. Who needs to see them?
+
 Server
 -- A whole bunch of UI for browsing puzzles
+-- Save puzzle title separately for meta:title?
 -- Start versioning JS? That way caching works and doesn't shoot me in the foot.
 -- Signin?
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
--- Save puzzle title separately for meta:title?
--- Consider changing UUIDType to just be a string -- it's pain to read.
+    Consider changing UUIDType to just be a string -- it's pain to read.
 
 Low Prio
 -- Fix generation colors / general improvements to random puzzles
@@ -56,3 +58,4 @@ Low Prio
     maze can be 'click to reveal' like memory card game
     should play the music if I can
 -- Animation for start-grow isn't playing for primary line
+
