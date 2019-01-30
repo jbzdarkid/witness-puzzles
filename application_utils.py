@@ -81,11 +81,8 @@ def host_statically(path, serverpath=None, protected=False):
     serverpath = f'/{path}'
   application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
 
-def get_validation_error(display_hash):
-  try:
-    driver = Chrome()
-  except:
-    return # @Hack: I should probably *fix* this...
+def validate_and_capture_image(display_hash):
+  driver = Chrome()
   driver.set_window_size(2000, 2000)
   driver.get(f'{request.url_root}validate/{display_hash}')
   """
@@ -100,15 +97,12 @@ def get_validation_error(display_hash):
     result = WebDriverWait(driver, 60).until(condition) # 1 minute wait
   except TimeoutException:
     driver.quit()
-    return 'Puzzle validation timed out.'
+    return false
 
   valid = result.get_attribute('valid')
   if valid == None or valid == 'false':
-    reason = result.get_attribute('reason')
-    if reason == None:
-      reason = 'Solution is not valid.'
     driver.quit()
-    return reason
+    return false
 
   puzzle = driver.find_element_by_id('puzzle')
   img = Image.open(BytesIO(puzzle.screenshot_as_png))
@@ -118,4 +112,5 @@ def get_validation_error(display_hash):
       os.makedirs(f'images/{display_hash[:2]}')
       img.save(f'images/{display_hash[:2]}/{display_hash}.png')
     except OSError as e:
-      return 'Unable to save puzzle, please try again.'
+      return false
+  return true

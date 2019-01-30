@@ -28,11 +28,9 @@ def publish():
   solution_json = request.form['solution']
 
   display_hash = create_puzzle(puzzle_json, solution_json)
-  error = get_validation_error(display_hash) # Also saves the image
-
-  if error:
+  if not validate_and_capture_image(display_hash):
     delete_puzzle(display_hash)
-    return error, 400
+    return 400
 
   return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])

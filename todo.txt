@@ -27,8 +27,7 @@ Tracing
 Background validation
 -- Replace XMLHttpRequest with Fetch?
 -- Preview images for puzzles (meta:og tag) [WIP]
-   Still need to fix chrome on the server (try phantomjs again?)
--- Background validation should *stop* returning internal errors. Who needs to see them?
+   Still need to fix chrome on the server (phantomjs is deprecated)
 
 Server
 -- A whole bunch of UI for browsing puzzles

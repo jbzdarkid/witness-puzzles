@@ -429,7 +429,7 @@ function publishPuzzle() {
         window.location = url
       }
     } else {
-      publish.innerText = 'Error: ' + this.responseText
+      publish.innerText = 'Could not validate puzzle!'
     }
   }
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
