@@ -10,7 +10,6 @@ Editor
     Fixed?
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
--- 1-wide puzzles are about 10px too small, which makes the right-drag incorrect.
 -- Better UI for "draggable edge"
 -- Set width to 1, change default -> P+H symmetry, throws.
 -- Shape chooser is not centered
