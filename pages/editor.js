@@ -292,19 +292,18 @@ function setStyle(style) {
   // Delayed until after symmetry enforcement to avoid oob
   puzzle.pillar = style.includes('Pillar')
 
-  // @Robustness: I think this has a bug with 1xN
   var width = puzzle.grid.length
-  // Non-pillar to pillar
   if (puzzle.pillar === true) {
-    if (width === 1) {
-      width = 2
+    if (puzzle.symmetry == undefined) {
+      // Width must be a multiple of 2 (rounding down)
+      if (width < 2) width = 2
+      else width -= width % 2
     } else {
-      width -= width % 2 // Width must be a multiple of 2
-    }
-    if (puzzle.symmetry != undefined) {
-      width -= width % 4 // Width must be a multiple of 4
+      // Width must be a multiple of 4 (rounding up)
+      width += 4 - width % 4
     }
   } else if (puzzle.pillar === false) {
+    // Pillar to non-pillar is always an increase
     width += 1 - width % 2
   }
 
@@ -816,14 +815,14 @@ function resizePuzzle(dx, dy, id) {
     }
   }
 
-  // Symmetry copies one half of the grid to the other, and selects the far side from the
-  // dragging edge to be the master copy.
-  // @Cleanup: This needs to implement ranges for pillars.
+  // Symmetry copies one half of the grid to the other,
+  // and selects the far side from the dragging edge to be the master copy.
+  // Note that these ranges are [,) i.e. [0, 4) iterates 0-1-2-3.
   if (puzzle.symmetry != undefined) {
     if (id.includes('right')) {
-      var xIter = [0, (newWidth-1)/2, 1]
+      var xIter = [0, Math.floor(newWidth/2), 1]
     } else if (id.includes('left')) {
-      var xIter = [newWidth-1, (newWidth-1)/2, -1]
+      var xIter = [newWidth-1, Math.ciel(newWidth/2)-1, -1]
     } else {
       var xIter = [0, newWidth-1, 1]
     }
@@ -835,6 +834,8 @@ function resizePuzzle(dx, dy, id) {
       var yIter = [0, newHeight, 1]
     }
     console.debug('Half-copying grid in range', xIter, yIter)
+    if (xIter[1]%1 !== 0) throw 'Invalid x iteration: ' + JSON.stringify(xIter)
+    if (yIter[1]%1 !== 0) throw 'Invalid y iteration: ' + JSON.stringify(yIter)
 
     for (var x = xIter[0]; x != xIter[1]; x += xIter[2]) {
       for (var y = yIter[0]; y != yIter[1]; y += yIter[2]) {
@@ -853,8 +854,6 @@ function resizePuzzle(dx, dy, id) {
   return true
 }
 
-// 711 267
-// 670 264
 function _dragStart(event, elem) {
   dragging = {'x':event.clientX, 'y':event.clientY}
 

@@ -9,9 +9,9 @@ Editor
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- Better UI for "draggable edge"
--- Set width to 1, change default -> P+H symmetry, throws.
 -- Shape chooser is not centered
 -- Crayons could be colored in, maybe.
+-- At the full drag limit, start points can shift by 0.5 cells
 
 Tracing
 -- Consider computing symmetricalDir once, then saving it in data?
