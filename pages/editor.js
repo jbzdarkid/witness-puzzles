@@ -715,20 +715,27 @@ function _shapeChooser() {
   anchor.onmousedown = function(event) {_shapeChooserClick(event)}
   document.body.appendChild(anchor)
 
-  var chooser = document.createElement('table')
+  var chooser = document.createElement('div')
   puzzle.parentElement.insertBefore(chooser, puzzle)
   chooser.id = 'chooser'
-  chooser.setAttribute('cellspacing', '24px')
-  chooser.setAttribute('cellpadding', '0px')
-  chooser.style.zIndex = 1 // Position in front of the puzzle
+  chooser.style.display = 'flex'
   chooser.style.position = 'absolute'
-  chooser.style.padding = 25
+  chooser.style.width = '100%'
+  chooser.style.height= '100%'
   chooser.style.minWidth = '400px'
-  chooser.style.background = window.BACKGROUND
-  chooser.style.border = window.BORDER
-  chooser.onmousedown = function(event) {_shapeChooserClick(event, this)}
+  chooser.style.zIndex = 1 // Position in front of the puzzle
+
+  var chooserTable = document.createElement('table')
+  chooser.appendChild(chooserTable)
+  chooserTable.id = 'chooserTable'
+  chooserTable.setAttribute('cellspacing', '24px')
+  chooserTable.setAttribute('cellpadding', '0px')
+  chooserTable.style.padding = 25
+  chooserTable.style.background = window.BACKGROUND
+  chooserTable.style.border = window.BORDER
+  chooserTable.onmousedown = function(event) {_shapeChooserClick(event, this)}
   for (var x=0; x<4; x++) {
-    var row = chooser.insertRow(x)
+    var row = chooserTable.insertRow(x)
     for (var y=0; y<4; y++) {
       var cell = row.insertCell(y)
       cell.powerOfTwo = 1 << (x + y*4)
@@ -759,7 +766,7 @@ function _shapeChooserClick(event, cell) {
     return
   }
   // Clicks inside the chooser box are non-closing
-  if (cell.id === 'chooser') {
+  if (cell.id === 'chooser' || cell.id === 'chooserTable') {
     event.stopPropagation()
     return
   }
