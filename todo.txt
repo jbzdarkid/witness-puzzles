@@ -14,8 +14,6 @@ Editor
 -- Decide if shape chooser should pop over the right buttons or not.
 
 Tracing
--- Consider computing symmetricalDir once, then saving it in data?
-    I guess this was referring to the path segment, actually
 -- Tracing down against walls and gap-2 is awkward
     The game is awful at this too.
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is

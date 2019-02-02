@@ -1,4 +1,4 @@
-chromedriver-installer==0.0.6
+chromedriver-py==2.46
 Click==7.0
 Flask-SQLAlchemy==2.3.2
 Flask==1.0.2

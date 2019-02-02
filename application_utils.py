@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, send_from_directory
 import os
+from chromedriver_py import binary_path
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -82,7 +83,7 @@ def host_statically(path, serverpath=None, protected=False):
   application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
 
 def validate_and_capture_image(display_hash):
-  driver = Chrome()
+  driver = Chrome(executable_path=binary_path)
   driver.set_window_size(2000, 2000)
   driver.get(f'{request.url_root}validate/{display_hash}')
   """
