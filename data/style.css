@@ -12,3 +12,17 @@ input.checkbox {
   margin-right: 5px;
 }
 body { text-align: center; }
+
+.editor {
+  display: inline-flex;
+  flex-flow: column nowrap;
+}
+
+.editor > div {
+  padding: 5px;
+}
+
+.editorWidgets {
+  display: inline-flex;
+  justify-content: space-between;
+}

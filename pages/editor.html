@@ -15,35 +15,30 @@
   </head>
   <body>
     <script>loadSettings()</script>
-    <label id="puzzleName" contentEditable=true style="font-size: 72"></label>
-
-    <table id="meta">
-      <tr>
-        <td colspan="3" style="text-align: center;">
-          <div id="metaButtons" style="display:inline">
-            <button onclick="createEmptyPuzzle()">New</button>
-            <button onclick="loadPuzzle()">Load</button>
-            <button onclick="deletePuzzle()">Delete</button>
-            <button onclick="importPuzzle()">Import</button>
-          </div>
-        </td>
-      </tr><tr>
-        <td colspan="3" style="text-align: center;">
-          <label for="puzzleStyle">Puzzle Style: </label>
-          <select id="puzzleStyle" onchange="setStyle(this.value)">
-            <option>Default</option>
-            <option>Horizontal Symmetry</option>
-            <option>Vertical Symmetry</option>
-            <option>Rotational Symmetry</option>
-            <option>Pillar</option>
-            <option>Pillar (H Symmetry)</option>
-            <option>Pillar (V Symmetry)</option>
-            <option>Pillar (R Symmetry)</option>
-            <option>Pillar (Two Lines)</option>
-          </select>
-        </td>
-      </tr><tr>
-        <td>
+    <div class="editor">
+      <label id="puzzleName" contentEditable=true style="font-size: 72"></label>
+      <div id="metaButtons">
+        <button onclick="createEmptyPuzzle()">New</button>
+        <button onclick="loadPuzzle()">Load</button>
+        <button onclick="deletePuzzle()">Delete</button>
+        <button onclick="importPuzzle()">Import</button>
+      </div>
+      <div>
+        <label for="puzzleStyle">Puzzle Style: </label>
+        <select id="puzzleStyle" onchange="setStyle(this.value)">
+          <option>Default</option>
+          <option>Horizontal Symmetry</option>
+          <option>Vertical Symmetry</option>
+          <option>Rotational Symmetry</option>
+          <option>Pillar</option>
+          <option>Pillar (H Symmetry)</option>
+          <option>Pillar (V Symmetry)</option>
+          <option>Pillar (R Symmetry)</option>
+          <option>Pillar (Two Lines)</option>
+        </select>
+      </div>
+      <div class="editorWidgets">
+        <div>
           <table id="symbolButtons" style="display:none" cellpadding="4" cellspacing="0">
             <tr>
               <td><button id="start"></button></td>
@@ -65,7 +60,8 @@
               <td><button id="rylop"></button></td>
             </tr>
           </table>
-        </td><td>
+        </div>
+        <div>
           <div style="position: relative">
             <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: 0; top: 0; height: 10px; width: 10px"></div>
             <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: 0; right: 10; height: 10px"></div>
@@ -77,7 +73,8 @@
             <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: 0; top: 10; width: 10px"></div>
             <svg id="puzzle"></svg>
           </div>
-        </td><td>
+        </div>
+        <div>
           <table id="colorButtons" style="display:none" cellpadding="4" cellspacing="0">
             <tr><td><button id="black"></button></td></tr>
             <tr><td><button id="white"></button></td></tr>
@@ -88,25 +85,23 @@
             <tr><td><button id="blue"></button></td></tr>
             <tr><td><button id="purple"></button></td></tr>
           </table>
-        </td>
-      </tr><tr>
-        <td colspan="3" style="text-align:center;">
-          <input class="checkbox" type="checkbox" id="solveMode" onchange="setSolveMode(this.checked)">
-          <label for="solveMode">Solve (manually)</label>
-          <button id="solveAuto" onclick="solvePuzzle()">Solve (automatically)</button>
-          <div style="display: inline-block; vertical-align:top">
-            <div id="solutionViewer" style="position: absolute; display:none">
-              <button id="previousSolution">&larr;</button>
-              <label id="solutionCount"></label>
-              <button id="nextSolution">&rarr;</button>
-            </div>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <input class="checkbox" type="checkbox" id="solveMode" onchange="setSolveMode(this.checked)">
+        <label for="solveMode">Solve (manually)</label>
+        <button id="solveAuto" onclick="solvePuzzle()">Solve (automatically)</button>
+        <div style="display: inline-block; vertical-align:top">
+          <div id="solutionViewer" style="position: absolute; display:none">
+            <button id="previousSolution">&larr;</button>
+            <label id="solutionCount"></label>
+            <button id="nextSolution">&rarr;</button>
           </div>
-        </td>
-      </tr><tr>
-        <td colspan="3" style="text-align:center;">
-          <button id="publish" onclick="publishPuzzle()" disabled>Publish</button>
-        </td>
-      </tr>
-    </table>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button id="publish" onclick="publishPuzzle()" disabled>Publish</button>
+      </div>
+    </div>
   </body>
 </html>
