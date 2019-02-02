@@ -239,10 +239,10 @@ class Puzzle {
     var dirs = []
     var leftCell = this.getCell(x - 1, y)
     if (leftCell == undefined || leftCell.gap === 2) dirs.push('left')
-    var rightCell = this.getCell(x + 1, y)
-    if (rightCell == undefined || rightCell.gap === 2) dirs.push('right')
     var topCell = this.getCell(x, y - 1)
     if (topCell == undefined || topCell.gap === 2) dirs.push('top')
+    var rightCell = this.getCell(x + 1, y)
+    if (rightCell == undefined || rightCell.gap === 2) dirs.push('right')
     var bottomCell = this.getCell(x, y + 1)
     if (bottomCell == undefined || bottomCell.gap === 2) dirs.push('bottom')
     return dirs
