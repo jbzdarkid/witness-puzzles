@@ -6,8 +6,6 @@ High Prio
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 
 Editor
--- Editor dragging has deadzone -- there should be a magic pixel (or they should be much closer.)
-    Fixed?
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- Better UI for "draggable edge"

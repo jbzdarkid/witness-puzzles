@@ -853,6 +853,8 @@ function resizePuzzle(dx, dy, id) {
   return true
 }
 
+// 711 267
+// 670 264
 function _dragStart(event, elem) {
   dragging = {'x':event.clientX, 'y':event.clientY}
 
@@ -888,14 +890,20 @@ function _dragMove(event, elem) {
     dy = event.clientY - dragging.y
   }
 
-  var xLim = 41
+  var xLim = 40
   // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
   if (puzzle.symmetry != undefined && puzzle.pillar === true) {
-    xLim = 82
+    xLim = 80
   }
 
-  if (Math.abs(dx) >= xLim || Math.abs(dy) >= 41) {
-    if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/41), elem.id)) return
+  var yLim = 40
+  // 4x4 and larger will only expand downwards, so we have to require more motion.
+  if (puzzle.grid[0].length >= 9) {
+    var yLim = 60
+  }
+
+  if (Math.abs(dx) >= xLim || Math.abs(dy) >= yLim) {
+    if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/yLim), elem.id)) return
     _writePuzzle()
 
     // If resize succeeded, set a new reference point for future drag operations
