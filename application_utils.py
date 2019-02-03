@@ -98,12 +98,12 @@ def validate_and_capture_image(display_hash):
     result = WebDriverWait(driver, 60).until(condition) # 1 minute wait
   except TimeoutException:
     driver.quit()
-    return false
+    return False
 
   valid = result.get_attribute('valid')
   if valid == None or valid == 'false':
     driver.quit()
-    return false
+    return False
 
   puzzle = driver.find_element_by_id('puzzle')
   img = Image.open(BytesIO(puzzle.screenshot_as_png))
@@ -113,5 +113,5 @@ def validate_and_capture_image(display_hash):
       os.makedirs(f'images/{display_hash[:2]}')
       img.save(f'images/{display_hash[:2]}/{display_hash}.png')
     except OSError as e:
-      return false
-  return true
+      return False
+  return True
