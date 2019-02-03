@@ -119,7 +119,9 @@ function polyFit(region, puzzle) {
   var polys = []
   var ylops = []
   var polyCount = 0
+  var regionSize = 0
   for (var pos of region.cells) {
+    if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == undefined) continue
     if (cell.polyshape === 0) continue
@@ -130,10 +132,6 @@ function polyFit(region, puzzle) {
       ylops.push(cell)
       polyCount -= getPolySize(cell.polyshape)
     }
-  }
-  var regionSize = 0
-  for (var pos of region.cells) {
-    if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
   }
   if (polys.length + ylops.length === 0) {
     console.log('No polyominos or onimylops inside the region, vacuously true')
@@ -159,7 +157,7 @@ function polyFit(region, puzzle) {
   }
   // In the normal case, we mark every cell as -1: It needs to be covered by one poly
   if (polyCount > 0) {
-    for (var cell of region.cells) puzzle.setCell(cell.x, cell.y, -1)
+    for (var pos of region.cells) puzzle.setCell(pos.x, pos.y, -1)
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
