@@ -22,7 +22,12 @@ Tracing
 Background validation
 -- Replace XMLHttpRequest with Fetch?
 -- Preview images for puzzles (meta:og tag) [WIP]
-   Still need to fix chrome on the server (phantomjs is deprecated)
+    Still need to fix chrome on the server (phantomjs is deprecated)
+    Tried: js2py -- requires ES5.1 (no objects, for..of, requires semis)
+    Tried: PhantomJS -- still deprecated, still obnoxious
+    Tried: Firefox -- Promising, but couldn't get the executable to launch (same as Chrome)
+    Tried: pyppeteer -- Requires async, which requires the main loop, which Flask owns.
+-- Modify the validate_template to instead have an input box where I can paste the solution json (to be rendered). That way, I don't have to temporarily commit a puzzle and then back it out again.
 
 Server
 -- A whole bunch of UI for browsing puzzles

@@ -9,6 +9,8 @@
   </head>
   <body>
     <svg id="puzzle"></svg>
+    <canvas id="canvas" style="display:none"></canvas>
+    <img id="image" style="display:none"></img>
   </body>
   <script>
     window.onload = function() {
@@ -26,6 +28,32 @@
       }
 
       document.body.append(result)
+      /* @Future: I can also use SVG rendering for this. I should do this if I can find a way to pass the HTML directly into chrome, because then I won't have an actual webpage to render.
+
+      var svg = document.getElementById('puzzle')
+      var xml = new XMLSerializer().serializeToString(svg)
+      var img = document.getElementById('image')
+      img.src = 'data:image/svg+xml;base64,' + btoa(xml)
+      img.onload = function() {
+        var canvas = document.getElementById('canvas')
+        canvas.width = svg.getBBox().width + 10
+        canvas.height = svg.getBBox().height + 10
+        var ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        // ctx.getImageData(0, 0, canvas.width, canvas.height)
+        var uri = canvas.toDataURL('image/png')
+        // URI is a base-64 encoded image, which python should just be able to read.
+
+
+          var saveLink = document.createElement('a')
+          saveLink.download = 'puzzle.png'
+          saveLink.style.display = 'none'
+          document.body.appendChild(saveLink)
+          saveLink.href = uri
+          saveLink.click()
+
+      }
+      */
     }
   </script>
 </html>
