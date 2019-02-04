@@ -17,7 +17,7 @@ class Puzzle(db.Model):
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #, nullable=False
 
-def create_puzzle(puzzle_json, solution_json):
+def create_puzzle(puzzle_json, solution_json, img):
   h = sha256()
   h.update(puzzle_json.encode())
   display_hash = h.hexdigest()[:8].upper()

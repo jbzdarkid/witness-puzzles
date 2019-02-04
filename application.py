@@ -28,10 +28,11 @@ def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
 
-  if not validate_and_capture_image(puzzle_json, solution_json):
+  img = validate_and_capture_image(puzzle_json, solution_json)
+  if img is None:
     return 400
 
-  display_hash = create_puzzle(puzzle_json, solution_json)
+  display_hash = create_puzzle(puzzle_json, solution_json, img)
   return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
 

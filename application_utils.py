@@ -89,27 +89,18 @@ def validate_and_capture_image(puzzle_json, solution_json):
   driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
   driver.get(f'{request.url_root}validate.html')
 
+  img = None
+
   # Wait for page to load, then run the script and wait for a response.
   try:
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-    driver.execute_script(f'validate_and_capture_image({puzzle_json}, {solution_json})')
+    driver.execute_script(f'validate_and_capture_image(\'{puzzle_json}\', \'{solution_json}\')')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
+    valid = result.get_attribute('valid')
+    if valid == 'true':
+      bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
+      img = Image.open(BytesIO(b64decode(bytes)))
   except TimeoutException:
-    driver.quit()
-    return False
-
-  valid = result.get_attribute('valid')
-  if not valid == 'true':
-    driver.quit()
-    return False
-
-  bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
-  img = Image.open(BytesIO(b64decode(bytes)))
+    pass
   driver.quit()
-  if not os.path.exists(f'images/{display_hash[:2]}'):
-    try:
-      os.makedirs(f'images/{display_hash[:2]}')
-      img.save(f'images/{display_hash[:2]}/{display_hash}.png')
-    except OSError as e:
-      return False
-  return True
+  return img

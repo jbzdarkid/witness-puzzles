@@ -14,6 +14,7 @@
       result.valid = false
       try {
         var solution = Puzzle.deserialize(solution_json)
+        var puzzle = Puzzle.deserialize(puzzle_json)
         validate(solution)
         result.valid = solution.valid
       } catch {}
@@ -23,7 +24,7 @@
       }
 
       // Solution was valid, continuing with drawing + capturing the image
-      draw(puzzle_json)
+      draw(puzzle)
       var svg = document.getElementById('puzzle')
       var xml = new XMLSerializer().serializeToString(svg)
       var img = document.getElementById('image')
