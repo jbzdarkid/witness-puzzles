@@ -83,23 +83,17 @@ def host_statically(path, serverpath=None, protected=False):
     serverpath = f'/{path}'
   application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
 
-def validate_and_capture_image(solution_json):
+def validate_and_capture_image(puzzle_json, solution_json):
   options = webdriver.ChromeOptions()
   options.add_argument('headless')
-  driver = webdriver.Chrome(chrome_options=options)
+  driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
   driver.get(f'{request.url_root}validate.html')
 
-  condition = EC.presence_of_element_located((By.ID, 'serialized'))
+  # Wait for page to load, then run the script and wait for a response.
   try:
-    result = WebDriverWait(driver, 60).until(condition) # 1 minute wait
-    result.type_text(solution_json) # or something
-  except TimeoutException:
-    driver.quit()
-    return False
-
-  condition = EC.presence_of_element_located((By.ID, 'result'))
-  try:
-    result = WebDriverWait(driver, 60).until(condition) # 1 minute wait
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
+    driver.execute_script(f'validate_and_capture_image({puzzle_json}, {solution_json})')
+    result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
   except TimeoutException:
     driver.quit()
     return False
