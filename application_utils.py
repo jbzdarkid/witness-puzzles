@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from PIL import Image
 from io import BytesIO
+from base64 import b64decode
 
 application = Flask(__name__, template_folder='pages')
 
@@ -86,14 +87,7 @@ def validate_and_capture_image(display_hash):
   options = webdriver.ChromeOptions()
   options.add_argument('headless')
   driver = webdriver.Chrome(chrome_options=options)
-  driver.set_window_size(2000, 2000)
   driver.get(f'{request.url_root}validate/{display_hash}')
-  """
-  print('--- Javascript console ---')
-  for line in driver.get_log('browser'):
-    print(line)
-  print('=== Javascript console ===')
-  """
 
   condition = EC.presence_of_element_located((By.ID, 'result'))
   try:
@@ -103,12 +97,12 @@ def validate_and_capture_image(display_hash):
     return False
 
   valid = result.get_attribute('valid')
-  if valid == None or valid == 'false':
+  if not valid == 'true':
     driver.quit()
     return False
 
-  puzzle = driver.find_element_by_id('puzzle')
-  img = Image.open(BytesIO(puzzle.screenshot_as_png))
+  bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
+  img = Image.open(BytesIO(b64decode(bytes)))
   driver.quit()
   if not os.path.exists(f'images/{display_hash[:2]}'):
     try:
