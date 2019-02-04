@@ -116,8 +116,8 @@ function _drawPuzzle() {
     if (puzzle.grid.length > 13 || puzzle.grid[0].length > 13) {
       document.getElementById('solveAuto').disabled = true
     }
-  } else if (puzzle.pillar != undefined) {
-    // 4x4 is the max for non-symmetry pillar puzzles
+  } else if (puzzle.pillar === true) {
+    // 4x4 is the max for non-symmetry, pillar puzzles
     if (puzzle.grid.length > 9 || puzzle.grid[0].length > 9) {
       document.getElementById('solveAuto').disabled = true
     }

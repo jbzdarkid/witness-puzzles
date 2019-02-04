@@ -57,4 +57,7 @@ Low Prio
     maze can be 'click to reveal' like memory card game
     should play the music if I can
 -- Animation for start-grow isn't playing for primary line
+-- Some kind of release story
+    Either auto-upload on code push, or a script to make a zip file
+    Should also start minifying code eventually.
 
