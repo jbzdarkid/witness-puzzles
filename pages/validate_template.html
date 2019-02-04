@@ -8,17 +8,18 @@
     <script type="text/javascript" src="/engine/display2.js"></script>
   </head>
   <body>
+    <label id="serialized" contentEditable=true></label>
     <svg id="puzzle"></svg>
     <canvas id="canvas" style="display:none"></canvas>
     <img id="image" style="display:none"></img>
   </body>
   <script>
-    window.onload = function() {
+    document.getElementById('serialized').onchange = function(this) {
       var result = document.createElement('p')
       result.id = 'result'
       result.valid = false
       try {
-        var solution = Puzzle.deserialize({{ solution|tojson }})
+        var solution = Puzzle.deserialize(this.value)
         validate(solution)
         result.valid = solution.valid
       } catch {}
