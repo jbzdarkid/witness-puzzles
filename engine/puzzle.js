@@ -120,7 +120,7 @@ class Puzzle {
     puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
-    puzzle.largezero = puzzle.grid.length * puzzle.grid
+    puzzle.largezero = puzzle.grid.length * puzzle.grid[0].length
     return puzzle
   }
 
