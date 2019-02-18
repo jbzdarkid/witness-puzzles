@@ -13,6 +13,7 @@ host_statically('engine')
 host_statically('images')
 host_statically('pages/editor.html', '/editor.html')
 host_statically('pages/editor.js', '/editor.js')
+host_statically('pages/validate.html', '/validate.html')
 host_statically('pages/test.html', '/test.html', protected=True)
 host_statically('pages/test.js', '/test.js', protected=True)
 
@@ -27,18 +28,13 @@ def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
 
-  if not validate_and_capture_image(solution_json):
+  img = validate_and_capture_image(puzzle_json, solution_json)
+  if img is None:
     return 400
 
-  display_hash = create_puzzle(puzzle_json, solution_json)
+  display_hash = create_puzzle(puzzle_json, solution_json, img)
   return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
-
-# Validating "semi-published" puzzles
-def validate(display_hash):
-  puzzle = get_puzzle(display_hash) # This should never fail, and if it does, a 500 is ok.
-  return render_template('validate_template.html', solution=puzzle.solution_json)
-application.add_url_rule('/validate/<display_hash>', 'validate', validate)
 
 # Playing published puzzles
 def play(display_hash):
