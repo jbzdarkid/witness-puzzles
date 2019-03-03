@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, send_from_directory
+from flask import Flask, request, redirect, send_from_directory, url_for
 import os
 from chromedriver_py import binary_path
 from selenium import webdriver
@@ -81,7 +81,10 @@ def host_statically(path, serverpath=None, protected=False):
 
   if not serverpath:
     serverpath = f'/{path}'
-  application.add_url_rule(serverpath, path, lambda:__static_content_func(protected, path))
+  application.add_url_rule(serverpath, serverpath, lambda:__static_content_func(protected, path))
+
+def host_redirect(path, serverpath):
+  application.add_url_rule(serverpath, serverpath, lambda:redirect(url_for(path)))
 
 def validate_and_capture_image(puzzle_json, solution_json):
   options = webdriver.ChromeOptions()

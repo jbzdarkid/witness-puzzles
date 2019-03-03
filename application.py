@@ -4,26 +4,27 @@ from uuid import UUID, uuid4
 
 from application_database import *
 from application_utils import *
+import application_hashes
 
-# Root should be some sort of puzzle browser, not old index.html
-# application.add_url_rule('/', 'root', lambda:send_from_directory('', 'index.html'))
-
+host_redirect('/pages/editor.html', '/editor.html')
+host_redirect('/pages/editor.html', '/index.html') # TODO: Root should be some sort of puzzle browser, not the editor
+host_redirect('/pages/editor.html', '/') # TODO: Root should be some sort of puzzle browser, not the editor
+host_redirect('/pages/stest.html', '/test.html')
+host_redirect('/pages/validate.html', '/validate.html')
 host_statically('data')
 host_statically('engine')
 host_statically('images')
-host_statically('pages/editor.html', '/editor.html')
-host_statically('pages/editor.js', '/editor.js')
-host_statically('pages/validate.html', '/validate.html')
-host_statically('pages/test.html', '/test.html', protected=True)
-host_statically('pages/test.js', '/test.js', protected=True)
+host_statically('pages/editor.html')
+host_statically('pages/editor.js')
+host_statically('pages/test.html', protected=True)
+host_statically('pages/test.js', protected=True)
+host_statically('pages/validate.html')
 
 @application.errorhandler(404)
 def page_not_found(error):
   return render_template('404_generic.html'), 404
 
 # Publishing puzzles
-# This is a bit awkward, since in order to load the puzzle it has to exist somewhere,
-# so I save the puzzle then quickly verify and delete it if it's invalid.
 def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
