@@ -829,7 +829,7 @@ function resizePuzzle(dx, dy, id) {
     if (id.includes('right')) {
       var xIter = [0, Math.floor(newWidth/2), 1]
     } else if (id.includes('left')) {
-      var xIter = [newWidth-1, Math.ciel(newWidth/2)-1, -1]
+      var xIter = [newWidth-1, Math.ceil(newWidth/2)-1, -1]
     } else {
       var xIter = [0, newWidth-1, 1]
     }
