@@ -49,6 +49,7 @@ Low Prio
 -- Hide solution (puzzleData) from global scope
 -- JS supports 'format strings', via `foo ${bar}`
     Too modern? Should check avail on my target platforms, specifically mobile
+    It's ES6, which is also where objects live, so I'm pretty tied to it.
 -- change all divs to auto-centering? It's all I seem to use them for rn
     Maybe have a class="centered"
 -- transform: scale(2) doesn't work on safari?

@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException
 from PIL import Image
 from io import BytesIO
 from base64 import b64decode
+import boto3
 
 application = Flask(__name__, template_folder='pages')
 
@@ -33,10 +34,9 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
       port = os.environ['RDS_PORT'],
       name = os.environ['RDS_DB_NAME'],
     ),
-    # Re-use the database username/password with flask-basicauth (used to protect certain pages)
-    'USERNAME': os.environ['RDS_USERNAME'],
-    'PASSWORD': os.environ['RDS_PASSWORD'],
-    'SECRET_KEY': os.environ['SECRET_KEY'],
+    'S3_ACCESS_KEY': os.environ['S3_ACCESS_KEY'],
+    'S3_SECRET_ACCESS_KEY': os.environ['S3_SECRET_ACCESS_KEY'],
+    'SECRET_KEY': os.environ['SECRET_KEY'], # CSRF secret key
   })
   application.debug = False
   # Enforce HTTPS only in the presence of a certificate
@@ -50,12 +50,15 @@ else: # Running locally
   application.debug = True # Required to do auto-reload
 
 def request_is_authorized():
-  if 'USERNAME' not in application.config or 'PASSWORD' not in application.config:
+  # Re-using the s3 key/secret key as a username/password to protect certain pages
+  username = application.config.get('S3_ACCESS_KEY')
+  password = application.config.get('S3_SECRET_ACCESS_KEY')
+  if username is None or password is None:
     return True # No user/pass specified, allow access
   if not request.authorization:
     return False # No auth provided, block access
-  if (application.config['USERNAME'] == request.authorization.username and
-      application.config['PASSWORD'] == request.authorization.password):
+  if (username == request.authorization.username and
+      password == request.authorization.password):
     return True # Correct user/pass provided, allow access
 
   return False # Default, block access
@@ -89,18 +92,33 @@ def validate_and_capture_image(puzzle_json, solution_json):
   driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
   driver.get(f'{request.url_root}validate.html')
 
-  img = None
-
-  # Wait for page to load, then run the script and wait for a response.
+  img_bytes = None
   try:
+    # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
     driver.execute_script(f'validate_and_capture_image(\'{puzzle_json}\', \'{solution_json}\')')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
-    valid = result.get_attribute('valid')
-    if valid == 'true':
+    if result.get_attribute('valid') == 'true':
       bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
-      img = Image.open(BytesIO(b64decode(bytes)))
+      img_bytes = BytesIO(b64decode(bytes))
   except TimeoutException:
     pass
   driver.quit()
-  return img
+  return img_bytes
+
+def upload_image(img_bytes, display_hash):
+  name = display_hash[:2] + '/' + display_hash + '.png'
+  if application.debug:
+    try:
+      os.mkdir(f'images/{display_hash[:2]}')
+    except:
+      pass
+    Image.open(img_bytes).save(f'images/{name}')
+    return f'images/{name}'
+  else:
+    boto3.client(
+      's3',
+      aws_access_key_id = application.config['S3_ACCESS_KEY'],
+      aws_secret_access_key = application.config['S3_SECRET_ACCESS_KEY'],
+    ).upload_fileobj(img_bytes, 'witnesspuzzles-images', name)
+    return f'https://witnesspuzzles-images.s3.amazonaws.com/{name}'

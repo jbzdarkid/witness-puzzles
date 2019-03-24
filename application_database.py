@@ -15,9 +15,10 @@ class Puzzle(db.Model):
   puzzle_json = db.Column(db.Text, nullable=False)
   solution_json = db.Column(db.Text, nullable=False)
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+  url = db.Column(db.Text)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #, nullable=False
 
-def create_puzzle(puzzle_json, solution_json, img):
+def create_puzzle(puzzle_json, solution_json, img_bytes):
   h = sha256()
   h.update(puzzle_json.encode())
   display_hash = h.hexdigest()[:8].upper()
@@ -25,14 +26,19 @@ def create_puzzle(puzzle_json, solution_json, img):
   display_hash = display_hash.replace('O', 'B')
   display_hash = display_hash.replace('1', 'C')
   display_hash = display_hash.replace('0', 'D')
-  if not get_puzzle(display_hash):
+  puzzle = get_puzzle(display_hash)
+  if not puzzle:
     puzzle = Puzzle(
       display_hash=display_hash,
       puzzle_json=puzzle_json,
-      solution_json=solution_json
+      solution_json=solution_json,
     )
-    db.session.add(puzzle)
-    db.session.commit()
+  if not puzzle.url:
+    puzzle.url = upload_image(img_bytes, display_hash)
+
+  db.session.add(puzzle)
+  db.session.commit()
+
   return display_hash
 
 def get_puzzle(display_hash):
