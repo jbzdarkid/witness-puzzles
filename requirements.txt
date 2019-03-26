@@ -1,3 +1,4 @@
+boto3==1.9.120
 chromedriver-py==2.46
 Click==7.0
 Flask-SQLAlchemy==2.3.2

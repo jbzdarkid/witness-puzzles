@@ -29,11 +29,12 @@ def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
 
-  img = validate_and_capture_image(puzzle_json, solution_json)
-  if img is None:
+  img_bytes = validate_and_capture_image(puzzle_json, solution_json)
+  if img_bytes is None:
     return 400
 
-  display_hash = create_puzzle(puzzle_json, solution_json, img)
+  display_hash = create_puzzle(puzzle_json, solution_json, img_bytes)
+
   return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
 
@@ -73,6 +74,8 @@ application.add_url_rule('/dashboard.html', 'dashboard.html', dashboard)
 if __name__ == '__main__':
   extra_files = []
   for root, dirs, files in os.walk('.'):
+    if 'images' in root:
+      continue
     for file in files:
       extra_files.append(root + os.sep + file)
   application.run(extra_files=extra_files)
