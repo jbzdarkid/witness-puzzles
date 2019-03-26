@@ -1,7 +1,6 @@
 import os
 import zipfile
 import sys
-import jsmin
 import hashlib
 
 version = sys.argv[1]
@@ -25,13 +24,14 @@ def write(filename):
   name, ext = filename.rsplit('.')
   if ext == 'js':
     contents = open(filename).read()
-    contents = jsmin.jsmin(contents)
+    # TODO: Minify?
     hash = hashlib.sha256()
     hash.update(contents.encode('utf-8'))
-    new_filename = f'{name}-h{hash.hexdigest()[:8]}.{ext}'
-    z.writestr(new_filename, contents)
+    # TODO: figure out how to get redirects / etc working
+    # new_filename = f'{name}-{hash.hexdigest()[:8]}.{ext}'
+    z.writestr(filename, contents)
 
-    hashfile += f"host_redirect('{filename}', '/{new_filename}')\n"
+    # hashfile += f"host_redirect('/{new_filename}', '/{filename}')\n"
   else:
     z.write(filename)
 
