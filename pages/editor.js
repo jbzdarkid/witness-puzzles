@@ -409,14 +409,9 @@ function _showSolution(num) {
 
 var currentPublishRequest
 function publishPuzzle() {
-  if (document.getElementById('solveMode').checked === true) {
-    var serialied = puzzle.serialize()
-  } else {
-
-  }
-
   var request = new XMLHttpRequest()
   request.onreadystatechange = function() {
+    // Don't continue if the request was cancelled or another request was started in the meantime.
     if (this !== currentPublishRequest) return
     if (this.readyState != XMLHttpRequest.DONE) return
 
