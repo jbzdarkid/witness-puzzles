@@ -1,6 +1,7 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
   <head>
-    <meta property="og:title" content="Witness Puzzle {{ display_hash }}"/>
+    <meta property="og:title" content="{{ title }}"/>
+    <meta property="og:description" content="Witness Puzzle {{ display_hash }}"/>
     <meta property="og:type" content="website"/>
     <meta property="og:site_name" content="Witness Puzzles"/>
     <meta property="og:image" content="{{ image }}"/>
@@ -13,11 +14,13 @@
     <script type="text/javascript" src="/engine/svg.js"></script>
     <script type="text/javascript" src="/engine/display2.js"></script>
     <script type="text/javascript" src="/engine/trace2.js"></script>
-    <title>Loading puzzle...</title>
+    <title>{{ title }}</title>
   </head>
   <body>
     <script>loadSettings()</script>
-    <div style="text-align: center"><label id="title" style="font-size: 72"></label></div>
+    <div style="text-align: center">
+      <label id="title" style="font-size: 72">Loading puzzle...</label>
+    </div>
     <div style="text-align: center">
       <svg id="puzzle"></svg>
     </div>

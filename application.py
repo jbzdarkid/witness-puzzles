@@ -50,7 +50,8 @@ def play(display_hash):
     puzzle=puzzle.puzzle_json,
     display_hash=display_hash,
     session_id=session_id,
-    image=f'/images/{display_hash[:2]}/{display_hash}.png'
+    title=puzzle.title,
+    image=puzzle.url
   )
 application.add_url_rule('/play/<display_hash>', 'play', play)
 

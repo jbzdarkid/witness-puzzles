@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from hashlib import sha256
 from sqlalchemy_utils import UUIDType
+from json import loads
 
 from application_utils import *
 
@@ -16,6 +17,7 @@ class Puzzle(db.Model):
   solution_json = db.Column(db.Text, nullable=False)
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   url = db.Column(db.Text)
+  title = db.Column(db.Text)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #, nullable=False
 
 def create_puzzle(puzzle_json, solution_json, img_bytes):
@@ -35,7 +37,8 @@ def create_puzzle(puzzle_json, solution_json, img_bytes):
     )
   if not puzzle.url:
     puzzle.url = upload_image(img_bytes, display_hash)
-
+  if not puzzle.title:
+    puzzle.title = loads(puzzle.puzzle_json)['name']
   db.session.add(puzzle)
   db.session.commit()
 
