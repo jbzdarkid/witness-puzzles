@@ -16,20 +16,9 @@ Editor
 Tracing
 -- Tracing down against walls and gap-2 is awkward
     The game is awful at this too.
+    I thought I fixed this?
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
     If it makes it easier, rm cursor when finishing
-
-Background validation
--- Replace XMLHttpRequest with Fetch?
--- Preview images for puzzles (meta:og tag) [WIP]
-    Need to host images in S3, not save them locally.
-    I already have a bucket called witnesspuzzles-images
-    https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html
-    https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPOST.html
-    should look up the differences between these two
-
-    I can also try this http://zabana.me/notes/upload-files-amazon-s3-flask.html
-    and then see what it does internally
 
 Server
 -- A whole bunch of UI for browsing puzzles
@@ -41,15 +30,16 @@ Server
     Consider changing UUIDType to just be a string -- it's pain to read.
 
 Low Prio
--- Fix generation colors / general improvements to random puzzles
 -- Favicon still needs improving
     RM the dot, it's invisible
     Figure out something better for the tri (star?)
--- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
+-- Animation for start-grow isn't playing for primary line
+-- ES6 modernization
+    JS supports 'format strings', via `foo ${bar}`
+    Replace XMLHttpRequest with Fetch
+-- Fix generation colors / general improvements to random puzzles
 -- Hide solution (puzzleData) from global scope
--- JS supports 'format strings', via `foo ${bar}`
-    Too modern? Should check avail on my target platforms, specifically mobile
-    It's ES6, which is also where objects live, so I'm pretty tied to it.
+    I think this is legacy from the old index.html, solve is no longer directly possible
 -- change all divs to auto-centering? It's all I seem to use them for rn
     Maybe have a class="centered"
 -- transform: scale(2) doesn't work on safari?
@@ -59,8 +49,9 @@ Low Prio
     use trace callback func
     maze can be 'click to reveal' like memory card game
     should play the music if I can
--- Animation for start-grow isn't playing for primary line
--- Some kind of release story
-    Either auto-upload on code push, or a script to make a zip file
-    Should also start minifying code eventually.
-
+-- Improvements to publish.py
+    Auto-release would be nice
+    Minifying code would be nice (but might require node.js)
+    Javascript versioning/hashing would be nice
+-- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
+    Don't perf optimize before I know I need to.
