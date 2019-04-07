@@ -22,7 +22,7 @@ function _solveLoop(puzzle, x, y, solutions) {
   if (solutions.length >= window.MAX_SOLUTIONS) return
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
-  if (cell.gap != 0) return
+  if (cell.gap === 1 || cell.gap === 2) return
 
   if (puzzle.symmetry == undefined) {
     if (cell.color !== 0) return // Collided with ourselves

@@ -9,7 +9,7 @@ import application_hashes
 host_redirect('/pages/editor.html', '/editor.html')
 host_redirect('/pages/editor.html', '/index.html') # TODO: Root should be some sort of puzzle browser, not the editor
 host_redirect('/pages/editor.html', '/') # TODO: Root should be some sort of puzzle browser, not the editor
-host_redirect('/pages/stest.html', '/test.html')
+host_redirect('/pages/test.html', '/test.html')
 host_redirect('/pages/validate.html', '/validate.html')
 host_statically('data')
 host_statically('engine')
