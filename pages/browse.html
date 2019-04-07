@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="/data/favicon.png">
+    <script type="text/javascript" src="/engine/utilities.js"></script>
+    <script type="text/javascript" src="browse.js"></script>
+    <title>List of puzzles?</title>
+  </head>
+  <body style="margin-left: 0px">
+    <div id="navbar" style="position: fixed; top: 0; height: 60px; width: 100%">
+      <div id="title" style="position: absolute; width: 100%; pointer-events: none">
+        <label style="font-size: 48">Witness Puzzles</label>
+      </div>
+
+      <div style="float: left; display: flex; height: 100%">
+        <script>loadSettings()</script>
+      </div>
+      <div id="navbar-content" style="margin-left: 8px; margin-right: 8px">
+        <div style="float: left; margin-left: 24px; display: flex; height: 100%">
+          <script>createLink("/editor.html", "Create a puzzle", style="margin: auto");</script> <!-- TODO: -->
+        </div>
+        <div style="float: right; display: flex; height: 100%">
+          <label class="link" href="https://github.com/jbzdarkid/witness-puzzles" style="margin: auto">Source code</a>
+        </div>
+      </div>
+    </div>
+    <div id="navbar-padding" style="margin-top: 60px"></div>
+
+    <div style="display: flex" id="puzzleTable"></div>
+
+    <div style="height: 1500px;"> <!-- This is just to show off scrolling -->
+  </body>
+</html>

@@ -309,7 +309,7 @@ function _drag(svg, params) {
         rect.setAttribute('y', i*4)
         rect.setAttribute('x', j*4)
       }
-      rect.setAttribute('fill', 'white')
+      rect.setAttribute('fill', window.PAGE_BACKGROUND)
     }
   }
 }

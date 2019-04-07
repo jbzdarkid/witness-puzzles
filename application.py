@@ -7,14 +7,16 @@ from application_utils import *
 import application_hashes
 
 host_redirect('/pages/editor.html', '/editor.html')
-host_redirect('/pages/editor.html', '/index.html') # TODO: Root should be some sort of puzzle browser, not the editor
-host_redirect('/pages/editor.html', '/') # TODO: Root should be some sort of puzzle browser, not the editor
+host_redirect('/pages/browse.html', '/index.html')
+host_redirect('/pages/browse.html', '/')
 host_redirect('/pages/test.html', '/test.html')
 host_redirect('/pages/validate.html', '/validate.html')
 host_statically('data')
 host_statically('engine')
 host_statically('images')
 host_statically('sourcemaps')
+host_statically('pages/browse.html')
+host_statically('pages/browse.js')
 host_statically('pages/editor.html')
 host_statically('pages/editor.js')
 host_statically('pages/test.html', protected=True)

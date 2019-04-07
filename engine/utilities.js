@@ -179,7 +179,7 @@ function showSettings() {
 // @Cleanup: Settings should live in one variable in localStorage, it makes it easier to save them / persist them across clears
 function loadSettings() {
   var parentDiv = document.createElement('div')
-  document.body.appendChild(parentDiv)
+  document.currentScript.parentElement.appendChild(parentDiv)
   parentDiv.style.position = 'absolute'
   parentDiv.style.float = 'left'
   parentDiv.style.border = '2px solid ' + window.BORDER
@@ -268,4 +268,10 @@ function loadSettings() {
   volume.onchange = function() {
     localStorage.volume = this.value
   }
+}
+
+function createLink() {
+  document.currentScript.parentElement.appendChild(parentDiv)
+
+
 }
