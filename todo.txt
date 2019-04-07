@@ -18,7 +18,6 @@ Editor
 Tracing
 -- Tracing down against walls and gap-2 is awkward
     The game is awful at this too.
-    I thought I fixed this?
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
     If it makes it easier, rm cursor when finishing
 
