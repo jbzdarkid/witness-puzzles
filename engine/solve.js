@@ -16,10 +16,13 @@ function solve(puzzle) {
   return solutions
 }
 
+// @Performance: This is the most central loop in this code.
+// Any performance efforts should be focused here.
 function _solveLoop(puzzle, x, y, solutions) {
   if (solutions.length >= window.MAX_SOLUTIONS) return
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
+  if (cell.gap != 0) return
 
   if (puzzle.symmetry == undefined) {
     if (cell.color !== 0) return // Collided with ourselves
@@ -46,8 +49,6 @@ function _solveLoop(puzzle, x, y, solutions) {
       solutions.push(Puzzle.deserialize(puzzle.serialize()))
     }
   }
-  // @Performance: @Sanity: Don't allow the line to go through gaps.
-  // @Performance: Before trying the above, figure out why 5x5 with 2x gap over start point is 20s.
 
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
   // Extend path left and right

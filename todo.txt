@@ -12,6 +12,9 @@ Editor
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.
+-- Import isn't clearing the negation state (and probably other 'load' functions, too)
+-- Just lower the max puzzle size. 8x8 max? 10 just seems... humongous.
+-- Once a solution is published, it appears to be clearing lines from the published solution (so arrows have odd behavior)
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward
@@ -55,3 +58,4 @@ Low Prio
     Javascript versioning/hashing would be nice
 -- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
     Don't perf optimize before I know I need to.
+-- Getting a timeout on BD5CD4CF with (RRRR UUUU) -- good place to look at perf
