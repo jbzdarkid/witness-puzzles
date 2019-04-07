@@ -8,7 +8,6 @@ High Prio
 Editor
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
--- Better UI for "draggable edge"
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.

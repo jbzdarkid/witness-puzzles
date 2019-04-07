@@ -375,6 +375,23 @@ window.onload = function() {
 
   for (var resize of document.getElementsByClassName('resize')) {
     resize.onmousedown = function(event) {_dragStart(event, this)}
+    if (resize.id === 'resize-left' || resize.id === 'resize-right') {
+      var svg = drawSymbol({'type': 'drag', 'rot':1, 'width':6, 'height':22})
+      svg.style.width = '6px'
+      svg.style.height = '22px'
+      resize.appendChild(svg)
+
+      resize.style.display = 'flex'
+      svg.style.margin = 'auto'
+    } else if (resize.id === 'resize-top' || resize.id === 'resize-bottom') {
+      var svg = drawSymbol({'type': 'drag', 'rot':0, 'width':22, 'height':6})
+      svg.style.width = '22px'
+      svg.style.height = '6px'
+      resize.appendChild(svg)
+
+      resize.style.display = 'flex'
+      svg.style.margin = 'auto'
+    }
   }
 }
 

@@ -20,6 +20,7 @@ function drawSymbolWithSvg(svg, params) {
   else if (params.type === 'crayon') _crayon(svg, params)
   else if (params.type === 'start') _start(svg, params)
   else if (params.type === 'end') _end(svg, params)
+  else if (params.type === 'drag') _drag(svg, params)
   else console.error('Unknown symbol type in params: ' + JSON.stringify(params))
 }
 
@@ -290,4 +291,25 @@ function _gap(svg, params) {
   rect2.setAttribute('transform', rotate(90 * params.rot))
   rect2.setAttribute('x', centerX - 9)
   rect2.setAttribute('y', centerY - 12)
+}
+
+function _drag(svg, params) {
+  if (!params.rot) params.rot = 0
+
+  for (var i=0; i<6; i++) {
+    for (var j=0; j<2; j++) {
+      var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      svg.appendChild(rect)
+      rect.setAttribute('width', 2)
+      rect.setAttribute('height', 2)
+      if (params.rot === 0) {
+        rect.setAttribute('x', i*4)
+        rect.setAttribute('y', j*4)
+      } else {
+        rect.setAttribute('y', i*4)
+        rect.setAttribute('x', j*4)
+      }
+      rect.setAttribute('fill', 'white')
+    }
+  }
 }
