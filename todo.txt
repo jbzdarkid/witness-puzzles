@@ -25,7 +25,6 @@ Tracing
 
 Server
 -- A whole bunch of UI for browsing puzzles
--- Save puzzle title separately for meta:title?
 -- Start versioning JS? That way caching works and doesn't shoot me in the foot.
 -- Signin?
 -- Telemetry dashboard
@@ -37,6 +36,8 @@ Low Prio
     RM the dot, it's invisible
     Figure out something better for the tri (star?)
 -- Animation for start-grow isn't playing for primary line
+-- Improvements to publish.py
+    Javascript versioning/hashing would be nice
 -- ES6 modernization
     JS supports 'format strings', via `foo ${bar}`
     Replace XMLHttpRequest with Fetch
@@ -52,10 +53,4 @@ Low Prio
     use trace callback func
     maze can be 'click to reveal' like memory card game
     should play the music if I can
--- Improvements to publish.py
-    Auto-release would be nice
-    Minifying code would be nice (but might require node.js)
-    Javascript versioning/hashing would be nice
--- Consider moving (0, 0) to something large like (1000, 1000) to improve wraparound perf
-    Don't perf optimize before I know I need to.
 -- Getting a timeout on BD5CD4CF with (RRRR UUUU) -- good place to look at perf
