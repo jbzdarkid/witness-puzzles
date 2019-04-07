@@ -22,25 +22,27 @@ def write(filename):
       write(filename + '/' + f)
     return
 
-  name, ext = filename.rsplit('.')
+  name, ext = filename.rsplit('.', 1)
+  sourcemap = 'sourcemaps/' + filename.rsplit('/', 1)[-1] + '.map'
+
   if ext == 'js':
     contents = subprocess.run([
       'java', '-jar', 'closure-compiler-v20190325.jar',
       '--js', filename,
-      '--create_source_map', f'sourcemaps/{filename}.map',
+      '--create_source_map', sourcemap,
       '--source_map_format', 'V3'
     ], capture_output=True).stdout
-    contents += f'\n//# sourceMappingURL=/sourcemaps/{filename}.map'.encode('utf-8')
-    z.write(f'sourcemaps/{filename}.map')
+    contents += f'\n//# sourceMappingURL=/{sourcemap}'.encode('utf-8')
+    z.write(sourcemap)
     z.write(filename, f'sourcemaps/{filename}')
 
     hash = hashlib.sha256()
     hash.update(contents)
     # TODO: figure out how to get redirects / etc working
-    # new_filename = f'{name}-{hash.hexdigest()[:8]}.{ext}'
+    # hashed_filename = f'{name}-{hash.hexdigest()[:8]}.{ext}'
     z.writestr(filename, contents)
 
-    # hashfile += f"host_redirect('/{new_filename}', '/{filename}')\n"
+    # hashfile += f"host_redirect('/{hashed_filename}', '/{filename}')\n"
   else:
     z.write(filename)
 
