@@ -277,6 +277,8 @@ function createLink(href, title, style='', parent=document.currentScript.parentE
     window.location = href
   }
   link.innerText = title
-  link.style = 'cursor: pointer; text-decoration: none; ' + style
-  return link
+  link.style = style
+  link.style.cursor = 'pointer'
+  link.style.textDecoration = 'none'
+  link.style.color = window.TEXT_COLOR
 }

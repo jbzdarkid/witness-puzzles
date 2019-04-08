@@ -1,16 +1,11 @@
 @font-face { src: url('Constantia.ttf'); }
-label, button, select, option, input {
+label, button, select, option, input, a {
   font-family: Constantia;
   font-variant: small-caps;
   font-weight: bold;
   font-size: 28px;
 }
-.link {
-  cursor: pointer
-}
-a {
-  text-decoration: none;
-}
+a { text-decoration: none }
 table { margin: auto; }
 .resize { position: absolute; }
 input.checkbox {

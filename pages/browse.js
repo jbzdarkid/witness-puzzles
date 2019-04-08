@@ -26,9 +26,6 @@ window.onload = function() {
 
     cell.appendChild(document.createElement('br'))
 
-    var label = document.createElement('label')
-    cell.appendChild(label)
-    label.innerText = puzzle.title
-    label.style.cursor = 'pointer'
+    window.createLink(puzzle.url, puzzle.title, style='', parent=cell)
   }
 }
