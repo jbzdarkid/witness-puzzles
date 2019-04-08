@@ -270,8 +270,13 @@ function loadSettings() {
   }
 }
 
-function createLink() {
-  document.currentScript.parentElement.appendChild(parentDiv)
-
-
+function createLink(href, title, style='', parent=document.currentScript.parentElement) {
+  var link = document.createElement('a')
+  parent.appendChild(link)
+  link.onclick = function() {
+    window.location = href
+  }
+  link.innerText = title
+  link.style = 'cursor: pointer; text-decoration: none; ' + style
+  return link
 }

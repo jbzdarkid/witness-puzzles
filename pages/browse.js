@@ -5,12 +5,6 @@ var puzzles = [
 ]
 
 window.onload = function() {
-  for (var link of document.getElementsByClassName('link')) {
-    link.onclick = function() {
-      window.location = this.getAttribute('href')
-    }
-  }
-
   var navbar = document.getElementById('navbar')
   navbar.style.borderBottom = '2px solid ' + window.BORDER
   navbar.style.background = window.PAGE_BACKGROUND

@@ -5,7 +5,13 @@ label, button, select, option, input {
   font-weight: bold;
   font-size: 28px;
 }
-table { margin:auto; }
+.link {
+  cursor: pointer
+}
+a {
+  text-decoration: none;
+}
+table { margin: auto; }
 .resize { position: absolute; }
 input.checkbox {
   transform: scale(2) translate(0px, -3px);
