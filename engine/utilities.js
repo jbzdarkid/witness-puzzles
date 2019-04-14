@@ -196,7 +196,6 @@ function loadSettings() {
   var parentDiv = document.createElement('div')
   document.currentScript.parentElement.appendChild(parentDiv)
   parentDiv.style.position = 'absolute'
-  parentDiv.style.float = 'left'
   parentDiv.style.border = '2px solid ' + window.BORDER
   parentDiv.style.background = window.PAGE_BACKGROUND
 
@@ -238,7 +237,7 @@ function loadSettings() {
 
   var themeLabel = document.createElement('label')
   settings.appendChild(themeLabel)
-  themeLabel.for = 'theme'
+  themeLabel.htmlFor = 'theme'
   themeLabel.innerText = ' Dark theme'
 
   settings.appendChild(document.createElement('br'))
@@ -247,7 +246,7 @@ function loadSettings() {
   // Sensitivity
   var sensLabel = document.createElement('label')
   settings.appendChild(sensLabel)
-  sensLabel.for = 'sens'
+  sensLabel.htmlFor = 'sens'
   sensLabel.innerText = 'Mouse Speed 2D'
 
   if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
@@ -267,7 +266,7 @@ function loadSettings() {
   // Volume
   var volumeLabel = document.createElement('label')
   settings.appendChild(volumeLabel)
-  volumeLabel.for = 'volume'
+  volumeLabel.htmlFor = 'volume'
   volumeLabel.innerText = 'Volume'
 
   if (localStorage.volume == undefined) localStorage.volume = 0.12
@@ -286,7 +285,7 @@ function loadSettings() {
 }
 
 function createLink(href, title, style='', parent=document.currentScript.parentElement) {
-  var link = document.createElement('a')
+  var link = document.createElement('label')
   parent.appendChild(link)
   link.onclick = function() {
     window.location = href
