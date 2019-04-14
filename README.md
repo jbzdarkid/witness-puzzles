@@ -2,10 +2,15 @@ JavaScript implementation of the puzzles in The Witness
 
 # Table of Contents
 1. [Overview / Explanation of files](#Overview)
-  1. [utilities.js](#utilitiesjs)
-  1. [puzzle.js](#puzzlejs)
-1. [Contributing]
-1. [Legal]
+    1. [utilities.js](#utilitiesjs)
+    1. [puzzle.js](#puzzlejs)
+    1. [display2.js](#display2js)
+    1. [svg.js](#svgjs)
+    1. [validate.js](#validatejs)
+    1. [trace2.js](#trace2js)
+    1. [solve.js](#solvejs)
+1. [Contributing](#Contributing)
+1. [Legal](#Legal)
 
 # Overview
 This repo handles puzzle creation, solution, and displaying. The core engine is made of 8 files:
@@ -62,3 +67,21 @@ If the direction is none, we stop the loop at this time.
 ## solve.js
 This is a very straightforwards brute-force solver. We do depth-first recursive backtracking to try every single solution to the puzzle. We compute if the current cell is valid (not already colored), and then recurse in all 4 directions.
 The solution path is saved on the grid to allow for easy re-tracing.
+
+# Contributing
+I'm not accepting contributions at this time, but I am accepting feedback via the main site. Thank you for your interest!
+
+# Legal
+This sofware is licensed under [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
+
+Copyright 2017 jbzdarkid
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
