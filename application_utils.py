@@ -103,21 +103,21 @@ def validate_and_capture_image(puzzle_json, solution_json):
     driver.execute_script(f'validate_and_capture_image({to_json_string(puzzle_json)}, {to_json_string(solution_json)})')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
     if result.get_attribute('valid') == 'true':
+      # [22:] to remove the "data:image/png;base64," prefix
+      data = BytesIO(b64decode(result.get_attribute('screenshot')[22:]))
       valid = True
-      bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
-      img_bytes = BytesIO(b64decode(bytes))
     else:
-      feedback = 'Validation failed.\n'
+      data = 'Validation failed.\n'
   except TimeoutException:
-    feedback = 'Validation timed out.\n'
+    data = 'Validation timed out.\n'
 
   if not valid:
-    feedback += 'Console output:\n'
+    data += 'Console output:\n'
     for line in driver.get_log('browser'):
-      feedback += f'{line["level"]}: {line["message"]}\n'
+      data += f'{line["level"]}: {line["message"]}\n'
 
   driver.quit()
-  return valid, img_bytes or feedback
+  return valid, data
 
 def upload_image(img_bytes, display_hash):
   name = display_hash[:2] + '/' + display_hash + '.png'
