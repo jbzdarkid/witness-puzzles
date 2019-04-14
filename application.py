@@ -32,15 +32,15 @@ host_statically('pages/test.html', protected=True)
 host_statically('pages/test.js', protected=True)
 host_statically('pages/validate.html')
 
-@application.errorhandler(404)
 def page_not_found(error):
   return render_template('404_generic.html'), 404
+application.register_error_handler(404, page_not_found)
 
-@application.errorhandler(Exception)
-def handle_error(exc):
+def handle_exception(exc):
   message = f'Caught a {type(exc).__name__}: {format_exc()}'
   add_feedback(request.environ['HTTP_REFERER'], message)
   return '', 500
+application.register_error_handler(Exception, handle_exception)
 
 # Publishing puzzles
 def publish():
