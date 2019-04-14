@@ -2,6 +2,7 @@ In vague order of importance.
 
 High Prio
 -- Title doesn't allow apostrophes? Or parenthesis?
+-- Fire bug report when background validation fails.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
 

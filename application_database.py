@@ -52,6 +52,7 @@ def get_puzzles(sort_type, order, offset=0, limit=100):
   if sort_type == 'date':
     column = Puzzle.date
   else:
+    print('Recieved request for puzzles with unknown sort_type: "' + sort_type + '"')
     return []
 
   if order == 'desc':
@@ -111,8 +112,6 @@ class Feedback(db.Model):
 
 def add_feedback(page, data):
   feedback = Feedback(page=page, data=data)
-  print(data)
-  print(page)
   db.session.add(feedback)
   db.session.commit()
 
@@ -138,3 +137,30 @@ def get_all_rows():
 
 # @Cleanup: Only debug mode?
 db.create_all()
+
+if application.debug:
+  db.session.add(Puzzle(
+    display_hash = '2D99CC28',
+    puzzle_json = '{}',
+    solution_json = '{}',
+    date = datetime(2001, 1, 1),
+    url = '/images/2D/2D99CC28.png',
+    title = 'foo',
+  ))
+  db.session.add(Puzzle(
+    display_hash = 'EB678CA3',
+    puzzle_json = '{}',
+    solution_json = '{}',
+    date = datetime(2002, 2, 2),
+    url = '/images/EB/EB678CA3.png',
+    title = 'bar',
+  ))
+  db.session.add(Puzzle(
+    display_hash = 'F23DF4F6',
+    puzzle_json = '{}',
+    solution_json = '{}',
+    date = datetime(2003, 3, 3),
+    url = '/images/F2/F23DF4F6.png',
+    title = 'baz',
+  ))
+  db.session.commit()
