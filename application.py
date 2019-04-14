@@ -7,15 +7,22 @@ from application_database import *
 from application_utils import *
 import application_hashes
 
-host_redirect('/pages/editor.html', '/editor.html')
-host_redirect('/pages/browse.html', '/index.html')
+# Home page
 host_redirect('/pages/browse.html', '/')
+host_redirect('/pages/browse.html', '/index.html')
+
+# Short name redirects
+host_redirect('/pages/browse.html', '/browse.html')
+host_redirect('/pages/editor.html', '/editor.html')
 host_redirect('/pages/test.html', '/test.html')
 host_redirect('/pages/validate.html', '/validate.html')
+
+# Large blocks of data
 host_statically('data')
 host_statically('engine')
-host_statically('images')
 host_statically('sourcemaps')
+
+# Actual page sources
 host_statically('pages/browse.html')
 host_statically('pages/browse.js')
 host_statically('pages/editor.html')
