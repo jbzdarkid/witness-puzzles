@@ -88,7 +88,8 @@ application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
 def telemetry():
   session_id = UUID(request.form['session_id'])
   type = request.form['type']
-  add_event(session_id, type)
+  date = request.form['date']
+  add_event(session_id, type, date)
 
   return '', 200
 application.add_url_rule('/telemetry', 'telemetry', telemetry, methods=['POST'])

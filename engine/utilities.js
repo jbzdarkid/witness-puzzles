@@ -65,6 +65,7 @@ function TELEMETRY(type) {
   request.send(
     'session_id=' + window.session_id +
     '&display_hash=' + window.display_hash +
+    '&time=' + (new Date()).getTime() +
     '&type=' + type
   )
 }

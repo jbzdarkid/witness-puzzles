@@ -78,15 +78,21 @@ class Event(db.Model):
   type = db.Column(db.String(32), nullable=False)
 
 def start_session(session_id):
-  event = Event(session_id=session_id, type='session_create')
-  db.session.add(event)
+  db.session.add(Event(
+    session_id = session_id,
+    type = 'session_create',
+    date = datetime.utcnow(),
+  ))
   db.session.commit()
 
-def add_event(session_id, type):
+def add_event(session_id, type, date):
   if not is_active(session_id):
     return
-  event = Event(session_id=session_id, type=type)
-  db.session.add(event)
+  db.session.add(Event(
+    session_id = session_id,
+    type = type,
+    date = date,
+  ))
   db.session.commit()
 
 def is_active(session_id):
