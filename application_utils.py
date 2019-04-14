@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, send_from_directory, url_for
 import os
+from json import dumps as to_json_string
 from chromedriver_py import binary_path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -89,29 +90,34 @@ def host_statically(path, serverpath=None, protected=False):
 def host_redirect(path, serverpath):
   application.add_url_rule(serverpath, f'redirect_{serverpath}', lambda:redirect(path))
 
-# @Cleanup: This feels like a *very* sloppy way to fire feedback from here.
-# Can I change the ownership rules so that this function lives somewhere better?
-def validate_and_capture_image(puzzle_json, solution_json, add_feedback):
+def validate_and_capture_image(puzzle_json, solution_json):
   options = webdriver.ChromeOptions()
   options.add_argument('headless')
   driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
   driver.get(f'{request.url_root}validate.html')
 
-  img_bytes = None
+  valid = False
   try:
     # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
     driver.execute_script(f'validate_and_capture_image({to_json_string(puzzle_json)}, {to_json_string(solution_json)})')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
     if result.get_attribute('valid') == 'true':
+      valid = True
       bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
       img_bytes = BytesIO(b64decode(bytes))
     else:
-      add_feedback('Validation failed, console output: ' + driver.get_log('browser'))
+      feedback = 'Validation failed.\n'
   except TimeoutException:
-    add_feedback('Validation timed out, console output: ' + driver.get_log('browser'))
+    feedback = 'Validation timed out.\n'
+
+  if not valid:
+    feedback += 'Console output:\n'
+    for line in driver.get_log('browser'):
+      feedback += f'{line["level"]}: {line["message"]}\n'
+
   driver.quit()
-  return img_bytes
+  return valid, img_bytes or feedback
 
 def upload_image(img_bytes, display_hash):
   name = display_hash[:2] + '/' + display_hash + '.png'

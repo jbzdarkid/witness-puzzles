@@ -17,7 +17,9 @@
         var puzzle = Puzzle.deserialize(puzzle_json)
         validate(solution)
         result.valid = solution.valid
-      } catch {}
+      } catch (exc) {
+        console.error(exc.stack)
+      }
       if (result.valid === false) {
         document.body.append(result)
         return

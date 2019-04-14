@@ -47,13 +47,13 @@ def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
 
-  img_bytes = validate_and_capture_image(puzzle_json, solution_json, add_feedback)
-  if not img_bytes:
+  valid, data = validate_and_capture_image(puzzle_json, solution_json)
+  if not valid:
+    add_feedback(data)
     return '', 400
-
-  display_hash = create_puzzle(puzzle_json, solution_json, img_bytes)
-
-  return display_hash, 200
+  else:
+    display_hash = create_puzzle(puzzle_json, solution_json, data)
+    return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
 
 # Playing published puzzles
