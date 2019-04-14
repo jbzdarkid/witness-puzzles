@@ -1,7 +1,6 @@
 In vague order of importance.
 
 High Prio
--- Fire bug report when background validation fails.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
 
