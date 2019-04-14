@@ -4,7 +4,7 @@ window.onload = function() {
   navbar.style.background = window.PAGE_BACKGROUND
 
   var request = new XMLHttpRequest()
-  request.open('GET', '/browse?sort_type=date', false)
+  request.open('GET', '/browse?sort_type=date?order=desc', false)
   request.send()
   var puzzles = JSON.parse(request.response)
   var table = document.getElementById('puzzleTable')

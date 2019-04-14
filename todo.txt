@@ -15,6 +15,7 @@ Browse
     Date (default)
     Solve count?
     Popularity?
+    By mechanic?
 -- Consider preloading puzzles in the python layer.
 
 Editor
@@ -42,6 +43,8 @@ Server
     Consider changing UUIDType to just be a string -- it's pain to read.
 
 Low Prio
+-- Add all puzzles in the game to the system. Maybe a separate category / identifier?
+    Add tests & speedrunner solver
 -- Have feedback link to session ID?
 -- Add 'happy' to feedback?
 -- Favicon still needs improving
