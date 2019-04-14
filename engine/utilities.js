@@ -167,6 +167,21 @@ function setLogLevel(level) {
 }
 setLogLevel('info')
 
+function loadFeedback() {
+  var feedbackButton = document.createElement('label')
+  document.currentScript.parentElement.appendChild(feedbackButton)
+  feedbackButton.innerText = 'Send feedback'
+  feedbackButton.style.margin = 'auto'
+  feedbackButton.style.cursor = 'pointer'
+  feedbackButton.style.fontSize = '28'
+  feedbackButton.onclick = function () {
+    var feedback = prompt('Provide feedback:')
+    if (feedback) {
+      window.FEEDBACK(feedback)
+    }
+  }
+}
+
 function hideSettings() {
   localStorage.settings = 'hidden'
   var settings = document.getElementById('settings')
