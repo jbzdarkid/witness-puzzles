@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
+from flask import request
 from hashlib import sha256
 from sqlalchemy_utils import UUIDType
 from json import loads
@@ -110,9 +111,9 @@ class Feedback(db.Model):
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   data = db.Column(db.Text, nullable=False)
 
-def add_feedback(page, data):
-  feedback = Feedback(page=page, data=data)
-  db.session.add(feedback)
+def add_feedback(data):
+  print(f'Recieved feedback: {data}')
+  db.session.add(Feedback(page=request.environ['HTTP_REFERER'], data=data))
   db.session.commit()
 
 # @Cleanup: This is the model, it should not be processing data. Leave that for the view / controller.

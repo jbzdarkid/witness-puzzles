@@ -38,7 +38,7 @@ application.register_error_handler(404, page_not_found)
 
 def handle_exception(exc):
   message = f'Caught a {type(exc).__name__}: {format_exc()}'
-  add_feedback(request.environ['HTTP_REFERER'], message)
+  add_feedback(message)
   return '', 500
 application.register_error_handler(Exception, handle_exception)
 
@@ -91,10 +91,7 @@ application.add_url_rule('/browse', 'browse', browse)
 
 # Users providing feedback or internal bug reports
 def feedback():
-  page = request.environ['HTTP_REFERER']
-  data = request.form['data']
-  add_feedback(page, data)
-
+  add_feedback(request.form['data'])
   return '', 200
 application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
 
