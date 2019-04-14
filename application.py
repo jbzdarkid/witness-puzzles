@@ -47,9 +47,9 @@ def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
 
-  img_bytes = validate_and_capture_image(puzzle_json, solution_json)
-  if img_bytes is None:
-    return 400
+  img_bytes = validate_and_capture_image(puzzle_json, solution_json, add_feedback)
+  if not img_bytes:
+    return '', 400
 
   display_hash = create_puzzle(puzzle_json, solution_json, img_bytes)
 

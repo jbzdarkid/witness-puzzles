@@ -89,7 +89,9 @@ def host_statically(path, serverpath=None, protected=False):
 def host_redirect(path, serverpath):
   application.add_url_rule(serverpath, f'redirect_{serverpath}', lambda:redirect(path))
 
-def validate_and_capture_image(puzzle_json, solution_json):
+# @Cleanup: This feels like a *very* sloppy way to fire feedback from here.
+# Can I change the ownership rules so that this function lives somewhere better?
+def validate_and_capture_image(puzzle_json, solution_json, add_feedback):
   options = webdriver.ChromeOptions()
   options.add_argument('headless')
   driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
@@ -104,8 +106,10 @@ def validate_and_capture_image(puzzle_json, solution_json):
     if result.get_attribute('valid') == 'true':
       bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
       img_bytes = BytesIO(b64decode(bytes))
+    else:
+      add_feedback('Validation failed, console output: ' + driver.get_log('browser'))
   except TimeoutException:
-    pass
+    add_feedback('Validation timed out, console output: ' + driver.get_log('browser'))
   driver.quit()
   return img_bytes
 
