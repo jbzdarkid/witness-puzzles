@@ -101,7 +101,7 @@ def validate_and_capture_image(puzzle_json, solution_json, add_feedback):
   try:
     # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-    driver.execute_script(f'validate_and_capture_image(\'{puzzle_json}\', \'{solution_json}\')')
+    driver.execute_script(f'validate_and_capture_image({to_json_string(puzzle_json)}, {to_json_string(solution_json)})')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
     if result.get_attribute('valid') == 'true':
       bytes = result.get_attribute('screenshot')[22:] # Remove the "data:image/png;base64," prefix
