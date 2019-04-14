@@ -1,19 +1,16 @@
-var puzzles = [
-  {'display_hash':'2D99CC28', 'url':'/images/2D/2D99CC28.png', 'title':'foo'},
-  {'display_hash':'EB678CA3', 'url':'/images/EB/EB678CA3.png', 'title':'bar'},
-  {'display_hash':'F23DF4F6', 'url':'/images/F2/F23DF4F6.png', 'title':'baz'}
-]
-
 window.onload = function() {
   var navbar = document.getElementById('navbar')
   navbar.style.borderBottom = '2px solid ' + window.BORDER
   navbar.style.background = window.PAGE_BACKGROUND
 
-
-  // puzzles = SomeApiCall(); // Or, I can load this in the python layer? Both?
+  var request = new XMLHttpRequest()
+  request.open('GET', '/browse?sort_type=date', false)
+  request.send()
+  var puzzles = JSON.parse(request.response)
   var table = document.getElementById('puzzleTable')
 
-  for (var puzzle of puzzles) {
+  for (var i=0; i<puzzles.length; i++) {
+    var puzzle = puzzles[i]
     var cell = document.createElement('a')
     table.appendChild(cell)
     cell.href = '/play/' + puzzle.display_hash

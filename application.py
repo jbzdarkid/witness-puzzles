@@ -1,5 +1,6 @@
 from flask import redirect, render_template, request
 import os
+from json import dumps as to_json_string
 from uuid import UUID, uuid4
 
 from application_database import *
@@ -57,6 +58,31 @@ def play(display_hash):
     image=puzzle.url
   )
 application.add_url_rule('/play/<display_hash>', 'play', play)
+
+# Getting puzzles from the DB to show on the browse page
+def browse():
+  sort_type = request.args.get('sort_type', 'date') # date
+  order = request.args.get('order', '') # asc, desc
+  puzzles = get_puzzles(sort_type, order)
+
+  output = []
+  for puzzle in puzzles:
+    output.append({
+      'display_hash': puzzle.display_hash,
+      'url': puzzle.url,
+      'title': puzzle.title,
+    })
+  return to_json_string(output)
+application.add_url_rule('/browse', 'browse', browse)
+
+# Users providing feedback or internal bug reports
+def feedback():
+  page = request.environ['HTTP_REFERER']
+  data = request.form['data']
+  add_feedback(page, data)
+
+  return '', 200
+application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
 
 # Firing telemetry
 def telemetry():

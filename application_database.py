@@ -47,6 +47,18 @@ def create_puzzle(puzzle_json, solution_json, img_bytes):
 def get_puzzle(display_hash):
   return db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).first()
 
+def get_puzzles(sort_type, order, offset=0, limit=100):
+  # @Feature: query.offset() and query.limit()
+  if sort_type == 'date':
+    column = Puzzle.date
+  else:
+    return []
+
+  if order == 'desc':
+    column = column.desc()
+
+  return db.session.query(Puzzle).order_by(column)
+
 def delete_puzzle(display_hash):
   db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).delete()
 
@@ -85,6 +97,20 @@ def is_active(session_id):
     return False
   return True
 
+class Feedback(db.Model):
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  page = db.Column(db.Text, nullable=False)
+  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+  data = db.Column(db.Text, nullable=False)
+
+def add_feedback(page, data):
+  feedback = Feedback(page=page, data=data)
+  print(data)
+  print(page)
+  db.session.add(feedback)
+  db.session.commit()
+
+# @Cleanup: This is the model, it should not be processing data. Leave that for the view / controller.
 def get_all_rows():
   data = 'Puzzles:\n'
   puzzles = db.session.query(Puzzle).all()
@@ -104,4 +130,5 @@ def get_all_rows():
 
   return data
 
+# @Cleanup: Only debug mode?
 db.create_all()

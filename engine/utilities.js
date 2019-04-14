@@ -30,6 +30,13 @@ var urlParams
        urlParams[decode(match[1])] = decode(match[2])
 })()
 
+// https://stackoverflow.com/q/12571650
+window_onerror = window.onerror
+window.onerror = function(message, url, line) {
+  FEEDBACK(message + ' on line ' + line)
+  window_onerror(message, url, line)
+}
+
 var tracks = {
   'start': new Audio('/data/panel_start_tracing.ogg'),
   'success': new Audio('/data/panel_success.ogg'),
@@ -53,13 +60,20 @@ function TELEMETRY(type) {
   }
 
   var request = new XMLHttpRequest()
-  request.open('POST', '/telemetry', true)
+  request.open('POST', '/telemetry', true) // Fire and forget
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   request.send(
     'session_id=' + window.session_id +
     '&display_hash=' + window.display_hash +
     '&type=' + type
   )
+}
+
+function FEEDBACK(message) {
+  var request = new XMLHttpRequest()
+  request.open('POST', '/feedback', true) // Fire and forget
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.send('data=' + message)
 }
 
 window.LINE_PRIMARY = '#8FF'
