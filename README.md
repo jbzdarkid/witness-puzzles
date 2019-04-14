@@ -7,6 +7,7 @@ JavaScript implementation of the puzzles in The Witness
     1. [display2.js](#display2js)
     1. [svg.js](#svgjs)
     1. [validate.js](#validatejs)
+    1. [polyominos.js](#polyominosjs)
     1. [trace2.js](#trace2js)
     1. [solve.js](#solvejs)
 1. [Contributing](#Contributing)
@@ -41,8 +42,8 @@ As well as validity, validate() will also determine the list of invalid elements
 Aside from marking validity, invalid elements, and negations, the original puzzle object is unmodified, and subsequent calls to validate() will return the same result, invalid elements, and negations.
 
 ## polyominos.js
-This file is separate from validate.js mostly for legacy reasons. It contains all logic and lists of polyominos.
-Polyominos in this engine are represented by bitmask -- each one fits into 16 bits. As with everywhere in this system, X represents horizontal, and Y represents vertical, so bit 7 would be X=1, Y=3 (X*4 + Y = mask). You could also say "1 across, 3 down".
+This file is an extension of logic from validate.js. It contains all logic and lists of polyominos.
+Polyominos in this engine are represented by bitmask -- each one fits into 16 bits. As with everywhere in this system, X represents horizontal, and Y represents vertical, so bit 7 would be `X=1`, `Y=3` (`X*4 + Y = mask`). You could also say "1 across, 3 down".
 The key bit of logic here is polyominoFromPolyshape, which converts one of these masks (very small, easy to manage) into a list of grid locations. Recall that the grid is double-sized, so this also does the job of filling out the spaces between the polyomino's "squares".
 
 ## trace2.js
