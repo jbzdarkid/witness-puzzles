@@ -1,4 +1,4 @@
-from flask import redirect, render_template, request
+from flask import render_template, request
 import os
 from json import dumps as to_json_string
 from uuid import UUID, uuid4
