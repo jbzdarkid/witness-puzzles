@@ -1,21 +1,21 @@
 In vague order of importance.
 
 High Prio
+-- Editor does not link to other pages (!)
+-- Mobile UI is terrible / non-functional.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
 
 Browse
--- Dynamic list generation
 -- "Jump to top" button
--- Sorting
 -- Batched list generation
--- Infinite scrolling?
--- Add more sorting types.
-    Date (default)
+    Infinite scrolling?
+    Consider preloading puzzles in the python layer.
+-- Sorting
+    Date (default, currently implemented)
     Solve count?
-    Popularity?
+    Popularity? (-> rating system)
     By mechanic?
--- Consider preloading puzzles in the python layer.
 
 Editor
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
@@ -40,6 +40,15 @@ Server
 -- Telemetry dashboard
     Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
     Consider changing UUIDType to just be a string -- it's pain to read.
+
+Tutorial
+-- Need to explain complex mechanics
+    Double negation
+    Polys outside the grid
+    ? oversized polys
+-- Sadly, need to explain normal mechanics
+    The best option here is to cherry-pick puzzles from the base game.
+    That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
 
 Low Prio
 -- Add all puzzles in the game to the system. Maybe a separate category / identifier?
