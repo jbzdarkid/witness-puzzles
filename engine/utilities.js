@@ -7,6 +7,7 @@ if (!String.prototype.includes) {
 }
 Event.prototype.movementX = Event.prototype.movementX || Event.prototype.mozMovementX
 Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMovementY
+Event.prototype.requestPointerLock = Event.prototype.requestPointerLock || Event.prototype.mozRequestPointerLock
 /*** End cross-compatibility ***/
 
 // https://stackoverflow.com/q/11409895
@@ -284,7 +285,9 @@ function loadSettings() {
   volumeLabel.htmlFor = 'volume'
   volumeLabel.innerText = 'Volume'
 
-  if (localStorage.volume == undefined) localStorage.volume = 0.12
+  if (localStorage.volume == undefined || localStorage.volume < 0 || localStorage.volume > 0.24) {
+    localStorage.volume = 0.12
+  }
   var volume = document.createElement('input')
   settings.appendChild(volume)
   volume.style.width = '100%'
