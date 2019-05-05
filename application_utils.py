@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, send_from_directory, url_for
+from flask import Flask, request, redirect, send_from_directory
 import os
 from json import dumps as to_json_string
 from chromedriver_py import binary_path
@@ -124,7 +124,7 @@ def upload_image(img_bytes, display_hash):
   if application.debug:
     try:
       os.mkdir(f'images/{display_hash[:2]}')
-    except:
+    except FileExistsError:
       pass
     Image.open(img_bytes).save(f'images/{name}')
     return f'images/{name}'

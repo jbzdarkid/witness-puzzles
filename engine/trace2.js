@@ -242,21 +242,21 @@ class PathSegment {
     } else if (data.x > data.bbox.middle.x && this.dir !== 'left') {
       points2.x1 = data.bbox.middle.x
       points2.x2 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
-      if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
+      if (isEnd && data.pos.x%2 === 0 && data.pos.y%2 === 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
     } else if (data.y < data.bbox.middle.y && this.dir !== 'bottom') {
       points2.y1 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
       points2.y2 = data.bbox.middle.y
-      if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
+      if (isEnd && data.pos.x%2 === 1 && data.pos.y%2 === 0) {
         points2.x1 += 17
         points2.x2 -= 17
       }
     } else if (data.y > data.bbox.middle.y && this.dir !== 'top') {
       points2.y1 = data.bbox.middle.y
       points2.y2 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
-      if (isEnd && data.pos.x%2 == 1 && data.pos.y%2 == 0) {
+      if (isEnd && data.pos.x%2 === 1 && data.pos.y%2 === 0) {
         points2.x1 += 17
         points2.x2 -= 17
       }
