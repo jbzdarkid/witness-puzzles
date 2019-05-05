@@ -90,11 +90,7 @@ def start_session(session_id):
 def add_event(session_id, type, date):
   if not is_active(session_id):
     return
-  db.session.add(Event(
-    session_id = session_id,
-    type = type,
-    date = date,
-  ))
+  db.session.add(Event(session_id=session_id, type=type, date=date))
   db.session.commit()
 
 def is_active(session_id):

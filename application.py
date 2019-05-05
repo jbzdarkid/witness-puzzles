@@ -1,6 +1,7 @@
 from flask import redirect, render_template, request
 import os
 from json import dumps as to_json_string
+from datetime import datetime
 from uuid import UUID, uuid4
 from traceback import format_exc
 
@@ -99,7 +100,9 @@ application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
 def telemetry():
   session_id = UUID(request.form['session_id'])
   type = request.form['type']
-  date = request.form['date']
+  date = None
+  if 'date' in request.form:
+    date = datetime.fromtimestamp(int(request.form['date']) / 1000)
   add_event(session_id, type, date)
 
   return '', 200
