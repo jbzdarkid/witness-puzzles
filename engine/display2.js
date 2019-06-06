@@ -205,7 +205,7 @@ function _drawStartAndEnd(puzzle, svg) {
           start.onclick = function(event) {
             trace(event, puzzle, {'x':x, 'y':y}, start, symStart)
           }
-        })(puzzle, x, y, start, symStart)
+        }(puzzle, x, y, start, symStart))
 
         // The startpoint must have a primary line through it
         if (cell.color !== 1 && cell.color !== 2) continue
