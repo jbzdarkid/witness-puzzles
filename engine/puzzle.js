@@ -404,6 +404,8 @@ class Puzzle {
       for (var x=0; x<this.grid.length; x++) {
         var cell = this.getCell(x, y)
         if (cell == undefined) output += '?'
+        else if (cell.start === true) output += 'S'
+        else if (cell.end != null) output += 'E'
         else if (cell.type === 'line') output += cell.color
         else output += '#'
       }
