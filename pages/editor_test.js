@@ -73,6 +73,7 @@ window.onload = function() {
     var testName = testNames[i]
 
     try {
+      setup()
       tests[testName]()
       console.info('Test', testName, 'succeeded')
     } catch (e) {
@@ -83,6 +84,12 @@ window.onload = function() {
     }
   }
   return numFailures
+}
+
+function setup() {
+  createEmptyPuzzle()
+  ASSERT_ALL_START(0, 8)
+  ASSERT_ALL_END(8, 0, 'right')
 }
 
 var tests = {
@@ -135,66 +142,42 @@ var tests = {
     setStyle('Pillar (Two Lines)')
     ASSERT_SIZE(4, 7)
   },
-  'change-style-4-4': function() {
-    createEmptyPuzzle()
-    ASSERT_ALL_START(0, 8)
-    ASSERT_ALL_END(8, 0, 'right')
-
+  'default': function() {
     setStyle('Default')
     ASSERT_SIZE(9, 9)
     ASSERT_ALL_START(0, 8)
     ASSERT_ALL_END(8, 0, 'right')
-
+  },
+  'horizontal': function() {
     setStyle('Horizontal Symmetry')
     ASSERT_SIZE(9, 9)
     ASSERT_ALL_START(0, 8, 8, 8)
     ASSERT_ALL_END(0, 0, 'left', 8, 0, 'right')
-
-    puzzle.grid[8][8].start = undefined
-    puzzle.grid[0][0].end = undefined
-
+  },
+  'vertical': function() {
     setStyle('Vertical Symmetry')
     ASSERT_SIZE(9, 9)
     ASSERT_ALL_START(0, 8, 0, 0)
     ASSERT_ALL_END(8, 0, 'right', 8, 8, 'right')
-
+  },
+  'rotational': function() {
+    debugger;
     setStyle('Rotational Symmetry')
     ASSERT_SIZE(9, 9)
-
-    setStyle('Pillar')
-    ASSERT_SIZE(8, 9)
-
-    setStyle('Pillar (H Symmetry)')
-    ASSERT_SIZE(8, 9)
-    setStyle('Pillar (V Symmetry)')
-    ASSERT_SIZE(8, 9)
-    setStyle('Pillar (R Symmetry)')
-    ASSERT_SIZE(8, 9)
-    setStyle('Pillar (Two Lines)')
-    ASSERT_SIZE(8, 9)
-  },
-  'change-style-5-5': function() {
-    window.puzzle = new Puzzle(5, 5)
-    setStyle('Default')
-    ASSERT_SIZE(11, 11)
-
-    setStyle('Horizontal Symmetry')
-    ASSERT_SIZE(11, 11)
-    setStyle('Vertical Symmetry')
-    ASSERT_SIZE(11, 11)
-    setStyle('Rotational Symmetry')
-    ASSERT_SIZE(11, 11)
-
-    setStyle('Pillar')
-    ASSERT_SIZE(10, 11)
-
-    setStyle('Pillar (H Symmetry)')
-    ASSERT_SIZE(12, 11)
-    setStyle('Pillar (V Symmetry)')
-    ASSERT_SIZE(12, 11)
-    setStyle('Pillar (R Symmetry)')
-    ASSERT_SIZE(12, 11)
-    setStyle('Pillar (Two Lines)')
-    ASSERT_SIZE(12, 11)
+    ASSERT_ALL_START(0, 8, 0, 0)
+    ASSERT_ALL_END(8, 0, 'right', 8, 8, 'right')
   }
+  /*
+    setStyle('Pillar')
+    ASSERT_SIZE(8, 9)
+
+    setStyle('Pillar (H Symmetry)')
+    ASSERT_SIZE(8, 9)
+    setStyle('Pillar (V Symmetry)')
+    ASSERT_SIZE(8, 9)
+    setStyle('Pillar (R Symmetry)')
+    ASSERT_SIZE(8, 9)
+    setStyle('Pillar (Two Lines)')
+    ASSERT_SIZE(8, 9)
+  }*/
 }
