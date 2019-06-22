@@ -5,6 +5,7 @@ High Prio
 -- Mobile UI is terrible / non-functional.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
+-- Error reporting doesn't work on minified code: 'u' on Line 1 is not useful.
 
 Browse
 -- "Jump to top" button
