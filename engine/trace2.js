@@ -5,7 +5,7 @@ class BoundingBox {
     this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
     this.sym = sym
     if (window.BBOX_DEBUG === true) {
-      this.debug = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      this.debug = createElement('rect')
       data.svg.appendChild(this.debug)
       this.debug.setAttribute('opacity', 0.5)
       this.debug.setAttribute('style', 'pointer-events: none;')
@@ -87,10 +87,10 @@ class BoundingBox {
 
 class PathSegment {
   constructor(dir) {
-    this.poly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-    this.circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-    this.poly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-    this.pillarCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    this.poly1 = createElement('polygon')
+    this.circ = createElement('circle')
+    this.poly2 = createElement('polygon')
+    this.pillarCirc = createElement('circle')
     this.dir = dir
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
@@ -133,10 +133,10 @@ class PathSegment {
       this.poly2.setAttribute('class', 'line-2 ' + data.svg.id)
       this.pillarCirc.setAttribute('class', 'line-2 ' + data.svg.id)
 
-      this.symPoly1 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      this.symCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      this.symPoly2 = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      this.symPillarCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      this.symPoly1 = createElement('polygon')
+      this.symCirc = createElement('circle')
+      this.symPoly2 = createElement('polygon')
+      this.symPillarCirc = createElement('circle')
       data.svg.insertBefore(this.symCirc, data.cursor)
       data.svg.insertBefore(this.symPoly2, data.cursor)
       data.svg.insertBefore(this.symPillarCirc, data.cursor)
@@ -400,7 +400,7 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
-          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}')
+          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20000 alternate-reverse error}')
         }
       }
 
@@ -425,7 +425,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   var x = parseFloat(start.getAttribute('cx'))
   var y = parseFloat(start.getAttribute('cy'))
 
-  var cursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+  var cursor = createElement('circle')
   svg.appendChild(cursor)
   cursor.setAttribute('r', 12)
   cursor.setAttribute('fill', window.CURSOR)
@@ -481,7 +481,7 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
       data.bbox.raw.y2 + dy,
       sym=true)
 
-    data.symcursor = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    data.symcursor = createElement('circle')
     svg.appendChild(data.symcursor)
     data.symcursor.setAttribute('class', 'line-3 ' + data.svg.id)
     data.symcursor.setAttribute('cx', symStart.getAttribute('cx'))

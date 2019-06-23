@@ -16,7 +16,7 @@ function draw(puzzle, target='puzzle') {
   svg.style.width = pixelWidth
   svg.style.height = pixelHeight
 
-  var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('stroke-width', 10)
   rect.setAttribute('stroke', window.BORDER)
@@ -43,7 +43,7 @@ function _drawGrid(puzzle, svg) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.gap === 2) continue
-      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
       line.setAttribute('stroke', window.FOREGROUND)
@@ -78,7 +78,7 @@ function _drawGrid(puzzle, svg) {
           var bottomCell = puzzle.getCell(x, y + 1)
           if (bottomCell != undefined && bottomCell.gap !== 2) surroundingLines++
           if (surroundingLines === 1) {
-            var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+            var rect = createElement('rect')
             rect.setAttribute('x', x*41 + 40)
             rect.setAttribute('y', y*41 + 40)
             rect.setAttribute('width', 24)
@@ -96,7 +96,7 @@ function _drawGrid(puzzle, svg) {
     for (var y=0; y<puzzle.grid[0].length; y+=2) {
       var cell = puzzle.getCell(x-1, y)
       if (cell == undefined || cell.gap === 2) continue
-      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
       line.setAttribute('stroke', window.FOREGROUND)

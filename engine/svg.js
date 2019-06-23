@@ -1,9 +1,9 @@
-function _createElement(type) {
+function createElement(type) {
   return document.createElementNS('http://www.w3.org/2000/svg', type)
 }
 
 function drawSymbol(params) {
-  var svg = _createElement('svg')
+  var svg = createElement('svg')
   svg.setAttribute('viewBox', '0 0 ' + params.width + ' ' + params.height)
   if (!params.x) params.x = 0
   if (!params.y) params.y = 0
@@ -25,11 +25,14 @@ function drawSymbolWithSvg(svg, params) {
   else if (params.type === 'start') _start(svg, params)
   else if (params.type === 'end') _end(svg, params)
   else if (params.type === 'drag') _drag(svg, params)
-  else console.error('Unknown symbol type in params: ' + JSON.stringify(params))
+//  else if (params.type === undefined) { /* Do nothing */ }
+//  else {
+//    console.error('Unknown symbol type in params: ' + JSON.stringify(params))
+//  }
 }
 
 function _square(svg, params) {
-  var rect = _createElement('rect')
+  var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 28)
   rect.setAttribute('height', 28)
@@ -42,7 +45,7 @@ function _square(svg, params) {
 }
 
 function _star(svg, params) {
-  var poly = _createElement('polygon')
+  var poly = createElement('polygon')
   svg.appendChild(poly)
   var points = [
     '-10.5 -10.5', // Top left
@@ -87,7 +90,7 @@ function _poly(svg, params) {
 
   for (var pos of polyomino) {
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
-    var rect = _createElement('rect')
+    var rect = createElement('rect')
     svg.appendChild(rect)
     var transform = 'translate(' + (centerX + pos.x*offset) + ', ' + (centerY + pos.y*offset) + ')'
     if (isRotated(params.polyshape)) {
@@ -121,7 +124,7 @@ function _ylop(svg, params) {
 
   for (var pos of polyomino) {
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
-    var poly = _createElement('polygon')
+    var poly = createElement('polygon')
     svg.appendChild(poly)
     var points = [
       '0 0', '12 0', '12 12', '0 12', '0 3',
@@ -140,7 +143,7 @@ function _ylop(svg, params) {
 }
 
 function _nega(svg, params) {
-  var poly = _createElement('polygon')
+  var poly = createElement('polygon')
   svg.appendChild(poly)
   var points = [
     '2.9 -2',
@@ -178,7 +181,7 @@ function _triangle(svg, params) {
   for (var y=0; y<high; y++) {
     var wide = distribution[y]
     for (var x=0; x<wide; x++) {
-      var poly = _createElement('polygon')
+      var poly = createElement('polygon')
       svg.appendChild(poly)
       var Xcoord = params.x + params.width/2 + 11*(2*x - wide + 1)
       var Ycoord = params.y + params.height/2 + 10*(2*y - high + 1)
@@ -195,7 +198,7 @@ function _crayon(svg, params) {
   var width = params.width
   var border = 2
 
-  var poly = _createElement('polygon')
+  var poly = createElement('polygon')
   svg.appendChild(poly)
   var points = [
     '0 ' + (height/2),
@@ -212,14 +215,14 @@ function _crayon(svg, params) {
   ]
   poly.setAttribute('points', points.join(', '))
   poly.setAttribute('fill', params.color)
-  var txt = _createElement('text')
+  var txt = createElement('text')
   svg.appendChild(txt)
   txt.setAttribute('transform', 'translate(' + (height/2 + 10) + ', ' + (height/2 + 6) + ')')
   txt.innerHTML = params.text
 }
 
 function _start(svg, params) {
-  var circ = _createElement('circle')
+  var circ = createElement('circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 24)
   circ.setAttribute('fill', window.FOREGROUND)
@@ -228,7 +231,7 @@ function _start(svg, params) {
 }
 
 function _end(svg, params) {
-  var rect = _createElement('rect')
+  var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 24)
   rect.setAttribute('height', 24)
@@ -236,7 +239,7 @@ function _end(svg, params) {
   rect.setAttribute('x', params.height/2 - 12 + params.x)
   rect.setAttribute('y', params.width/2 - 12 + params.y)
 
-  var circ = _createElement('circle')
+  var circ = createElement('circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 12)
   circ.setAttribute('fill', window.FOREGROUND)
@@ -261,7 +264,7 @@ function _end(svg, params) {
 }
 
 function _dot(svg, params) {
-  var hex = _createElement('polygon')
+  var hex = createElement('polygon')
   svg.appendChild(hex)
   hex.setAttribute('points', '5.2 9, 10.4 0, 5.2 -9, -5.2 -9, -10.4 0, -5.2 9')
   hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
@@ -278,7 +281,7 @@ function _gap(svg, params) {
   var centerY = params.width/2 + params.y
   var rotate = function(degrees) {return 'rotate(' + degrees + ', ' + centerX + ', ' + centerY + ')'}
 
-  var rect = _createElement('rect')
+  var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 58)
   rect.setAttribute('height', 24)
@@ -287,7 +290,7 @@ function _gap(svg, params) {
   rect.setAttribute('x', centerX - 29)
   rect.setAttribute('y', centerY - 12)
 
-  var rect2 = _createElement('rect')
+  var rect2 = createElement('rect')
   svg.appendChild(rect2)
   rect2.setAttribute('width', 18)
   rect2.setAttribute('height', 24)
@@ -302,7 +305,7 @@ function _drag(svg, params) {
 
   for (var i=0; i<6; i++) {
     for (var j=0; j<2; j++) {
-      var rect = _createElement('rect')
+      var rect = createElement('rect')
       svg.appendChild(rect)
       rect.setAttribute('width', 2)
       rect.setAttribute('height', 2)

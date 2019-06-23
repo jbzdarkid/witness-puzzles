@@ -11,7 +11,7 @@ window.onload = function() {
     var cell = table.rows[table.rows.length - 1].insertCell()
     cell.style.textAlign = 'center'
     cell.width = '33%'
-    var puzzleSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    var puzzleSvg = createElement('svg')
     puzzleSvg.id = testName
     cell.appendChild(puzzleSvg)
 

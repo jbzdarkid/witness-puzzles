@@ -109,7 +109,7 @@ function _drawPuzzle() {
     var width = (x%2 === 0 ? 24 : 58)
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var height = (y%2 === 0 ? 24 : 58)
-      var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      var rect = createElement('rect')
       puzzleElement.appendChild(rect)
       rect.setAttribute('x', xPos)
       rect.setAttribute('y', yPos)
