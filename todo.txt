@@ -1,19 +1,12 @@
 In vague order of importance.
 
 High Prio
--- Editor does not link to other pages (!)
+-- Header is not functioning well on low-resolution. Try to use flexbox properly.
 -- Mobile UI is terrible / non-functional.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
 -- Error reporting doesn't work on minified code: 'u' on Line 1 is not useful.
--- Changing title breaks publish in an odd way
--- changing type to R symmetry pillar still is buggy
--- R symmetry pillars are just broken, resizing them does amazingly dumb stuff
--- Empty title should probably "work", maybe have an explicit 'title box'?
--- Clicking 'solve manually' should probably clear auto-solution
--- Can't resume from cursor in 'solve manually'
 -- Can't resume from cursor in play mode
--- Add marker to puzzle if it was ever 'solved automatically'?
 
 Browse
 -- "Jump to top" button
@@ -27,6 +20,15 @@ Browse
     By mechanic?
 
 Editor
+-- R symmetry pillars are just broken, resizing them does amazingly dumb stuff
+-- Empty title should probably "work", maybe have an explicit 'title box'?
+-- Clicking 'solve manually' should probably clear auto-solution
+-- Can't resume from cursor in 'solve manually'
+-- Add marker to puzzle if it was ever 'solved automatically'?
+-- Changing title breaks publish in an odd way
+-- Changing type to R symmetry pillar still is buggy. See tests.
+-- Editor does not link to other pages (!)
+  Probably just re-use the header everywhere.
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- Crayons could be colored in, maybe.
@@ -37,11 +39,16 @@ Editor
 -- Just lower the max puzzle size. 8x8 max? 10 just seems... humongous.
 -- (!)Once a solution is published, it appears to be clearing lines from the published solution (so arrows have odd behavior)
 
+Validation
+-- Perf optimziation: Triangles do not require regions, so I can skip regionCheck.
+
 Tracing
 -- Tracing down against walls and gap-2 is awkward
     The game is awful at this too.
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
     If it makes it easier, rm cursor when finishing
+-- When the cell to my right is non-empty, midpoint pulls work properly.
+-- When the cell to my right is empty, midpoint pulls feel like walls (!)
 
 Server
 -- Start versioning JS? That way caching works and doesn't shoot me in the foot.
@@ -51,6 +58,7 @@ Server
     Consider changing UUIDType to just be a string -- it's pain to read.
 
 Tutorial
+-- Make a list of all the differences from the game (each needs a tutorial or a setting)
 -- Need to explain complex mechanics
     Double negation
     Polys outside the grid

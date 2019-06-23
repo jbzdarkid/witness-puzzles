@@ -19,6 +19,7 @@ function solve(puzzle) {
 // @Performance: This is the most central loop in this code.
 // Any performance efforts should be focused here.
 function _solveLoop(puzzle, x, y, solutions) {
+  // Stop trying to solve once we reach our goal
   if (solutions.length >= window.MAX_SOLUTIONS) return
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
