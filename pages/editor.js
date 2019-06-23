@@ -300,7 +300,7 @@ function setStyle(style) {
       else width -= width % 2
     } else {
       // Width must be a multiple of 4 (rounding up)
-      width += 4 - width % 4
+      width += 3 - (width + 3) % 4
     }
   } else if (puzzle.pillar === false) {
     // Pillar to non-pillar is always an increase

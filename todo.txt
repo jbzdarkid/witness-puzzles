@@ -6,6 +6,14 @@ High Prio
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
 -- Error reporting doesn't work on minified code: 'u' on Line 1 is not useful.
+-- Changing title breaks publish in an odd way
+-- changing type to R symmetry pillar still is buggy
+-- R symmetry pillars are just broken, resizing them does amazingly dumb stuff
+-- Empty title should probably "work", maybe have an explicit 'title box'?
+-- Clicking 'solve manually' should probably clear auto-solution
+-- Can't resume from cursor in 'solve manually'
+-- Can't resume from cursor in play mode
+-- Add marker to puzzle if it was ever 'solved automatically'?
 
 Browse
 -- "Jump to top" button
