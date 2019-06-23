@@ -154,7 +154,7 @@ function _reloadPuzzle() {
   var publish = document.getElementById('publish')
   publish.disabled = true
   publish.innerText = 'Publish'
-  publish.onclick = function() {publishPuzzle()}
+  publish.onclick = publishPuzzle
   currentPublishRequest = undefined
 
   var puzzleStyle = document.getElementById('puzzleStyle')
@@ -428,6 +428,8 @@ function _showSolution(solutions, num) {
 
 var currentPublishRequest
 function publishPuzzle() {
+  // Clone the puzzle to ensure it's not modified while the request is being constructed
+  var puzzleCopy = puzzle.clone()
   var request = new XMLHttpRequest()
   request.onreadystatechange = function() {
     // Don't continue if the request was cancelled or another request was started in the meantime.
@@ -448,9 +450,11 @@ function publishPuzzle() {
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
   request.open('POST', '/publish', true)
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  var requestBody = 'solution=' + puzzle.serialize()
-  puzzle.clearLines()
-  requestBody += '&puzzle=' + puzzle.serialize()
+
+  var requestBody = 'solution=' + puzzleCopy.serialize()
+  puzzleCopy.clearLines()
+  requestBody += '&puzzle=' + puzzleCopy.serialize()
+
   request.send(requestBody)
   currentPublishRequest = request
 

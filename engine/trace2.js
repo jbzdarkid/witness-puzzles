@@ -400,7 +400,7 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
-          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20000 alternate-reverse error}')
+          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}')
         }
       }
 
