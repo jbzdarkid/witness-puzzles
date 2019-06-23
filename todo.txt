@@ -35,8 +35,6 @@ Editor
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.
--- (!)Import isn't clearing the negation state (and probably other 'load' functions, too)
-    Neither is 'draw on the grid again'. I think redraw() has a bug.
 -- Just lower the max puzzle size. 8x8 max? 10 just seems... humongous.
 -- (!)Once a solution is published, it appears to be clearing lines from the published solution (so arrows have odd behavior)
 

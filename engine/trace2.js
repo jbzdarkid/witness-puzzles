@@ -421,6 +421,16 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
   }
 }
 
+function clearAnimations() {
+  if (data.animations == undefined) return
+  for (var i=0; i<data.animations.cssRules.length; i++) {
+    var rule = data.animations.cssRules[i]
+    if (rule.selectorText != undefined && rule.selectorText.startsWith('.' + data.svg.id)) {
+      data.animations.deleteRule(i--)
+    }
+  }
+}
+
 function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   var x = parseFloat(start.getAttribute('cx'))
   var y = parseFloat(start.getAttribute('cy'))
@@ -459,12 +469,8 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
       break
     }
   }
-  for (var i = 0; i < data.animations.cssRules.length; i++) {
-    var rule = data.animations.cssRules[i]
-    if (rule.selectorText != undefined && rule.selectorText.startsWith('.' + svg.id)) {
-      data.animations.deleteRule(i--)
-    }
-  }
+
+  clearAnimations()
 
   if (puzzle.symmetry == undefined) {
     data.puzzle.updateCell(data.pos.x, data.pos.y, {'type':'line', 'color':1})

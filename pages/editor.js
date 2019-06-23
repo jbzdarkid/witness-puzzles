@@ -83,13 +83,14 @@ function deletePuzzle() {
   _readPuzzle()
 }
 
-// Clear lines from the puzzle, redraw it, and add editor hooks.
+// Clear animations from the puzzle, redraw it, and add editor hooks.
 // Note that this function DOES NOT reload the style, check for the automatic solver,
 // reset the publish button, and other such 'meta' cleanup steps.
 // You should only call this function if you're *sure* you're not in manual solve mode.
 // If there's a chance that you are in manual solve mode, call _reloadPuzzle().
 function _drawPuzzle() {
   window.draw(puzzle)
+  window.clearAnimations() // TODO: Should this be in window.draw?
 
   // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
   var puzzleElement = document.getElementById('puzzle')
