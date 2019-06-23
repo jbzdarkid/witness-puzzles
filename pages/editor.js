@@ -2,8 +2,6 @@ window.DISABLE_CACHE = true
 var activeParams = {'id':'', 'color':'black', 'polyshape':71}
 var puzzle
 var dragging
-// @Cleanup: Can this be non-global?
-var solutions = []
 
 function _readPuzzleList() {
   try {
@@ -36,7 +34,9 @@ function _readPuzzle() {
     var serialized = window.localStorage.getItem(puzzleList[0])
     // @Cleanup: This logic is duplicated from createSerializedPuzzle
     puzzle = Puzzle.deserialize(serialized)
-    _drawPuzzle()
+    // @Cleanup: This makes me sad.
+    // _drawPuzzle()
+    setSolveMode(false) // Draws the puzzle and disables manual solve mode
   } catch (e) {
     console.log(e)
     console.log('Could not parse puzzle, deleting')
@@ -330,8 +330,8 @@ function setSolveMode(value) {
 
 function solvePuzzle() {
   setSolveMode(false)
-  solutions = window.solve(puzzle)
-  _showSolution(0)
+  var solutions = window.solve(puzzle)
+  _showSolution(solutions, 0)
 }
 //** End of user interaction points
 
@@ -395,7 +395,7 @@ window.onload = function() {
   }
 }
 
-function _showSolution(num) {
+function _showSolution(solutions, num) {
   if (num < 0) num = solutions.length - 1
   if (num >= solutions.length) num = 0
 
@@ -412,8 +412,8 @@ function _showSolution(num) {
     solutionCount.innerText = (num + 1) + ' of ' + solutions.length
     previousSolution.disabled = false
     nextSolution.disabled = false
-    previousSolution.onclick = function() {_showSolution(num - 1)}
-    nextSolution.onclick = function() {_showSolution(num + 1)}
+    previousSolution.onclick = function() {_showSolution(solutions, num - 1)}
+    nextSolution.onclick = function() {_showSolution(solutions, num + 1)}
   }
   if (solutions[num] != undefined) {
     solutions[num].name = puzzle.name

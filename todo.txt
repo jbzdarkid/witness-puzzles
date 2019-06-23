@@ -24,6 +24,7 @@ Editor
 -- Empty title should probably "work", maybe have an explicit 'title box'?
 -- Clicking 'solve manually' should probably clear auto-solution
 -- Can't resume from cursor in 'solve manually'
+    Can't repro...
 -- Add marker to puzzle if it was ever 'solved automatically'?
 -- Changing title breaks publish in an odd way
 -- Changing type to R symmetry pillar still is buggy. See tests.
