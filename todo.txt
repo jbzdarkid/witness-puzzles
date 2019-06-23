@@ -10,6 +10,18 @@ High Prio
 -- Can't resume from cursor in play mode
     Can't repro
 
+Three pages
+- Play
+XX  -> Edit ("Edit this puzzle") ~~
+  -> Browse ("Back to the puzzle list")
+- Edit
+  -> Play (Publish)
+  -> Browse ("View all puzzles")
+- Browse
+  -> Play (click on a puzzle)
+  -> Edit ("Create a puzzle")
+
+
 Browse
 -- "Jump to top" button
 -- Batched list generation

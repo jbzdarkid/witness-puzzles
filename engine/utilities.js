@@ -174,6 +174,8 @@ setLogLevel('info')
 
 function loadHeader() {
   var parent = document.currentScript.parentElement
+  parent.style.borderBottom = '2px solid ' + window.BORDER
+  parent.style.background = window.PAGE_BACKGROUND
 
   var titleDiv = document.createElement('div')
   parent.appendChild(titleDiv)
@@ -195,12 +197,14 @@ function loadHeader() {
   parent.appendChild(editorLink)
   editorLink.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
   editorLink.innerText = 'Create a puzzle'
+  editorLink.className = 'navbar-content'
   editorLink.onclick = function() {window.location = '/editor.html'}
 
   var feedbackButton = document.createElement('label')
   parent.appendChild(feedbackButton)
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
+  feedbackButton.className = 'navbar-content'
   feedbackButton.onclick = function () {
     var feedback = prompt('Provide feedback:')
     if (feedback) {
@@ -210,13 +214,15 @@ function loadHeader() {
 
   var separator = document.createElement('label')
   parent.appendChild(separator)
-  separator.style = 'float: right; line-height: 60px; padding: 0 6 0 6' // left-right padding only
+  separator.style = 'float: right; line-height: 60px; padding-left: 6px; padding-right: 6px'
+  separator.className = 'navbar-content'
   separator.innerText = '|'
 
   var sourceLink = document.createElement('label')
   parent.appendChild(sourceLink)
   sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
   sourceLink.innerText = 'Source code'
+  sourceLink.className = 'navbar-content'
   sourceLink.onclick = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
 }
 
