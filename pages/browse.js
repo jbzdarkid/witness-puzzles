@@ -23,6 +23,6 @@ window.onload = function() {
 
     cell.appendChild(document.createElement('br'))
 
-    window.createLink(puzzle.url, puzzle.title, style='', parent=cell)
+    window.createLink(puzzle.url, puzzle.title, parent=cell)
   }
 }

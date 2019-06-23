@@ -8,27 +8,7 @@
   </head>
   <body style="margin-left: 0px">
     <div id="navbar" style="position: fixed; top: 0; height: 60px; width: 100%">
-      <div id="title" style="position: absolute; width: 100%; pointer-events: none">
-        <label style="font-size: 48">Witness Puzzles</label>
-      </div>
-
-      <div style="float: left; display: flex; height: 100%">
-        <script>loadSettings()</script>
-      </div>
-      <div id="navbar-content" style="margin-left: 8px; margin-right: 8px">
-        <div style="float: left; margin-left: 24px; display: flex; height: 100%">
-          <script>createLink('/editor.html', 'Create a puzzle', style='margin: auto')</script>
-        </div>
-        <div style="float: right; display: flex; height: 100%">
-          <script>
-            createLink('https://github.com/jbzdarkid/witness-puzzles', 'Source code', style='margin: auto')
-          </script>
-
-          <label style="margin: auto; padding: 6px">|</label>
-
-          <script>loadFeedback()</script>
-        </div>
-      </div>
+      <script>loadHeader()</script>
     </div>
     <div id="navbar-padding" style="margin-top: 60px"></div>
 

@@ -172,6 +172,69 @@ function setLogLevel(level) {
 }
 setLogLevel('info')
 
+function loadHeader() {
+  var parent = document.currentScript.parentElement
+
+  var titleDiv = document.createElement('div')
+  parent.appendChild(titleDiv)
+  titleDiv.id = 'title'
+  titleDiv.style = 'position: absolute; width: 100%; pointer-events: none'
+
+  var titleLabel = document.createElement('label')
+  titleDiv.appendChild(titleLabel)
+  titleLabel.style = 'font-size: 48'
+  titleLabel.innerText = 'Witness Puzzles'
+
+  var settingsDiv = document.createElement('div')
+  parent.appendChild(settingsDiv)
+  settingsDiv.style = 'float: left; height: 100%'
+  loadSettings(parent=settingsDiv)
+  var parent = document.currentScript.parentElement // blah
+
+  var editorLink = document.createElement('label')
+  parent.appendChild(editorLink)
+  editorLink.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
+  editorLink.innerText = 'Create a puzzle'
+  editorLink.onclick = function() {window.location = '/editor.html'}
+
+  var feedbackButton = document.createElement('label')
+  parent.appendChild(feedbackButton)
+  feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
+  feedbackButton.innerText = 'Send feedback'
+  feedbackButton.onclick = function () {
+    var feedback = prompt('Provide feedback:')
+    if (feedback) {
+      window.FEEDBACK(feedback)
+    }
+  }
+
+  var separator = document.createElement('label')
+  parent.appendChild(separator)
+  separator.style = 'float: right; line-height: 60px; padding: 0 6 0 6' // left-right padding only
+  separator.innerText = '|'
+
+  var sourceLink = document.createElement('label')
+  parent.appendChild(sourceLink)
+  sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
+  sourceLink.innerText = 'Source code'
+  sourceLink.onclick = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function loadFeedback() {
   var feedbackButton = document.createElement('label')
   document.currentScript.parentElement.appendChild(feedbackButton)
@@ -212,9 +275,9 @@ function showSettings() {
 }
 
 // @Cleanup: Settings should live in one variable in localStorage, it makes it easier to save them / persist them across clears
-function loadSettings() {
+function loadSettings(parent=document.currentScript.parentElement) {
   var parentDiv = document.createElement('div')
-  document.currentScript.parentElement.appendChild(parentDiv)
+  parent.appendChild(parentDiv)
   parentDiv.style.position = 'absolute'
   parentDiv.style.border = '2px solid ' + window.BORDER
   parentDiv.style.background = window.PAGE_BACKGROUND
@@ -306,7 +369,7 @@ function loadSettings() {
   }
 }
 
-function createLink(href, title, style='', parent=document.currentScript.parentElement) {
+function createLink(href, title, parent=document.currentScript.parentElement) {
   var link = document.createElement('label')
   parent.appendChild(link)
   link.onclick = function() {
@@ -315,6 +378,5 @@ function createLink(href, title, style='', parent=document.currentScript.parentE
   link.innerText = title
   link.style = style
   link.style.cursor = 'pointer'
-  link.style.textDecoration = 'none'
-  link.style.color = window.TEXT_COLOR
+  link.style.color = window.TEXT_COLOR // Not inherited, sadly
 }
