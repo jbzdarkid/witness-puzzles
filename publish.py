@@ -26,15 +26,16 @@ def write(filename):
   sourcemap = 'sourcemaps/' + filename.rsplit('/', 1)[-1] + '.map'
 
   if ext == 'js':
-    contents = subprocess.run([
-      'java', '-jar', 'closure-compiler-v20190325.jar',
-      '--js', filename,
-      '--create_source_map', sourcemap,
-      '--source_map_format', 'V3'
-    ], capture_output=True).stdout
-    contents += f'\n//# sourceMappingURL=/{sourcemap}'.encode('utf-8')
-    z.write(sourcemap)
-    z.write(filename, f'sourcemaps/{filename}')
+#    contents = subprocess.run([
+#      'java', '-jar', 'closure-compiler-v20190325.jar',
+#      '--js', filename,
+#      '--create_source_map', sourcemap,
+#      '--source_map_format', 'V3'
+#    ], capture_output=True).stdout
+#    contents += f'\n//# sourceMappingURL=/{sourcemap}'.encode('utf-8')
+#    z.write(sourcemap)
+#    z.write(filename, f'sourcemaps/{filename}')
+    contents = open(filename).read()
 
     hash = hashlib.sha256()
     hash.update(contents)
