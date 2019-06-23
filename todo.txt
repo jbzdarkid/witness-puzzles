@@ -47,8 +47,6 @@ Tracing
     The game is awful at this too.
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
     If it makes it easier, rm cursor when finishing
--- When the cell to my right is non-empty, midpoint pulls work properly.
--- When the cell to my right is empty, midpoint pulls feel like walls (!)
 
 Server
 -- Start versioning JS? That way caching works and doesn't shoot me in the foot.

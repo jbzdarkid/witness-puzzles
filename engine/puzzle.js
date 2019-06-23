@@ -63,14 +63,16 @@ class Puzzle {
     var puzzle = new Puzzle()
     puzzle.name = parsed.name
     puzzle.grid = parsed.grid
-    // @Legacy: Grid squares used to use 'false' to indicate emptiness. Now, we use:
-    // Cells default to undefined
+    // @Legacy: Grid squares used to use 'false' to indicate emptiness.
+    // @Legacy: Cells used to use undefined to indicate emptiness.
+    // Now, we use:
+    // Cells default to {}
     // Lines default to {'type':'line', 'color':0}
     for (var x=0; x<puzzle.grid.length; x++) {
       for (var y=0; y<puzzle.grid[x].length; y++) {
         var cell = puzzle.grid[x][y]
-        if (cell === false) {
-          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
+        if (cell === false || cell == undefined) {
+          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = {}
           else puzzle.grid[x][y] = {'type':'line', 'color':0}
         } else if (cell != undefined) {
           if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
@@ -139,7 +141,7 @@ class Puzzle {
     for (var x=0; x<width; x++) {
       this.grid[x] = []
       for (var y=0; y<height; y++) {
-        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = undefined
+        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = {}
         else this.grid[x][y] = {'type':'line', 'color':0}
       }
     }
