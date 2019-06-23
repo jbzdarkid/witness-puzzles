@@ -38,7 +38,7 @@ def write(filename):
     contents = open(filename).read()
 
     hash = hashlib.sha256()
-    hash.update(contents)
+    hash.update(contents.encode('utf-8'))
     # TODO: figure out how to get redirects / etc working
     # hashed_filename = f'{name}-{hash.hexdigest()[:8]}.{ext}'
     z.writestr(filename, contents)
