@@ -34,9 +34,8 @@ function _readPuzzle() {
     var serialized = window.localStorage.getItem(puzzleList[0])
     // @Cleanup: This logic is duplicated from createSerializedPuzzle
     puzzle = Puzzle.deserialize(serialized)
-    // @Cleanup: This makes me sad.
-    // _drawPuzzle()
-    setSolveMode(false) // Draws the puzzle and disables manual solve mode
+
+    _reloadPuzzle()
   } catch (e) {
     console.log(e)
     console.log('Could not parse puzzle, deleting')
@@ -44,50 +43,31 @@ function _readPuzzle() {
   }
 }
 
-// The global puzzle object has been modified, serialize it to localStorage.
-// Finally, we redraw the puzzle (in case modifications were made) unless the caller asks us not to.
-// We also any potential solution lines from the puzzle
-function _writePuzzle(redraw=true) {
-  console.log('Writing puzzle', puzzle)
-  puzzle.clearLines()
-
-  var puzzleList = _readPuzzleList()
-  // @Robustness: Some intelligence about showing day / month / etc depending on date age
-  puzzleList[0] = puzzle.name + ' on ' + (new Date()).toLocaleString()
-  window.localStorage.setItem(puzzleList[0], puzzle.serialize())
-  _writePuzzleList(puzzleList)
-
-  if (redraw) {
-    // @Hack: This doesn't feel like the right place...
-    setSolveMode(false)
-    // _drawPuzzle()
-  }
-}
-
-// Create a new puzzle. If none is provided, a default, empty puzzle is created.
-// Note that this is not idempotent; you can create as many new puzzles as you want.
-function _createPuzzle(newPuzzle) {
-  console.log('Creating puzzle', newPuzzle)
-  // Make way for the new puzzle
+// Write a new puzzle to the puzzle list.
+// We add a new empty puzzle to the list, modify the global puzzle,
+// and then call the "current puzzle out of date" function.
+function _writeNewPuzzle(newPuzzle) {
   var puzzleList = _readPuzzleList()
   puzzleList.unshift(undefined)
   _writePuzzleList(puzzleList)
 
   puzzle = newPuzzle
   _writePuzzle()
+  _reloadPuzzle()
 }
 
-// Create a new puzzle from serialized. Note that this may fail!
-function _createSerializedPuzzle(serialized) {
-  console.log('Creating puzzle from serialized', serialized)
-  try {
-    var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
-  } catch (e) {
-    console.error('Failed to load serialized puzzle', e)
-    return false
-  }
-  _createPuzzle(newPuzzle)
-  return true
+// The current puzzle (element 0 in the puzzle list) is out of date.
+// Clean it up, and reserialize it.
+function _writePuzzle() {
+  console.log('Writing puzzle', puzzle)
+  var puzzleToSave = puzzle.clone()
+  puzzleToSave.clearLines()
+
+  var puzzleList = _readPuzzleList()
+  // @Robustness: Some intelligence about showing day / month / etc depending on date age
+  puzzleList[0] = puzzleToSave.name + ' on ' + (new Date()).toLocaleString()
+  window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
+  _writePuzzleList(puzzleList)
 }
 
 // Delete the active puzzle then read the next one.
@@ -103,11 +83,53 @@ function deletePuzzle() {
   _readPuzzle()
 }
 
-// Redraws the puzzle.
-// Also updates the dropdown for puzzle style and adds the editor hotspots.
+// Clear lines from the puzzle, redraw it, and add editor hooks.
+// Note that this function DOES NOT reload the style, check for the automatic solver,
+// reset the publish button, and other such 'meta' cleanup steps.
+// You should only call this function if you're *sure* you're not in manual solve mode.
+// If there's a chance that you are in manual solve mode, call _reloadPuzzle().
 function _drawPuzzle() {
-  document.getElementById('puzzleName').innerText = puzzle.name
   window.draw(puzzle)
+
+  // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
+  var puzzleElement = document.getElementById('puzzle')
+  // Remove all 'onTraceStart' calls, they should be interacted through solveManually only.
+  for (var child of puzzleElement.children) {
+    child.onclick = null
+  }
+
+  var addOnClick = function(elem, x, y) {
+    elem.onclick = function() {_onElementClicked(x, y)}
+  }
+
+  var xPos = 40
+  var topLeft = {'x':40, 'y':40}
+  for (var x=0; x<puzzle.grid.length; x++) {
+    var yPos = 40
+    var width = (x%2 === 0 ? 24 : 58)
+    for (var y=0; y<puzzle.grid[x].length; y++) {
+      var height = (y%2 === 0 ? 24 : 58)
+      var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      puzzleElement.appendChild(rect)
+      rect.setAttribute('x', xPos)
+      rect.setAttribute('y', yPos)
+      rect.setAttribute('width', width)
+      rect.setAttribute('height', height)
+      rect.setAttribute('fill', 'white')
+      rect.setAttribute('opacity', 0)
+      yPos += height
+      addOnClick(rect, x, y)
+      rect.onmouseover = function() {this.setAttribute('opacity', 0.1)}
+      rect.onmouseout = function() {this.setAttribute('opacity', 0)}
+    }
+    xPos += width
+  }
+}
+
+function _reloadPuzzle() {
+  setSolveMode(false) // Disable the Solve (manually) button, clear lines, and redraw the puzzle
+
+  document.getElementById('puzzleName').innerText = puzzle.name
   document.getElementById('solutionViewer').style.display = 'none'
 
   document.getElementById('solveAuto').disabled = false
@@ -159,40 +181,6 @@ function _drawPuzzle() {
     }
   }
   console.log('Computed puzzle style', puzzleStyle.value)
-
-  // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
-  var puzzleElement = document.getElementById('puzzle')
-  // Remove all 'onTraceStart' calls, they should be interacted through solveManually only.
-  for (var child of puzzleElement.children) {
-    child.onclick = null
-  }
-
-  var addOnClick = function(elem, x, y) {
-    elem.onclick = function() {_onElementClicked(x, y)}
-  }
-
-  var xPos = 40
-  var topLeft = {'x':40, 'y':40}
-  for (var x=0; x<puzzle.grid.length; x++) {
-    var yPos = 40
-    var width = (x%2 === 0 ? 24 : 58)
-    for (var y=0; y<puzzle.grid[x].length; y++) {
-      var height = (y%2 === 0 ? 24 : 58)
-      var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-      puzzleElement.appendChild(rect)
-      rect.setAttribute('x', xPos)
-      rect.setAttribute('y', yPos)
-      rect.setAttribute('width', width)
-      rect.setAttribute('height', height)
-      rect.setAttribute('fill', 'white')
-      rect.setAttribute('opacity', 0)
-      yPos += height
-      addOnClick(rect, x, y)
-      rect.onmouseover = function() {this.setAttribute('opacity', 0.1)}
-      rect.onmouseout = function() {this.setAttribute('opacity', 0)}
-    }
-    xPos += width
-  }
 }
 
 //** Buttons which the user can click on
@@ -202,7 +190,7 @@ function createEmptyPuzzle() {
   newPuzzle.grid[0][8].start = true
   newPuzzle.grid[8][0].end = 'right'
   newPuzzle.name = 'Unnamed Puzzle'
-  _createPuzzle(newPuzzle)
+  _writeNewPuzzle(newPuzzle)
 }
 
 function loadPuzzle() {
@@ -241,10 +229,16 @@ function loadPuzzle() {
 
 function importPuzzle() {
   var serialized = prompt('Paste your puzzle here:')
-  if (!_createSerializedPuzzle(serialized)) {
+
+  console.log('Creating puzzle from serialized', serialized)
+  try {
+    var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
+    _writeNewPuzzle(newPuzzle)
+  } catch (e) {
+    console.error('Failed to load serialized puzzle', e)
+
     // Only alert if user tried to enter data
     if (serialized) alert('Not a valid puzzle!')
-    return
   }
 }
 
@@ -309,6 +303,7 @@ function setStyle(style) {
 
   resizePuzzle(width - puzzle.grid.length, 0, 'right')
   _writePuzzle()
+  _reloadPuzzle()
 }
 
 function setSolveMode(value) {
@@ -318,8 +313,7 @@ function setSolveMode(value) {
       puzzle = solution
       document.getElementById('publish').disabled = false
     }
-    // @Hack: I should write an function to clear editor interaction points, and then use that here.
-    _drawPuzzle()
+    // Redraw the puzzle, without interaction points. This is a bit of a @Hack, but it works.
     window.draw(puzzle)
   } else {
     puzzle.clearLines()
@@ -328,9 +322,11 @@ function setSolveMode(value) {
   }
 }
 
+// Automatically solve the puzzle
 function solvePuzzle() {
   setSolveMode(false)
   var solutions = window.solve(puzzle)
+  puzzle.autoSolved = true
   _showSolution(solutions, 0)
 }
 //** End of user interaction points
@@ -349,16 +345,17 @@ window.onload = function() {
       this.innerText = this.innerText.replace('\n', '')
     }
     // Ensure that puzzle names are non-empty (input box would disappear)
-    if (this.innerText.length === 0) {
-      this.innerText = 'Unnamed Puzzle'
-    }
+    // TODO: This is wrong! Because now this is extremely awkward.
+    // if (this.innerText.length === 0) {
+    //   this.innerText = 'Unnamed Puzzle'
+    // }
     // This only fires if onkeypress is bypassed somehow (e.g. paste)
     if (this.innerText.length >= 50) {
       this.innerText = this.innerText.substring(0, 50)
     }
     // Update the puzzle with the new name
     puzzle.name = this.innerText
-    _writePuzzle(false)
+    _writePuzzle()
   }
   // Use onkeypress when you need to prevent an action
   puzzleName.onkeypress = function(event) {
@@ -418,7 +415,11 @@ function _showSolution(solutions, num) {
   if (solutions[num] != undefined) {
     solutions[num].name = puzzle.name
     puzzle = solutions[num]
+    // Redraws the puzzle *and* adds editor hooks (so that we can return to editing)
+    // There's no need to reload all the additional meta elements, since the puzzle isn't
+    // actually changing, we're just drawing on it.
     _drawPuzzle()
+    // Only enable the publish button if there was a solution.
     document.getElementById('publish').disabled = false
   }
   document.getElementById('solutionViewer').style.display = null
@@ -611,6 +612,7 @@ function _onElementClicked(x, y) {
     }
   }
   _writePuzzle()
+  _reloadPuzzle()
 }
 
 var symbolData = {
@@ -655,7 +657,7 @@ function _drawSymbolButtons() {
         button.params.polyshape &= ~window.ROTATION_BIT
       }
       button.onclick = function() {
-        setSolveMode(false)
+        _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
           activeParams = Object.assign(activeParams, this.params)
           _shapeChooser()
@@ -666,7 +668,7 @@ function _drawSymbolButtons() {
       }
     } else if (button.id === 'triangle') {
       button.onclick = function() {
-        setSolveMode(false)
+        _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
           symbolData.triangle.count = symbolData.triangle.count % 4 + 1
           activeParams.count = symbolData.triangle.count
@@ -676,7 +678,7 @@ function _drawSymbolButtons() {
       }
     } else {
       button.onclick = function() {
-        setSolveMode(false)
+        _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         activeParams = Object.assign(activeParams, this.params)
         _drawSymbolButtons()
       }
@@ -690,7 +692,7 @@ function _drawColorButtons() {
   var colorTable = document.getElementById('colorButtons')
   colorTable.style.display = null
   var changeActiveColor = function() {
-    setSolveMode(false)
+    _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
     activeParams.color = this.id
     _drawColorButtons()
   }
@@ -923,6 +925,7 @@ function _dragMove(event, elem) {
   if (Math.abs(dx) >= xLim || Math.abs(dy) >= yLim) {
     if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/yLim), elem.id)) return
     _writePuzzle()
+    _reloadPuzzle()
 
     // If resize succeeded, set a new reference point for future drag operations
     dragging.x = event.clientX

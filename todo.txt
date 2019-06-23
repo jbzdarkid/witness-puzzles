@@ -27,8 +27,6 @@ Editor
 -- Clicking 'solve manually' should probably clear auto-solution
 -- Can't resume from cursor in 'solve manually'
     Can't repro...
--- Add marker to puzzle if it was ever 'solved automatically'?
--- Changing title breaks publish in an odd way
 -- Changing type to R symmetry pillar still is buggy. See tests.
 -- Editor does not link to other pages (!)
   Probably just re-use the header everywhere.

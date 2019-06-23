@@ -35,7 +35,11 @@ var urlParams
 window_onerror = window.onerror
 window.onerror = function(message, url, line) {
   FEEDBACK(message + ' on line ' + line)
-  window_onerror(message, url, line)
+  if (window_onerror == undefined) {
+    console.error('Parse error in file ' + url + ' on line ' + line)
+  } else {
+    window_onerror(message, url, line)
+  }
 }
 
 var tracks = {

@@ -47,7 +47,7 @@ function _solveLoop(puzzle, x, y, solutions) {
     puzzle.updateCell(x, y, {'dir':'none'})
     window.validate(puzzle)
     if (puzzle.valid) {
-      solutions.push(Puzzle.deserialize(puzzle.serialize()))
+      solutions.push(puzzle.clone())
     }
   }
 

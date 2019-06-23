@@ -62,6 +62,7 @@ class Puzzle {
     var parsed = JSON.parse(json)
     var puzzle = new Puzzle()
     puzzle.name = parsed.name
+    puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
     // @Legacy: Grid squares used to use 'false' to indicate emptiness.
     // @Legacy: Cells used to use undefined to indicate emptiness.
@@ -128,6 +129,11 @@ class Puzzle {
 
   serialize() {
     return JSON.stringify(this)
+  }
+
+  clone() {
+    // This is just not that expensive.
+    return Puzzle.deserialize(this.serialize())
   }
 
   // This is explicitly *not* just clearing the grid, so that external references
