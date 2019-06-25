@@ -173,12 +173,21 @@ function setLogLevel(level) {
 setLogLevel('info')
 
 function loadHeader() {
-  var parent = document.currentScript.parentElement
-  parent.style.borderBottom = '2px solid ' + window.BORDER
-  parent.style.background = window.PAGE_BACKGROUND
+  document.body.style.marginLeft = '0px'
+
+  var navbar = document.createElement('div')
+  document.body.appendChild(navbar)
+  navbar.className = 'navbar'
+  navbar.style = 'min-width: 700px; position: fixed; top: 0; width: 100%'
+  navbar.style.borderBottom = '2px solid ' + window.BORDER
+  navbar.style.background = window.PAGE_BACKGROUND
+
+  var navbarPadding = document.createElement('div')
+  document.body.appendChild(navbarPadding)
+  navbarPadding.className = 'navbar-padding'
 
   var titleDiv = document.createElement('div')
-  parent.appendChild(titleDiv)
+  navbar.appendChild(titleDiv)
   titleDiv.id = 'title'
   titleDiv.style = 'position: absolute; width: 100%; pointer-events: none'
 
@@ -187,15 +196,25 @@ function loadHeader() {
   titleLabel.style = 'font-size: 48'
   titleLabel.innerText = 'Witness Puzzles'
 
-  var editorLink = document.createElement('label')
-  parent.appendChild(editorLink)
-  editorLink.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
-  editorLink.innerText = 'Create a puzzle'
-  editorLink.className = 'navbar-content'
-  editorLink.onclick = function() {window.location = '/editor.html'}
+  var link = document.createElement('label')
+  navbar.appendChild(link)
+  link.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
+  link.className = 'navbar-content'
+
+  if (window.location.href.endsWith('browse.html')) {
+    link.innerText = 'Create a puzzle'
+    link.onclick = function() {window.location = '/editor.html'}
+  } else if (window.location.href.includes('/play/')) {
+    link.innerText = 'Back to all puzzles'
+    link.onclick = function() {window.location = '/browse.html'}
+  } else /* if (window.location.href.endsWith('editor.html')) */ {
+    link.innerText = 'View all puzzles'
+    link.onclick = function() {window.location = '/browse.html'}
+  }
+
 
   var feedbackButton = document.createElement('label')
-  parent.appendChild(feedbackButton)
+  navbar.appendChild(feedbackButton)
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
@@ -207,13 +226,13 @@ function loadHeader() {
   }
 
   var separator = document.createElement('label')
-  parent.appendChild(separator)
+  navbar.appendChild(separator)
   separator.style = 'float: right; line-height: 60px; padding-left: 6px; padding-right: 6px'
   separator.className = 'navbar-content'
   separator.innerText = '|'
 
   var sourceLink = document.createElement('label')
-  parent.appendChild(sourceLink)
+  navbar.appendChild(sourceLink)
   sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
   sourceLink.innerText = 'Source code'
   sourceLink.className = 'navbar-content'
@@ -221,7 +240,7 @@ function loadHeader() {
 
 
   var collapsedSettings = drawSymbol({'type': 'plus', 'width':20, 'height':20})
-  parent.appendChild(collapsedSettings)
+  navbar.appendChild(collapsedSettings)
   collapsedSettings.style = 'width: 20px; height: 20px; position: absolute; left: 0; cursor: pointer'
   collapsedSettings.style.border = '2px solid ' + window.BORDER
   collapsedSettings.id = 'collapsedSettings'
@@ -232,7 +251,7 @@ function loadHeader() {
   }
 
   var expandedSettings = document.createElement('div')
-  parent.appendChild(expandedSettings)
+  navbar.appendChild(expandedSettings)
   expandedSettings.style = 'width: 250px; position: absolute; left: 0; display: none; padding: 10px'
   expandedSettings.style.border = '2px solid ' + window.BORDER
   expandedSettings.style.background = window.PAGE_BACKGROUND

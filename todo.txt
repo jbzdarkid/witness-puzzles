@@ -40,8 +40,6 @@ Editor
 -- Can't resume from cursor in 'solve manually'
     Can't repro...
 -- Changing type to R symmetry pillar still is buggy. See tests.
--- Editor does not link to other pages (!)
-  Probably just re-use the header everywhere.
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- Crayons could be colored in, maybe.
