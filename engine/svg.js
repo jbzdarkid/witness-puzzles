@@ -25,6 +25,8 @@ function drawSymbolWithSvg(svg, params) {
   else if (params.type === 'start') _start(svg, params)
   else if (params.type === 'end') _end(svg, params)
   else if (params.type === 'drag') _drag(svg, params)
+  else if (params.type === 'plus') _plus(svg, params)
+  else if (params.type === 'minus') _minus(svg, params)
 //  else if (params.type === undefined) { /* Do nothing */ }
 //  else {
 //    console.error('Unknown symbol type in params: ' + JSON.stringify(params))
@@ -319,4 +321,25 @@ function _drag(svg, params) {
       rect.setAttribute('fill', window.PAGE_BACKGROUND)
     }
   }
+}
+
+function _plus(svg, params) {
+  var verti = createElement('rect')
+  svg.appendChild(verti)
+  verti.setAttribute('x', params.width/2 - 1)
+  verti.setAttribute('y', 3)
+  verti.setAttribute('width', 2)
+  verti.setAttribute('height', params.height - 6)
+  verti.setAttribute('fill', window.TEXT_COLOR)
+  _minus(svg, params)
+}
+
+function _minus(svg, params) {
+  var horiz = createElement('rect')
+  svg.appendChild(horiz)
+  horiz.setAttribute('x', 3)
+  horiz.setAttribute('y', params.height/2 - 1)
+  horiz.setAttribute('width', params.width - 6)
+  horiz.setAttribute('height', 2)
+  horiz.setAttribute('fill', window.TEXT_COLOR)
 }
