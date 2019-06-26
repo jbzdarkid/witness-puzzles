@@ -1,7 +1,6 @@
 In vague order of importance.
 
 High Prio
--- Header is not functioning well on low-resolution. Try to use flexbox properly.
 -- Mobile UI is terrible / non-functional.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
@@ -9,18 +8,6 @@ High Prio
     Disabled minification for a week, let's see how it goes.
 -- Can't resume from cursor in play mode
     Can't repro
-
-Three pages
-- Play
-XX  -> Edit ("Edit this puzzle") ~~
-  -> Browse ("Back to the puzzle list")
-- Edit
-  -> Play (Publish)
-  -> Browse ("View all puzzles")
-- Browse
-  -> Play (click on a puzzle)
-  -> Edit ("Create a puzzle")
-
 
 Browse
 -- "Jump to top" button
@@ -47,9 +34,6 @@ Editor
 -- Decide if shape chooser should pop over the right buttons or not.
 -- Just lower the max puzzle size. 8x8 max? 10 just seems... humongous.
 
-Validation
--- Perf optimziation: Triangles do not require regions, so I can skip regionCheck.
-
 Tracing
 -- Tracing down against walls and gap-2 is awkward
     The game is awful at this too.
@@ -68,7 +52,9 @@ Tutorial
 -- Need to explain complex mechanics
     Double negation
     Polys outside the grid
-    ? oversized polys
+    Poly overlapping
+    Precise polyominos
+    Two-stage negation
 -- Sadly, need to explain normal mechanics
     The best option here is to cherry-pick puzzles from the base game.
     That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
@@ -89,10 +75,12 @@ Low Prio
     JS supports 'format strings', via `foo ${bar}`
     Replace XMLHttpRequest with Fetch
 -- Fix generation colors / general improvements to random puzzles
+    >general support for random puzzles
 -- Hide solution (puzzleData) from global scope
     I think this is legacy from the old index.html, solve is no longer directly possible
 -- change all divs to auto-centering? It's all I seem to use them for rn
     Maybe have a class="centered"
+    Everything inherits body here
 -- transform: scale(2) doesn't work on safari?
     Checkboxes are terrible. Maybe write my own?
 -- random generation for challenges

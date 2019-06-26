@@ -172,7 +172,7 @@ function setLogLevel(level) {
 }
 setLogLevel('info')
 
-function loadHeader() {
+function loadHeader(titleText) {
   document.body.style.marginLeft = '0px'
 
   var navbar = document.createElement('div')
@@ -188,13 +188,13 @@ function loadHeader() {
 
   var titleDiv = document.createElement('div')
   navbar.appendChild(titleDiv)
-  titleDiv.id = 'title'
   titleDiv.style = 'position: absolute; width: 100%; pointer-events: none'
 
   var titleLabel = document.createElement('label')
   titleDiv.appendChild(titleLabel)
-  titleLabel.style = 'font-size: 48'
-  titleLabel.innerText = 'Witness Puzzles'
+  titleLabel.style = 'font-size: 48; pointer-events: auto'
+  titleLabel.id = 'title'
+  titleLabel.innerText = titleText
 
   var link = document.createElement('label')
   navbar.appendChild(link)

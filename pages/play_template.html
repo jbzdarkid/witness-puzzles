@@ -17,12 +17,10 @@
     <title>{{ title }}</title>
   </head>
   <body>
-    <script>loadHeader()</script>
-    <div style="text-align: center">
-      <label id="title" style="font-size: 72">Loading puzzle...</label>
-    </div>
-    <div style="text-align: center">
-      <svg id="puzzle"></svg>
+    <script>loadHeader('Loading puzzle...')</script>
+    <div style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; pointer-events: none;
+                display: flex; justify-content: center; align-items: center">
+      <svg id="puzzle" style="pointer-events: auto"></svg>
     </div>
   </body>
   <script>
