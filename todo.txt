@@ -49,6 +49,8 @@ Server
 
 Tutorial
 -- Make a list of all the differences from the game (each needs a tutorial or a setting)
+    Have a 'left/right arrows' with a bunch of puzzle images (or maybe animated static objects)
+    [image]\n[explanation]\n[left arrow] step # [right arrow]
 -- Need to explain complex mechanics
     Double negation
     Polys outside the grid
