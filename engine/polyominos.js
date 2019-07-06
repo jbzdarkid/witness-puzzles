@@ -165,6 +165,7 @@ function polyFit(region, puzzle) {
   puzzle.grid = savedGrid
   return ret
 }
+
 // If false, poly doesn't fit and grid is unmodified
 // If true, poly fits and grid is modified (with the placement)
 function _tryPlacePolyshape(cells, x, y, puzzle, sign) {
@@ -271,8 +272,8 @@ function _logPolyGrid(puzzle) {
     for (var x=0; x<puzzle.grid.length; x++) {
       var cell = puzzle.grid[x][y]
       if (cell === -1) output += '-'
-      if (cell === 0) output += '0'
-      if (cell === 1) output += '1'
+      else if (0 <= cell && cell <= 9) output += cell
+      else output += '?'
     }
     output += '\n'
   }
