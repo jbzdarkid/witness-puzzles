@@ -172,36 +172,49 @@ function setLogLevel(level) {
 }
 setLogLevel('info')
 
-function loadHeader() {
-  var parent = document.currentScript.parentElement
-  parent.style.borderBottom = '2px solid ' + window.BORDER
-  parent.style.background = window.PAGE_BACKGROUND
+function loadHeader(titleText) {
+  document.body.style.marginLeft = '0px'
+
+  var navbar = document.createElement('div')
+  document.body.appendChild(navbar)
+  navbar.className = 'navbar'
+  navbar.style = 'min-width: 700px; position: fixed; top: 0; width: 100%'
+  navbar.style.borderBottom = '2px solid ' + window.BORDER
+  navbar.style.background = window.PAGE_BACKGROUND
+
+  var navbarPadding = document.createElement('div')
+  document.body.appendChild(navbarPadding)
+  navbarPadding.className = 'navbar-padding'
 
   var titleDiv = document.createElement('div')
-  parent.appendChild(titleDiv)
-  titleDiv.id = 'title'
+  navbar.appendChild(titleDiv)
   titleDiv.style = 'position: absolute; width: 100%; pointer-events: none'
 
   var titleLabel = document.createElement('label')
   titleDiv.appendChild(titleLabel)
-  titleLabel.style = 'font-size: 48'
-  titleLabel.innerText = 'Witness Puzzles'
+  titleLabel.style = 'font-size: 48; pointer-events: auto'
+  titleLabel.id = 'title'
+  titleLabel.innerText = titleText
 
-  var settingsDiv = document.createElement('div')
-  parent.appendChild(settingsDiv)
-  settingsDiv.style = 'float: left; height: 100%'
-  loadSettings(parent=settingsDiv)
-  var parent = document.currentScript.parentElement // blah
+  var link = document.createElement('label')
+  navbar.appendChild(link)
+  link.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
+  link.className = 'navbar-content'
 
-  var editorLink = document.createElement('label')
-  parent.appendChild(editorLink)
-  editorLink.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
-  editorLink.innerText = 'Create a puzzle'
-  editorLink.className = 'navbar-content'
-  editorLink.onclick = function() {window.location = '/editor.html'}
+  if (window.location.href.endsWith('browse.html')) {
+    link.innerText = 'Create a puzzle'
+    link.onclick = function() {window.location = '/editor.html'}
+  } else if (window.location.href.includes('/play/')) {
+    link.innerText = 'Back to all puzzles'
+    link.onclick = function() {window.location = '/browse.html'}
+  } else /* if (window.location.href.endsWith('editor.html')) */ {
+    link.innerText = 'View all puzzles'
+    link.onclick = function() {window.location = '/browse.html'}
+  }
+
 
   var feedbackButton = document.createElement('label')
-  parent.appendChild(feedbackButton)
+  navbar.appendChild(feedbackButton)
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
@@ -213,17 +226,119 @@ function loadHeader() {
   }
 
   var separator = document.createElement('label')
-  parent.appendChild(separator)
+  navbar.appendChild(separator)
   separator.style = 'float: right; line-height: 60px; padding-left: 6px; padding-right: 6px'
   separator.className = 'navbar-content'
   separator.innerText = '|'
 
   var sourceLink = document.createElement('label')
-  parent.appendChild(sourceLink)
+  navbar.appendChild(sourceLink)
   sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
   sourceLink.innerText = 'Source code'
   sourceLink.className = 'navbar-content'
   sourceLink.onclick = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
+
+
+  var collapsedSettings = drawSymbol({'type': 'plus', 'width':20, 'height':20})
+  navbar.appendChild(collapsedSettings)
+  collapsedSettings.style = 'width: 20px; height: 20px; position: absolute; left: 0; cursor: pointer'
+  collapsedSettings.style.border = '2px solid ' + window.BORDER
+  collapsedSettings.id = 'collapsedSettings'
+  collapsedSettings.onclick = function() {
+    this.style.display = 'none'
+    var expandedSettings = document.getElementById('expandedSettings')
+    expandedSettings.style.display = null
+  }
+
+  var expandedSettings = document.createElement('div')
+  navbar.appendChild(expandedSettings)
+  expandedSettings.style = 'width: 250px; position: absolute; left: 0; display: none; padding: 10px'
+  expandedSettings.style.border = '2px solid ' + window.BORDER
+  expandedSettings.style.background = window.PAGE_BACKGROUND
+  expandedSettings.id = 'expandedSettings'
+
+  var minus = drawSymbol({'type':'minus', 'width':20, 'height':20})
+  minus.style = 'width: 20px; height: 20px; cursor: pointer; position: absolute; top: 0; left: 0'
+  expandedSettings.appendChild(minus)
+  minus.onclick = function() {
+    this.parentElement.style.display = 'none'
+    var collapsedSettings = document.getElementById('collapsedSettings')
+    collapsedSettings.style.display = null
+  }
+
+  // Now, for the contents of the settings
+  var settingsLabel = document.createElement('label')
+  expandedSettings.appendChild(settingsLabel)
+  settingsLabel.innerText = 'settings'
+  settingsLabel.style = 'line-height: 0px' // Attach to the top
+
+  expandedSettings.appendChild(document.createElement('br'))
+  expandedSettings.appendChild(document.createElement('br'))
+
+  // Theme
+  var themeBox = document.createElement('input')
+  expandedSettings.appendChild(themeBox)
+  themeBox.className = 'checkbox'
+  themeBox.type = 'checkbox'
+  themeBox.id = 'theme'
+  themeBox.onchange = function() {
+    localStorage.theme = this.checked
+    location.reload()
+  }
+  themeBox.checked = (localStorage.theme === 'true')
+  // This needs to happen now, since the document body hasn't yet loaded.
+  document.body.style.color = window.TEXT_COLOR
+  document.body.style.background = window.PAGE_BACKGROUND
+
+  var themeLabel = document.createElement('label')
+  expandedSettings.appendChild(themeLabel)
+  themeLabel.htmlFor = 'theme'
+  themeLabel.innerText = ' Dark theme'
+
+  expandedSettings.appendChild(document.createElement('br'))
+  expandedSettings.appendChild(document.createElement('br'))
+
+  // Sensitivity
+  var sensLabel = document.createElement('label')
+  expandedSettings.appendChild(sensLabel)
+  sensLabel.htmlFor = 'sens'
+  sensLabel.innerText = 'Mouse Speed 2D'
+
+  if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
+  var sens = document.createElement('input')
+  expandedSettings.appendChild(sens)
+  sens.style.width = '100%'
+  sens.type = 'range'
+  sens.id = 'sens'
+  sens.min = '0.1'
+  sens.max = '1.3'
+  sens.step = '0.1'
+  sens.value = localStorage.sensitivity
+  sens.onchange = function() {
+    localStorage.sensitivity = this.value
+  }
+
+  // Volume
+  var volumeLabel = document.createElement('label')
+  expandedSettings.appendChild(volumeLabel)
+  volumeLabel.htmlFor = 'volume'
+  volumeLabel.innerText = 'Volume'
+
+  if (localStorage.volume == undefined || localStorage.volume < 0 || localStorage.volume > 0.24) {
+    localStorage.volume = 0.12
+  }
+  var volume = document.createElement('input')
+  expandedSettings.appendChild(volume)
+  volume.style.width = '100%'
+  volume.type = 'range'
+  volume.id = 'volume'
+  volume.min = '0'
+  volume.max = '0.24'
+  volume.step = '0.02'
+  volume.value = localStorage.volume
+  volume.onchange = function() {
+    localStorage.volume = this.value
+  }
 }
 
 

@@ -1,1 +1,11 @@
-* text eol=lf
+# Default to non-text so we don't format extensionless files
+* -text
+
+*.js text eol=lf
+*.py text eol=lf
+*.sql text eol=lf
+*.txt text eol=lf
+
+# Images
+*.ico -text
+*.png -text

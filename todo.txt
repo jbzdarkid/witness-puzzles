@@ -1,7 +1,6 @@
 In vague order of importance.
 
 High Prio
--- Header is not functioning well on low-resolution. Try to use flexbox properly.
 -- Mobile UI is terrible / non-functional.
 -- Formal object for lines?
     Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
@@ -9,18 +8,6 @@ High Prio
     Disabled minification for a week, let's see how it goes.
 -- Can't resume from cursor in play mode
     Can't repro
-
-Three pages
-- Play
-XX  -> Edit ("Edit this puzzle") ~~
-  -> Browse ("Back to the puzzle list")
-- Edit
-  -> Play (Publish)
-  -> Browse ("View all puzzles")
-- Browse
-  -> Play (click on a puzzle)
-  -> Edit ("Create a puzzle")
-
 
 Browse
 -- "Jump to top" button
@@ -40,17 +27,12 @@ Editor
 -- Can't resume from cursor in 'solve manually'
     Can't repro...
 -- Changing type to R symmetry pillar still is buggy. See tests.
--- Editor does not link to other pages (!)
-  Probably just re-use the header everywhere.
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.
 -- Just lower the max puzzle size. 8x8 max? 10 just seems... humongous.
-
-Validation
--- Perf optimziation: Triangles do not require regions, so I can skip regionCheck.
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward
@@ -67,10 +49,14 @@ Server
 
 Tutorial
 -- Make a list of all the differences from the game (each needs a tutorial or a setting)
+    Have a 'left/right arrows' with a bunch of puzzle images (or maybe animated static objects)
+    [image]\n[explanation]\n[left arrow] step # [right arrow]
 -- Need to explain complex mechanics
     Double negation
     Polys outside the grid
-    ? oversized polys
+    Poly overlapping
+    Precise polyominos
+    Two-stage negation
 -- Sadly, need to explain normal mechanics
     The best option here is to cherry-pick puzzles from the base game.
     That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
@@ -92,10 +78,12 @@ Low Prio
     JS supports 'format strings', via `foo ${bar}`
     Replace XMLHttpRequest with Fetch
 -- Fix generation colors / general improvements to random puzzles
+    >general support for random puzzles
 -- Hide solution (puzzleData) from global scope
     I think this is legacy from the old index.html, solve is no longer directly possible
 -- change all divs to auto-centering? It's all I seem to use them for rn
     Maybe have a class="centered"
+    Everything inherits body here
 -- transform: scale(2) doesn't work on safari?
     Checkboxes are terrible. Maybe write my own?
 -- random generation for challenges

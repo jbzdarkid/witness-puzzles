@@ -20,11 +20,22 @@ function validate(puzzle) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
-      if (cell.type !== 'line') {
-        // Perf optimization: We can skip computing regions if the grid has no symbols.
+      if (['square', 'star', 'nega', 'poly', 'ylop'].includes(cell.type)) {
         puzzleHasSymbols = true
         continue
       }
+      if (cell.type === 'triangle') {
+        var count = 0
+        if (puzzle.getLine(x - 1, y) > 0) count++
+        if (puzzle.getLine(x + 1, y) > 0) count++
+        if (puzzle.getLine(x, y - 1) > 0) count++
+        if (puzzle.getLine(x, y + 1) > 0) count++
+        if (cell.count !== count) {
+          console.log('Triangle at grid['+x+']['+y+'] has', count, 'borders')
+          puzzle.invalidElements.push({'x':x, 'y':y})
+        }
+      }
+      // TODO: Obvious cleanup: Write a helper function for each individual type?
       if (cell.gap > 0 && cell.color > 0) {
         console.log('Gap at', x, y, 'is covered')
         puzzle.valid = false
@@ -50,6 +61,7 @@ function validate(puzzle) {
     puzzle.valid = false
   }
 
+  // Perf optimization: We can skip computing regions if the grid has no symbols.
   if (!puzzleHasSymbols) { // No additional symbols, and we already checked dots & gaps
     puzzle.valid = puzzle.valid && (puzzle.invalidElements.length === 0)
   } else { // Additional symbols, so we need to discard dots & divide them by region
