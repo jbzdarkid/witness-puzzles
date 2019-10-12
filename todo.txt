@@ -76,6 +76,7 @@ Tutorial
     That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
 
 Low Prio
+-- Shift-click should jump by 10 in showSolution
 -- "Edit this puzzle"?
 -- Add all puzzles in the game to the system. Maybe a separate category / identifier?
     Add tests & speedrunner solver
