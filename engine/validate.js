@@ -52,11 +52,13 @@ function validate(puzzle) {
           puzzle.valid = false
         }
       }
-      if (cell.start === true && cell.color !== 0) puzzleHasStart = true
-      if (cell.end != undefined && cell.color !== 0) puzzleHasEnd = true
+      if (cell.color !== 0) {
+        if (cell.start === true) puzzleHasStart = true
+        if (cell.end != undefined) puzzleHasEnd = true
+      }
     }
   }
-  if (!puzzleHasStart || !puzzleHasStart) {
+  if (!puzzleHasStart || !puzzleHasEnd) {
     console.log('There is no covered start or endpoint')
     puzzle.valid = false
   }
