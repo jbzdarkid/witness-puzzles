@@ -19,6 +19,8 @@ host_redirect('/pages/editor.html', '/editor.html')
 host_redirect('/pages/test.html', '/test.html')
 host_redirect('/pages/editor_test.html', '/editor_test.html')
 host_redirect('/pages/validate.html', '/validate.html')
+host_redirect('/pages/triangles.html', '/triangles.html')
+host_redirect('/pages/triangles.js', '/triangles.js')
 
 # Large blocks of data
 host_statically('data')
@@ -35,6 +37,8 @@ host_statically('pages/test.js', protected=True)
 host_statically('pages/editor_test.html', protected=True)
 host_statically('pages/editor_test.js', protected=True)
 host_statically('pages/validate.html')
+host_statically('pages/triangles.html')
+host_statically('pages/triangles.js')
 
 def page_not_found(error):
   return render_template('404_generic.html'), 404
