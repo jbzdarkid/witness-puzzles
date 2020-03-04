@@ -75,7 +75,7 @@ class Puzzle {
         if (cell === false || cell == undefined) {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = {}
           else puzzle.grid[x][y] = {'type':'line', 'color':0}
-        } else if (cell != undefined) {
+        } else {
           if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
             // @Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
             // rot=all is a holdover that was used to represent rotation polyominos.
@@ -120,7 +120,7 @@ class Puzzle {
         puzzle.grid[gap.x][gap.y].gap = 1
       }
     }
-    puzzle.regionCache = parsed.regionCache
+    if (parsed.regionCache != undefined) puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
     puzzle.largezero = puzzle.grid.length * puzzle.grid[0].length
@@ -375,6 +375,8 @@ class Puzzle {
         }
       }
     }
+
+    // Start by marking all outside cells as 'not in any region' (aka undefined)
 
     // Left and right edges
     if (this.pillar === false) {

@@ -8,6 +8,7 @@ High Prio
     Disabled minification for a week, let's see how it goes.
 -- Can't resume from cursor in play mode
     Can't repro
+-- Potential perf improvements with validation by using references to cells, not cells themselves.
 
 Browse
 -- "Jump to top" button

@@ -1,0 +1,60 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="/data/favicon.png">
+    <script type="text/javascript" src="/engine/polyominos.js"></script>
+    <script type="text/javascript" src="/engine/utilities.js"></script>
+    <script type="text/javascript" src="/engine/puzzle.js"></script>
+    <script type="text/javascript" src="/engine/solve.js"></script>
+    <script type="text/javascript" src="/engine/validate.js"></script>
+    <script type="text/javascript" src="/engine/svg.js"></script>
+    <script type="text/javascript" src="/engine/display2.js"></script>
+    <script type="text/javascript" src="/engine/trace2.js"></script>
+    <script type="text/javascript" src="_UTM2.js"></script>
+    <script type="text/javascript" src="_UTM.js"></script>
+    <title>Optimizing whatever</title>
+  </head>
+  <body>
+    <script>loadHeader('Foobar')</script>
+
+    <table id="meta">
+      <tr>
+        <td style="text-align: center;">
+          <label>Select a puzzle: </label>
+          <select id="area" onchange="loadPuzzleRegion(this.value)">
+            <option>Boathouse</option>
+            <option>Mill</option>
+            <option>Mountaintop</option>
+            <option>Mountain 1</option>
+            <option>Mountain 2</option>
+            <option>Mountain 3</option>
+            <option>Symmetry</option>
+            <option>Tutorial</option>
+          </select>
+          <select id="areaPuzzles" onchange="loadSinglePuzzle(this.value)">
+            <option>(none)</option>
+          </select>
+        </td>
+      </tr><tr>
+        <td>
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <div style="position: relative">
+              <svg id="puzzle"></svg>
+            </div>
+          </div>
+        </td>
+      </tr><tr>
+        <td style="text-align:center;">
+          <button id="solveAuto" onclick="solvePuzzle()">Solve (automatically)</button>
+          <div style="display: inline-block; vertical-align:top">
+            <div id="solutionViewer" style="position: absolute; display:none">
+              <button id="previousSolution">&larr;</button>
+              <label id="solutionCount"></label>
+              <button id="nextSolution">&rarr;</button>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
