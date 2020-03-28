@@ -40,9 +40,10 @@ host_statically('pages/validate.html')
 host_statically('pages/triangles.html')
 host_statically('pages/triangles.js')
 
-host_statically('pages/_UTM.html')
-host_statically('pages/_UTM.js')
-host_statically('pages/_UTM2.js')
+if application.debug:
+  host_statically('pages/_UTM.html')
+  host_statically('pages/_UTM.js')
+  host_statically('pages/_UTM2.js')
 
 def page_not_found(error):
   return render_template('404_generic.html'), 404
