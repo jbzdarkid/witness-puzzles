@@ -112,6 +112,17 @@ def add_feedback(data):
   db.session.add(Feedback(page=request.environ['HTTP_REFERER'], data=data))
   db.session.commit()
 
+class Error(db.Model):
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  page = db.Column(db.Text, nullable=False)
+  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+  data = db.Column(db.Text, nullable=False)
+
+def add_error(data):
+  print(f'Recieved error: {data}')
+  db.session.add(Error(page=request.environ['HTTP_REFERER'], data=data))
+  db.session.commit()
+
 # @Cleanup: This is the model, it should not be processing data. Leave that for the view / controller.
 def get_all_rows():
   data = 'Puzzles:\n'

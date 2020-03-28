@@ -59,25 +59,16 @@ function PLAY_SOUND(track) {
   tracks[track].play()
 }
 
-function TELEMETRY(type) {
-  if (window.session_id == undefined) {
-    return // No session -- possibly on the test page.
-  }
-
-  var request = new XMLHttpRequest()
-  request.open('POST', '/telemetry', true) // Fire and forget
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  request.send(
-    'session_id=' + window.session_id +
-    '&display_hash=' + window.display_hash +
-    '&date=' + (new Date()).getTime() +
-    '&type=' + type
-  )
-}
-
 function FEEDBACK(message) {
   var request = new XMLHttpRequest()
   request.open('POST', '/feedback', true) // Fire and forget
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.send('data=' + message)
+}
+
+function ERROR(message) {
+  var request = new XMLHttpRequest()
+  request.open('POST', '/error', true) // Fire and forget
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   request.send('data=' + message)
 }

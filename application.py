@@ -101,31 +101,17 @@ def browse():
   return to_json_string(output)
 application.add_url_rule('/browse', 'browse', browse)
 
-# Users providing feedback or internal bug reports
+# Users providing feedback
 def feedback():
   add_feedback(request.form['data'])
   return '', 200
 application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
 
-# Firing telemetry
-def telemetry():
-  session_id = UUID(request.form['session_id'])
-  type = request.form['type']
-  date = None
-  if 'date' in request.form:
-    date = datetime.fromtimestamp(int(request.form['date']) / 1000)
-  add_event(session_id, type, date)
-
+# Internal errors
+def error():
+  add_error(request.form['data'])
   return '', 200
-application.add_url_rule('/telemetry', 'telemetry', telemetry, methods=['POST'])
-
-# Viewing telemetry
-def dashboard():
-  if not request_is_authorized():
-    return '', 401, {'WWW-Authenticate': 'Basic realm=""'}
-  rows = get_all_rows()
-  return render_template('dashboard_template.html', data=rows)
-application.add_url_rule('/dashboard.html', 'dashboard.html', dashboard)
+application.add_url_rule('/error', 'error', error, methods=['POST'])
 
 if __name__ == '__main__':
   extra_files = []

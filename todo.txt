@@ -44,9 +44,6 @@ Tracing
 Server
 -- Start versioning JS? That way caching works and doesn't shoot me in the foot.
 -- Signin?
--- Telemetry dashboard
-    Probably password protect this? Use Flask-BasicAuth w/ RDS password (for simplicity)
-    Consider changing UUIDType to just be a string -- it's pain to read.
 
 Tutorial
 -- Make a list of all the differences from the game (each needs a tutorial or a setting)

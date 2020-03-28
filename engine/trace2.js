@@ -364,7 +364,6 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
   if (document.pointerLockElement == null) { // Started tracing a solution
     data.tracing = true
     window.PLAY_SOUND('start')
-    window.TELEMETRY('start_trace')
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
     onTraceStart(puzzle, pos, svg, start, symStart)
@@ -390,13 +389,11 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
 
       if (puzzle.valid) {
         window.PLAY_SOUND('success')
-        window.TELEMETRY('stop_trace_success')
         // !important to override the child animation
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success !important}')
         if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
       } else {
         window.PLAY_SOUND('fail')
-        window.TELEMETRY('stop_trace_fail')
         data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
@@ -406,13 +403,10 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
 
     } else if (event.which === 3) { // Right-clicked, not at the end: Clear puzzle
       window.PLAY_SOUND('abort')
-      window.TELEMETRY('stop_trace_abort')
       _clearGrid(svg, puzzle)
     } else { // Exit lock but allow resuming from the cursor
-      window.TELEMETRY('stop_trace_temporary')
       data.cursor.onclick = function(event) {
         if (svg !== data.svg) return // Another puzzle is live, so data is gone
-        window.TELEMETRY('start_trace_temporary')
         data.tracing = true
         start.requestPointerLock()
       }

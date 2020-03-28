@@ -27,13 +27,11 @@
     window.session_id = '{{ session_id }}'
     window.display_hash = '{{ display_hash }}'
     window.onload = function() {
-      TELEMETRY('page_load')
       var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
       var pageTitle = document.head.getElementsByTagName('title')[0]
       pageTitle.innerText = 'Playing puzzle: ' + puzzle.name
       document.getElementById('title').innerText = puzzle.name
       draw(puzzle)
-      TELEMETRY('page_load_done')
     }
   </script>
 </html>
