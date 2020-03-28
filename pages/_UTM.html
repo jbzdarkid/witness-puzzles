@@ -12,10 +12,10 @@
     <script type="text/javascript" src="/engine/trace2.js"></script>
     <script type="text/javascript" src="_UTM2.js"></script>
     <script type="text/javascript" src="_UTM.js"></script>
-    <title>Optimizing whatever</title>
+    <title>Puzzle Optimizer</title>
   </head>
   <body>
-    <script>loadHeader('Foobar')</script>
+    <script>loadHeader('Puzzle Optimizer')</script>
 
     <table id="meta">
       <tr>
@@ -23,13 +23,29 @@
           <label>Select a puzzle: </label>
           <select id="area" onchange="loadPuzzleRegion(this.value)">
             <option>Boathouse</option>
-            <option>Mill</option>
-            <option>Mountaintop</option>
+            <option>Bunker</option>
+            <option>Desert</option>
+            <option>Glass Factory</option>
+            <option>Jungle</option>
+            <option>Keep</option>
+            <option>Monastery</option>
             <option>Mountain 1</option>
             <option>Mountain 2</option>
             <option>Mountain 3</option>
+            <option>Mountainside</option>
+            <option>Mountaintop</option>
+            <option>Outside Tutorial</option>
+            <option>Quarry</option>
+            <option>Shadows</option>
+            <option>Shipwreck</option>
+            <option>Swamp</option>
             <option>Symmetry</option>
-            <option>Tutorial</option>
+            <option>Theater</option>
+            <option>Town</option>
+            <option>Treehouse</option>
+            <option>Tunnels</option>
+            <option selected="selected">Tutorial</option>
+            <option>UTM</option>
           </select>
           <select id="areaPuzzles" onchange="loadSinglePuzzle(this.value)">
             <option>(none)</option>
@@ -51,6 +67,8 @@
               <button id="previousSolution">&larr;</button>
               <label id="solutionCount"></label>
               <button id="nextSolution">&rarr;</button>
+              <br>
+              <label id="solutionInfo"></label>
             </div>
           </div>
         </td>
