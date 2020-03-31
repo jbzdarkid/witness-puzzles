@@ -3,7 +3,6 @@ from datetime import datetime
 from json import dumps as to_json_string
 import os
 from traceback import format_exc
-from uuid import UUID, uuid4
 
 from application_database import *
 from application_utils import *
@@ -76,12 +75,9 @@ def play(display_hash):
   if not puzzle or not puzzle.puzzle_json:
     return render_template('404_puzzle.html', display_hash=display_hash)
 
-  session_id = uuid4()
-  start_session(session_id)
   return render_template('play_template.html',
     puzzle=puzzle.puzzle_json,
     display_hash=display_hash,
-    session_id=session_id,
     title=puzzle.title,
     image=puzzle.url
   )

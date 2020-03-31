@@ -24,7 +24,6 @@
     </div>
   </body>
   <script>
-    window.session_id = '{{ session_id }}'
     window.display_hash = '{{ display_hash }}'
     window.onload = function() {
       var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
