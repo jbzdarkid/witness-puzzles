@@ -1,9 +1,9 @@
 from flask import render_template, request
-import os
-from json import dumps as to_json_string
 from datetime import datetime
-from uuid import UUID, uuid4
+from json import dumps as to_json_string
+import os
 from traceback import format_exc
+from uuid import UUID, uuid4
 
 from application_database import *
 from application_utils import *
