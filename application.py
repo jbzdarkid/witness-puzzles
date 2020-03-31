@@ -59,13 +59,14 @@ application.register_error_handler(Exception, handle_exception)
 def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
+  title = request.form['title']
 
   valid, data = validate_and_capture_image(puzzle_json, solution_json)
   if not valid:
     add_feedback(data)
     return '', 400
   else:
-    display_hash = create_puzzle(puzzle_json, solution_json, data)
+    display_hash = create_puzzle(title, puzzle_json, solution_json, data)
     return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
 

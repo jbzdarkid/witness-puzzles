@@ -451,7 +451,9 @@ function publishPuzzle() {
   request.open('POST', '/publish', true)
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-  var requestBody = 'solution=' + puzzleCopy.serialize()
+  var requestBody = 'title=' + puzzle.name
+  delete puzzle.name // Puzzle name should be sourced only from the title
+  requestBody += '&solution=' + puzzleCopy.serialize()
   puzzleCopy.clearLines()
   requestBody += '&puzzle=' + puzzleCopy.serialize()
 

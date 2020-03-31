@@ -14,13 +14,13 @@ class Puzzle(db.Model):
   # 8 characters at 32 = 2^40
   # 50% of collision at 2^20 entries
   display_hash = db.Column(db.String(8), unique=True, primary_key=True)
+  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   puzzle_json = db.Column(db.Text, nullable=False)
   solution_json = db.Column(db.Text, nullable=False)
-  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   url = db.Column(db.Text)
   title = db.Column(db.Text)
 
-def create_puzzle(puzzle_json, solution_json, img_bytes):
+def create_puzzle(title, puzzle_json, solution_json, img_bytes):
   h = sha256()
   h.update(puzzle_json.encode())
   display_hash = h.hexdigest()[:8].upper()
@@ -29,16 +29,16 @@ def create_puzzle(puzzle_json, solution_json, img_bytes):
   display_hash = display_hash.replace('1', 'C')
   display_hash = display_hash.replace('0', 'D')
   puzzle = get_puzzle(display_hash)
-  if not puzzle:
-    puzzle = Puzzle(
-      display_hash=display_hash,
-      puzzle_json=puzzle_json,
-      solution_json=solution_json,
-    )
-  if not puzzle.url:
-    puzzle.url = upload_image(img_bytes, display_hash)
-  if not puzzle.title:
-    puzzle.title = loads(puzzle.puzzle_json)['name']
+  if puzzle:
+    return display_hash # Puzzle already exists
+
+  puzzle = Puzzle(
+    display_hash=display_hash,
+    puzzle_json=puzzle_json,
+    solution_json=solution_json,
+    url=upload_image(img_bytes, display_hash),
+    title=title,
+  )
   db.session.add(puzzle)
   db.session.commit()
 

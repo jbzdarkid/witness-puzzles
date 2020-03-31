@@ -78,6 +78,7 @@ def host_redirect(path, serverpath):
 def validate_and_capture_image(puzzle_json, solution_json):
   options = webdriver.ChromeOptions()
   options.add_argument('headless')
+  os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
   driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
   driver.get(f'{request.url_root}validate.html')
 

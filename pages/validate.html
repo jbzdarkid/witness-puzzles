@@ -37,7 +37,6 @@
         canvas.height = svg.getBBox().height + 10
         var ctx = canvas.getContext('2d')
         ctx.drawImage(img, 0, 0)
-        // ctx.getImageData(0, 0, canvas.width, canvas.height)
         // Base-64 encode the image, which python should just be able to read.
         result.screenshot = canvas.toDataURL() // Defaults to PNG, 100%
         document.body.append(result)

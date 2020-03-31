@@ -28,8 +28,8 @@
     window.onload = function() {
       var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
       var pageTitle = document.head.getElementsByTagName('title')[0]
-      pageTitle.innerText = 'Playing puzzle: ' + puzzle.name
-      document.getElementById('title').innerText = puzzle.name
+      pageTitle.innerText = 'Playing puzzle: {{ title }}'
+      document.getElementById('title').innerText = '{{ title }}'
       draw(puzzle)
     }
   </script>
