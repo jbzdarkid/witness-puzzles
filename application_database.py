@@ -19,7 +19,6 @@ class Puzzle(db.Model):
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   url = db.Column(db.Text)
   title = db.Column(db.Text)
-  user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #, nullable=False
 
 def create_puzzle(puzzle_json, solution_json, img_bytes):
   h = sha256()
@@ -63,24 +62,26 @@ def get_puzzles(sort_type, order, offset=0, limit=100):
 
 class Feedback(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  page = db.Column(db.Text, nullable=False)
+  page = db.Column(db.Text, nullable=True)
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-  data = db.Column(db.Text, nullable=False)
+  data = db.Column(db.Text, nullable=True)
 
 def add_feedback(data):
   print(f'Recieved feedback: {data}')
-  db.session.add(Feedback(page=request.environ['HTTP_REFERER'], data=data))
+  page = request.environ.get('HTTP_REFERRER', '')
+  db.session.add(Feedback(page=page, data=data))
   db.session.commit()
 
 class Error(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  page = db.Column(db.Text, nullable=False)
+  page = db.Column(db.Text, nullable=True)
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-  data = db.Column(db.Text, nullable=False)
+  data = db.Column(db.Text, nullable=True)
 
 def add_error(data):
   print(f'Recieved error: {data}')
-  db.session.add(Error(page=request.environ['HTTP_REFERER'], data=data))
+  page = request.environ.get('HTTP_REFERRER', '')
+  db.session.add(Error(page=page, data=data))
   db.session.commit()
 
 db.create_all()

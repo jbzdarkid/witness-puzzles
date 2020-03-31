@@ -41,6 +41,7 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
   })
   # Enforce HTTPS only in the presence of a certificate
   # TODO: Finish setting up HTTPS
+  # https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/https-singleinstance.html
   # https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/https-singleinstance-python.html
   # application.before_request(http_to_https)
   application.debug = False
@@ -57,7 +58,7 @@ def __static_content_func(filename):
   return send_from_directory(root, file)
 
 # Recursively host folders, files, with custom paths per request.
-def host_statically(path, serverpath=None, protected=False):
+def host_statically(path, serverpath=None):
   path = path.replace('\\', '/')
   if os.path.isdir(path):
     for file in os.listdir(path):
@@ -69,7 +70,7 @@ def host_statically(path, serverpath=None, protected=False):
 
   if not serverpath:
     serverpath = f'/{path}'
-  application.add_url_rule(serverpath, f'static_{serverpath}', lambda:__static_content_func(protected, path))
+  application.add_url_rule(serverpath, f'static_{serverpath}', lambda:__static_content_func(path))
 
 def host_redirect(path, serverpath):
   application.add_url_rule(serverpath, f'redirect_{serverpath}', lambda:redirect(path))
