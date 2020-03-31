@@ -54,6 +54,8 @@ write('data')
 write('engine')
 write('pages')
 write('requirements.txt')
+# write('.ebextensions')
+write('install-google-chrome.sh')
 z.writestr('application_hashes.py', hashfile)
 z.close()
 

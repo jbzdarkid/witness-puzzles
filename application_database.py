@@ -61,46 +61,6 @@ def get_puzzles(sort_type, order, offset=0, limit=100):
 
   return db.session.query(Puzzle).order_by(column)
 
-def delete_puzzle(display_hash):
-  db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).delete()
-
-class User(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  disp_name = db.Column(db.String(80), nullable=False)
-  # google_id
-  # faceb_id
-  # apple_id
-  # msft_id
-
-class Event(db.Model):
-  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  session_id = db.Column(UUIDType, nullable=False)
-  display_hash = db.Column(db.String(8), db.ForeignKey('puzzle.display_hash'))
-  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-  type = db.Column(db.String(32), nullable=False)
-
-def start_session(session_id):
-  db.session.add(Event(
-    session_id = session_id,
-    type = 'session_create',
-    date = datetime.utcnow(),
-  ))
-  db.session.commit()
-
-def add_event(session_id, type, date):
-  if not is_active(session_id):
-    return
-  db.session.add(Event(session_id=session_id, type=type, date=date))
-  db.session.commit()
-
-def is_active(session_id):
-  session = db.session.query(Event).filter(Event.session_id == session_id).first()
-  if not session:
-    return False
-  if datetime.utcnow() - session.date > timedelta(hours=1):
-    return False
-  return True
-
 class Feedback(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   page = db.Column(db.Text, nullable=False)
@@ -123,27 +83,6 @@ def add_error(data):
   db.session.add(Error(page=request.environ['HTTP_REFERER'], data=data))
   db.session.commit()
 
-# @Cleanup: This is the model, it should not be processing data. Leave that for the view / controller.
-def get_all_rows():
-  data = 'Puzzles:\n'
-  puzzles = db.session.query(Puzzle).all()
-  for puzzle in puzzles:
-    data += f'Puzzle {puzzle.display_hash} created on {puzzle.date} of size {len(puzzle.puzzle_json)}\n'
-
-  #for user in users:
-  #    print user.name
-
-  data += 'Events:\n'
-  sessions = db.session.query(Event).filter(Event.type == 'session_create').all()
-  for session in sessions:
-    data += '\nSession ' + str(session.session_id) + ':\n'
-    events = db.session.query(Event).filter(Event.session_id == session.session_id).all()
-    for event in events:
-      data += f'Event "{event.type}" at time {event.date}\n'
-
-  return data
-
-# @Cleanup: Only debug mode?
 db.create_all()
 
 if application.debug:

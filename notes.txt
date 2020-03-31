@@ -1,0 +1,10 @@
+Go to https://us-west-2.console.aws.amazon.com/ec2/v2/home#Instances
+Right click on the instance -> Connect, then copy the ssh connection string
+(e.g. ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@ec2-54-203-55-171.us-west-2.compute.amazonaws.com)
+
+source /opt/python/run/venv/bin/activate
+cd /opt/python/current/app
+
+
+deactivate
+logout

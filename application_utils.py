@@ -39,36 +39,20 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
     'S3_SECRET_ACCESS_KEY': os.environ['S3_SECRET_ACCESS_KEY'],
     'SECRET_KEY': os.environ['SECRET_KEY'], # CSRF secret key
   })
-  application.debug = False
   # Enforce HTTPS only in the presence of a certificate
-  application.before_request(http_to_https)
+  # TODO: Finish setting up HTTPS
+  # https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/https-singleinstance-python.html
+  # application.before_request(http_to_https)
+  application.debug = False
 else: # Running locally
   application.config.update({
     'SQLALCHEMY_DATABASE_URI':'sqlite:///:memory:',
     'SECRET_KEY': 'default',
   })
-  application.after_request(disable_caching)
+  application.after_request(disable_caching) # Auto-reload should not cache contents.
   application.debug = True # Required to do auto-reload
 
-def request_is_authorized():
-  # Re-using the s3 key/secret key as a username/password to protect certain pages
-  username = application.config.get('S3_ACCESS_KEY')
-  password = application.config.get('S3_SECRET_ACCESS_KEY')
-  if username is None or password is None:
-    return True # No user/pass specified, allow access
-  if not request.authorization:
-    return False # No auth provided, block access
-  if (username == request.authorization.username and
-      password == request.authorization.password):
-    return True # Correct user/pass provided, allow access
-
-  return False # Default, block access
-
-def __static_content_func(protected, filename):
-  if protected and not request_is_authorized():
-    # Contents, HTTP code, headers
-    return '', 401, {'WWW-Authenticate': 'Basic realm=""'}
-
+def __static_content_func(filename):
   root, file = filename.rsplit('/', 1)
   return send_from_directory(root, file)
 
