@@ -75,7 +75,7 @@ function _showSolution(solutions, num, side) {
     nextSolution.onclick = function() {_showSolution(solutions, num + 1, side)}
   }
   if (solutions[num] != undefined) {
-    window.draw(solutions[num], side)
+    window.draw(solutions[num].clone(), side)
   }
   document.getElementById('solutionViewer-' + side).style.display = null
 }
