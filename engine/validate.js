@@ -1,5 +1,7 @@
 // Settings (todo: Expose to the user/puzzlemaker?)
 window.NEGATIONS_CANCEL_NEGATIONS = true
+window.SHAPELESS_ZERO_POLY = true
+window.PRECISE_POLYOMINOS = true
 
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Whether or not the puzzle is valid

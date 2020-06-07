@@ -73,23 +73,27 @@ function polyominoFromPolyshape(polyshape, ylop=false) {
       if (!_isSet(polyshape, x, y)) continue
       polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y)})
 
-      if (ylop) {
-        // Ylops fill up/left if no adjacent cell, and always fill bottom/right
-        if (!_isSet(polyshape, x - 1, y)) {
-          polyomino.push({'x':2*(x - topLeft.x) - 1, 'y':2*(y - topLeft.y)})
-        }
-        if (!_isSet(polyshape, x, y - 1)) {
-          polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) - 1})
-        }
-        polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
-        polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
-      } else {
-        // Normal polys only fill bottom/right if there is an adjacent cell.
-        if (_isSet(polyshape, x + 1, y)) {
+      // "Precise" polyominos adds cells in between the apparent squares in the polyomino.
+      // This prevents the solution line from going through polyominos in the solution.
+      if (window.PRECISE_POLYOMINOS) {
+        if (ylop) {
+          // Ylops fill up/left if no adjacent cell, and always fill bottom/right
+          if (!_isSet(polyshape, x - 1, y)) {
+            polyomino.push({'x':2*(x - topLeft.x) - 1, 'y':2*(y - topLeft.y)})
+          }
+          if (!_isSet(polyshape, x, y - 1)) {
+            polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) - 1})
+          }
           polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
-        }
-        if (_isSet(polyshape, x, y + 1)) {
           polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
+        } else {
+          // Normal polys only fill bottom/right if there is an adjacent cell.
+          if (_isSet(polyshape, x + 1, y)) {
+            polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
+          }
+          if (_isSet(polyshape, x, y + 1)) {
+            polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
+          }
         }
       }
     }
@@ -140,6 +144,10 @@ function polyFit(region, puzzle) {
   if (polyCount > 0 && polyCount !== regionSize) {
     console.log('Combined size of polyominos and onimoylops', polyCount, 'does not match region size', regionSize)
     return false
+  }
+  if (polyCount === 0 && window.SHAPELESS_ZERO_POLY) {
+    console.log('Combined size of polyominos and onimoylops is zero')
+    return true
   }
   if (polyCount < 0) {
     console.log('Combined size of onimoylops is greater than polyominos by', -polyCount)
