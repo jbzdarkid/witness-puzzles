@@ -1,12 +1,5 @@
 Server setup:
 
-Go to https://us-west-2.console.aws.amazon.com/ec2/v2/home#Instances
-Right click on the instance -> Connect, then copy the ssh connection string
-(e.g. ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@ec2-54-203-55-171.us-west-2.compute.amazonaws.com)
-
-sudo chmod 644 install-google-chrome.sh
-sudo bash install-google-chrome.sh
-
 # Installing Apache (?) or at least downstream dependecies of it
 sudo yum provides mod24_ssl
 sudo yum install mod24_ssl
@@ -27,14 +20,35 @@ sudo vim /etc/httpd/conf.d/ssl.conf
 # Restart the server
 
 
-source /opt/python/run/venv/bin/activate
+
+
+# Every time the server is reinstalled, follow these steps:
+
+# Go to https://us-west-2.console.aws.amazon.com/ec2/v2/home#Instances
+# Right click on the instance -> Connect, then copy the ssh connection string
+# (e.g. ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@ec2-54-203-55-171.us-west-2.compute.amazonaws.com)
+
+# Once connected, run this:
 cd /opt/python/current/app
-# Muck with the app
+sudo chmod 644 install-google-chrome.sh
+sudo bash install-google-chrome.sh
+
+cd /usr/local/bin
+sudo yum-config-manager --enable epel
+sudo wget https://dl.eff.org/certbot-auto
+sudo chown root certbot-auto
+sudo chmod 755 certbot-auto
+sudo ./cerbot-auto --debug
+
+
+
+# If you want to muck around more, run:
+source /opt/python/run/venv/bin/activate
 deactivate
 logout
 
 
-Local dev setup:
+# Local development setup:
 ./venv/Scripts/activate
 py -3 -m pip install --user -r requirements.txt
 py -3 application.py
