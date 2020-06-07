@@ -14,7 +14,7 @@ function _readPuzzleList() {
 }
 
 function _writePuzzleList(puzzleList) {
-  if (puzzleList == undefined) throw "Attempted to write puzzle list but none was provided"
+  if (puzzleList == undefined) throw 'Attempted to write puzzle list but none was provided'
   window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
 
@@ -449,7 +449,7 @@ function publishPuzzle() {
   }
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
   request.open('POST', '/publish', true)
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
   var requestBody = 'title=' + puzzle.name
   delete puzzle.name // Puzzle name should be sourced only from the title

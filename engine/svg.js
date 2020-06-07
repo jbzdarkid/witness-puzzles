@@ -80,7 +80,7 @@ function _poly(svg, params) {
   var polyomino = window.polyominoFromPolyshape(params.polyshape)
 
   var bounds = {'xmin':0, 'xmax':0, 'ymin':0, 'ymax':0}
-  for (var pos of polyomino) {
+  for (var pos in polyomino) {
     bounds.xmin = Math.min(bounds.xmin, pos.x)
     bounds.xmax = Math.max(bounds.xmax, pos.x)
     bounds.ymin = Math.min(bounds.ymin, pos.y)
@@ -90,7 +90,7 @@ function _poly(svg, params) {
   var centerX = (params.width - size - offset * (bounds.xmax + bounds.xmin)) / 2 + params.x
   var centerY = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
 
-  for (var pos of polyomino) {
+  for (var pos in polyomino) {
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var rect = createElement('rect')
     svg.appendChild(rect)
@@ -114,7 +114,7 @@ function _ylop(svg, params) {
   var polyomino = window.polyominoFromPolyshape(params.polyshape)
 
   var bounds = {'xmin':0, 'xmax':0, 'ymin':0, 'ymax':0}
-  for (var pos of polyomino) {
+  for (var pos in polyomino) {
     bounds.xmin = Math.min(bounds.xmin, pos.x)
     bounds.xmax = Math.max(bounds.xmax, pos.x)
     bounds.ymin = Math.min(bounds.ymin, pos.y)
@@ -124,7 +124,7 @@ function _ylop(svg, params) {
   var centerX = (params.width - size - offset * (bounds.xmax + bounds.xmin)) / 2 + params.x
   var centerY = (params.height - size - offset * (bounds.ymax + bounds.ymin)) / 2 + params.y
 
-  for (var pos of polyomino) {
+  for (var pos in polyomino) {
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var poly = createElement('polygon')
     svg.appendChild(poly)

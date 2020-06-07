@@ -51,7 +51,7 @@ var tracks = {
 
 function PLAY_SOUND(track) {
   console.log('Playing sound:', track)
-  for (var audio of Object.values(tracks)) {
+  for (var audio in Object.values(tracks)) {
     audio.pause()
     audio.currentTime = 0
   }

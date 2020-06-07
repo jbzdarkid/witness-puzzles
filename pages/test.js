@@ -835,5 +835,21 @@ var tests = {
     puzzle.grid[4][0].end = 'right'
     puzzle.grid[4][6].end = 'right'
     return [puzzle, 2]
+  }, 'inconsistent-negation': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[1][1] = {'type':'nega', 'color':'red'}
+    puzzle.grid[3][1] = {'type':'star', 'color':'red'}
+    puzzle.grid[5][1] = {'type':'square', 'color':'red'}
+    puzzle.grid[1][3] = {'type':'nega', 'color':'green'}
+    puzzle.grid[3][3] = {'type':'star', 'color':'green'}
+    puzzle.grid[8][0].end = 'right'
+    return [puzzle, 0]
+  }, 'dumb-triple-triangle': function() {
+    var puzzle = new Puzzle(1, 1, true)
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[1][1] = {'type':'triangle', 'count':3, 'color':'orange'}
+    puzzle.grid[1][2].start = true
+    return [puzzle, 2]
   }
 }

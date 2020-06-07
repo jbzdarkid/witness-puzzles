@@ -227,6 +227,6 @@ function _regionCheck(puzzle, region) {
       }
     }
   }
-  console.log('Region has', invalidElements.length, 'invalid elements')
+  console.log('Region has', invalidElements.length, 'invalid elements:', JSON.stringify(invalidElements))
   return invalidElements
 }
