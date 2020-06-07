@@ -345,6 +345,9 @@ function loadHeader(titleText) {
 
 
 
+/// ------------
+/// Everything below this is legacy, and should not be used.
+/// ============
 
 
 function loadFeedback() {
@@ -387,7 +390,8 @@ function showSettings() {
 }
 
 // @Cleanup: Settings should live in one variable in localStorage, it makes it easier to save them / persist them across clears
-function loadSettings(parent=document.currentScript.parentElement) {
+function loadSettings(parent) {
+  parent = parent || document.currentScript.parentElement
   var parentDiv = document.createElement('div')
   parent.appendChild(parentDiv)
   parentDiv.style.position = 'absolute'
@@ -481,7 +485,8 @@ function loadSettings(parent=document.currentScript.parentElement) {
   }
 }
 
-function createLink(href, title, parent=document.currentScript.parentElement) {
+function createLink(href, title, parent) {
+  parent = parent || document.currentScript.parentElement
   var link = document.createElement('label')
   parent.appendChild(link)
   link.onclick = function() {

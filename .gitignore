@@ -3,3 +3,4 @@
 *.jar
 venv/
 sourcemaps/
+*.zip

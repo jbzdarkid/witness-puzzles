@@ -7,12 +7,34 @@ Right click on the instance -> Connect, then copy the ssh connection string
 sudo chmod 644 install-google-chrome.sh
 sudo bash install-google-chrome.sh
 
+# Installing Apache (?) or at least downstream dependecies of it
+sudo yum provides mod24_ssl
+sudo yum install mod24_ssl
+sudo yum install openssl
+
+# Disable mpm_prefork, and enable mpm_event
+sudo vim /etc/httpd/conf.modules.d/00-mpm.conf
+# Add these lines:
+Protocols h2 http/1.1
+Protocols h2 h2c http/1.1
+# Then, restart the server
+
+# Make a self-signed cert (to test yourself)
+cd /etc/pki/tls/certs
+sudo ./make-dummy-cert localhost.crt
+sudo vim /etc/httpd/conf.d/ssl.conf
+:source /home/ec2-user/.vimrc
+# Restart the server
+
+
 source /opt/python/run/venv/bin/activate
 cd /opt/python/current/app
+# Muck with the app
 deactivate
 logout
 
 
 Local dev setup:
+./venv/Scripts/activate
 py -3 -m pip install --user -r requirements.txt
 py -3 application.py

@@ -138,11 +138,11 @@ function polyFit(region, puzzle) {
     return true
   }
   if (polyCount > 0 && polyCount !== regionSize) {
-    console.log('Combined size of polyominos', polyCount, 'does not match region size', regionSize)
+    console.log('Combined size of polyominos and onimoylops', polyCount, 'does not match region size', regionSize)
     return false
   }
   if (polyCount < 0) {
-    console.log('More onimoylops than polyominos by', -polyCount)
+    console.log('Combined size of onimoylops is greater than polyominos by', -polyCount)
     return false
   }
 
@@ -247,17 +247,27 @@ function _placePolys(polys, puzzle) {
     return false
   }
 
+  var attemptedPolyshapes = []
   for (var openCell of openCells) {
     for (var i=0; i<polys.length; i++) {
       var poly = polys.splice(i, 1)[0]
       console.spam('Selected poly', poly)
       for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
+        if (attemptedPolyshapes.includes(polyshape)) {
+          console.spam('Polyshape', polyshape, 'has already been attempted')
+          continue
+        }
+        attemptedPolyshapes.push(polyshape)
         var cells = polyominoFromPolyshape(polyshape)
-        if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) continue
+        if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
+          console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
+          continue
+        }
         console.group('')
         if (_placePolys(polys, puzzle)) return true
         console.groupEnd('')
-        if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, -1)) continue
+        // Should not fail, as it's an inversion of the above _tryPlacePolyshape
+        _tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, -1)
       }
       polys.splice(i, 0, poly)
     }
