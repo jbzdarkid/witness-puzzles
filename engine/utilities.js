@@ -52,8 +52,10 @@ var tracks = {
 function PLAY_SOUND(track) {
   console.log('Playing sound:', track)
   for (var audio in Object.values(tracks)) {
-    audio.pause()
-    audio.currentTime = 0
+    if (audio.pause) {
+      audio.pause()
+      audio.currentTime = 0
+    }
   }
   tracks[track].volume = localStorage.volume
   tracks[track].play()

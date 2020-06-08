@@ -39,11 +39,8 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
     'S3_SECRET_ACCESS_KEY': os.environ['S3_SECRET_ACCESS_KEY'],
     'SECRET_KEY': os.environ['SECRET_KEY'], # CSRF secret key
   })
-  # Enforce HTTPS only in the presence of a certificate
-  # TODO: Finish setting up HTTPS
-  # https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/https-singleinstance.html
-  # https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/https-singleinstance-python.html
-  # application.before_request(http_to_https)
+  # Enforce HTTPS-only in the presence of a certificate
+  application.before_request(http_to_https)
   application.debug = False
 else: # Running locally
   application.config.update({
