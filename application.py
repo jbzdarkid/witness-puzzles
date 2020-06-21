@@ -117,6 +117,8 @@ if __name__ == '__main__':
   for root, dirs, files in os.walk('.'):
     if 'images' in root:
       continue
+    if '.git' in root:
+      continue
     for file in files:
       extra_files.append(root + os.sep + file)
   application.run(extra_files=extra_files)
