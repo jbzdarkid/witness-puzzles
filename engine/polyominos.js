@@ -255,8 +255,8 @@ function _placePolys(polys, puzzle) {
     return false
   }
 
-  var attemptedPolyshapes = []
   for (var openCell of openCells) {
+    var attemptedPolyshapes = []
     for (var i=0; i<polys.length; i++) {
       var poly = polys.splice(i, 1)[0]
       console.spam('Selected poly', poly)
