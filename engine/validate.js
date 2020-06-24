@@ -112,7 +112,8 @@ function _regionCheckNegations(puzzle, region) {
   }
   console.debug('Found negation symbols:', JSON.stringify(negationSymbols))
   // Get a list of elements that are currently invalid (before any negations are applied)
-  var invalidElements = _regionCheck(puzzle, region)
+  var regionData = _regionCheck(puzzle, region)
+  var invalidElements = regionData.veryInvalidElements.concat(regionData.invalidElements)
   console.log('Negation-less regioncheck returned invalid elements:', JSON.stringify(invalidElements))
   // Set 'nonce' back to 'nega' for the negation symbols
   for (var nega of negationSymbols) {
@@ -169,6 +170,7 @@ function _regionCheckNegations(puzzle, region) {
 // Since the path must be complete at this point, returns only true or false
 function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
+  var veryInvalidElements = []
   var invalidElements = []
 
   var coloredObjects = {}
@@ -180,7 +182,7 @@ function _regionCheck(puzzle, region) {
     // Check for uncovered dots
     if (cell.dot > 0) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
-      invalidElements.push(pos)
+      veryInvalidElements.push(pos)
     }
 
     // Check for triangles
@@ -192,7 +194,7 @@ function _regionCheck(puzzle, region) {
       if (puzzle.getLine(pos.x, pos.y + 1) > 0) count++
       if (cell.count !== count) {
         console.log('Triangle at grid['+pos.x+']['+pos.y+'] has', count, 'borders')
-        invalidElements.push(pos)
+        veryInvalidElements.push(pos)
       }
     }
 
@@ -216,7 +218,10 @@ function _regionCheck(puzzle, region) {
         invalidElements.push(pos)
       }
     } else if (cell.type === 'star') {
-      if (coloredObjects[cell.color] !== 2) {
+      if (coloredObjects[cell.color] === 1) {
+        console.log('Found a', cell.color, 'star in a region with 1', cell.color, 'object')
+        veryInvalidElements.push(pos)
+      } else if (coloredObjects[cell.color] > 2) {
         console.log('Found a', cell.color, 'star in a region with', coloredObjects[cell.color], cell.color, 'objects')
         invalidElements.push(pos)
       }
@@ -232,6 +237,11 @@ function _regionCheck(puzzle, region) {
       }
     }
   }
-  console.log('Region has', invalidElements.length, 'invalid elements:', JSON.stringify(invalidElements))
-  return invalidElements
+  console.log('Region has', veryInvalidElements.length, 'invalid elements:', JSON.stringify(veryInvalidElements))
+  console.log('Region has', invalidElements.length, 'very invalid elements:', JSON.stringify(invalidElements))
+  return {
+    'veryInvalidElements': veryInvalidElements,
+    'invalidElements': invalidElements,
+    'valid': invalidElements.length === 0 && veryInvalidElements === 0
+  }
 }
