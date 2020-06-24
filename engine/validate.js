@@ -1,4 +1,4 @@
-// Settings (todo: Expose to the user/puzzlemaker?)
+// Validation settings
 window.NEGATIONS_CANCEL_NEGATIONS = true
 window.SHAPELESS_ZERO_POLY = true
 window.PRECISE_POLYOMINOS = true
@@ -66,9 +66,12 @@ function validate(puzzle) {
   }
 
   // Perf optimization: We can skip computing regions if the grid has no symbols.
-  if (!puzzleHasSymbols) { // No additional symbols, and we already checked dots & gaps
+  if (!puzzleHasSymbols) {
+    // No complex symbols in the puzzle (i.e. symbols which require a region to determine)
+    // We have checked for dots, triangles, and gaps, but they are not 'symbols' in that sense.
     puzzle.valid = puzzle.valid && (puzzle.invalidElements.length === 0)
-  } else { // Additional symbols, so we need to discard dots & divide them by region
+  } else {
+    // Additional symbols, so we need to discard computation & divide the puzzle by regions
     puzzle.invalidElements = []
     var regions = puzzle.getRegions()
     console.log('Found', regions.length, 'regions')

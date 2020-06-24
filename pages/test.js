@@ -18,6 +18,7 @@ window.onload = function() {
     try {
       var puzzleData = tests[testName]()
       var puzzle = puzzleData[0]
+      puzzle.name = testName
       var expectedSolutions = puzzleData[1]
       window.draw(puzzle, testName)
       var solutions = window.solve(puzzle)
@@ -836,6 +837,44 @@ var tests = {
     puzzle.grid[4][6].end = 'right'
     return [puzzle, 2]
   }, 'inconsistent-negation': function() {
+    /* Solving RRRR UUUU:
+      Found a red star in a region with 3 red objects
+      Negation-less regioncheck returned invalid elements: [{"x":3,"y":1}]
+
+      Pairing 1:
+      Negation (1, 3) // green
+      Target (1, 1) red negation
+      -> Failed (Found a green star in a region with 1 green objects)
+
+      Pairing 2:
+      Negation (1, 3) // green
+      Target (3, 1) // red star
+      -> Failed (Found a green star in a region with 1 green objects)
+        Pairing 2a:
+        Negation (1, 1) // red
+        Target (3, 3) // green star
+        -> Success
+    */
+
+    /* Solving UUUU RRRR:
+      Found a red star in a region with 3 red objects
+      Negation-less regioncheck returned invalid elements: [{"x":3,"y":1}]
+
+      Pairing 1:
+      Negation (1, 1) // red
+      Target (1, 3) // green negation
+      Failed (Found a green star in a region with 1 green objects)
+
+      Pairing 2:
+      Negation (1, 1) // red
+      Target (3, 1) // red star
+      Failed (Not enough elements left to create a negation pair)
+
+      It's not valid to target (3, 3) -- even though it was above -- because it gets re-evaulated.
+      But, realistically, we entered this with 1 invalid object and two negations. We should be failing.
+      There's also no in-game proof that there is re-evaluation, all the game promises is that negations can cancel each other.
+    */
+
     var puzzle = new Puzzle(4, 4)
     puzzle.grid[0][8].start = true
     puzzle.grid[1][1] = {'type':'nega', 'color':'red'}

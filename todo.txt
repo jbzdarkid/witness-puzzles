@@ -1,15 +1,7 @@
-In vague order of importance.
+- Work on speedrunning solver / improving "unique puzzles"
+  Simplest approach is just to have a simpler cache key, which is content-aware.
 
-High Prio
--- Mobile UI is terrible / non-functional.
--- Formal object for lines?
-    Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
--- Error reporting doesn't work on minified code: 'u' on Line 1 is not useful.
-    Disabled minification for a week, let's see how it goes.
--- Can't resume from cursor in play mode
-    Can't repro
--- Potential perf improvements with validation by using references to cells, not cells themselves.
--- Update deps
+
 
 Browse
 -- "Jump to top" button
@@ -24,17 +16,16 @@ Browse
 
 Editor
 -- R symmetry pillars are just broken, resizing them does amazingly dumb stuff
+-- Changing type to R symmetry pillar still is buggy. See tests.
 -- Empty title should probably "work", maybe have an explicit 'title box'?
 -- Clicking 'solve manually' should probably clear auto-solution
--- Can't resume from cursor in 'solve manually'
-    Can't repro...
--- Changing type to R symmetry pillar still is buggy. See tests.
 -- Look into "cancel" solving? Might be hard, since I'm on main thread.
     Hard, look into old worker code
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.
 -- Just lower the max puzzle size. 8x8 max? 10 just seems... humongous.
+-- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward
@@ -44,7 +35,7 @@ Tracing
 
 Server
 -- Start versioning JS? That way caching works and doesn't shoot me in the foot.
--- Signin?
+-- Sign-in?
 
 Tutorial
 -- Make a list of all the differences from the game (each needs a tutorial or a setting)
@@ -59,13 +50,13 @@ Tutorial
 -- Sadly, need to explain normal mechanics
     The best option here is to cherry-pick puzzles from the base game.
     That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
+-- Should also have an explanation for the different 'styles' (which is probably how I'll implement settings)
 
-Low Prio
+Low Prio / Misc
 -- Shift-click should jump by 10 in showSolution
 -- "Edit this puzzle"?
 -- Add all puzzles in the game to the system. Maybe a separate category / identifier?
     Add tests & speedrunner solver
--- Have feedback link to session ID?
 -- Add 'happy' to feedback?
 -- Favicon still needs improving
     RM the dot, it's invisible
@@ -73,16 +64,8 @@ Low Prio
 -- Animation for start-grow isn't playing for primary line
 -- Improvements to publish.py
     Javascript versioning/hashing would be nice
--- ES6 modernization
-    JS supports 'format strings', via `foo ${bar}`
-    Replace XMLHttpRequest with Fetch
 -- Fix generation colors / general improvements to random puzzles
     >general support for random puzzles
--- Hide solution (puzzleData) from global scope
-    I think this is legacy from the old index.html, solve is no longer directly possible
--- change all divs to auto-centering? It's all I seem to use them for rn
-    Maybe have a class="centered"
-    Everything inherits body here
 -- transform: scale(2) doesn't work on safari?
     Checkboxes are terrible. Maybe write my own?
 -- random generation for challenges
@@ -90,5 +73,8 @@ Low Prio
     use trace callback func
     maze can be 'click to reveal' like memory card game
     should play the music if I can
--- Getting a timeout on BD5CD4CF with (RRRR UUUU) -- good place to look at perf
 -- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
+-- Mobile UI is terrible / non-functional.
+-- Update deps (?)
+-- Formal object for lines?
+    Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.
