@@ -306,7 +306,7 @@ class Puzzle {
     for (var x=0; x<this.grid.length; x++) {
       for (var y=0; y<this.grid[x].length; y++) {
         if (x%2 === 1 && y%2 === 1) continue
-        else Object.assign(this.grid[x][y], {'color':0, 'dir':undefined})
+        Object.assign(this.grid[x][y], {'color':0, 'dir':undefined})
       }
     }
   }
@@ -400,6 +400,10 @@ class Puzzle {
         // This will also mark all lines inside the new region as used.
         var region = new Region(this.grid.length)
         this._floodFill(x, y, region)
+        // *-*-* I'm not certain this is a good idea, but it potentially saves perf of people asking about it over and over again.
+        for (var i=0; i<region.cells.length; i++) {
+          region.cells[i]['cell'] = savedGrid[region.cells[i].x][region.cells[i].y]
+        }
         regions.push(region)
       }
     }

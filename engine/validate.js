@@ -69,7 +69,7 @@ function validate(puzzle) {
   if (!puzzleHasSymbols) {
     // No complex symbols in the puzzle (i.e. symbols which require a region to determine)
     // We have checked for dots, triangles, and gaps, but they are not 'symbols' in that sense.
-    puzzle.valid = puzzle.valid && (puzzle.invalidElements.length === 0)
+    puzzle.valid &= (puzzle.invalidElements.length === 0)
   } else {
     // Additional symbols, so we need to discard computation & divide the puzzle by regions
     puzzle.invalidElements = []
@@ -83,8 +83,6 @@ function validate(puzzle) {
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
         regionData = _regionCheckNegations(puzzle, region)
-        // Entirely for convenience
-        regionData.valid = (regionData.invalidElements.length === 0)
         console.log('Region valid:', regionData.valid)
 
         if (!window.DISABLE_CACHE) {
@@ -93,7 +91,7 @@ function validate(puzzle) {
       }
       puzzle.negations = puzzle.negations.concat(regionData.negations)
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-      puzzle.valid = puzzle.valid && regionData.valid
+      puzzle.valid &= regionData.valid
     }
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
@@ -103,11 +101,11 @@ function _regionCheckNegations(puzzle, region) {
   // Get a list of negation symbols in the grid, and set them to 'nonce'
   var negationSymbols = []
   for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
+    var cell = pos.cell
     if (cell != undefined && cell.type === 'nega') {
       cell.type = 'nonce'
       puzzle.setCell(pos.x, pos.y, cell)
-      negationSymbols.push({'x':pos.x, 'y':pos.y, 'cell':cell})
+      negationSymbols.push(pos)
     }
   }
   console.debug('Found negation symbols:', JSON.stringify(negationSymbols))
@@ -139,7 +137,6 @@ function _regionCheckNegations(puzzle, region) {
     }
   }
   for (var invalidElement of invalidElements) {
-    invalidElement.cell = puzzle.getCell(invalidElement.x, invalidElement.y)
     console.spam('Negating', invalidElement.cell, 'at', invalidElement.x, invalidElement.y)
 
     // Remove the negation and target, then recurse
@@ -237,11 +234,12 @@ function _regionCheck(puzzle, region) {
       }
     }
   }
-  console.log('Region has', veryInvalidElements.length, 'invalid elements:', JSON.stringify(veryInvalidElements))
-  console.log('Region has', invalidElements.length, 'very invalid elements:', JSON.stringify(invalidElements))
+  console.debug('Region has', veryInvalidElements.length, 'very invalid elements:', JSON.stringify(veryInvalidElements))
+  console.debug('Region has', invalidElements.length, 'invalid elements:', JSON.stringify(invalidElements))
   return {
     'veryInvalidElements': veryInvalidElements,
     'invalidElements': invalidElements,
-    'valid': invalidElements.length === 0 && veryInvalidElements === 0
+    'negations': [],
+    'valid': (invalidElements.length === 0 && veryInvalidElements.length === 0)
   }
 }
