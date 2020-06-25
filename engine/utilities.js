@@ -37,7 +37,6 @@ window.onerror = function(message, url, line) {
   FEEDBACK(message + ' on line ' + line)
   if (window_onerror == undefined) {
     console.error('Parse error in file ' + url + ' on line ' + line)
-    assert(false)
   } else {
     window_onerror(message, url, line)
   }

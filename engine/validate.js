@@ -82,7 +82,7 @@ function validate(puzzle) {
       var regionData = puzzle.regionCache[key]
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
-        regionData = _regionCheckNegations(puzzle, region)
+        regionData = _regionCheckNegations2(puzzle, region)
         console.log('Region valid:', regionData.valid)
 
         if (!window.DISABLE_CACHE) {
@@ -95,6 +95,188 @@ function validate(puzzle) {
     }
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
+}
+
+function _negationCombinations(puzzle, negationSymbols, invalidElements, index=0) {
+  if (negationSymbols.length === 0) return [[]]
+
+  var combinations = []
+  var source = negationSymbols.pop()
+
+  for (var i=index; i<invalidElements.length; i++) {
+    var target = invalidElements[index]
+    var subCombinations = _negationCombinations(puzzle, negationSymbols, invalidElements, index + 1)
+    for (var j=0; j<subCombinations.length; j++) {
+      subCombinations[j].push({'source':source, 'target':target})
+      combinations.push(subCombinations[j])
+    }
+  }
+
+  if (window.NEGATIONS_CANCEL_NEGATIONS) {
+    for (var i=index; i<negationSymbols.length + invalidElements.length; i++) {
+      var target = negationSymbols[i - invalidElements.length]
+      var subCombinations = _negationCombinations(puzzle, negationSymbols, invalidElements, index + 1)
+      for (var j=0; j<subCombinations.length; j++) {
+        subCombinations[j].push({'source':source, 'target':target})
+        combinations.push(subCombinations[j])
+      }
+    }
+  }
+
+  negationSymbols.push(source)
+  return combinations
+}
+
+function _regionCheckNegations3(puzzle, region, negationSymbols, invalidElements, index=0) {
+  // Base case 0
+  if (negationSymbols.length === 0) {
+    return _regionCheck(puzzle, region)
+  }
+
+  window.NEGATIONS_CANCEL_NEGATIONS = false
+  // Base case 1
+  if (!window.NEGATIONS_CANCEL_NEGATIONS) {
+    if (index >= invalidElements.length) {
+      console.debug(negationSymbols.length, 'negation symbol(s) left over with nothing to negate')
+      for (var pos of negationSymbols) {
+        puzzle.updateCell(pos.x, pos.y, {'type':'nonce'})
+      }
+      var regionData = _regionCheck(puzzle, region)
+      for (var pos of negationSymbols) {
+        puzzle.updateCell(pos.x, pos.y, {'type':'nega'})
+        regionData.invalidElements.push(pos)
+      }
+      regionData.valid = false
+      return regionData
+    }
+  } else {
+    if (index >= invalidElements.length + negationSymbols.length) {
+      // TODO.
+    }
+  }
+
+  var source = negationSymbols.pop()
+  puzzle.setCell(source.x, source.y, null)
+  for (var i=index; i<invalidElements.length; i++) {
+    var target = invalidElements[i]
+    console.spam('Attempting negation pair', source, target)
+
+    console.group()
+    puzzle.setCell(target.x, target.y, null)
+    var regionData = _regionCheckNegations3(puzzle, region, negationSymbols, invalidElements, index + 1)
+    puzzle.setCell(target.x, target.y, target.cell)
+    console.groupEnd()
+
+    if (regionData.valid) break
+  }
+
+  if (window.NEGATIONS_CANCEL_NEGATIONS) {
+    // TODO.
+  }
+
+  puzzle.setCell(source.x, source.y, source.cell)
+  assert(regionData)
+  regionData.negations.push({'source':source, 'target':target})
+  return regionData
+  /*
+  if (window.NEGATIONS_CANCEL_NEGATIONS) {
+    for (var i=index; i<negationSymbols.length + invalidElements.length; i++) {
+      var target = negationSymbols[i - invalidElements.length]
+
+      puzzle.setCell(target.x, target.y, null)
+      regionData = _regionCheckNegations3(puzzle, region, negationSymbols, invalidElements, index + 1)
+      puzzle.setCell(target.x, target.y, target.cell)
+
+      if (regionData.valid) break
+    }
+  }
+  */
+}
+
+function _regionCheckNegations2(puzzle, region) {
+  // Get a list of negation symbols in the grid, and set them to 'nonce'
+  var negationSymbols = []
+  for (var pos of region.cells) {
+    var cell = pos.cell
+    if (cell != undefined && cell.type === 'nega') {
+      negationSymbols.push(pos)
+      puzzle.updateCell(pos.x, pos.y, {'type': 'nonce'})
+    }
+  }
+  console.debug('Found negation symbols:', JSON.stringify(negationSymbols))
+  // Get a list of elements that are currently invalid (before any negations are applied)
+  var regionData = _regionCheck(puzzle, region)
+  console.debug('Negation-less regioncheck valid:', regionData.valid)
+  // Set 'nonce' back to 'nega' for the negation symbols
+  for (var pos of negationSymbols) {
+    puzzle.updateCell(pos.x, pos.y, {'type': 'nega'})
+  }
+
+  var combinations = []
+  if (negationSymbols.length === 0) return regionData
+
+  var invalidElements = regionData.invalidElements
+  var veryInvalidElements = regionData.veryInvalidElements
+
+  console.debug('Forcibly negating', veryInvalidElements.length, 'symbols')
+  var baseCombination = []
+  while (negationSymbols.length > 0 && veryInvalidElements.length > 0) {
+    var source = negationSymbols.pop()
+    var target = veryInvalidElements.pop()
+    puzzle.setCell(source.x, source.y, null)
+    puzzle.setCell(target.x, target.y, null)
+    baseCombination.push({'source':source, 'target':target})
+  }
+  console.debug('Base combination:', JSON.stringify(baseCombination))
+
+  /*
+  // If there are no more negation symbols, just return the basic combination.
+  // Maybe it's good enough (or maybe there are still veryInvalidElements). In either case, we have nothing else to try.
+  if (negationSymbols.length === 0) {
+    combinations.push([]) // Push empty, will be concatenated later.
+    console.debug('No remaining negation symbols left, just using baseCombination', baseCombination)
+    console.debug('There are still', veryInvalidElements.length, 'very invalid elements')
+  } else {
+    // Note that, at this point we can assume that veryInvalidElements.length === 0. Otherwise, we wouldn't exit the loop!
+    combinations = _negationCombinations(puzzle, negationSymbols, invalidElements)
+    console.debug('There are', negationSymbols.length, 'remaining negation symbols, resulting in', combinations.length, 'combinations')
+  }
+  */
+
+  var regionData = _regionCheckNegations3(puzzle, region, negationSymbols, invalidElements)
+
+  // Restore required negations
+  for (var combination of baseCombination) {
+    puzzle.setCell(combination.source.x, combination.source.y, combination.source.cell)
+    puzzle.setCell(combination.target.x, combination.target.y, combination.target.cell)
+    regionData.negations.push(combination)
+  }
+  return regionData
+
+  /*
+  for (var i=0; i<combinations.length; i++) {
+    var combination = combinations[i].concat(baseCombination)
+    console.spam('Attempting combatination', i, JSON.stringify(combination))
+    for (var j=0; j<combination.length; j++) {
+      puzzle.setCell(combination[j].source.x, combination[j].source.y, null)
+      puzzle.setCell(combination[j].target.x, combination[j].target.y, null)
+    }
+    regionData = _regionCheck(puzzle, region)
+    for (var j=0; j<combination.length; j++) {
+      puzzle.setCell(combination[j].source.x, combination[j].source.y, combination[j].source.cell)
+      puzzle.setCell(combination[j].target.x, combination[j].target.y, combination[j].target.cell)
+    }
+
+    if (regionData.valid) {
+      console.debug('Region is valid with negations applied, so the negation is valid!')
+      regionData['negations'] = combination
+      return regionData
+    }
+  }
+
+  console.debug('No negation combinations worked, giving up and returning the final attempt')
+  return regionData
+  */
 }
 
 function _regionCheckNegations(puzzle, region) {
