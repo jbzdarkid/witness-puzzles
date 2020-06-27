@@ -30,9 +30,6 @@ window.onload = function() {
     }
     if (solutions.length !== expectedSolutions) {
       console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
-      for (var solution of solutions) {
-        solution.logGrid()
-      }
       var border = puzzleSvg.firstChild
       border.setAttribute('stroke', 'red')
       numFailures++
@@ -123,7 +120,7 @@ var tests = {
     puzzle.grid[1][1] = {'type':'square', 'color':'orange'}
     puzzle.grid[3][1] = {'type':'square', 'color':'blue'}
     puzzle.grid[3][5] = {'type':'poly', 'color': 'yellow', 'polyshape':1}
-    return [puzzle, 41]
+    return [puzzle, 42]
   }, 'double-negation-with-double-squares': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true
@@ -133,7 +130,7 @@ var tests = {
     puzzle.grid[1][3] = {'type':'square', 'color':'orange'}
     puzzle.grid[3][3] = {'type':'square', 'color':'blue'}
     puzzle.grid[5][3] = {'type':'square', 'color':'blue'}
-    return [puzzle, 62]
+    return [puzzle, 86]
   }, 'double-negation-with-double-squares-2': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true
@@ -144,7 +141,7 @@ var tests = {
     puzzle.grid[3][3] = {'type':'square', 'color':'blue'}
     puzzle.grid[5][3] = {'type':'square', 'color':'blue'}
     puzzle.grid[2][2].dot = 1
-    return [puzzle, 80]
+    return [puzzle, 86]
   }, 'negation-complexity': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[0][4].start = true
@@ -174,7 +171,7 @@ var tests = {
     puzzle.grid[1][3] = {'type':'nega', 'color':'white'}
     puzzle.grid[3][3] = {'type':'square', 'color':'orange'}
     puzzle.grid[5][3] = {'type':'square', 'color':'orange'}
-    return [puzzle, 7]
+    return [puzzle, 5]
   }, 'negation-complexity-B1': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[0][4].start = true
