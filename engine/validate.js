@@ -97,16 +97,15 @@ function validate(puzzle) {
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
 }
 
-function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0) {
-  // Base case 0
-  if (negationSymbols.length === 0) {
+function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0, index2=0) {
+  if (index2 >= negationSymbols.length) {
+    console.debug('0 negation symbols left, returning negation-less regionCheck')
     return _regionCheck(puzzle, region)
   }
 
-  var maxIndex = invalidElements.length + (window.NEGATIONS_CANCEL_NEGATIONS ? negationSymbols.length : 0)
-
-  // Base case 1
-  if (index >= maxIndex) {
+  if (index >= invalidElements.length &&
+     (!window.NEGATIONS_CANCEL_NEGATIONS ||
+     (window.NEGATIONS_CANCEL_NEGATIONS && index2 >= negationSymbols.length - 1))) {
     console.debug(negationSymbols.length, 'negation symbol(s) left over with nothing to negate')
     for (var pos of negationSymbols) {
       puzzle.updateCell(pos.x, pos.y, {'type':'nonce'})
@@ -120,29 +119,45 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
     return regionData
   }
 
-  var source = negationSymbols.pop()
+  var source = negationSymbols[index2]
   puzzle.setCell(source.x, source.y, null)
-  
-  for (var i=index; i<maxIndex; i++) {
-    if (i < invalidElements.length) {
-      var target = invalidElements[i]
-    } else {
-      assert(window.NEGATIONS_CANCEL_NEGATIONS)
-      var target = negationSymbols[i - invalidElements.length]
-    }
+
+  var firstRegionData = null
+
+  for (var i=index; i<invalidElements.length; i++) {
+    var target = invalidElements[i]
     console.spam('Attempting negation pair', source, target)
 
     console.group()
     puzzle.setCell(target.x, target.y, null)
-    var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index + 1)
+    var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, i + 1, index2 + 1)
+    if (!firstRegionData) firstRegionData = regionData
     puzzle.setCell(target.x, target.y, target.cell)
     console.groupEnd()
 
     if (regionData.valid) break
   }
 
+  if (window.NEGATIONS_CANCEL_NEGATIONS) {
+    for (var i=index2 + 1; i<negationSymbols.length; i++) {
+      var target = negationSymbols[i]
+      console.spam('Attempting negation pair', source, target)
+
+      console.group()
+      puzzle.setCell(target.x, target.y, null)
+      var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, invalidElements.length, i + 1)
+      if (!firstRegionData) firstRegionData = regionData
+      puzzle.setCell(target.x, target.y, target.cell)
+      console.groupEnd()
+
+      if (regionData.valid) break
+    }
+  }
+
   puzzle.setCell(source.x, source.y, source.cell)
-  assert(regionData)
+  // For display purposes only. The first attempt will always pair off the most negation symbols,
+  // so it's the best choice to display (if we're going to fail).
+  if (!regionData.valid) regionData = firstRegionData
   regionData.negations.push({'source':source, 'target':target})
   return regionData
 }
