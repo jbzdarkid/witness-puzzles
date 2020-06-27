@@ -91,6 +91,7 @@ function validate(puzzle) {
       }
       puzzle.negations = puzzle.negations.concat(regionData.negations)
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
+      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
       puzzle.valid &= regionData.valid
     }
   }
@@ -131,11 +132,17 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
     console.group()
     puzzle.setCell(target.x, target.y, null)
     var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, i + 1, index2 + 1)
-    if (!firstRegionData) firstRegionData = regionData
     puzzle.setCell(target.x, target.y, target.cell)
     console.groupEnd()
 
-    if (regionData.valid) break
+    if (!firstRegionData) {
+      firstRegionData = regionData
+      firstRegionData.negations.push({'source':source, 'target':target})
+    }
+    if (regionData.valid) {
+      regionData.negations.push({'source':source, 'target':target})
+      break
+    }
   }
 
   if (window.NEGATIONS_CANCEL_NEGATIONS) {
@@ -146,20 +153,24 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
       console.group()
       puzzle.setCell(target.x, target.y, null)
       var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, invalidElements.length, i + 1)
-      if (!firstRegionData) firstRegionData = regionData
       puzzle.setCell(target.x, target.y, target.cell)
       console.groupEnd()
 
-      if (regionData.valid) break
+      if (!firstRegionData) {
+        firstRegionData = regionData
+        firstRegionData.negations.push({'source':source, 'target':target})
+      }
+      if (regionData.valid) {
+        regionData.negations.push({'source':source, 'target':target})
+        break
+      }
     }
   }
 
   puzzle.setCell(source.x, source.y, source.cell)
   // For display purposes only. The first attempt will always pair off the most negation symbols,
   // so it's the best choice to display (if we're going to fail).
-  if (!regionData.valid) regionData = firstRegionData
-  regionData.negations.push({'source':source, 'target':target})
-  return regionData
+  return (regionData.valid ? regionData : firstRegionData)
 }
 
 function _regionCheckNegations(puzzle, region) {
