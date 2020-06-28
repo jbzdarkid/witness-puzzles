@@ -432,8 +432,6 @@ class Puzzle {
     // @Performance (sorta? Not really...)
     var savedGrid = this.grid
     this.grid = maskedGrid
-    assert(maskedGrid)
-    assert(maskedGrid[0])
 
     // Mark all outside cells as 'not in any region' (aka undefined)
     assert(!this.pillar)

@@ -1,6 +1,7 @@
 window.MAX_SOLUTIONS = 10000
 // Generates a solution via DFS recursive backtracking
 // Since most mechanics are NP, this is as good as anything else, up to optimizations.
+// See: https://arxiv.org/pdf/1804.10193.pdf
 function solve(puzzle) {
   var solutions = []
   var start = (new Date()).getTime()
