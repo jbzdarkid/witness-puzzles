@@ -4,14 +4,17 @@ function solve(puzzle) {
   var solutions = []
   var start = (new Date()).getTime()
   for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+    for (var y=0; y<puzzle.grid[0].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.start === true) {
         if (puzzle.pillar) {
           _solveLoop(puzzle, x, y, solutions)
-        } else {
+        } else if (x == 0 || y == 0 || x == puzzle.grid.length - 1 || y == puzzle.grid[0].length - 1) {
+          // TODO: Support center start points.
           // @Hack: To support pass-by-reference, I'm wrapping this inside an array.
           _solveLoop2(puzzle, x, y, solutions, [], [puzzle.createMaskedGrid()])
+        } else {
+          _solveLoop(puzzle, x, y, solutions)
         }
       }
     }

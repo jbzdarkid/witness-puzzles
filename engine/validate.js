@@ -240,7 +240,8 @@ function _regionCheck(puzzle, region) {
     // Check for triangles
     if (cell.type === 'triangle') {
       var count = 0
-      if (puzzle.getLine(pos.x - 1, pos.y) > 0) count++
+      // @Bug! This does not work if the puzzle is not being live-updated. Because of course.
+      if (region.getLine(pos.x - 1, pos.y) > 0) count++
       if (puzzle.getLine(pos.x + 1, pos.y) > 0) count++
       if (puzzle.getLine(pos.x, pos.y - 1) > 0) count++
       if (puzzle.getLine(pos.x, pos.y + 1) > 0) count++

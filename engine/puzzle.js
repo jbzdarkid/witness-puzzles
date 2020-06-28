@@ -465,7 +465,7 @@ class Puzzle {
 
     for (var pos of path) {
       // Unsafe?
-      var cell = this.grid[pos.x, pos.y]
+      var cell = this.grid[pos.x][pos.y]
       if (pos.x%2 !== pos.y%2 && (cell.start === true || cell.end != undefined)) {
         // Traced lines which are mid-segment start or end points should not separate the region
         maskedGrid[pos.x][pos.y] = 0
