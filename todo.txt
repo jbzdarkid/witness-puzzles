@@ -1,10 +1,5 @@
-- WIP on inconsistent negations
-  TODO: Fix still-red puzzles
-  TODO: Fix negation fading
-
 - Work on speedrunning solver / improving "unique puzzles"
   Simplest approach is just to have a simpler cache key, which is content-aware.
-
 
 Browse
 -- "Jump to top" button
