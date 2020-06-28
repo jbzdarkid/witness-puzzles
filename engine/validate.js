@@ -104,34 +104,53 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
     return _regionCheck(puzzle, region)
   }
 
-  if (index >= invalidElements.length &&
-     (!window.NEGATIONS_CANCEL_NEGATIONS ||
-     (window.NEGATIONS_CANCEL_NEGATIONS && index2 >= negationSymbols.length - 1))) {
-    console.debug(negationSymbols.length, 'negation symbol(s) left over with nothing to negate')
-    for (var pos of negationSymbols) {
-      puzzle.updateCell(pos.x, pos.y, {'type':'nonce'})
+  if (index >= invalidElements.length) {
+    var i = index2
+    // pair off all negation symbols, 2 at a time
+    if (window.NEGATIONS_CANCEL_NEGATIONS) {
+      for (; i<negationSymbols.length-1; i+=2) {
+        var source = negationSymbols[i]
+        var target = negationSymbols[i+1]
+        puzzle.setCell(source.x, source.y, null)
+        puzzle.setCell(target.x, target.y, null)
+      }
+    }
+
+    console.debug(negationSymbols.length - i, 'negation symbol(s) left over with nothing to negate')
+    for (; i<negationSymbols.length; i++) {
+      puzzle.updateCell(negationSymbols[i].x, negationSymbols[i].y, {'type':'nonce'})
     }
     var regionData = _regionCheck(puzzle, region)
-    for (var pos of negationSymbols) {
-      puzzle.updateCell(pos.x, pos.y, {'type':'nega'})
-      regionData.invalidElements.push(pos)
+
+    i = index2
+    if (window.NEGATIONS_CANCEL_NEGATIONS) {
+      for (; i<negationSymbols.length-1; i+=2) {
+        var source = negationSymbols[i]
+        var target = negationSymbols[i+1]
+        puzzle.setCell(source.x, source.y, source.cell)
+        puzzle.setCell(target.x, target.y, target.cell)
+        regionData.negations.push({'source':source, 'target':target})
+      }
     }
-    regionData.valid = false
+    for (; i<negationSymbols.length; i++) {
+      puzzle.updateCell(negationSymbols[i].x, negationSymbols[i].y, {'type':'nega'})
+      regionData.invalidElements.push(negationSymbols[i])
+      regionData.valid = false
+    }
     return regionData
   }
 
-  var source = negationSymbols[index2]
+  var source = negationSymbols[index2++]
   puzzle.setCell(source.x, source.y, null)
 
   var firstRegionData = null
-
   for (var i=index; i<invalidElements.length; i++) {
     var target = invalidElements[i]
     console.spam('Attempting negation pair', source, target)
 
     console.group()
     puzzle.setCell(target.x, target.y, null)
-    var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, i + 1, index2 + 1)
+    var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, i + 1, index2)
     puzzle.setCell(target.x, target.y, target.cell)
     console.groupEnd()
 
@@ -142,28 +161,6 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
     if (regionData.valid) {
       regionData.negations.push({'source':source, 'target':target})
       break
-    }
-  }
-
-  if (window.NEGATIONS_CANCEL_NEGATIONS) {
-    for (var i=index2 + 1; i<negationSymbols.length; i++) {
-      var target = negationSymbols[i]
-      console.spam('Attempting negation pair', source, target)
-
-      console.group()
-      puzzle.setCell(target.x, target.y, null)
-      var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, invalidElements.length, i + 1)
-      puzzle.setCell(target.x, target.y, target.cell)
-      console.groupEnd()
-
-      if (!firstRegionData) {
-        firstRegionData = regionData
-        firstRegionData.negations.push({'source':source, 'target':target})
-      }
-      if (regionData.valid) {
-        regionData.negations.push({'source':source, 'target':target})
-        break
-      }
     }
   }
 
