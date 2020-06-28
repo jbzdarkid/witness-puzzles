@@ -110,6 +110,7 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
     path.push({'x':x, 'y':y}) // Otherwise, mark this cell as visited
   }
 
+  // @Bug, probably -- should check for end after magic.
   if (cell.end != undefined) {
     // @Performance? This just looks... dumb.
     var maskedGridCopy = JSON.parse(JSON.stringify(maskedGrid[0]))
@@ -118,45 +119,46 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
     // Maybe this is OK for solve? Just not validate()?
 
     // This also looks dumb. But it's probably quite fast...
-    var region1 = puzzle.floodFill(maskedGrid[0], path, x - 1, y - 1)
-    if (window._regionCheckNegations(puzzle, region1).valid) {
-      var region2 = puzzle.floodFill(maskedGrid[0], path, x - 1, y + 1)
-      if (window._regionCheckNegations(puzzle, region2).valid) {
-        var region3 = puzzle.floodFill(maskedGrid[0], path, x + 1, y - 1)
-        if (window._regionCheckNegations(puzzle, region3).valid) {
-          var region4 = puzzle.floodFill(maskedGrid[0], path, x + 1, y + 1)
-          if (window._regionCheckNegations(puzzle, region4).valid) {
-            // TODO: I don't really want this, ever. Only for debugging?
-            var solution = puzzle.clone()
-            for (var i=0; i<path.length; i++) {
-              var pos = path[i]
-              var dir = undefined
-              if (i == path.length - 1) dir = 'none'
-              else if (pos.x - 1 === path[i+1].x) dir = 'left'
-              else if (pos.x + 1 === path[i+1].x) dir = 'right'
-              else if (pos.y - 1 === path[i+1].y) dir = 'top'
-              else if (pos.y + 1 === path[i+1].y) dir = 'bottom'
-
-              if (solution.symmetry == undefined) {
-                solution.updateCell(pos.x, pos.y, {'color':1, 'dir':dir})
-              } else {
-                solution.updateCell(pos.x, pos.y, {'color':2, 'dir':dir})
-                var sym = solution.getSymmetricalPos(pos.x, pos.y)
-                var symDir = solution.getSymmetricalDir(dir)
-                solution.updateCell(sym.x, sym.y, {'color':3, 'dir':symDir})
-              }
-            }
-            solutions.push(solution)
-          }
+    var valid = true
+    for (var dx=-1; dx<2; dx++) {
+      for (var dy=-1; dy<2; dy++) {
+        var region = puzzle.floodFill(maskedGrid[0], path, x + dx, y + dy)
+        if (!window._regionCheckNegations(puzzle, region).valid) {
+          valid = false
+          break
         }
       }
+      if (!valid) break
+    }
+    if (valid) {
+
+      // TODO: I don't really want this, ever. Find a way to enable only for debugging?
+      var solution = puzzle.clone()
+      for (var i=0; i<path.length; i++) {
+        var pos = path[i]
+        var dir = undefined
+        if (i == path.length - 1) dir = 'none'
+        else if (pos.x - 1 === path[i+1].x) dir = 'left'
+        else if (pos.x + 1 === path[i+1].x) dir = 'right'
+        else if (pos.y - 1 === path[i+1].y) dir = 'top'
+        else if (pos.y + 1 === path[i+1].y) dir = 'bottom'
+
+        if (solution.symmetry == undefined) {
+          solution.updateCell(pos.x, pos.y, {'color':1, 'dir':dir})
+        } else {
+          solution.updateCell(pos.x, pos.y, {'color':2, 'dir':dir})
+          var sym = solution.getSymmetricalPos(pos.x, pos.y)
+          var symDir = solution.getSymmetricalDir(dir)
+          solution.updateCell(sym.x, sym.y, {'color':3, 'dir':symDir})
+        }
+      }
+      solutions.push(solution)
     }
     // Restore the previous grid and continue -- there may be other endpoints (with different regions)
     maskedGrid[0] = maskedGridCopy
   }
 
   // TODO: This logic doesn't apply to pillars.
-  assert(!puzzle.pillar)
   function isOuter(pos) {
     return pos.x <= 0 || pos.y <= 0 || pos.x >= puzzle.grid.length - 1 || pos.y >= puzzle.grid[0].length - 1
   }
