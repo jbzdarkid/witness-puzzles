@@ -8,6 +8,7 @@ function solve(puzzle) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.start === true) {
         if (puzzle.pillar) {
+          // TODO: Support pillars, somehow?
           _solveLoop(puzzle, x, y, solutions)
         } else if (x == 0 || y == 0 || x == puzzle.grid.length - 1 || y == puzzle.grid[0].length - 1) {
           // TODO: Support center start points.
@@ -93,22 +94,19 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
   if (cell.gap === 1 || cell.gap === 2) return
+  if (cell.color !== 0) return // Collided with ourselves
 
   if (puzzle.symmetry == undefined) {
-    for (var pos of path) {
-      // Compare performance to just keeping the grid up-to-date.
-      if (pos.x == x && pos.y == y) return // Collided with ourselves
-    }
-    path.push({'x':x, 'y':y}) // Otherwise, mark this cell as visited
+    puzzle.updateCell(x, y, {'color':1})
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
     if (x == sym.x && y == sym.y) return // Would collide with our reflection
-    for (var pos of path) {
-      if (pos.x == x && pos.y == y) return // Collided with ourselves
-      if (pos.x == sym.x && pos.y == sym.y) return // Collided with our reflection
-    }
-    path.push({'x':x, 'y':y}) // Otherwise, mark this cell as visited
+
+    puzzle.updateCell(x, y, {'color':2})
+    puzzle.updateCell(sym.x, sym.y, {'color':3})
   }
+
+  path.push({'x':x, 'y':y})
 
   // @Bug, probably -- should check for end after magic.
   if (cell.end != undefined) {
@@ -130,9 +128,10 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
       }
       if (!valid) break
     }
-    if (valid) {
 
+    if (valid) {
       // TODO: I don't really want this, ever. Find a way to enable only for debugging?
+      // Oh, or just move this code to wherever I need it.
       var solution = puzzle.clone()
       for (var i=0; i<path.length; i++) {
         var pos = path[i]
@@ -144,12 +143,12 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
         else if (pos.y + 1 === path[i+1].y) dir = 'bottom'
 
         if (solution.symmetry == undefined) {
-          solution.updateCell(pos.x, pos.y, {'color':1, 'dir':dir})
+          solution.updateCell(pos.x, pos.y, {'dir':dir})
         } else {
-          solution.updateCell(pos.x, pos.y, {'color':2, 'dir':dir})
+          solution.updateCell(pos.x, pos.y, { 'dir':dir})
           var sym = solution.getSymmetricalPos(pos.x, pos.y)
           var symDir = solution.getSymmetricalDir(dir)
-          solution.updateCell(sym.x, sym.y, {'color':3, 'dir':symDir})
+          solution.updateCell(sym.x, sym.y, {'dir':symDir})
         }
       }
       solutions.push(solution)
@@ -158,7 +157,6 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
     maskedGrid[0] = maskedGridCopy
   }
 
-  // TODO: This logic doesn't apply to pillars.
   function isOuter(pos) {
     return pos.x <= 0 || pos.y <= 0 || pos.x >= puzzle.grid.length - 1 || pos.y >= puzzle.grid[0].length - 1
   }
@@ -184,6 +182,12 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
       }
     }
     maskedGrid[0] = maskedGridCopy
+    puzzle.updateCell(x, y, {'color':0})
+    if (puzzle.symmetry != undefined) {
+      var sym = puzzle.getSymmetricalPos(x, y)
+      puzzle.updateCell(sym.x, sym.y, {'color':0})
+    }
+
     path.pop()
     return
   }
@@ -198,6 +202,12 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
   if (x%2 === 0) {
     _solveLoop2(puzzle, x, y - 1, solutions, path, maskedGrid)
     _solveLoop2(puzzle, x, y + 1, solutions, path, maskedGrid)
+  }
+
+  puzzle.updateCell(x, y, {'color':0})
+  if (puzzle.symmetry != undefined) {
+    var sym = puzzle.getSymmetricalPos(x, y)
+    puzzle.updateCell(sym.x, sym.y, {'color':0})
   }
 
   // Tail recursion: Back out of this cell

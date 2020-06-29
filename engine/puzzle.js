@@ -65,7 +65,7 @@ class Puzzle {
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
     // @Legacy: Grid squares used to use 'false' to indicate emptiness.
-    // @Legacy: Cells used to use undefined to indicate emptiness.
+    // @Legacy: Cells used to use undefined to indicate emptiness. (... I think this still happens for intermediates)
     // Now, we use:
     // Cells default to {}
     // Lines default to {'type':'line', 'color':0}
