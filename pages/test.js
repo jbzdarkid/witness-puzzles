@@ -2,7 +2,9 @@ window.DISABLE_CACHE = true
 
 window.onload = function() {
   var table = document.getElementById('meta')
-  var numFailures = 0
+  var failures = []
+  var drawTime = 0
+  var solveTime = 0
   var testNames = Object.keys(tests)
   for (var i=0; i<testNames.length; i++) {
     if (i%3 === 0) table.insertRow()
@@ -20,22 +22,35 @@ window.onload = function() {
       var puzzle = puzzleData[0]
       puzzle.name = testName
       var expectedSolutions = puzzleData[1]
+      drawTime -= (new Date()).getTime()
       window.draw(puzzle, testName)
+      drawTime += (new Date()).getTime()
+      solveTime -= (new Date()).getTime()
       var solutions = window.solve(puzzle)
+      solveTime += (new Date()).getTime()
     } catch (e) {
       console.error('Test', testName, 'errored:', e)
       var border = puzzleSvg.firstChild
       border.setAttribute('stroke', 'red')
-      numFailures++
+      failures.push(testName)
     }
     if (solutions.length !== expectedSolutions) {
       console.error('Test', testName, 'has', solutions.length, 'solutions, should have', expectedSolutions)
       var border = puzzleSvg.firstChild
       border.setAttribute('stroke', 'red')
-      numFailures++
+      failures.push(testName)
     }
   }
-  return numFailures
+  console.info('Finished running ' + testNames.length + ' tests with ' + failures.length + ' failures')
+  console.info('Total draw time ' + (drawTime/1000) + ' seconds')
+  console.info('Total solve time ' + (solveTime/1000) + ' seconds')
+  if (failures.length > 0) {
+    console.error('Failures:')
+    for (var failure of failures) {
+      console.info('  ' + failure)
+    }
+  }
+  return failures.length
 }
 
 var tests = {

@@ -7,16 +7,17 @@ function solve(puzzle) {
     for (var y=0; y<puzzle.grid[0].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.start === true) {
-        if (puzzle.pillar) {
-          // TODO: Support pillars, somehow?
-          _solveLoop(puzzle, x, y, solutions)
-        } else if (x == 0 || y == 0 || x == puzzle.grid.length - 1 || y == puzzle.grid[0].length - 1) {
-          // TODO: Support center start points.
-          // @Hack: To support pass-by-reference, I'm wrapping this inside an array.
-          _solveLoop2(puzzle, x, y, solutions, [], [puzzle.createMaskedGrid()])
-        } else {
-          _solveLoop(puzzle, x, y, solutions)
-        }
+        _solveLoop(puzzle, x, y, solutions)
+        // if (puzzle.pillar) {
+        //   // TODO: Support pillars, somehow?
+        //   _solveLoop(puzzle, x, y, solutions)
+        // } else if (x == 0 || y == 0 || x == puzzle.grid.length - 1 || y == puzzle.grid[0].length - 1) {
+        //   // TODO: Support center start points.
+        //   // @Hack: To support pass-by-reference, I'm wrapping this inside an array.
+        //   _solveLoop2(puzzle, x, y, solutions, [], [puzzle.createMaskedGrid()])
+        // } else {
+        //   _solveLoop(puzzle, x, y, solutions)
+        // }
       }
     }
   }
@@ -30,25 +31,22 @@ function solve(puzzle) {
 function _solveLoop(puzzle, x, y, solutions) {
   // Stop trying to solve once we reach our goal
   if (solutions.length >= window.MAX_SOLUTIONS) return
+
+  // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
   if (cell.gap === 1 || cell.gap === 2) return
+  if (cell.color !== 0) return
 
   if (puzzle.symmetry == undefined) {
-    if (cell.color !== 0) return // Collided with ourselves
-    puzzle.updateCell(x, y, {'color':1}) // Otherwise, mark this cell as visited
+    puzzle.updateCell(x, y, {'color':1})
   } else {
-    // Get the symmetrical position, and try coloring it
     var sym = puzzle.getSymmetricalPos(x, y)
-    var oldColor = puzzle.getLine(sym.x, sym.y)
-    puzzle.updateCell(sym.x, sym.y, {'color':3})
+    // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
+    if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
 
-    // Collided with ourselves or our reflection
-    if (cell.color !== 0) {
-      puzzle.updateCell(sym.x, sym.y, {'color':oldColor})
-      return
-    }
-    puzzle.updateCell(x, y, {'color':2}) // Otherwise, mark this cell as visited
+    puzzle.updateCell(x, y, {'color':2})
+    puzzle.updateCell(sym.x, sym.y, {'color':3})
   }
 
   if (cell.end != undefined) {
@@ -145,7 +143,7 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
         if (solution.symmetry == undefined) {
           solution.updateCell(pos.x, pos.y, {'dir':dir})
         } else {
-          solution.updateCell(pos.x, pos.y, { 'dir':dir})
+          solution.updateCell(pos.x, pos.y, {'dir':dir})
           var sym = solution.getSymmetricalPos(pos.x, pos.y)
           var symDir = solution.getSymmetricalDir(dir)
           solution.updateCell(sym.x, sym.y, {'dir':symDir})
