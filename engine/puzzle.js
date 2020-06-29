@@ -351,6 +351,31 @@ class Puzzle {
   }
 
   getRegions() {
+    var maskedGrid = this._createMaskedGrid()
+    var savedGrid = this.grid
+    this.grid = maskedGrid
+
+    var regions = []
+    for (var x=0; x<this.grid.length; x++) {
+      for (var y=0; y<this.grid[x].length; y++) {
+        if (this.grid[x][y] == undefined) continue
+
+        // If this cell is empty (aka hasn't already been used by a region), then create a new one
+        // This will also mark all lines inside the new region as used.
+        var region = new Region(this.grid.length)
+        this._floodFill(x, y, region)
+        // *-*-* I'm not certain this is a good idea, but it potentially saves perf of people asking about it over and over again.
+        for (var i=0; i<region.cells.length; i++) {
+          region.cells[i]['cell'] = savedGrid[region.cells[i].x][region.cells[i].y]
+        }
+        regions.push(region)
+      }
+    }
+    this.grid = savedGrid
+    return regions
+  }
+
+  _createMaskedGrid() {
     // Make a copy of the grid -- we will be overwriting it
     var savedGrid = this.grid
     this.newGrid()
@@ -391,64 +416,8 @@ class Puzzle {
       this._floodFillOutside(x, savedGrid[0].length - 1)
     }
 
-    var regions = []
-    for (var x=0; x<this.grid.length; x++) {
-      for (var y=0; y<this.grid[x].length; y++) {
-        if (this.grid[x][y] == undefined) continue
-
-        // If this cell is empty (aka hasn't already been used by a region), then create a new one
-        // This will also mark all lines inside the new region as used.
-        var region = new Region(this.grid.length)
-        this._floodFill(x, y, region)
-        // *-*-* I'm not certain this is a good idea, but it potentially saves perf of people asking about it over and over again.
-        for (var i=0; i<region.cells.length; i++) {
-          region.cells[i]['cell'] = savedGrid[region.cells[i].x][region.cells[i].y]
-        }
-        regions.push(region)
-      }
-    }
-    this.grid = savedGrid
-    return regions
-  }
-
-  createMaskedGrid() {
-    var maskedGrid = []
-
-    // Override all elements with empty lines -- this means that flood fill is just
-    // looking for lines with color 0.
-    for (var x=0; x<this.grid.length; x++) {
-      maskedGrid[x] = []
-      for (var y=0; y<this.grid[0].length; y++) {
-        var cell = this.grid[x][y]
-        if (cell != undefined && cell.gap === 2) {
-          maskedGrid[x][y] = 2
-        } else {
-          // Indicates that this cell will be a part of the region
-          maskedGrid[x][y] = 1
-        }
-      }
-    }
-
-    // @Performance (sorta? Not really...)
-    var savedGrid = this.grid
-    this.grid = maskedGrid
-
-    // Mark all outside cells as 'not in any region' (aka undefined)
-    assert(!this.pillar)
-
-    // Left and right edges
-    if (this.pillar === false) {
-      for (var y=1; y<maskedGrid[0].length; y+=2) {
-        this._floodFillOutside(0, y)
-        this._floodFillOutside(maskedGrid.length - 1, y)
-      }
-    }
-    // Top and bottom edges
-    for (var x=1; x<maskedGrid.length; x+=2) {
-      this._floodFillOutside(x, 0)
-      this._floodFillOutside(x, maskedGrid[0].length - 1)
-    }
-
+    // @Cleanup.
+    var maskedGrid = this.grid
     this.grid = savedGrid
     return maskedGrid
   }
@@ -457,25 +426,10 @@ class Puzzle {
     var region = new Region(this.grid.length)
     if (x < 0 || y < 0 || x >= this.grid.length || y >= this.grid[0].length) return region
 
-    var maskedGrid = this.createMaskedGrid()
+    var maskedGrid = this._createMaskedGrid()
 
     // Cell has already been used by a region.
     if (maskedGrid[x][y] == undefined) return region
-
-    for (var i=0; i<this.grid.length; i++) {
-      for (var j=0; j<this.grid[0].length; j++) {
-        var cell = this.grid[i][j]
-        if (cell != undefined && cell.color > 0) {
-          if (i%2 !== j%2 && (cell.start === true || cell.end != undefined)) {
-            // Traced lines which are mid-segment start or end points should not separate the region
-            maskedGrid[i][j] = 0
-          } else {
-            // Traced lines should not be a part of the region
-            maskedGrid[i][j] = undefined
-          }
-        }
-      }
-    }
 
     var savedGrid = this.grid
     this.grid = maskedGrid
