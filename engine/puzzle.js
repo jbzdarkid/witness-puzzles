@@ -453,13 +453,12 @@ class Puzzle {
     return maskedGrid
   }
 
-  // Note: This modifies maskedGrid. Be sure to make a copy beforehand!
-  // Alternately: I could return the new maskedGrid?
-  // Alternately alternately: Why the hell do I ever want to modify this object? Don't say "perf".
-  floodFill(maskedGrid, x, y) {
+  floodFill(x, y) {
     var region = new Region(this.grid.length)
+    if (x < 0 || y < 0 || x >= this.grid.length || y >= this.grid[0].length) return region
 
-    if (x < 0 || y < 0 || x >= maskedGrid.length || y >= maskedGrid[0].length) return region
+    var maskedGrid = this.createMaskedGrid()
+
     // Cell has already been used by a region.
     if (maskedGrid[x][y] == undefined) return region
 

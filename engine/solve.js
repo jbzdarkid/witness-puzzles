@@ -61,8 +61,7 @@ function _solveLoop(puzzle, x, y, solutions, magic) {
     var floodX = magic[2].x - x + magic[1].x
     var floodY = magic[2].y - y + magic[1].y
 
-    var maskedGrid = puzzle.createMaskedGrid()
-    var region = puzzle.floodFill(maskedGrid, floodX, floodY)
+    var region = puzzle.floodFill(floodX, floodY)
     if (!window._regionCheckNegations(puzzle, region).valid) {
 
       // @Cutnpaste
