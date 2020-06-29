@@ -54,37 +54,7 @@ window.onload = function() {
 }
 
 var tests = {
-  // 66.877 seconds
-  'performance-5x5': function() {
-    var puzzle = new Puzzle(5, 5)
-    puzzle.grid[0][10].start = true
-    puzzle.grid[10][0].end = 'right'
-    puzzle.grid[1][1] = {'type': 'star', 'color': 'yellow'}
-    puzzle.grid[1][3] = {'type': 'star', 'color': 'red'}
-    puzzle.grid[1][5] = {'type': 'star', 'color': 'red'}
-    puzzle.grid[1][7] = {'type': 'star', 'color': 'blue'}
-    puzzle.grid[1][9] = {'type': 'star', 'color': 'green'}
-    puzzle.grid[3][1] = {'type': 'star', 'color': 'blue'}
-    puzzle.grid[3][3] = {'type': 'star', 'color': 'yellow'}
-    puzzle.grid[3][5] = {'type': 'star', 'color': 'yellow'}
-    puzzle.grid[3][7] = {'type': 'star', 'color': 'blue'}
-    puzzle.grid[3][9] = {'type': 'star', 'color': 'red'}
-    puzzle.grid[5][1] = {'type': 'star', 'color': 'red'}
-    puzzle.grid[5][3] = {'type': 'star', 'color': 'green'}
-    puzzle.grid[5][7] = {'type': 'star', 'color': 'green'}
-    puzzle.grid[5][9] = {'type': 'star', 'color': 'blue'}
-    puzzle.grid[7][1] = {'type': 'star', 'color': 'blue'}
-    puzzle.grid[7][3] = {'type': 'star', 'color': 'green'}
-    puzzle.grid[7][5] = {'type': 'star', 'color': 'yellow'}
-    puzzle.grid[7][7] = {'type': 'star', 'color': 'red'}
-    puzzle.grid[7][9] = {'type': 'star', 'color': 'red'}
-    puzzle.grid[9][1] = {'type': 'star', 'color': 'green'}
-    puzzle.grid[9][3] = {'type': 'star', 'color': 'yellow'}
-    puzzle.grid[9][5] = {'type': 'star', 'color': 'yellow'}
-    puzzle.grid[9][7] = {'type': 'star', 'color': 'green'}
-    puzzle.grid[9][9] = {'type': 'star', 'color': 'blue'}
-    return [puzzle, 3]
-  },/* 'end-left': function() {
+  'end-left': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[4][4].start = true
     puzzle.grid[0][2].end = 'left'
@@ -927,5 +897,34 @@ var tests = {
     puzzle.grid[1][1] = {'type':'triangle', 'count':3, 'color':'orange'}
     puzzle.grid[1][2].start = true
     return [puzzle, 2]
-  }*/
+  }, 'performance-5x5': function() {
+    var puzzle = new Puzzle(5, 5)
+    puzzle.grid[0][10].start = true
+    puzzle.grid[10][0].end = 'right'
+    puzzle.grid[1][1] = {'type': 'star', 'color': 'yellow'}
+    puzzle.grid[1][3] = {'type': 'star', 'color': 'red'}
+    puzzle.grid[1][5] = {'type': 'star', 'color': 'red'}
+    puzzle.grid[1][7] = {'type': 'star', 'color': 'blue'}
+    puzzle.grid[1][9] = {'type': 'star', 'color': 'green'}
+    puzzle.grid[3][1] = {'type': 'star', 'color': 'blue'}
+    puzzle.grid[3][3] = {'type': 'star', 'color': 'yellow'}
+    puzzle.grid[3][5] = {'type': 'star', 'color': 'yellow'}
+    puzzle.grid[3][7] = {'type': 'star', 'color': 'blue'}
+    puzzle.grid[3][9] = {'type': 'star', 'color': 'red'}
+    puzzle.grid[5][1] = {'type': 'star', 'color': 'red'}
+    puzzle.grid[5][3] = {'type': 'star', 'color': 'green'}
+    puzzle.grid[5][7] = {'type': 'star', 'color': 'green'}
+    puzzle.grid[5][9] = {'type': 'star', 'color': 'blue'}
+    puzzle.grid[7][1] = {'type': 'star', 'color': 'blue'}
+    puzzle.grid[7][3] = {'type': 'star', 'color': 'green'}
+    puzzle.grid[7][5] = {'type': 'star', 'color': 'yellow'}
+    puzzle.grid[7][7] = {'type': 'star', 'color': 'red'}
+    puzzle.grid[7][9] = {'type': 'star', 'color': 'red'}
+    puzzle.grid[9][1] = {'type': 'star', 'color': 'green'}
+    puzzle.grid[9][3] = {'type': 'star', 'color': 'yellow'}
+    puzzle.grid[9][5] = {'type': 'star', 'color': 'yellow'}
+    puzzle.grid[9][7] = {'type': 'star', 'color': 'green'}
+    puzzle.grid[9][9] = {'type': 'star', 'color': 'blue'}
+    return [puzzle, 3]
+  }
 }
