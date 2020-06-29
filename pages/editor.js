@@ -145,8 +145,8 @@ function _reloadPuzzle() {
       document.getElementById('solveAuto').disabled = true
     }
   } else {
-    // 5x5 is the max for non-symmetry, non-pillar puzzles
-    if (puzzle.grid.length > 11 || puzzle.grid[0].length > 11) {
+    // 6x6 is the max for non-symmetry, non-pillar puzzles
+    if (puzzle.grid.length > 13 || puzzle.grid[0].length > 13) {
       document.getElementById('solveAuto').disabled = true
     }
   }
