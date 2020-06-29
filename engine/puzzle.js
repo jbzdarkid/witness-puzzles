@@ -455,23 +455,26 @@ class Puzzle {
 
   // Note: This modifies maskedGrid. Be sure to make a copy beforehand!
   // Alternately: I could return the new maskedGrid?
-  // Alternately alternately: Why the hell do I ever want to modify this object?
-  floodFill(maskedGrid, path, x, y) {
+  // Alternately alternately: Why the hell do I ever want to modify this object? Don't say "perf".
+  floodFill(maskedGrid, x, y) {
     var region = new Region(this.grid.length)
 
     if (x < 0 || y < 0 || x >= maskedGrid.length || y >= maskedGrid[0].length) return region
     // Cell has already been used by a region.
     if (maskedGrid[x][y] == undefined) return region
 
-    for (var pos of path) {
-      // Unsafe?
-      var cell = this.grid[pos.x][pos.y]
-      if (pos.x%2 !== pos.y%2 && (cell.start === true || cell.end != undefined)) {
-        // Traced lines which are mid-segment start or end points should not separate the region
-        maskedGrid[pos.x][pos.y] = 0
-      } else {
-        // Traced lines should not be a part of the region
-        maskedGrid[pos.x][pos.y] = undefined
+    for (var i=0; i<this.grid.length; i++) {
+      for (var j=0; j<this.grid[0].length; j++) {
+        var cell = this.grid[i][j]
+        if (cell != undefined && cell.color > 0) {
+          if (i%2 !== j%2 && (cell.start === true || cell.end != undefined)) {
+            // Traced lines which are mid-segment start or end points should not separate the region
+            maskedGrid[i][j] = 0
+          } else {
+            // Traced lines should not be a part of the region
+            maskedGrid[i][j] = undefined
+          }
+        }
       }
     }
 

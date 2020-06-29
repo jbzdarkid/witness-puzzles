@@ -7,7 +7,7 @@ function solve(puzzle) {
     for (var y=0; y<puzzle.grid[0].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.start === true) {
-        _solveLoop(puzzle, x, y, solutions)
+        _solveLoop(puzzle, x, y, solutions, magic = [false, null, null])
         // if (puzzle.pillar) {
         //   // TODO: Support pillars, somehow?
         //   _solveLoop(puzzle, x, y, solutions)
@@ -26,9 +26,13 @@ function solve(puzzle) {
   return solutions
 }
 
+function _isEdge(puzzle, x, y) {
+  return x <= 0 || y <= 0 || x >= puzzle.grid.length - 1 || y >= puzzle.grid[0].length - 1
+}
+
 // @Performance: This is the most central loop in this code.
 // Any performance efforts should be focused here.
-function _solveLoop(puzzle, x, y, solutions) {
+function _solveLoop(puzzle, x, y, solutions, magic) {
   // Stop trying to solve once we reach our goal
   if (solutions.length >= window.MAX_SOLUTIONS) return
 
@@ -49,6 +53,29 @@ function _solveLoop(puzzle, x, y, solutions) {
     puzzle.updateCell(sym.x, sym.y, {'color':3})
   }
 
+  // TODO: Inline isEdge?
+  // TODO: puzzle.isEdge()?
+  var isEdge = _isEdge(puzzle, x, y)
+  var newMagic = [magic[0] || isEdge, magic[2], {'x':x, 'y':y, 'isEdge':isEdge}]
+  if (newMagic[0] && magic[1] && !magic[1].isEdge && magic[2].isEdge && isEdge) {
+    var floodX = magic[2].x - x + magic[1].x
+    var floodY = magic[2].y - y + magic[1].y
+
+    var maskedGrid = puzzle.createMaskedGrid()
+    var region = puzzle.floodFill(maskedGrid, floodX, floodY)
+    if (!window._regionCheckNegations(puzzle, region).valid) {
+
+      // @Cutnpaste
+      // Tail recursion: Back out of this cell
+      puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+      if (puzzle.symmetry != undefined) {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        puzzle.updateCell(sym.x, sym.y, {'color':0})
+      }
+      return
+    }
+  }
+
   if (cell.end != undefined) {
     // Reached an endpoint, validate solution and keep going -- there may be other endpoints
     puzzle.updateCell(x, y, {'dir':'none'})
@@ -62,16 +89,16 @@ function _solveLoop(puzzle, x, y, solutions) {
   // Extend path left and right
   if (y%2 === 0) {
     puzzle.updateCell(x, y, {'dir':'left'})
-    _solveLoop(puzzle, x - 1, y, solutions)
+    _solveLoop(puzzle, x - 1, y, solutions, newMagic)
     puzzle.updateCell(x, y, {'dir':'right'})
-    _solveLoop(puzzle, x + 1, y, solutions)
+    _solveLoop(puzzle, x + 1, y, solutions, newMagic)
   }
   // Extend path up and down
   if (x%2 === 0) {
     puzzle.updateCell(x, y, {'dir':'top'})
-    _solveLoop(puzzle, x, y - 1, solutions)
+    _solveLoop(puzzle, x, y - 1, solutions, newMagic)
     puzzle.updateCell(x, y, {'dir':'bottom'})
-    _solveLoop(puzzle, x, y + 1, solutions)
+    _solveLoop(puzzle, x, y + 1, solutions, newMagic)
   }
 
   // Tail recursion: Back out of this cell
@@ -153,10 +180,6 @@ function _solveLoop2(puzzle, x, y, solutions, path, maskedGrid) {
     }
     // Restore the previous grid and continue -- there may be other endpoints (with different regions)
     maskedGrid[0] = maskedGridCopy
-  }
-
-  function isOuter(pos) {
-    return pos.x <= 0 || pos.y <= 0 || pos.x >= puzzle.grid.length - 1 || pos.y >= puzzle.grid[0].length - 1
   }
 
   if (path.length >= 3 && !isOuter(path[path.length-3]) && isOuter(path[path.length-2])) {
