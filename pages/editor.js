@@ -326,9 +326,10 @@ function setSolveMode(value) {
 // Automatically solve the puzzle
 function solvePuzzle() {
   setSolveMode(false)
-  var solutions = window.solve(puzzle)
-  puzzle.autoSolved = true
-  _showSolution(solutions, 0)
+  window.solveAsync(puzzle, function(solutions) {
+    puzzle.autoSolved = true
+    _showSolution(solutions, 0)
+  })
 }
 //** End of user interaction points
 
