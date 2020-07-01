@@ -152,24 +152,78 @@ class SharedCallback {
     this.callback = callback
     this.pendingCalls = 0
     this.onComplete = null
+    this.fraction = 1.0
   }
   
-  execute(code) {
+  execute(code, onComplete) {
     if (this.callback == undefined) {
-      // If there is no callback provided, just execute synchronously.
-      // this.get() will return null, and future layers will continue to be synchronous.
+      // If there is no callback provided, just execute synchronously, don't bother doing anything fancy.
       code(this)
-    } else {
-      this.pendingCalls++
-      var sharedCallback = this
-      setTimeout(function() {
-        code(sharedCallback)
-        sharedCallback.pendingCalls--
-      }, 0)
+      if (onComplete) onComplete()
+      return
     }
+    
+    // If there is a callback, create a new child callback.
+    // Then, we can observe if any of the code in execute actually recursed.
+    // If so, ???
+    // If not, just execute our callback directly.
+    
+    this.pendingCalls++
+    this.onComplete = onComplete
+    var childCallback = new SharedCallback(this._complete)
+    var parentCallback = this // To be able to reference this inside of setTimeout.
+    
+    setTimeout(function() {
+      code(childCallback)
+      
+      if (childCallback.pendingCalls === 0) {
+        // No recursion occured, so we are at a leaf node.
+        // Ergo, our child callback will never call _complete, and we must call it now.
+        parentCallback._complete()
+      } else {
+        // We have some number of children, update their fractions accordingly.
+        childCallback.fraction = parentCallback.fraction / childCallback.pendingCalls
+      }
+    }, 0)
   }
+  
+  _complete() {
+    this.pendingCalls--
+    if (this.pendingCalls <= 0) {
+      if (this.onComplete) this.onComplete()
+      console.log('Completed fraction:', this.fraction)
+      this.callback()
+    }
+c  }
 }
 
+
+function testAsync() {
+  k = 3
+  var sharedCallback = new SharedCallback(function() {
+    console.info('Final callback')
+  })
+  
+  testLoop(sharedCallback, 0, k)
+}
+
+function testLoop(sharedCallback, depth, k) {
+  console.info('Entered loop at depth', depth, 'k=', k)
+  if (k <= 1) return // Base case
+  
+  
+  var i = Math.floor(k / 2)
+  var j = k - i
+  
+  sharedCallback.execute(function(childCallback) {
+    testLoop(childCallback, depth + 1, i)
+    testLoop(childCallback, depth + 1, j)
+  }, null)
+}
+
+debugger;
+testAsync()
+/*
 // Very duplicated. FEEEX
 
 window.MAX_SOLUTIONS = 10000
@@ -303,55 +357,30 @@ function _solveLoop2(puzzle, x, y, solutions, numEndpoints, earlyExitData, share
     numEndpoints--
   }
 
-  function execute(code) {
-    setTimeout(code, 0)
-  }
-  
-  function get() {
-    this.pendingCalls++
-    var newCallback = new SharedCallback()
-    newCallback.callback = this._callback
-    return newCallback
-  }
-  
-  function _callback() {
-    this.pendingCalls--
-    if (this.pendingCalls == 0) this.callback()
-  }
-  
-  var newCallback = sharedCallback.get()
+  sharedCallback.execute(function(childCallback) {
+    // Within this scope, we have a new, child callback.
+    // Every time its .execute() is called, the parent callback adds a reference.
+    // Once all references are freed, we execute the completion block.
 
-  // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-  // Extend path left and right
-  if (y%2 === 0) {
-    sharedCallback.execute(function() {
+    // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
+    // Extend path left and right
+    if (y%2 === 0) {
       puzzle.updateCell(x, y, {'dir':'left'})
-      _solveLoop2(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, newCallback)
-    })
-    sharedCallback.execute(function() {
+      _solveLoop2(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, childCallback)
       puzzle.updateCell(x, y, {'dir':'right'})
-      _solveLoop2(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, newCallback)
-    })
-  }
+      _solveLoop2(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, childCallback)
+    }
 
-  // Extend path up and down
-  if (x%2 === 0) {
-    sharedCallback.execute(function() {
+    // Extend path up and down
+    if (x%2 === 0) {
       puzzle.updateCell(x, y, {'dir':'top'})
-      _solveLoop2(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, newCallback)
-    })
-    sharedCallback.execute(function() {
+      _solveLoop2(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, childCallback)
       puzzle.updateCell(x, y, {'dir':'bottom'})
-      _solveLoop2(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, newCallback)
-    })
-  }
+      _solveLoop2(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, childCallback)
+    }
+  }, function() {
+    // Once all the above childCallbacks have completed, this block will execute.
 
-  if (newCallback.pendingCalls === 0) {
-    // Reached a leaf node
-    sharedCallback.completion()
-  }
-
-  sharedCallback.onComplete = function() {
     // Tail recursion: Back out of this cell
     puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
     if (puzzle.symmetry != undefined) {
@@ -360,3 +389,4 @@ function _solveLoop2(puzzle, x, y, solutions, numEndpoints, earlyExitData, share
     }
   })
 }
+*/
