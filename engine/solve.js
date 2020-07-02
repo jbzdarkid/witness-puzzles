@@ -146,83 +146,154 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 }
 
+var id = 100
 // TODO: Probably want 'solutions' in here, if only to save a variable.
 class SharedCallback {
-  constructor(callback) {
-    this.callback = callback
+  constructor(completion1, totalCallback=null) {
+    this.id = "" + (id++)
+    console.log(this.id, 'Constructing')
+  
     this.pendingCalls = 0
-    this.onComplete = null
+    // Cleanup: Once this works, go down to one completion object, and just save parentCallback.
+    this.completion1 = completion1
+    this.completion2 = null
+
     this.fraction = 1.0
+    this.childFraction = 1.0
+    this.total = [0.0] // Passed around as an array, so that all children share this reference.
+    this.totalCallback = totalCallback
   }
   
-  execute(code, onComplete) {
-    if (this.callback == undefined) {
+  execute(code, completion2) {
+    console.log(this.id, 'Executing')
+    if (completion2 == undefined) {
+      console.log(this.id, 'No callback, executing synchronously')
       // If there is no callback provided, just execute synchronously, don't bother doing anything fancy.
       code(this)
-      if (onComplete) onComplete()
+      this.completion1()
       return
     }
     
     // If there is a callback, create a new child callback.
     // Then, we can observe if any of the code in execute actually recursed.
-    // If so, ???
+    // If so, set its callback to fire ours once it's done.
     // If not, just execute our callback directly.
     
-    this.pendingCalls++
-    this.onComplete = onComplete
-    var childCallback = new SharedCallback(this._complete)
     var parentCallback = this // To be able to reference this inside of setTimeout.
+    parentCallback.pendingCalls++
+    parentCallback.completion2 = completion2
+    var childCallback = new SharedCallback(function() { parentCallback._complete() }) // completion1
+    childCallback.total = parentCallback.total
+    childCallback.totalCallback = parentCallback.totalCallback
     
+    console.debug(this.id, 'Calling setTimeout')
     setTimeout(function() {
+      console.spam(parentCallback.id, 'Setting childCallback.fraction =', parentCallback.childFraction)
+      childCallback.fraction = parentCallback.childFraction
+      
+      console.debug(parentCallback.id, 'pre-code -->')
       code(childCallback)
+      console.debug(parentCallback.id, '<-- post-code')
       
       if (childCallback.pendingCalls === 0) {
+        console.debug(parentCallback.id, 'Child callback', childCallback.id, 'had no pending calls, firing completion')
         // No recursion occured, so we are at a leaf node.
-        // Ergo, our child callback will never call _complete, and we must call it now.
+        // Consider our child dead, since nobody took a reference to it.
+
+        // First, we should mark its fraction as completed (since nobody else will)
+        if (childCallback.fraction > 0) {
+          parentCallback.total[0] += childCallback.fraction
+          console.spam(parentCallback.id, 'Completed', childCallback.fraction)
+          if (parentCallback.totalCallback) parentCallback.totalCallback(parentCallback.total[0])
+        }
+
+        // Second, we should call our completion routine (which it would've called, except it's dead)
         parentCallback._complete()
+
       } else {
-        // We have some number of children, update their fractions accordingly.
-        childCallback.fraction = parentCallback.fraction / childCallback.pendingCalls
+        console.debug(parentCallback.id, 'Child callback', childCallback.id, 'had', childCallback.pendingCalls, 'pending calls')
+        // The child callback is alive, so it can handle itself. When it finishes, it should call our completion routine.
+        
+        console.debug(parentCallback.id, 'Determining child fraction', childCallback.fraction, childCallback.pendingCalls)
+        if (childCallback.fraction > 0.01) {
+          // Child is not dead, give it a piece of the pie.
+          childCallback.childFraction = childCallback.fraction / childCallback.pendingCalls
+          childCallback.fraction = 0.0
+          console.debug(parentCallback.id, 'Child callback has', childCallback.pendingCalls, 'children, distributing', childCallback.childFraction, 'to each')
+          parentCallback.fraction = 0.0 // hacky, I think
+        }
       }
     }, 0)
+    console.debug(this.id, 'Returning')
   }
   
   _complete() {
+    var pre = this.pendingCalls
     this.pendingCalls--
+    console.log(this.id, 'Completed, pending calls from', pre, 'to', this.pendingCalls)
     if (this.pendingCalls <= 0) {
-      if (this.onComplete) this.onComplete()
-      console.log('Completed fraction:', this.fraction)
-      this.callback()
+      console.log(this.id, 'Fully completed, adding in fraction', this.fraction)
+      this.total[0] += this.fraction
+      console.spam(this.id, 'Completed', this.total[0])
+      if (this.totalCallback) this.totalCallback(this.total[0])
+      
+      console.spam(this.id, 'Calling c2')
+      if (this.completion2) this.completion2()
+      console.spam(this.id, 'Calling c1')
+      this.completion1()
     }
-c  }
+  }
 }
 
-
 function testAsync() {
-  k = 3
+  k = 100
   var sharedCallback = new SharedCallback(function() {
-    console.info('Final callback')
+    console.info('!!! Final callback 1 !!!')
   })
+  sharedCallback.totalCallback = function(percent) {
+    console.info('Completion progress:', 100 * percent)
+  }
   
-  testLoop(sharedCallback, 0, k)
+  console.log('Starting testLoop, depth: 0')
+  // id == 100
+  sharedCallback.execute(function(childCallback) {
+    console.log('pre testLoop')
+    testLoop(childCallback, 0, k)
+    console.log('post testLoop')
+  }, function() {
+    console.info('!!! Final callback 2 !!!')
+  })
 }
 
 function testLoop(sharedCallback, depth, k) {
-  console.info('Entered loop at depth', depth, 'k=', k)
-  if (k <= 1) return // Base case
-  
+  console.log('Entered loop at depth', depth, 'k=' + k)
+  if (k <= 1) {
+    console.log('Base case at depth', depth, 'returning')
+    return // Base case
+  }
   
   var i = Math.floor(k / 2)
   var j = k - i
+  console.log('Determined i', i, 'and j', j, 'at depth', depth)
   
+  // id == 101
   sharedCallback.execute(function(childCallback) {
-    testLoop(childCallback, depth + 1, i)
-    testLoop(childCallback, depth + 1, j)
-  }, null)
+    // id == 102
+    console.log('(0) Inside execute (k=' + k +'), depth', depth)
+    testLoop(childCallback, depth + 1, i) // inside here, we create id==103
+    console.log('(1) Inside execute (k=' + k +'), depth', depth)
+    testLoop(childCallback, depth + 1, j) // inside here, we create id==104
+    console.log('(2) Inside execute (k=' + k +'), depth', depth)
+  }, function() {
+    console.log('Firing callback2 at depth', depth)
+  })
 }
 
-debugger;
+window.setLogLevel('info')
+console.log('At root scope')
 testAsync()
+console.log('At root scope, after testAsync')
+
 /*
 // Very duplicated. FEEEX
 

@@ -1,6 +1,7 @@
 window.DISABLE_CACHE = true
 
 window.onload = function() {
+  return
   var table = document.getElementById('meta')
   var failures = []
   var drawTime = 0
