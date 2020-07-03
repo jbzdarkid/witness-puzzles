@@ -32,7 +32,6 @@ function _readPuzzle() {
   try {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
-    // @Cleanup: This logic is duplicated from createSerializedPuzzle
     puzzle = Puzzle.deserialize(serialized)
 
     _reloadPuzzle()
@@ -326,9 +325,20 @@ function setSolveMode(value) {
 // Automatically solve the puzzle
 function solvePuzzle() {
   setSolveMode(false)
-  window.solveAsync(puzzle, function(solutions) {
+  document.getElementById('solutionViewer').style.display = 'none'
+  document.getElementById('progressBox').style.display = null
+  debugger;
+  window.solve(puzzle, function(solutions) {
+    document.getElementById('progressBox').style.display = 'none'
+    document.getElementById('progressPercent').innerText = '0%'
+    document.getElementById('progress').style.width = '0%'
+
     puzzle.autoSolved = true
     _showSolution(solutions, 0)
+  }, function(progress) {
+    var percent = Math.floor(100 * progress)
+    document.getElementById('progressPercent').innerText = percent + '%'
+    document.getElementById('progress').style.width = percent + '%'
   })
 }
 //** End of user interaction points
