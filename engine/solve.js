@@ -146,91 +146,77 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 }
 
+var id = 100
 // TODO: Probably want 'solutions' in here, if only to save a variable.
 class SharedCallback {
-  constructor(completion1, totalCallback=null) {
-    this.pendingCalls = 0
-    // Cleanup: Once this works, go down to one completion object, and just save parentCallback.
-    this.completion1 = completion1
-    this.completion2 = null
-
-    this.fraction = 1.0
-    this.childFraction = 1.0
-    this.total = [0.0] // Passed around as an array, so that all children share this reference.
-    this.totalCallback = totalCallback
+  constructor(parentCallback=null) {
+    this.id = id++
+    this.numChildren = 0
+    this.completedChildren = 0
+    this.onComplete = null
+    this.parentCallback = parentCallback
+    if (parentCallback) {
+      this.fraction = 0.0
+      this.total = parentCallback.total
+      this.totalCallback = parentCallback.totalCallback
+      this.parentCallback.numChildren++
+    } else {
+      this.fraction = 1.0
+      this.total = [0.0]
+      this.totalCallback = null
+    }
   }
   
-  execute(code, completion2) {
-    if (completion2 == undefined) {
+  execute(code, onComplete) {
+    if (onComplete == undefined) {
       // If there is no callback provided, just execute synchronously, don't bother doing anything fancy.
       code(this)
-      this.completion1()
+      this.parentCallback._onChildComplete(this.fraction)
       return
     }
+    this.onComplete = onComplete
     
-    // If there is a callback, create a new child callback.
-    // Then, we can observe if any of the code in execute actually recursed.
-    // If so, set its callback to fire ours once it's done.
-    // If not, just execute our callback directly.
-    
-    var parentCallback = this // To be able to reference this inside of setTimeout.
-    parentCallback.pendingCalls++
-    parentCallback.completion2 = completion2
-    var childCallback = new SharedCallback(function() { parentCallback._complete() }) // completion1
-    childCallback.total = parentCallback.total
-    childCallback.totalCallback = parentCallback.totalCallback
+    var childCallback = new SharedCallback(this)
+    var parentCallback = this
     
     setTimeout(function() {
-      childCallback.fraction = parentCallback.childFraction
-      
       code(childCallback)
       
-      if (childCallback.pendingCalls === 0) {
+      if (childCallback.numChildren === 0) {
         // No recursion occured, so we are at a leaf node.
         // Consider our child dead, since nobody took a reference to it.
-
-        // First, we should mark its fraction as completed (since nobody else will)
-        if (childCallback.fraction > 0) {
-          parentCallback.total[0] += childCallback.fraction
-          if (parentCallback.totalCallback) parentCallback.totalCallback(parentCallback.total[0])
-        }
-
-        // Second, we should call our completion routine (which it would've called, except it's dead)
-        parentCallback._complete()
-
+        // Thus, we call our completion routine (which it would've called, except it's dead)
+        parentCallback._onChildComplete(childCallback.fraction)
       } else {
         // The child callback is alive, so it can handle itself. When it finishes, it should call our completion routine.
-        
-        if (childCallback.fraction > 0.01) {
-          // Child is not dead, give it a piece of the pie.
-          childCallback.childFraction = childCallback.fraction / childCallback.pendingCalls
-          childCallback.fraction = 0.0
-          parentCallback.fraction = 0.0 // hacky, I think
+        // Assign it an appropriate fraction for completion.
+        if (parentCallback.fraction > 0.01) {
+          childCallback.fraction = parentCallback.fraction / childCallback.numChildren
+          parentCallback.fraction = 0.0
         }
       }
     }, 0)
   }
   
-  _complete() {
-    var pre = this.pendingCalls
-    this.pendingCalls--
-    if (this.pendingCalls <= 0) {
-      if (this.fraction > 0) {
-        this.total[0] += this.fraction
-        if (this.totalCallback) this.totalCallback(this.total[0])
-      }
-      
-      if (this.completion2) this.completion2()
-      this.completion1()
+  _onChildComplete(fraction) {
+    console.info(this.id, fraction)
+    assert(fraction != null)
+    if (fraction > 0) {
+      this.total[0] += fraction
+      if (this.totalCallback) this.totalCallback(this.total[0])
+    }
+
+    this.completedChildren++
+    if (this.completedChildren >= this.numChildren) {
+      if (this.onComplete) this.onComplete()
+      if (this.parentCallback) this.parentCallback._onChildComplete(this.fraction)
     }
   }
 }
 
 function testAsync() {
-  k = 100
-  var sharedCallback = new SharedCallback(function() {
-    console.info('!!! Final callback 1 !!!')
-  })
+  k = 4
+  var sharedCallback = new SharedCallback()
   sharedCallback.totalCallback = function(percent) {
     console.info('Completion progress:', 100 * percent)
   }
