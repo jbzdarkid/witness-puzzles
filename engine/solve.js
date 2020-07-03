@@ -146,20 +146,17 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 }
 
-var id = 100
 // TODO: Probably want 'solutions' in here, if only to save a variable.
 class SharedCallback {
   constructor(parentCallback=null) {
-    this.id = id++
-    this.numChildren = 0
-    this.completedChildren = 0
+    this.pendingChildren = 0
     this.onComplete = null
     this.parentCallback = parentCallback
     if (parentCallback) {
       this.fraction = 0.0
       this.total = parentCallback.total
       this.totalCallback = parentCallback.totalCallback
-      this.parentCallback.numChildren++
+      this.parentCallback.pendingChildren++
     } else {
       this.fraction = 1.0
       this.total = [0.0]
@@ -181,13 +178,13 @@ class SharedCallback {
 
     setTimeout(function() {
       if (parentCallback.fraction > 0.01) {
-        childCallback.fraction = parentCallback.fraction / (parentCallback.numChildren - parentCallback.completedChildren)
+        childCallback.fraction = parentCallback.fraction / (parentCallback.pendingChildren)
         parentCallback.fraction -= childCallback.fraction
       }
 
       code(childCallback)
 
-      if (childCallback.numChildren === 0) {
+      if (childCallback.pendingChildren === 0) {
         // No recursion occurred, so we are at a leaf node.
         // Consider our child dead, since nobody took a reference to it.
         // Thus, we call our completion routine (which it would've called, except it's dead)
@@ -199,23 +196,22 @@ class SharedCallback {
   }
 
   _onChildComplete(fraction) {
-    console.info(this.id, fraction)
-    assert(fraction != null)
     if (fraction > 0) {
       this.total[0] += fraction
       if (this.totalCallback) this.totalCallback(this.total[0])
     }
 
-    this.completedChildren++
-    if (this.completedChildren >= this.numChildren) {
+    this.pendingChildren--
+    if (this.pendingChildren <= 0) {
       if (this.onComplete) this.onComplete()
       if (this.parentCallback) this.parentCallback._onChildComplete(this.fraction)
     }
   }
 }
 
+var total = 0
 function testAsync() {
-  k = 100
+  k = 10000
   var sharedCallback = new SharedCallback()
   sharedCallback.totalCallback = function(percent) {
     console.info('Completion progress:', 100 * percent)
@@ -224,12 +220,15 @@ function testAsync() {
   sharedCallback.execute(function(childCallback) {
     testLoop(childCallback, 0, k)
   }, function() {
-    console.info('!!! Final callback 2 !!!')
+    console.info('!!! Final callback !!!', total)
   })
 }
 
 function testLoop(sharedCallback, depth, k) {
-  if (k <= 1) return
+  if (k <= 1) {
+    total += k
+    return
+  }
 
   var i = Math.floor(k / 2)
   var j = k - i
