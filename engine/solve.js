@@ -166,7 +166,7 @@ class SharedCallback {
       this.totalCallback = null
     }
   }
-  
+
   execute(code, onComplete) {
     if (onComplete == undefined) {
       // If there is no callback provided, just execute synchronously, don't bother doing anything fancy.
@@ -175,29 +175,29 @@ class SharedCallback {
       return
     }
     this.onComplete = onComplete
-    
+
     var childCallback = new SharedCallback(this)
     var parentCallback = this
-    
+
     setTimeout(function() {
+      if (parentCallback.fraction > 0.01) {
+        childCallback.fraction = parentCallback.fraction / (parentCallback.numChildren - parentCallback.completedChildren)
+        parentCallback.fraction -= childCallback.fraction
+      }
+
       code(childCallback)
-      
+
       if (childCallback.numChildren === 0) {
-        // No recursion occured, so we are at a leaf node.
+        // No recursion occurred, so we are at a leaf node.
         // Consider our child dead, since nobody took a reference to it.
         // Thus, we call our completion routine (which it would've called, except it's dead)
         parentCallback._onChildComplete(childCallback.fraction)
       } else {
         // The child callback is alive, so it can handle itself. When it finishes, it should call our completion routine.
-        // Assign it an appropriate fraction for completion.
-        if (parentCallback.fraction > 0.01) {
-          childCallback.fraction = parentCallback.fraction / childCallback.numChildren
-          parentCallback.fraction = 0.0
-        }
       }
     }, 0)
   }
-  
+
   _onChildComplete(fraction) {
     console.info(this.id, fraction)
     assert(fraction != null)
@@ -215,12 +215,12 @@ class SharedCallback {
 }
 
 function testAsync() {
-  k = 4
+  k = 100
   var sharedCallback = new SharedCallback()
   sharedCallback.totalCallback = function(percent) {
     console.info('Completion progress:', 100 * percent)
   }
-  
+
   sharedCallback.execute(function(childCallback) {
     testLoop(childCallback, 0, k)
   }, function() {
@@ -230,10 +230,10 @@ function testAsync() {
 
 function testLoop(sharedCallback, depth, k) {
   if (k <= 1) return
-  
+
   var i = Math.floor(k / 2)
   var j = k - i
-  
+
   sharedCallback.execute(function(childCallback) {
     testLoop(childCallback, depth + 1, i)
     testLoop(childCallback, depth + 1, j)
@@ -272,7 +272,7 @@ function solveAsync(puzzle, callback) {
     console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
     callback(solutions)
   })
-  
+
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
   // N.B. It's important that we only call execute on the root object once,
