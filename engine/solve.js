@@ -147,55 +147,8 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 }
 
-var newTasks = []
-function _addTask(code) {
-  newTasks.push(code)
-}
-
 var tasks = []
-var totalFraction = 0.0
-function _runTasks(finalCallback, partialCallback=null) {
-  // I don't like declaring this inline -- compare perf of passing in final/partial?
-  function _runTasksLoop() {
-    if (tasks.length === 0) {
-      finalCallback()
-      return
-    }
-    var task = tasks.pop()
-    task.code()
-
-    if (newTasks.length > 0) {
-      if (task.fraction > 0.001) {
-        var newTaskFraction = task.fraction / newTasks.length
-        assert(newTaskFraction != 1)
-      } else {
-        var newTaskFraction = 0.0
-        if (task.fraction > 0) {
-          totalFraction += task.fraction
-          partialCallback(totalFraction)
-        }
-      }
-      for (var i=0; i<newTasks.length; i++) {
-        tasks.push({'code':newTasks[i], 'fraction':newTaskFraction})
-      }
-      newTasks = []
-    } else if (task.fraction > 0) {
-      totalFraction += task.fraction
-      partialCallback(totalFraction)
-    }
-    setTimeout(_runTasksLoop, 0)
-  }
-
-  // On the first run, award all new tasks equal weight.
-  var newTaskFraction = 1.0 / newTasks.length
-  for (var i=0; i<newTasks.length; i++) {
-    tasks.push({'code':newTasks[i], 'fraction':newTaskFraction})
-  }
-  newTasks = []
-
-  _runTasksLoop()
-}
-
+var fraction = 1.0
 function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var start = (new Date()).getTime()
 
@@ -215,20 +168,39 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var solutions = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
+
   for (var pos of startPoints) {
     _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
   }
 
-  _runTasks(function() {
-    var end = (new Date()).getTime()
-    console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-    finalCallback(solutions)
-  }, partialCallback)
+  function doOneTask() {
+    if (tasks.length === 0) {
+      var end = (new Date()).getTime()
+      console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+      finalCallback(solutions)
+      return
+    }
+
+    var task = tasks.pop()
+    var taskLength = tasks.length
+    task()
+    var newTasks = tasks.length - taskLength
+    if (newTasks === 0) {
+      // partialCallback(fraction)
+    }
+    setTimeout(doOneTask, 0)
+  }
+  setTimeout(doOneTask, 0)
 }
 
 // @Performance: This is the most central loop in this code.
 // Any performance efforts should be focused here.
 function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
+  if (fraction < 0.125) {
+    _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData)
+    return
+  }
+
   // Stop trying to solve once we reach our goal
   if (solutions.length >= window.MAX_SOLUTIONS) return
 
@@ -321,9 +293,9 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-  // Note: This order is reversed so that objects are popped in reverse order.
+  // NB: Order reversed because queue
 
-  _addTask(function() {
+  tasks.push(function() {
     // Tail recursion: Back out of this cell
     puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
     if (puzzle.symmetry != undefined) {
@@ -334,25 +306,33 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
 
   // Extend path up and down
   if (x%2 === 0) {
-    _addTask(function() {
+    tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'bottom'})
+      fraction /= 2
       _solveLoopAsync(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData)
+      fraction *= 2
     })
-    _addTask(function() {
+    tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'top'})
+      fraction /= 2
       _solveLoopAsync(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData)
+      fraction *= 2
     })
   }
 
   // Extend path left and right
   if (y%2 === 0) {
-    _addTask(function() {
+    tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'right'})
+      fraction /= 2
       _solveLoopAsync(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData)
+      fraction *= 2
     })
-    _addTask(function() {
+    tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'left'})
+      fraction /= 2
       _solveLoopAsync(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData)
+      fraction *= 2
     })
   }
 }
