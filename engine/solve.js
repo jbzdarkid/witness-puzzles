@@ -148,7 +148,39 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
 }
 
 var tasks = []
-var completed = 0.0
+var totalFraction = 0.0
+
+function _addTask(code) {
+  tasks.push({'code': code, 'fraction':1.0})
+}
+
+function _runTasks(finalCallback, partialCallback=null) {
+  function _runTasksLoop() {
+    if (tasks.length === 0) {
+      finalCallback()
+      return
+    }
+    var task = tasks.pop()
+    var numTasks = tasks.length
+    task.code()
+    var newTasks = tasks.length - numTasks
+
+    if (task.fraction > 0.001 && newTasks > 0) {
+      for (var i=tasks.length-1; i>tasks.length-newTasks-1; i--) {
+        tasks[i].fraction = task.fraction / newTasks
+      }
+      for (var i=0; i<tasks.length; i++) {
+        assert(tasks[i].fraction != 1)
+      }
+    } else if (task.fraction > 0) {
+      totalFraction += task.fraction
+      partialCallback(totalFraction)
+    }
+    setTimeout(_runTasksLoop, 0)
+  }
+  _runTasksLoop()
+}
+
 function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var start = (new Date()).getTime()
 
@@ -168,31 +200,18 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var solutions = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
-
-  for (var pos of startPoints) {
-    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, 1.0)
-  }
-
-  function doOneTask() {
-    if (tasks.length === 0) {
-      var end = (new Date()).getTime()
-      console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-      finalCallback(solutions)
-      return
+  _addTask(function() {
+    for (var pos of startPoints) {
+      _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
     }
+  })
 
-    var task = tasks.pop()
-    task.code()
-    completed += task.fraction
-    partialCallback(completed)
-    setTimeout(doOneTask, 0)
-  }
-  setTimeout(doOneTask, 0)
+  _runTasks(finalCallback, partialCallback)
 }
 
 // @Performance: This is the most central loop in this code.
 // Any performance efforts should be focused here.
-function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, fraction) {
+function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   // Stop trying to solve once we reach our goal
   if (solutions.length >= window.MAX_SOLUTIONS) return
 
@@ -285,10 +304,9 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, f
   }
 
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-  // NB: Order reversed because queue
-  // TODO: Using shift/unshift might let me keep order consistent.
+  // Note: This order is reversed so that objects are popped in reverse order.
 
-  tasks.push(function() {
+  _addTask(function() {
     // Tail recursion: Back out of this cell
     puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
     if (puzzle.symmetry != undefined) {
@@ -299,14 +317,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, f
 
   // Extend path up and down
   if (x%2 === 0) {
-    // TODO: Add a class here.
-    // Each class gets a weight based on its parent. When the function runs (and completes), it can update the total weight according to its value.
-    // Once a parent gets too small, it should stop distributing weight.
-    tasks.push(function() {
+    _addTask(function() {
       puzzle.updateCell(x, y, {'dir':'bottom'})
       _solveLoopAsync(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData)
     })
-    tasks.push(function() {
+    _addTask(function() {
       puzzle.updateCell(x, y, {'dir':'top'})
       _solveLoopAsync(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData)
     })
@@ -314,112 +329,14 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, f
 
   // Extend path left and right
   if (y%2 === 0) {
-    tasks.push(function() {
+    _addTask(function() {
       puzzle.updateCell(x, y, {'dir':'right'})
       _solveLoopAsync(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData)
     })
-    tasks.push(function() {
+    _addTask(function() {
       puzzle.updateCell(x, y, {'dir':'left'})
       _solveLoopAsync(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData)
     })
   }
 }
 
-// TODO: Probably want 'solutions' in here, if only to save a variable.
-class SharedCallback {
-  constructor(parentCallback=null) {
-    this.pendingChildren = 0
-    this.onComplete = null
-    this.parentCallback = parentCallback
-    if (parentCallback) {
-      this.fraction = 0.0
-      this.total = parentCallback.total
-      this.partialCallback = parentCallback.partialCallback
-      this.parentCallback.pendingChildren++
-    } else {
-      this.fraction = 1.0
-      this.total = [0.0]
-      this.partialCallback = null
-    }
-  }
-
-  execute(code, onComplete) {
-    this.onComplete = onComplete
-    var childCallback = new SharedCallback(this)
-
-    // if (this.fraction == 0.0) {
-    if (this.partialCallback == null) {
-      code(childCallback)
-      this.onComplete()
-      return
-    }
-
-    var parentCallback = this // So that I can reference "this" inside of setTimeout
-    tasks.push(function() {
-      if (parentCallback.fraction > 0.01) {
-        childCallback.fraction = parentCallback.fraction / parentCallback.pendingChildren
-        parentCallback.fraction -= childCallback.fraction
-      }
-
-      code(childCallback)
-
-      if (childCallback.pendingChildren === 0) {
-        // No recursion occurred, so we are at a leaf node.
-        // Consider our child dead, since nobody took a reference to it.
-        // Thus, we call our completion routine (which it would've called, except it's dead)
-        parentCallback._onChildComplete(childCallback.fraction)
-      } else {
-        // The child callback is alive, so it can handle itself. When it finishes, it should call our completion routine.
-      }
-    })
-    setTimeout(function() {
-      var func = tasks.pop()
-      func()
-    }, 0)
-  }
-
-  _onChildComplete(fraction) {
-    if (fraction > 0) {
-      this.total[0] += fraction
-      if (this.partialCallback) this.partialCallback(this.total[0])
-    }
-
-    this.pendingChildren--
-    if (this.pendingChildren <= 0) {
-      if (this.onComplete) this.onComplete()
-      if (this.parentCallback) this.parentCallback._onChildComplete(this.fraction)
-    }
-  }
-}
-
-// var total = 0
-// function testAsync() {
-//   k = 10000
-//   var sharedCallback = new SharedCallback()
-//   sharedCallback.partialCallback = function(percent) {
-//     console.info('Completion progress:', 100 * percent)
-//   }
-//
-//   sharedCallback.execute(function(childCallback) {
-//     testLoop(childCallback, 0, k)
-//   }, function() {
-//     console.info('!!! Final callback !!!', total)
-//   })
-// }
-//
-// function testLoop(sharedCallback, depth, k) {
-//   if (k <= 1) {
-//     total += k
-//     return
-//   }
-//
-//   var i = Math.floor(k / 2)
-//   var j = k - i
-//
-//   sharedCallback.execute(function(childCallback) {
-//     testLoop(childCallback, depth + 1, i)
-//     testLoop(childCallback, depth + 1, j)
-//   }, function() {
-//     // whatever
-//   })
-// }
