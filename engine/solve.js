@@ -147,37 +147,52 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 }
 
-var tasks = []
-var totalFraction = 0.0
-
+var newTasks = []
 function _addTask(code) {
-  tasks.push({'code': code, 'fraction':1.0})
+  newTasks.push(code)
 }
 
+var tasks = []
+var totalFraction = 0.0
 function _runTasks(finalCallback, partialCallback=null) {
+  // I don't like declaring this inline -- compare perf of passing in final/partial?
   function _runTasksLoop() {
     if (tasks.length === 0) {
       finalCallback()
       return
     }
     var task = tasks.pop()
-    var numTasks = tasks.length
     task.code()
-    var newTasks = tasks.length - numTasks
 
-    if (task.fraction > 0.001 && newTasks > 0) {
-      for (var i=tasks.length-1; i>tasks.length-newTasks-1; i--) {
-        tasks[i].fraction = task.fraction / newTasks
+    if (newTasks.length > 0) {
+      if (task.fraction > 0.001) {
+        var newTaskFraction = task.fraction / newTasks.length
+        assert(newTaskFraction != 1)
+      } else {
+        var newTaskFraction = 0.0
+        if (task.fraction > 0) {
+          totalFraction += task.fraction
+          partialCallback(totalFraction)
+        }
       }
-      for (var i=0; i<tasks.length; i++) {
-        assert(tasks[i].fraction != 1)
+      for (var i=0; i<newTasks.length; i++) {
+        tasks.push({'code':newTasks[i], 'fraction':newTaskFraction})
       }
+      newTasks = []
     } else if (task.fraction > 0) {
       totalFraction += task.fraction
       partialCallback(totalFraction)
     }
     setTimeout(_runTasksLoop, 0)
   }
+
+  // On the first run, award all new tasks equal weight.
+  var newTaskFraction = 1.0 / newTasks.length
+  for (var i=0; i<newTasks.length; i++) {
+    tasks.push({'code':newTasks[i], 'fraction':newTaskFraction})
+  }
+  newTasks = []
+
   _runTasksLoop()
 }
 
@@ -200,13 +215,15 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var solutions = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
-  _addTask(function() {
-    for (var pos of startPoints) {
-      _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
-    }
-  })
+  for (var pos of startPoints) {
+    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
+  }
 
-  _runTasks(finalCallback, partialCallback)
+  _runTasks(function() {
+    var end = (new Date()).getTime()
+    console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+    finalCallback(solutions)
+  }, partialCallback)
 }
 
 // @Performance: This is the most central loop in this code.
