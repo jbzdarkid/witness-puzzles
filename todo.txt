@@ -6,6 +6,7 @@
   * Pre-check puzzle for "has negations". If not, skip regionCheckNegations.
   * Pre-check puzzle for "has polyominos". If not, skip polyFit.
   * Try changing color strings into numbers. This is one of the major offenders for string compares.
+- Editor resize is outright broken. Somehow.
 
 Browse
 -- "Jump to top" button
