@@ -327,7 +327,6 @@ function solvePuzzle() {
   setSolveMode(false)
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
-  debugger;
   window.solve(puzzle, function(solutions) {
     document.getElementById('progressBox').style.display = 'none'
     document.getElementById('progressPercent').innerText = '0%'
