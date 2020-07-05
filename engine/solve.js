@@ -46,14 +46,14 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   if (cell.color !== 0) return
 
   if (puzzle.symmetry == undefined) {
-    puzzle.updateCell(x, y, {'color':1})
+    puzzle.updateCell2(x, y, 'color', 1)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
     // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
     if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
 
-    puzzle.updateCell(x, y, {'color':2})
-    puzzle.updateCell(sym.x, sym.y, {'color':3})
+    puzzle.updateCell2(x, y, 'color', 2)
+    puzzle.updateCell2(sym.x, sym.y, 'color', 3)
   }
 
   // Large optimization -- Attempt to early exit once we cut out a region.
@@ -94,10 +94,11 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
       if (!window._regionCheckNegations(puzzle, region).valid) {
         // @Cutnpaste
         // Tail recursion: Back out of this cell
-        puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+        puzzle.updateCell2(x, y, 'color', 0)
+        puzzle.updateCell2(x, y, 'dir', undefined)
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
-          puzzle.updateCell(sym.x, sym.y, {'color':0})
+          puzzle.updateCell2(sym.x, sym.y, 'color', 0)
         }
         return
       }
@@ -108,7 +109,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   }
 
   if (cell.end != undefined) {
-    puzzle.updateCell(x, y, {'dir':'none'})
+    puzzle.updateCell2(x, y, 'dir', 'none')
     window.validate(puzzle)
     if (puzzle.valid) {
       solutions.push(puzzle.clone())
@@ -118,10 +119,11 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
     if (numEndpoints === 1) {
       // @Cutnpaste
       // Tail recursion: Back out of this cell
-      puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+      puzzle.updateCell2(x, y, 'color', 0)
+      puzzle.updateCell2(x, y, 'dir', undefined)
       if (puzzle.symmetry != undefined) {
         var sym = puzzle.getSymmetricalPos(x, y)
-        puzzle.updateCell(sym.x, sym.y, {'color':0})
+        puzzle.updateCell2(sym.x, sym.y, 'color', 0)
       }
       return
     }
@@ -131,23 +133,24 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
   // Extend path left and right
   if (y%2 === 0) {
-    puzzle.updateCell(x, y, {'dir':'left'})
+    puzzle.updateCell2(x, y, 'dir', 'left')
     _solveLoop(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData)
-    puzzle.updateCell(x, y, {'dir':'right'})
+    puzzle.updateCell2(x, y, 'dir', 'right')
     _solveLoop(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData)
   }
   // Extend path up and down
   if (x%2 === 0) {
-    puzzle.updateCell(x, y, {'dir':'top'})
+    puzzle.updateCell2(x, y, 'dir', 'top')
     _solveLoop(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData)
-    puzzle.updateCell(x, y, {'dir':'bottom'})
+    puzzle.updateCell2(x, y, 'dir', 'bottom')
     _solveLoop(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData)
   }
   // Tail recursion: Back out of this cell
-  puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+  puzzle.updateCell2(x, y, 'color', 0)
+  puzzle.updateCell2(x, y, 'dir', undefined)
   if (puzzle.symmetry != undefined) {
     var sym = puzzle.getSymmetricalPos(x, y)
-    puzzle.updateCell(sym.x, sym.y, {'color':0})
+    puzzle.updateCell2(sym.x, sym.y, 'color', 0)
   }
 }
 
@@ -218,14 +221,14 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
   if (cell.color !== 0) return
 
   if (puzzle.symmetry == undefined) {
-    puzzle.updateCell(x, y, {'color':1})
+    puzzle.updateCell2(x, y, 'color', 1)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
     // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
     if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
 
-    puzzle.updateCell(x, y, {'color':2})
-    puzzle.updateCell(sym.x, sym.y, {'color':3})
+    puzzle.updateCell2(x, y, 'color', 2)
+    puzzle.updateCell2(sym.x, sym.y, 'color', 3)
   }
 
   // Large optimization -- Attempt to early exit once we cut out a region.
@@ -266,10 +269,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
       if (!window._regionCheckNegations(puzzle, region).valid) {
         // @Cutnpaste
         // Tail recursion: Back out of this cell
-        puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+        puzzle.updateCell2(x, y, 'color', 0)
+        puzzle.updateCell2(x, y, 'dir', undefined)
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
-          puzzle.updateCell(sym.x, sym.y, {'color':0})
+          puzzle.updateCell2(sym.x, sym.y, 'color', 0)
         }
         return
       }
@@ -279,7 +283,7 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
   }
 
   if (cell.end != undefined) {
-    puzzle.updateCell(x, y, {'dir':'none'})
+    puzzle.updateCell2(x, y, 'dir', 'none')
     window.validate(puzzle)
     if (puzzle.valid) {
       solutions.push(puzzle.clone())
@@ -289,10 +293,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
     if (numEndpoints === 1) {
       // @Cutnpaste
       // Tail recursion: Back out of this cell
-      puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+      puzzle.updateCell2(x, y, 'color', 0)
+      puzzle.updateCell2(x, y, 'dir', undefined)
       if (puzzle.symmetry != undefined) {
         var sym = puzzle.getSymmetricalPos(x, y)
-        puzzle.updateCell(sym.x, sym.y, {'color':0})
+        puzzle.updateCell2(sym.x, sym.y, 'color', 0)
       }
       return
     }
@@ -304,21 +309,22 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
 
   tasks.push(function() {
     // Tail recursion: Back out of this cell
-    puzzle.updateCell(x, y, {'color':0, 'dir':undefined})
+    puzzle.updateCell2(x, y, 'color', 0)
+    puzzle.updateCell2(x, y, 'dir', undefined)
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
-      puzzle.updateCell(sym.x, sym.y, {'color':0})
+      puzzle.updateCell2(sym.x, sym.y, 'color', 0)
     }
   })
 
   // Extend path up and down
   if (x%2 === 0) {
     tasks.push(function() {
-      puzzle.updateCell(x, y, {'dir':'bottom'})
+      puzzle.updateCell2(x, y, 'dir', 'bottom')
       _solveLoopAsync(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
     tasks.push(function() {
-      puzzle.updateCell(x, y, {'dir':'top'})
+      puzzle.updateCell2(x, y, 'dir', 'top')
       _solveLoopAsync(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
   }
@@ -326,11 +332,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
   // Extend path left and right
   if (y%2 === 0) {
     tasks.push(function() {
-      puzzle.updateCell(x, y, {'dir':'right'})
+      puzzle.updateCell2(x, y, 'dir', 'right')
       _solveLoopAsync(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
     tasks.push(function() {
-      puzzle.updateCell(x, y, {'dir':'left'})
+      puzzle.updateCell2(x, y, 'dir', 'left')
       _solveLoopAsync(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
   }

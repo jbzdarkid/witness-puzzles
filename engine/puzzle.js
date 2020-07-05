@@ -240,6 +240,16 @@ class Puzzle {
     }
   }
 
+  updateCell2(x, y, key, value) {
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return
+    if (this.grid[x][y] == undefined) {
+      this.grid[x][y] = {[key]: value}
+    } else {
+      this.grid[x][y][key] = value
+    }
+  }
+
   getValidEndDirs(x, y) {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return []
