@@ -104,10 +104,10 @@ function _drawPuzzle() {
 
   var xPos = 40
   var topLeft = {'x':40, 'y':40}
-  for (var x=0; x<puzzle.grid.length; x++) {
+  for (var x=0; x<puzzle.width; x++) {
     var yPos = 40
     var width = (x%2 === 0 ? 24 : 58)
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+    for (var y=0; y<puzzle.height; y++) {
       var height = (y%2 === 0 ? 24 : 58)
       var rect = createElement('rect')
       puzzleElement.appendChild(rect)
@@ -135,17 +135,17 @@ function _reloadPuzzle() {
   document.getElementById('solveAuto').disabled = false
   if (puzzle.symmetry != undefined) {
     // 6x6 is the max for symmetry puzzles
-    if (puzzle.grid.length > 13 || puzzle.grid[0].length > 13) {
+    if (puzzle.width > 13 || puzzle.height > 13) {
       document.getElementById('solveAuto').disabled = true
     }
   } else if (puzzle.pillar === true) {
     // 4x4 is the max for non-symmetry, pillar puzzles
-    if (puzzle.grid.length > 9 || puzzle.grid[0].length > 9) {
+    if (puzzle.width > 9 || puzzle.height > 9) {
       document.getElementById('solveAuto').disabled = true
     }
   } else {
     // 6x6 is the max for non-symmetry, non-pillar puzzles
-    if (puzzle.grid.length > 13 || puzzle.grid[0].length > 13) {
+    if (puzzle.width > 13 || puzzle.height > 13) {
       document.getElementById('solveAuto').disabled = true
     }
   }
@@ -261,8 +261,8 @@ function setStyle(style) {
   }
 
   // If the puzzle is in non-symmetry mode, replace all colored dots with black
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined || cell.type != 'line') continue
       if (puzzle.symmetry == undefined) {
@@ -286,7 +286,7 @@ function setStyle(style) {
   // Delayed until after symmetry enforcement to avoid oob
   puzzle.pillar = style.includes('Pillar')
 
-  var width = puzzle.grid.length
+  var width = puzzle.width
   if (puzzle.pillar === true) {
     if (puzzle.symmetry == undefined) {
       // Width must be a multiple of 2 (rounding down)
@@ -301,7 +301,7 @@ function setStyle(style) {
     width += 1 - width % 2
   }
 
-  resizePuzzle(width - puzzle.grid.length, 0, 'right')
+  resizePuzzle(width - puzzle.width, 0, 'right')
   _writePuzzle()
   _reloadPuzzle()
 }
@@ -816,8 +816,8 @@ function _shapeChooserClick(event, cell) {
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
 // and endpoints in sync with the original design.
 function resizePuzzle(dx, dy, id) {
-  var width = puzzle.grid.length
-  var height = puzzle.grid[0].length
+  var width = puzzle.width
+  var height = puzzle.height
   var newWidth = width + dx
   var newHeight = height + dy
   console.log('Resizing puzzle of size', width, height, 'to', newWidth, newHeight)
@@ -935,7 +935,7 @@ function _dragMove(event, elem) {
 
   var yLim = 40
   // 4x4 and larger will only expand downwards, so we have to require more motion.
-  if (puzzle.grid[0].length >= 9) {
+  if (puzzle.height >= 9) {
     var yLim = 60
   }
 

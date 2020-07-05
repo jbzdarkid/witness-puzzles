@@ -20,8 +20,8 @@ function validate(puzzle) {
   var puzzleHasEnd = false
   var puzzleHasNegations = false
   // Validate gap failures as an early exit.
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (['square', 'star', 'poly', 'ylop'].includes(cell.type)) {

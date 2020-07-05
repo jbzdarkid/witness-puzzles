@@ -54,6 +54,8 @@ class Puzzle {
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
+    this.width = this.grid.length
+    this.height = this.grid[0].length
     this.regionCache = {}
     this.pillar = pillar
   }
@@ -64,13 +66,15 @@ class Puzzle {
     puzzle.name = parsed.name
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
+    puzzle.width = parsed.grid.length
+    puzzle.height = parsed.grid[0].length
     // @Legacy: Grid squares used to use 'false' to indicate emptiness.
     // @Legacy: Cells used to use undefined to indicate emptiness. (... I think this still happens for intermediates)
     // Now, we use:
     // Cells default to {}
     // Lines default to {'type':'line', 'color':0}
-    for (var x=0; x<puzzle.grid.length; x++) {
-      for (var y=0; y<puzzle.grid[x].length; y++) {
+    for (var x=0; x<puzzle.width; x++) {
+      for (var y=0; y<puzzle.height; y++) {
         var cell = puzzle.grid[x][y]
         if (cell === false || cell == undefined) {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = {}
@@ -123,7 +127,7 @@ class Puzzle {
     if (parsed.regionCache != undefined) puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
-    puzzle.largezero = puzzle.grid.length * puzzle.grid[0].length
+    puzzle.largezero = puzzle.width * puzzle.height
     return puzzle
   }
 
@@ -140,8 +144,8 @@ class Puzzle {
   // to the grid are not also cleared.
   newGrid(width, height) {
     if (width == undefined) { // Called by someone who just wants to clear the grid.
-      width = this.grid.length
-      height = this.grid[0].length
+      width = this.width
+      height = this.height
     }
     this.grid = []
     for (var x=0; x<width; x++) {
@@ -158,14 +162,14 @@ class Puzzle {
   // Wrap a value around at the width of the grid. No-op if not in pillar mode.
   _mod(val) {
     if (this.pillar === false) return val
-    return (val + this.largezero) % this.grid.length
+    return (val + this.largezero) % this.width
   }
 
   // Determine if an x, y pair is a safe reference inside the grid. This should be invoked at the start of every
   // function, but then functions can access the grid directly.
   _safeCell(x, y) {
-    if (x < 0 || x >= this.grid.length) return false
-    if (y < 0 || y >= this.grid[x].length) return false
+    if (x < 0 || x >= this.width) return false
+    if (y < 0 || y >= this.height) return false
     return true
   }
 
@@ -199,17 +203,17 @@ class Puzzle {
   getSymmetricalPos(x, y) {
     if (this.symmetry != undefined) {
       if (this.pillar === true) {
-        x += this.grid.length/2
+        x += this.width/2
         if (this.symmetry.x === true) {
-          x = this.grid.length - x
+          x = this.width - x
         }
       } else {
         if (this.symmetry.x === true) {
-          x = (this.grid.length - 1) - x
+          x = (this.width - 1) - x
         }
       }
       if (this.symmetry.y === true) {
-        y = (this.grid[0].length - 1) - y
+        y = (this.height - 1) - y
       }
     }
     return {'x':this._mod(x), 'y':y}
@@ -270,8 +274,8 @@ class Puzzle {
   // break the path.
   loadHints() {
     this.hints = []
-    for (var x=0; x<this.grid.length; x++) {
-      for (var y=0; y<this.grid[x].length; y++) {
+    for (var x=0; x<this.width; x++) {
+      for (var y=0; y<this.height; y++) {
         if (x%2 + y%2 === 1 && this.getLine(x, y) > 0) {
           this.hints.push({'x':x, 'y':y})
         }
@@ -313,8 +317,8 @@ class Puzzle {
   }
 
   clearLines() {
-    for (var x=0; x<this.grid.length; x++) {
-      for (var y=0; y<this.grid[x].length; y++) {
+    for (var x=0; x<this.width; x++) {
+      for (var y=0; y<this.height; y++) {
         if (x%2 === 1 && y%2 === 1) continue
         Object.assign(this.grid[x][y], {'color':0, 'dir':undefined})
       }
@@ -367,9 +371,9 @@ class Puzzle {
     this.grid = []
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with color 0.
-    for (var x=0; x<savedGrid.length; x++) {
+    for (var x=0; x<this.width; x++) {
       this.grid[x] = []
-      for (var y=0; y<savedGrid[0].length; y++) {
+      for (var y=0; y<this.height; y++) {
         var cell = savedGrid[x][y]
         if (cell != undefined && cell.color > 0) {
           if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
@@ -392,16 +396,16 @@ class Puzzle {
 
     if (this.pillar === false) {
       // Left and right edges (only applies to non-pillars)
-      for (var y=1; y<savedGrid[0].length; y+=2) {
+      for (var y=1; y<this.height; y+=2) {
         this._floodFillOutside(0, y)
-        this._floodFillOutside(savedGrid.length - 1, y)
+        this._floodFillOutside(this.width - 1, y)
       }
     }
 
     // Top and bottom edges
-    for (var x=1; x<savedGrid.length; x+=2) {
+    for (var x=1; x<this.width; x+=2) {
       this._floodFillOutside(x, 0)
-      this._floodFillOutside(x, savedGrid[0].length - 1)
+      this._floodFillOutside(x, this.height - 1)
     }
 
     return savedGrid
@@ -411,13 +415,13 @@ class Puzzle {
     var regions = []
     var savedGrid = this._switchToMaskedGrid()
 
-    for (var x=0; x<this.grid.length; x++) {
-      for (var y=0; y<this.grid[x].length; y++) {
+    for (var x=0; x<this.width; x++) {
+      for (var y=0; y<this.height; y++) {
         if (this.grid[x][y] == undefined) continue
 
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.
-        var region = new Region(this.grid.length)
+        var region = new Region(this.width)
         this._floodFill(x, y, region)
         // *-*-* I'm not certain this is a good idea, but it potentially saves perf of people asking about it over and over again.
         for (var i=0; i<region.cells.length; i++) {
@@ -431,8 +435,8 @@ class Puzzle {
   }
 
   getRegion(x, y) {
-    var region = new Region(this.grid.length)
-    if (x < 0 || y < 0 || x >= this.grid.length || y >= this.grid[0].length) return region
+    var region = new Region(this.width)
+    if (x < 0 || y < 0 || x >= this.width || y >= this.height) return region
 
     var savedGrid = this._switchToMaskedGrid()
 
@@ -454,8 +458,8 @@ class Puzzle {
 
   logGrid() {
     var output = ''
-    for (var y=0; y<this.grid[0].length; y++) {
-      for (var x=0; x<this.grid.length; x++) {
+    for (var y=0; y<this.height; y++) {
+      for (var x=0; x<this.width; x++) {
         var cell = this.getCell(x, y)
         if (cell == undefined) output += '?'
         else if (cell.start === true) output += 'S'

@@ -27,8 +27,8 @@ function _randomTriangle(numTriangles, maxSolutions) {
     puzzle.grid[8][0].end = 'right'
 
     var cells = []
-    for (var x=0; x < puzzle.grid.length; x++) {
-      for (var y=0; y < puzzle.grid[0].length; y++) {
+    for (var x=0; x < puzzle.width; x++) {
+      for (var y=0; y < puzzle.height; y++) {
         if (x%2 == 1 && y%2 == 1) cells.push({'x':x, 'y':y})
       }
     }
@@ -83,8 +83,8 @@ function _showSolution(solutions, num, side) {
 function _getSolutionIndex(list, solution) {
   for (var i=0; i<list.length; i++) {
     var match = true
-    for (var x=0; x<solution.grid.length; x++) {
-      for (var y=0; y<solution.grid[0].length; y++) {
+    for (var x=0; x<solution.width; x++) {
+      for (var y=0; y<solution.height; y++) {
         if (solution.grid[x][y].color != list[i].grid[x][y].color) {
           match = false
           break

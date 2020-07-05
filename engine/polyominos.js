@@ -44,8 +44,8 @@ function getRotations(polyshape) {
 
 function fitsGrid(cells, x, y, puzzle) {
   for (var cell of cells) {
-    if (cell.x + x < 0 || cell.x + x >= puzzle.grid.length) return false
-    if (cell.y + y < 0 || cell.y + y >= puzzle.grid[0].length) return false
+    if (cell.x + x < 0 || cell.x + x >= puzzle.width) return false
+    if (cell.y + y < 0 || cell.y + y >= puzzle.height) return false
   }
   return true
 }
@@ -158,8 +158,8 @@ function polyFit(region, puzzle) {
   var savedGrid = puzzle.grid
   puzzle.newGrid()
   // First, we mark all cells as 0: Cells outside the target region should be unaffected.
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       puzzle.setCell(x, y, 0)
     }
   }
@@ -197,8 +197,8 @@ function _placeYlops(ylops, polys, puzzle) {
 
   var ylop = ylops.pop()
   var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
-  for (var x=1; x<puzzle.grid.length; x+=2) {
-    for (var y=1; y<puzzle.grid[x].length; y+=2) {
+  for (var x=1; x<puzzle.width; x+=2) {
+    for (var y=1; y<puzzle.height; y+=2) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
         var cells = polyominoFromPolyshape(polyshape, true)
@@ -218,8 +218,8 @@ function _placeYlops(ylops, polys, puzzle) {
 // so try every piece to fill it, then recurse.
 function _placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
-  for (var y=0; y<puzzle.grid[0].length; y++) {
-    for (var x=0; x<puzzle.grid.length; x++) {
+  for (var y=0; y<puzzle.height; y++) {
+    for (var x=0; x<puzzle.width; x++) {
       var cell = puzzle.getCell(x, y)
       if (cell > 0) {
         console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
@@ -241,8 +241,8 @@ function _placePolys(polys, puzzle) {
   // However in the case of pillars, there is no top-left, so we try all open cells in the
   // top-most open row
   var openCells = []
-  for (var y=1; y<puzzle.grid[0].length; y+=2) {
-    for (var x=1; x<puzzle.grid.length; x+=2) {
+  for (var y=1; y<puzzle.height; y+=2) {
+    for (var x=1; x<puzzle.width; x+=2) {
       if (puzzle.getCell(x, y) >= 0) continue
       openCells.push({'x':x, 'y':y})
       if (puzzle.pillar === false) break
@@ -286,8 +286,8 @@ function _placePolys(polys, puzzle) {
 
 function _logPolyGrid(puzzle) {
   var output = ''
-  for (var y=0; y<puzzle.grid[0].length; y++) {
-    for (var x=0; x<puzzle.grid.length; x++) {
+  for (var y=0; y<puzzle.height; y++) {
+    for (var x=0; x<puzzle.width; x++) {
       var cell = puzzle.grid[x][y]
       if (cell === -1) output += '-'
       else if (0 <= cell && cell <= 9) output += cell

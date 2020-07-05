@@ -6,12 +6,12 @@ function draw(puzzle, target='puzzle') {
 
   if (puzzle.pillar === true) {
     // 41*(width-1) + 30*2 (padding) + 10*2 (border)
-    var pixelWidth = 41*puzzle.grid.length + 80
+    var pixelWidth = 41*puzzle.width + 80
   } else {
     // 41*(width-1) + 24 (extra edge) + 30*2 (padding) + 10*2 (border)
-    var pixelWidth = 41*puzzle.grid.length + 63
+    var pixelWidth = 41*puzzle.width + 63
   }
-  var pixelHeight = 41*puzzle.grid[0].length + 63
+  var pixelHeight = 41*puzzle.height + 63
   svg.setAttribute('viewbox', '0 0 ' + pixelWidth + ' ' + pixelHeight)
   svg.style.width = pixelWidth
   svg.style.height = pixelHeight
@@ -39,8 +39,8 @@ function draw(puzzle, target='puzzle') {
 }
 
 function _drawGrid(puzzle, svg) {
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.gap === 2) continue
       var line = createElement('line')
@@ -50,7 +50,7 @@ function _drawGrid(puzzle, svg) {
       if (x%2 === 1 && y%2 === 0) { // Horizontal
         line.setAttribute('x1', (x-1)*41 + 52)
         // Adjust the length if it's a pillar -- the grid is not as wide!
-        if (puzzle.pillar === true && x === puzzle.grid.length - 1) {
+        if (puzzle.pillar === true && x === puzzle.width - 1) {
           line.setAttribute('x2', (x+1)*41 + 40)
         } else {
           line.setAttribute('x2', (x+1)*41 + 52)
@@ -93,7 +93,7 @@ function _drawGrid(puzzle, svg) {
   // Determine if left-side needs a 'wrap indicator'
   if (puzzle.pillar === true) {
     var x = 0;
-    for (var y=0; y<puzzle.grid[0].length; y+=2) {
+    for (var y=0; y<puzzle.height; y+=2) {
       var cell = puzzle.getCell(x-1, y)
       if (cell == undefined || cell.gap === 2) continue
       var line = createElement('line')
@@ -110,8 +110,8 @@ function _drawGrid(puzzle, svg) {
 }
 
 function _drawSymbols(puzzle, svg, target) {
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       var params = {
@@ -149,8 +149,8 @@ function _drawSymbols(puzzle, svg, target) {
 
 function _drawStartAndEnd(puzzle, svg) {
   var startData = undefined
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[x].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (cell.end != undefined) {
@@ -233,16 +233,16 @@ function _drawStartAndEnd(puzzle, svg) {
 function _drawSolution(puzzle, x, y) {
   console.info('Drawing solution')
   var rows = '   |'
-  for (var i=0; i<puzzle.grid.length; i++) {
+  for (var i=0; i<puzzle.width; i++) {
     if (i < 10) rows += ' '
     rows += '  ' + i + ' |'
   }
   console.info(rows)
-  for (var j=0; j<puzzle.grid[0].length; j++) {
+  for (var j=0; j<puzzle.height; j++) {
     var output = ''
     if (j < 10) output += ' '
     output += j + ' |'
-    for (var i=0; i<puzzle.grid.length; i++) {
+    for (var i=0; i<puzzle.width; i++) {
       var cell = puzzle.grid[i][j]
       if (cell == undefined || cell.dir == undefined) {
         output += '     |'

@@ -9,8 +9,8 @@ function solve(puzzle, finalCallback=null, partialCallback=null) {
 
   var startPoints = []
   var numEndpoints = 0
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[0].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (cell.start === true) {
@@ -79,7 +79,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   //
   // Unfortunately, this optimization doesn't work for pillars, since the two regions are the same.
   if (puzzle.pillar === false) {
-    var isEdge = x <= 0 || y <= 0 || x >= puzzle.grid.length - 1 || y >= puzzle.grid[0].length - 1
+    var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
     var newEarlyExitData = [
       earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?
       earlyExitData[2],                                         // The position before our current one
@@ -163,8 +163,8 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
 
   var startPoints = []
   var numEndpoints = 0
-  for (var x=0; x<puzzle.grid.length; x++) {
-    for (var y=0; y<puzzle.grid[0].length; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
       if (cell.start === true) {
@@ -262,7 +262,7 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
   //
   // Unfortunately, this optimization doesn't work for pillars, since the two regions are the same.
   if (puzzle.pillar === false) {
-    var isEdge = x <= 0 || y <= 0 || x >= puzzle.grid.length - 1 || y >= puzzle.grid[0].length - 1
+    var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
     var newEarlyExitData = [
       earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?
       earlyExitData[2],                                         // The position before our current one

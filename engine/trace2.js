@@ -105,7 +105,7 @@ class PathSegment {
       if (data.pos.x === 0 && this.dir === 'right') {
         this.pillarCirc.setAttribute('cx', data.bbox.x1)
         this.pillarCirc.setAttribute('static', true)
-      } else if (data.pos.x === data.puzzle.grid.length - 1 && this.dir === 'left') {
+      } else if (data.pos.x === data.puzzle.width - 1 && this.dir === 'left') {
         this.pillarCirc.setAttribute('cx', data.bbox.x2)
         this.pillarCirc.setAttribute('static', true)
       } else {
@@ -157,7 +157,7 @@ class PathSegment {
         if (data.sym.x === 0 && symmetricalDir === 'right') {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x1)
           this.symPillarCirc.setAttribute('static', true)
-        } else if (data.sym.x === data.puzzle.grid.length - 1 && symmetricalDir === 'left') {
+        } else if (data.sym.x === data.puzzle.width - 1 && symmetricalDir === 'left') {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x2)
           this.symPillarCirc.setAttribute('static', true)
         } else {
@@ -833,10 +833,10 @@ function _move() {
 // Adjust data.x by the width of the grid. This does preserve momentum around the edge.
 function _pillarWrap(moveDir) {
   if (moveDir === 'left' && data.pos.x === 0) {
-    data.x += data.puzzle.grid.length * 41
+    data.x += data.puzzle.width * 41
   }
-  if (moveDir === 'right' && data.pos.x === data.puzzle.grid.length - 1) {
-    data.x -= data.puzzle.grid.length * 41
+  if (moveDir === 'right' && data.pos.x === data.puzzle.width - 1) {
+    data.x -= data.puzzle.width * 41
   }
 }
 
@@ -845,8 +845,8 @@ function _changePos(bbox, pos, moveDir) {
     pos.x--
     // Wrap around the left
     if (data.puzzle.pillar === true && pos.x < 0) {
-      pos.x += data.puzzle.grid.length
-      bbox.shift('right', data.puzzle.grid.length * 41 - 82)
+      pos.x += data.puzzle.width
+      bbox.shift('right', data.puzzle.width * 41 - 82)
       bbox.shift('right', 58)
     } else {
       bbox.shift('left', (pos.x%2 === 0 ? 24 : 58))
@@ -854,9 +854,9 @@ function _changePos(bbox, pos, moveDir) {
   } else if (moveDir === 'right') {
     pos.x++
     // Wrap around to the right
-    if (data.puzzle.pillar === true && pos.x >= data.puzzle.grid.length) {
-      pos.x -= data.puzzle.grid.length
-      bbox.shift('left', data.puzzle.grid.length * 41 - 82)
+    if (data.puzzle.pillar === true && pos.x >= data.puzzle.width) {
+      pos.x -= data.puzzle.width
+      bbox.shift('left', data.puzzle.width * 41 - 82)
       bbox.shift('left', 24)
     } else {
       bbox.shift('right', (pos.x%2 === 0 ? 24 : 58))
