@@ -1,5 +1,11 @@
 - Work on speedrunning solver / improving "unique puzzles"
   Simplest approach is just to have a simpler cache key, which is content-aware.
+- Perf TODOS:
+  * Finish wiring through updateCell2
+  (note that existing "large offenders" can continue to call Object.assign themselves!)
+  * Pre-check puzzle for "has negations". If not, skip regionCheckNegations.
+  * Pre-check puzzle for "has polyominos". If not, skip polyFit.
+  * Try changing color strings into numbers. This is one of the major offenders for string compares.
 
 Browse
 -- "Jump to top" button
