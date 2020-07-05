@@ -1,7 +1,10 @@
 window.MAX_SOLUTIONS = 10000
 // Generates a solution via DFS recursive backtracking
 function solve(puzzle, finalCallback=null, partialCallback=null) {
-  if (finalCallback != null) return solveAsync(puzzle, finalCallback, partialCallback)
+  if (finalCallback != null) {
+    solveAsync(puzzle, finalCallback, partialCallback)
+    return []
+  }
   var start = (new Date()).getTime()
 
   var startPoints = []
@@ -98,6 +101,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
         }
         return
       }
+      // TODO: Optimization -- we can early exit if we cut off all remaining exits
     }
   } else {
     var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
@@ -148,7 +152,6 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
 }
 
 var tasks = []
-var fraction = 1.0
 function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var start = (new Date()).getTime()
 
@@ -169,10 +172,13 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
 
+  var depth = 7
   for (var pos of startPoints) {
-    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
+    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, depth)
   }
 
+  var completed = 0
+  var total = (1 << depth)
   function doOneTask() {
     if (tasks.length === 0) {
       var end = (new Date()).getTime()
@@ -186,7 +192,8 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
     task()
     var newTasks = tasks.length - taskLength
     if (newTasks === 0) {
-      // partialCallback(fraction)
+      completed += (1 << depth)
+      // partialCallback(completed / total)
     }
     setTimeout(doOneTask, 0)
   }
@@ -195,8 +202,8 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
 
 // @Performance: This is the most central loop in this code.
 // Any performance efforts should be focused here.
-function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
-  if (fraction < 0.125) {
+function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth) {
+  if (depth == 0) {
     _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData)
     return
   }
@@ -308,15 +315,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   if (x%2 === 0) {
     tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'bottom'})
-      fraction /= 2
-      _solveLoopAsync(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData)
-      fraction *= 2
+      _solveLoopAsync(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
     tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'top'})
-      fraction /= 2
-      _solveLoopAsync(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData)
-      fraction *= 2
+      _solveLoopAsync(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
   }
 
@@ -324,15 +327,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   if (y%2 === 0) {
     tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'right'})
-      fraction /= 2
-      _solveLoopAsync(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData)
-      fraction *= 2
+      _solveLoopAsync(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
     tasks.push(function() {
       puzzle.updateCell(x, y, {'dir':'left'})
-      fraction /= 2
-      _solveLoopAsync(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData)
-      fraction *= 2
+      _solveLoopAsync(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
   }
 }
