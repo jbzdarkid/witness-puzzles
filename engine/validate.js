@@ -14,15 +14,22 @@ function validate(puzzle) {
   puzzle.invalidElements = []
   puzzle.negations = []
 
+  // @Perf: This could potentially be pre-computed. Not that running through the grid is *that* expensive...
   var puzzleHasSymbols = false
   var puzzleHasStart = false
   var puzzleHasEnd = false
+  var puzzleHasNegations = false
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.grid.length; x++) {
     for (var y=0; y<puzzle.grid[x].length; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
-      if (['square', 'star', 'nega', 'poly', 'ylop'].includes(cell.type)) {
+      if (['square', 'star', 'poly', 'ylop'].includes(cell.type)) {
+        puzzleHasSymbols = true
+        continue
+      }
+      if (cell.type === 'nega') {
+        puzzleHasNegations = true
         puzzleHasSymbols = true
         continue
       }
@@ -82,7 +89,11 @@ function validate(puzzle) {
       var regionData = puzzle.regionCache[key]
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
-        regionData = _regionCheckNegations(puzzle, region)
+        if (puzzleHasNegations) {
+          regionData = _regionCheckNegations(puzzle, region)
+        } else {
+          regionData = _regionCheck(puzzle, region)
+        }
         console.log('Region valid:', regionData.valid)
 
         if (!window.DISABLE_CACHE) {
@@ -118,7 +129,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
 
     console.debug(negationSymbols.length - i, 'negation symbol(s) left over with nothing to negate')
     for (; i<negationSymbols.length; i++) {
-      puzzle.updateCell(negationSymbols[i].x, negationSymbols[i].y, {'type':'nonce'})
+      puzzle.updateCell2(negationSymbols[i].x, negationSymbols[i].y, 'type', 'nonce')
     }
     var regionData = _regionCheck(puzzle, region)
 
@@ -133,7 +144,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
       }
     }
     for (; i<negationSymbols.length; i++) {
-      puzzle.updateCell(negationSymbols[i].x, negationSymbols[i].y, {'type':'nega'})
+      puzzle.updateCell2(negationSymbols[i].x, negationSymbols[i].y, 'type', 'nega')
       regionData.invalidElements.push(negationSymbols[i])
       regionData.valid = false
     }
@@ -176,7 +187,7 @@ function _regionCheckNegations(puzzle, region) {
   for (var pos of region.cells) {
     if (pos.cell != undefined && pos.cell.type === 'nega') {
       negationSymbols.push(pos)
-      puzzle.updateCell(pos.x, pos.y, {'type': 'nonce'})
+      puzzle.updateCell2(pos.x, pos.y, 'type', 'nonce')
     }
   }
   console.debug('Found', negationSymbols.length, 'negation symbols')
@@ -188,7 +199,7 @@ function _regionCheckNegations(puzzle, region) {
 
   // Set 'nonce' back to 'nega' for the negation symbols
   for (var pos of negationSymbols) {
-    puzzle.updateCell(pos.x, pos.y, {'type': 'nega'})
+    puzzle.updateCell2(pos.x, pos.y, 'type', 'nega')
   }
 
   var combinations = []
