@@ -35,6 +35,8 @@ function solve(puzzle, finalCallback=null, partialCallback=null) {
 
 // @Performance: This is the most central loop in this code.
 // Any performance efforts should be focused here.
+// Note: Most mechanics are NP (or harder), so don't feel bad about solving them by brute force.
+// https://arxiv.org/pdf/1804.10193.pdf
 function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
   // Stop trying to solve once we reach our goal
   if (solutions.length >= window.MAX_SOLUTIONS) return
@@ -155,6 +157,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
 }
 
 var tasks = []
+var newTasks = []
 function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   var start = (new Date()).getTime()
 
@@ -175,13 +178,16 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
 
-  var depth = 7
   for (var pos of startPoints) {
-    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, depth)
+    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, 5)
   }
 
+  for (var i=0; i<newTasks.length; i++) {
+    tasks.push({'code':newTasks[i], 'fraction': 1.0 / newTasks.length})
+  }
+  newTasks = []
+
   var completed = 0
-  var total = (1 << depth)
   function doOneTask() {
     if (tasks.length === 0) {
       var end = (new Date()).getTime()
@@ -191,13 +197,17 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
     }
 
     var task = tasks.pop()
-    var taskLength = tasks.length
-    task()
-    var newTasks = tasks.length - taskLength
-    if (newTasks === 0) {
-      completed += (1 << depth)
-      // partialCallback(completed / total)
+    task.code()
+    if (newTasks.length === 0) {
+      completed += task.fraction
+      partialCallback(completed)
+    } else {
+      for (var i=0; i<newTasks.length; i++) {
+        tasks.push({'code':newTasks[i], 'fraction': task.fraction / newTasks.length})
+      }
+      newTasks = []
     }
+
     setTimeout(doOneTask, 0)
   }
   setTimeout(doOneTask, 0)
@@ -307,7 +317,7 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
   // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
   // NB: Order reversed because queue
 
-  tasks.push(function() {
+  newTasks.push(function() {
     // Tail recursion: Back out of this cell
     puzzle.updateCell2(x, y, 'color', 0)
     puzzle.updateCell2(x, y, 'dir', undefined)
@@ -319,11 +329,11 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
 
   // Extend path up and down
   if (x%2 === 0) {
-    tasks.push(function() {
+    newTasks.push(function() {
       puzzle.updateCell2(x, y, 'dir', 'bottom')
       _solveLoopAsync(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
-    tasks.push(function() {
+    newTasks.push(function() {
       puzzle.updateCell2(x, y, 'dir', 'top')
       _solveLoopAsync(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
@@ -331,14 +341,13 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
 
   // Extend path left and right
   if (y%2 === 0) {
-    tasks.push(function() {
+    newTasks.push(function() {
       puzzle.updateCell2(x, y, 'dir', 'right')
       _solveLoopAsync(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
-    tasks.push(function() {
+    newTasks.push(function() {
       puzzle.updateCell2(x, y, 'dir', 'left')
       _solveLoopAsync(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
     })
   }
 }
-
