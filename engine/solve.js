@@ -1,14 +1,12 @@
 window.MAX_SOLUTIONS = 10000
 // Generates a solution via DFS recursive backtracking
-function solve(puzzle, finalCallback=null, partialCallback=null) {
-  if (finalCallback != null) {
-    solveAsync(puzzle, finalCallback, partialCallback)
-    return []
-  }
+function solve(puzzle, partialCallback=null, finalCallback=null) {
   var start = (new Date()).getTime()
 
   var startPoints = []
   var numEndpoints = 0
+  puzzle.hasNegations = false
+  puzzle.hasPolyominos = false
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
@@ -17,6 +15,8 @@ function solve(puzzle, finalCallback=null, partialCallback=null) {
         startPoints.push({'x': x, 'y': y})
       }
       if (cell.end != undefined) numEndpoints++
+      if (cell.type == 'nega') puzzle.hasNegations = true
+      if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
     }
   }
 
@@ -24,13 +24,26 @@ function solve(puzzle, finalCallback=null, partialCallback=null) {
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
 
-  for (var pos of startPoints) {
-    _solveLoop(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
+  if (partialCallback == null && finalCallback == null) {
+    // Run synchronously
+    for (var pos of startPoints) {
+      _solveLoop(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
+    }
+    var end = (new Date()).getTime()
+    console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+    return solutions
+  } else {
+    // Run asynchronously
+    for (var pos of startPoints) {
+      _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, 5)
+    }
+    _runTaskLoop(partialCallback, function() {
+      var end = (new Date()).getTime()
+      console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+      finalCallback(solutions)
+    })
+    return []
   }
-
-  var end = (new Date()).getTime()
-  console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-  return solutions
 }
 
 // @Performance: This is the most central loop in this code.
@@ -158,37 +171,14 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
 
 var tasks = []
 var newTasks = []
-function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
-  var start = (new Date()).getTime()
-
-  var startPoints = []
-  var numEndpoints = 0
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = puzzle.grid[x][y]
-      if (cell == undefined) continue
-      if (cell.start === true) {
-        startPoints.push({'x': x, 'y': y})
-      }
-      if (cell.end != undefined) numEndpoints++
-    }
-  }
-
-  var solutions = []
-  // Some reasonable default data, which will avoid crashes during the solveLoop.
-  var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
-
-  for (var pos of startPoints) {
-    _solveLoopAsync(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, 5)
-  }
-
+function _runTaskLoop(partialCallback, finalCallback)  {
   for (var i=0; i<newTasks.length; i++) {
     tasks.push({'code':newTasks[i], 'fraction': 1.0 / newTasks.length})
   }
   newTasks = []
 
   var completed = 0
-  function doOneTask() {
+  function _doOneTask() {
     if (tasks.length === 0) {
       var end = (new Date()).getTime()
       console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
@@ -208,9 +198,9 @@ function solveAsync(puzzle, finalCallback=null, partialCallback=null) {
       newTasks = []
     }
 
-    setTimeout(doOneTask, 0)
+    setTimeout(_doOneTask, 0)
   }
-  setTimeout(doOneTask, 0)
+  setTimeout(_doOneTask, 0)
 }
 
 // @Performance: This is the most central loop in this code.
@@ -241,56 +231,8 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
     puzzle.updateCell2(sym.x, sym.y, 'color', 3)
   }
 
-  // Large optimization -- Attempt to early exit once we cut out a region.
-  // For non-pillar puzzles, every time we draw a line from one edge to another, we cut out two regions.
-  // We can detect this by asking if we've ever left an edge, and determining if we've just touched an edge.
-  // However, just touching the edge isn't sufficient, since we could still enter either region.
-  // As such, we wait one additional step, to see which half we have moved in to, then we evaluate
-  // whichever half you moved away from (since you can no longer re-enter it).
-  //
-  // Consider this pathway (tracing X-X-X-A-B-C).
-  // ....X....
-  // . . X . .
-  // ....X....
-  // . . A . .
-  // ...CB....
-  //
-  // Note that, once we have reached B, the puzzle is divided in half. However, we could go either
-  // left or right -- so we don't know which region is safe to validate.
-  // Once we reach C, however, the region to the right is guaranteed to be un-enterable.
-  // As such, we can start a flood fill from the cell to the right of A, computed by A+(C-B).
-  //
-  // Unfortunately, this optimization doesn't work for pillars, since the two regions are the same.
-  if (puzzle.pillar === false) {
-    var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
-    var newEarlyExitData = [
-      earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?
-      earlyExitData[2],                                         // The position before our current one
-      {'x':x, 'y':y, 'isEdge':isEdge}                           // Our current position.
-    ]
-    if (earlyExitData[0] && !earlyExitData[1].isEdge && earlyExitData[2].isEdge && isEdge) {
-      // Compute the X and Y of the region we just cut out.
-      // This is determined by looking at the delta between the current and last points,
-      // then replaying the *inverse* of that delta against the second-to-last point.
-      var regionX = earlyExitData[2].x + (earlyExitData[1].x - x)
-      var regionY = earlyExitData[2].y + (earlyExitData[1].y - y)
-
-      var region = puzzle.getRegion(regionX, regionY)
-      if (!window._regionCheckNegations(puzzle, region).valid) {
-        // @Cutnpaste
-        // Tail recursion: Back out of this cell
-        puzzle.updateCell2(x, y, 'color', 0)
-        puzzle.updateCell2(x, y, 'dir', undefined)
-        if (puzzle.symmetry != undefined) {
-          var sym = puzzle.getSymmetricalPos(x, y)
-          puzzle.updateCell2(sym.x, sym.y, 'color', 0)
-        }
-        return
-      }
-    }
-  } else {
-    var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
-  }
+  // Note: I've intentionally excluded the large optimization here, to avoid redundancy.
+  // Within depth 5, we aren't ever going to cut a large enough region for it to matter.
 
   if (cell.end != undefined) {
     puzzle.updateCell2(x, y, 'dir', 'none')
@@ -351,3 +293,4 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
     })
   }
 }
+

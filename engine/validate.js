@@ -18,21 +18,16 @@ function validate(puzzle) {
   var puzzleHasSymbols = false
   var puzzleHasStart = false
   var puzzleHasEnd = false
-  var puzzleHasNegations = false
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
-      if (['square', 'star', 'poly', 'ylop'].includes(cell.type)) {
+      if (['square', 'star', 'nega', 'poly', 'ylop'].includes(cell.type)) {
         puzzleHasSymbols = true
         continue
       }
-      if (cell.type === 'nega') {
-        puzzleHasNegations = true
-        puzzleHasSymbols = true
-        continue
-      }
+      // TODO: Obvious cleanup: Write a helper function for each individual type?
       if (cell.type === 'triangle') {
         var count = 0
         if (puzzle.getLine(x - 1, y) > 0) count++
@@ -44,7 +39,6 @@ function validate(puzzle) {
           puzzle.invalidElements.push({'x':x, 'y':y})
         }
       }
-      // TODO: Obvious cleanup: Write a helper function for each individual type?
       if (cell.gap > 0 && cell.color > 0) {
         console.log('Gap at', x, y, 'is covered')
         puzzle.valid = false
@@ -89,11 +83,7 @@ function validate(puzzle) {
       var regionData = puzzle.regionCache[key]
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
-        if (puzzleHasNegations) {
-          regionData = _regionCheckNegations(puzzle, region)
-        } else {
-          regionData = _regionCheck(puzzle, region)
-        }
+        regionData = _regionCheckNegations(puzzle, region)
         console.log('Region valid:', regionData.valid)
 
         if (!window.DISABLE_CACHE) {
@@ -182,6 +172,8 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
 }
 
 function _regionCheckNegations(puzzle, region) {
+  if (!puzzle.hasNegations) return _regionCheck(puzzle, region)
+
   // Get a list of negation symbols in the grid, and set them to 'nonce'
   var negationSymbols = []
   for (var pos of region.cells) {
@@ -195,6 +187,7 @@ function _regionCheckNegations(puzzle, region) {
   var regionData = _regionCheck(puzzle, region)
   console.debug('Negation-less regioncheck valid:', regionData.valid)
   // Perf: There's no reason to re-validate if there are no negation symbols.
+  // Note that there may be no negations in *this* region, even if they are elsewhere in the puzzle.
   if (negationSymbols.length === 0) return regionData
 
   // Set 'nonce' back to 'nega' for the negation symbols
@@ -291,15 +284,18 @@ function _regionCheck(puzzle, region) {
     }
   }
 
-  if (!window.polyFit(region, puzzle)) {
-    for (var pos of region.cells) {
-      var cell = puzzle.getCell(pos.x, pos.y)
-      if (cell == undefined) continue
-      if (cell.type === 'poly' || cell.type === 'ylop') {
-        invalidElements.push(pos)
+  if (puzzle.hasPolyominos) {
+    if (!window.polyFit(region, puzzle)) {
+      for (var pos of region.cells) {
+        var cell = puzzle.getCell(pos.x, pos.y)
+        if (cell == undefined) continue
+        if (cell.type === 'poly' || cell.type === 'ylop') {
+          invalidElements.push(pos)
+        }
       }
     }
   }
+
   console.debug('Region has', veryInvalidElements.length, 'very invalid elements')
   console.debug('Region has', invalidElements.length, 'invalid elements')
   return {

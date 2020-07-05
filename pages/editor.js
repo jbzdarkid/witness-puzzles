@@ -327,17 +327,18 @@ function solvePuzzle() {
   setSolveMode(false)
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
-  window.solve(puzzle, function(solutions) {
+  window.solve(puzzle, function(progress) {
+    var percent = Math.floor(100 * progress)
+    document.getElementById('progressPercent').innerText = percent + '%'
+    document.getElementById('progress').style.width = percent + '%'
+  }, function(solutions) {
     document.getElementById('progressBox').style.display = 'none'
+    document.getElementById('solutionViewer').style.display = null
     document.getElementById('progressPercent').innerText = '0%'
     document.getElementById('progress').style.width = '0%'
 
     puzzle.autoSolved = true
     _showSolution(solutions, 0)
-  }, function(progress) {
-    var percent = Math.floor(100 * progress)
-    document.getElementById('progressPercent').innerText = percent + '%'
-    document.getElementById('progress').style.width = percent + '%'
   })
 }
 //** End of user interaction points
@@ -433,7 +434,6 @@ function _showSolution(solutions, num) {
     // Only enable the publish button if there was a solution.
     document.getElementById('publish').disabled = false
   }
-  document.getElementById('solutionViewer').style.display = null
 }
 
 var currentPublishRequest
@@ -818,11 +818,9 @@ function _shapeChooserClick(event, cell) {
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
 // and endpoints in sync with the original design.
 function resizePuzzle(dx, dy, id) {
-  var width = puzzle.width
-  var height = puzzle.height
-  var newWidth = width + dx
-  var newHeight = height + dy
-  console.log('Resizing puzzle of size', width, height, 'to', newWidth, newHeight)
+  var newWidth = puzzle.width + dx
+  var newHeight = puzzle.height + dy
+  console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
 
   if (newWidth <= 0 || newHeight <= 0) return false
   if (newWidth > 21 || newHeight > 21) return false
@@ -835,8 +833,8 @@ function resizePuzzle(dx, dy, id) {
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
-  for (var x=0; x<width; x++) {
-    for (var y=0; y<height; y++) {
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
       var cell = savedGrid[x][y]
       if (cell == undefined) continue
       if (cell.end != undefined) {

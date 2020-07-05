@@ -1,13 +1,14 @@
 - Work on speedrunning solver / improving "unique puzzles"
   Simplest approach is just to have a simpler cache key, which is content-aware.
 - Perf TODOS:
-  * Pre-check puzzle for "has negations". If not, skip regionCheckNegations.
-  * Pre-check puzzle for "has polyominos". If not, skip polyFit.
   * Try changing color strings into numbers. This is one of the major offenders for string compares.
   * In regionCheck, we 100% have to read from the grid. So what are we adding cell data into the region for?
   * In _switchToMaskedGrid, take advantage of default == null
     And, see if we can get the default (null/undef) to be the same as (1) -- our most common case
+  * Factor out path direction and keep a 'path' array instead -- since we mostly don't need the pathway.
+  * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
 - Editor resize is outright broken. Somehow.
+  As is 'change puzzle type'. Yikes! Let's bug bash the editor.
 
 Browse
 -- "Jump to top" button
