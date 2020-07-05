@@ -364,11 +364,12 @@ class Puzzle {
   _switchToMaskedGrid() {
     // Make a copy of the grid -- we will be overwriting it
     var savedGrid = this.grid
-    this.newGrid()
+    this.grid = []
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with color 0.
     for (var x=0; x<savedGrid.length; x++) {
-      for (var y=0; y<savedGrid[x].length; y++) {
+      this.grid[x] = []
+      for (var y=0; y<savedGrid[0].length; y++) {
         var cell = savedGrid[x][y]
         if (cell != undefined && cell.color > 0) {
           if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
