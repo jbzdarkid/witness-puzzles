@@ -62,12 +62,11 @@ class Puzzle {
 
   static deserialize(json) {
     var parsed = JSON.parse(json)
-    var puzzle = new Puzzle()
+    // Claim that it's not a pillar (for consistent grid sizing), then double-check ourselves later.
+    var puzzle = new Puzzle((parsed.grid.length - 1)/2, (parsed.grid[0].length - 1)/2)
     puzzle.name = parsed.name
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
-    puzzle.width = parsed.grid.length
-    puzzle.height = parsed.grid[0].length
     // @Legacy: Grid squares used to use 'false' to indicate emptiness.
     // @Legacy: Cells used to use undefined to indicate emptiness. (... I think this still happens for intermediates)
     // Now, we use:

@@ -25,7 +25,7 @@ function solve(puzzle, finalCallback=null, partialCallback=null) {
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
 
   for (var pos of startPoints) {
-    _solveLoop(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, childCallback)
+    _solveLoop(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData)
   }
 
   var end = (new Date()).getTime()

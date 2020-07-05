@@ -26,11 +26,7 @@ window.onload = function() {
       window.draw(puzzle, testName)
       drawTime += (new Date()).getTime()
       solveTime -= (new Date()).getTime()
-      var solutions = window.solve(puzzle, function(solutions) {
-        console.info('Done! Found', solutions.length, 'solutions')
-      }, function(percent) {
-        console.info('Percent: ', 100 * percent)
-      })
+      var solutions = window.solve(puzzle)
       solveTime += (new Date()).getTime()
     } catch (e) {
       console.error('Test', testName, 'errored:', e)
@@ -58,7 +54,7 @@ window.onload = function() {
 }
 
 var tests = {
-  /*'end-left': function() {
+  'end-left': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[4][4].start = true
     puzzle.grid[0][2].end = 'left'
@@ -901,7 +897,7 @@ var tests = {
     puzzle.grid[1][1] = {'type':'triangle', 'count':3, 'color':'orange'}
     puzzle.grid[1][2].start = true
     return [puzzle, 2]
-  },*/ 'performance-5x5': function() {
+  }, 'performance-5x5': function() {
     var puzzle = new Puzzle(5, 5)
     puzzle.grid[0][10].start = true
     puzzle.grid[10][0].end = 'right'
