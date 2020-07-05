@@ -6,6 +6,9 @@
   * Pre-check puzzle for "has negations". If not, skip regionCheckNegations.
   * Pre-check puzzle for "has polyominos". If not, skip polyFit.
   * Try changing color strings into numbers. This is one of the major offenders for string compares.
+  * In regionCheck, we 100% have to read from the grid. So what are we adding cell data into the region for?
+  * In _switchToMaskedGrid, take advantage of default == null
+    And, see if we can get the default (null/undef) to be the same as (1) -- our most common case
 - Editor resize is outright broken. Somehow.
 
 Browse
