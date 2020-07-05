@@ -179,7 +179,7 @@ function _regionCheckNegations(puzzle, region) {
       puzzle.updateCell(pos.x, pos.y, {'type': 'nonce'})
     }
   }
-  console.debug('Found negation symbols:', JSON.stringify(negationSymbols))
+  console.debug('Found', negationSymbols.length, 'negation symbols')
   // Get a list of elements that are currently invalid (before any negations are applied)
   var regionData = _regionCheck(puzzle, region)
   console.debug('Negation-less regioncheck valid:', regionData.valid)
@@ -205,7 +205,6 @@ function _regionCheckNegations(puzzle, region) {
     puzzle.setCell(target.x, target.y, null)
     baseCombination.push({'source':source, 'target':target})
   }
-  console.debug('Base combination:', JSON.stringify(baseCombination))
 
   var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements)
 
@@ -290,8 +289,8 @@ function _regionCheck(puzzle, region) {
       }
     }
   }
-  console.debug('Region has', veryInvalidElements.length, 'very invalid elements:', JSON.stringify(veryInvalidElements))
-  console.debug('Region has', invalidElements.length, 'invalid elements:', JSON.stringify(invalidElements))
+  console.debug('Region has', veryInvalidElements.length, 'very invalid elements')
+  console.debug('Region has', invalidElements.length, 'invalid elements')
   return {
     'veryInvalidElements': veryInvalidElements,
     'invalidElements': invalidElements,
