@@ -295,8 +295,8 @@ function _drawSolution(puzzle, x, y) {
     x += dx
     y += dy
     // Unflag the cell, move into it, and reflag it
-    puzzle.updateCell(x, y, {'color':0})
+    puzzle.updateCell2(x, y, 'color', 0)
     onMove(41 * dx, 41 * dy)
-    puzzle.updateCell(x, y, {'color':1})
+    puzzle.updateCell2(x, y, 'color', 1)
   }
 }

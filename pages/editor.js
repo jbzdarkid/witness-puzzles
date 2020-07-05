@@ -273,11 +273,11 @@ function setStyle(style) {
         if (cell.start === true) {
           var sym = puzzle.getSymmetricalPos(x, y)
           console.debug('Copying startpoint from', x, y, 'to', sym.x, sym.y)
-          puzzle.updateCell(sym.x, sym.y, {'start':true})
+          puzzle.updateCell2(sym.x, sym.y, 'start', true)
         } else if (cell.end != undefined) {
           var sym = puzzle.getSymmetricalPos(x, y)
           console.debug('Copying endpoint from', x, y, 'to', sym.x, sym.y)
-          puzzle.updateCell(sym.x, sym.y, {'end':puzzle.getSymmetricalDir(cell.end)})
+          puzzle.updateCell2(sym.x, sym.y, 'end', puzzle.getSymmetricalDir(cell.end))
         }
       }
     }
@@ -499,7 +499,7 @@ function _onElementClicked(x, y) {
     }
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
-      puzzle.updateCell(sym.x, sym.y, {'start':puzzle.grid[x][y].start})
+      puzzle.updateCell2(sym.x, sym.y, 'start', puzzle.grid[x][y].start)
     }
   } else if (activeParams.type === 'end') {
     if (x%2 === 1 && y%2 === 1) return
@@ -515,7 +515,7 @@ function _onElementClicked(x, y) {
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
       var symmetricalDir = puzzle.getSymmetricalDir(dir)
-      puzzle.updateCell(sym.x, sym.y, {'end':symmetricalDir})
+      puzzle.updateCell2(sym.x, sym.y, 'end', symmetricalDir)
     }
   } else if (activeParams.type === 'dot') {
     if (x%2 === 1 && y%2 === 1) return
@@ -554,11 +554,13 @@ function _onElementClicked(x, y) {
         if (bottomCell != undefined && bottomCell.gap !== 2) continue
 
         // At this point, the cell has no defined or non-gap2 neighbors (isolated)
-        puzzle.updateCell(i, j, {'start':false, 'end':undefined})
+        puzzle.updateCell2(i, j, 'start', false)
+        puzzle.updateCell2(i, j, 'end', undefined)
         if (puzzle.symmetry != undefined) {
           var sym = puzzle.getSymmetricalPos(i, j)
           console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
-          puzzle.updateCell(sym.x, sym.y, {'start':false, 'end':undefined})
+          puzzle.updateCell2(sym.x, sym.y, 'start', false, 'end', undefined)
+          puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
         }
       }
     }
@@ -849,7 +851,7 @@ function resizePuzzle(dx, dy, id) {
           cell.end = validDirs[0]
         }
       }
-      puzzle.updateCell(x + xOffset, y + yOffset, cell)
+      puzzle.setCell(x + xOffset, y + yOffset, cell)
     }
   }
 
@@ -881,10 +883,8 @@ function resizePuzzle(dx, dy, id) {
         var cell = puzzle.getCell(x, y)
         var sym = puzzle.getSymmetricalPos(x, y)
         console.spam('Copying cell', JSON.stringify(cell), 'at', x, y)
-        puzzle.updateCell(sym.x, sym.y, {
-          'start':cell.start,
-          'end':puzzle.getSymmetricalDir(cell.end),
-        })
+        puzzle.updateCell2(sym.x, sym.y, 'start', cell.start)
+        puzzle.updateCell2(sym.x, sym.y, 'end', puzzle.getSymmetricalDir(cell.end))
         console.spam('Updated cell', JSON.stringify(puzzle.getCell(sym.x, sym.y)), 'at', sym.x, sym.y)
       }
     }

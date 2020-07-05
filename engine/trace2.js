@@ -467,10 +467,13 @@ function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
   clearAnimations()
 
   if (puzzle.symmetry == undefined) {
-    data.puzzle.updateCell(data.pos.x, data.pos.y, {'type':'line', 'color':1})
+    data.puzzle.updateCell2(data.pos.x, data.pos.y, 'type', 'line')
+    data.puzzle.updateCell2(data.pos.x, data.pos.y, 'color', 1)
   } else {
-    data.puzzle.updateCell(data.pos.x, data.pos.y, {'type':'line', 'color':2})
-    data.puzzle.updateCell(data.sym.x, data.sym.y, {'type':'line', 'color':3})
+    data.puzzle.updateCell2(data.pos.x, data.pos.y, 'type', 'line')
+    data.puzzle.updateCell2(data.pos.x, data.pos.y, 'color', 2)
+    data.puzzle.updateCell2(data.sym.x, data.sym.y, 'type', 'line')
+    data.puzzle.updateCell2(data.sym.x, data.sym.y, 'color', 3)
 
     var dx = parseFloat(symStart.getAttribute('cx')) - data.x
     var dy = parseFloat(symStart.getAttribute('cy')) - data.y
@@ -541,9 +544,9 @@ function onMove(dx, dy) {
     // If we backed up, remove a path segment and mark the old cell as unvisited
     if (backedUp) {
       data.path.pop().destroy()
-      data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':0})
+      data.puzzle.updateCell2(data.pos.x, data.pos.y, 'color', 0)
       if (data.puzzle.symmetry != undefined) {
-        data.puzzle.updateCell(data.sym.x, data.sym.y, {'color':0})
+        data.puzzle.updateCell2(data.sym.x, data.sym.y, 'color', 0)
       }
     }
 
@@ -557,10 +560,10 @@ function onMove(dx, dy) {
     if (!backedUp) {
       data.path.push(new PathSegment(moveDir))
       if (data.puzzle.symmetry == undefined) {
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':1})
+        data.puzzle.updateCell2(data.pos.x, data.pos.y, 'color', 1)
       } else {
-        data.puzzle.updateCell(data.pos.x, data.pos.y, {'color':2})
-        data.puzzle.updateCell(data.sym.x, data.sym.y, {'color':3})
+        data.puzzle.updateCell2(data.pos.x, data.pos.y, 'color', 2)
+        data.puzzle.updateCell2(data.sym.x, data.sym.y, 'color', 3)
       }
     }
   }

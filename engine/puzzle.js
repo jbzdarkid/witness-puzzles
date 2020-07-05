@@ -232,17 +232,6 @@ class Puzzle {
     return cell.color
   }
 
-  // A variant of setCell which updates the contents, instead of overwriting.
-  updateCell(x, y, properties) {
-    x = this._mod(x)
-    if (!this._safeCell(x, y)) return
-    if (this.grid[x][y] == undefined) {
-      this.grid[x][y] = properties
-    } else {
-      Object.assign(this.grid[x][y], properties)
-    }
-  }
-
   updateCell2(x, y, key, value) {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
