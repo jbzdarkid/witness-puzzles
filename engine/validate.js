@@ -177,7 +177,9 @@ function regionCheckNegations(puzzle, region) {
   // Get a list of negation symbols in the grid, and set them to 'nonce'
   var negationSymbols = []
   for (var pos of region.cells) {
-    if (pos.cell != undefined && pos.cell.type === 'nega') {
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell != undefined && cell.type === 'nega') {
+      pos.cell = cell
       negationSymbols.push(pos)
       puzzle.updateCell2(pos.x, pos.y, 'type', 'nonce')
     }
@@ -199,6 +201,13 @@ function regionCheckNegations(puzzle, region) {
 
   var invalidElements = regionData.invalidElements
   var veryInvalidElements = regionData.veryInvalidElements
+
+  for (var i=0; i<invalidElements.length; i++) {
+    invalidElements[i].cell = puzzle.getCell(invalidElements[i].x, invalidElements[i].y)
+  }
+  for (var i=0; i<veryInvalidElements.length; i++) {
+    veryInvalidElements[i].cell = puzzle.getCell(veryInvalidElements[i].x, veryInvalidElements[i].y)
+  }
 
   console.debug('Forcibly negating', veryInvalidElements.length, 'symbols')
   var baseCombination = []

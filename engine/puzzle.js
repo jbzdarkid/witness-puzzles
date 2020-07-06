@@ -411,10 +411,6 @@ class Puzzle {
         // This will also mark all lines inside the new region as used.
         var region = new Region(this.width)
         this._floodFill(x, y, region)
-        // *-*-* I'm not certain this is a good idea, but it potentially saves perf of people asking about it over and over again.
-        for (var i=0; i<region.cells.length; i++) {
-          region.cells[i]['cell'] = savedGrid[region.cells[i].x][region.cells[i].y]
-        }
         regions.push(region)
       }
     }
@@ -423,22 +419,18 @@ class Puzzle {
   }
 
   getRegion(x, y) {
-    var region = new Region(this.width)
-    if (x < 0 || y < 0 || x >= this.width || y >= this.height) return region
+    if (x < 0 || y < 0 || x >= this.width || y >= this.height) return null
 
     var savedGrid = this._switchToMaskedGrid()
-
-    // Only attempt to generate a region if the masked grid hasn't been used at this point.
-    if (this.grid[x][y] != undefined) {
-      // @Cutnpaste from getRegions.
-      // If this cell is empty (aka hasn't already been used by a region), then create a new one
-      // This will also mark all lines inside the new region as used.
-      this._floodFill(x, y, region)
-      // *-*-* I'm not certain this is a good idea, but it potentially saves perf of people asking about it over and over again.
-      for (var i=0; i<region.cells.length; i++) {
-        region.cells[i]['cell'] = savedGrid[region.cells[i].x][region.cells[i].y]
-      }
+    if (this.grid[x][y] == undefined) {
+      this.grid = savedGrid
+      return null
     }
+
+    // If the masked grid hasn't been used at this point, then create a new region.
+    // This will also mark all lines inside the new region as used.
+    var region = new Region(this.width)
+    this._floodFill(x, y, region)
 
     this.grid = savedGrid
     return region
