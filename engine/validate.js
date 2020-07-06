@@ -30,32 +30,32 @@ function validate(puzzle) {
       // TODO: Obvious cleanup: Write a helper function for each individual type?
       if (cell.type === 'triangle') {
         var count = 0
-        if (puzzle.getLine(x - 1, y) > 0) count++
-        if (puzzle.getLine(x + 1, y) > 0) count++
-        if (puzzle.getLine(x, y - 1) > 0) count++
-        if (puzzle.getLine(x, y + 1) > 0) count++
+        if (puzzle.getLine(x - 1, y) > window.LINE_NONE) count++
+        if (puzzle.getLine(x + 1, y) > window.LINE_NONE) count++
+        if (puzzle.getLine(x, y - 1) > window.LINE_NONE) count++
+        if (puzzle.getLine(x, y + 1) > window.LINE_NONE) count++
         if (cell.count !== count) {
           console.log('Triangle at grid['+x+']['+y+'] has', count, 'borders')
           puzzle.invalidElements.push({'x':x, 'y':y})
         }
       }
-      if (cell.gap > 0 && cell.color > 0) {
+      if (cell.gap > 0 && cell.line > window.LINE_NONE) {
         console.log('Gap at', x, y, 'is covered')
         puzzle.valid = false
       }
       if (cell.dot > 0) {
-        if (cell.color === 0) {
+        if (cell.line === window.LINE_NONE) {
           console.log('Dot at', x, y, 'is not covered')
           puzzle.invalidElements.push({'x':x, 'y':y})
-        } else if (cell.color === 2 && cell.dot === 3) {
+        } else if (cell.line === window.LINE_BLUE && cell.dot === 3) {
           console.log('Yellow dot at', x, y, 'is covered by blue line')
           puzzle.valid = false
-        } else if (cell.color === 3 && cell.dot === 2) {
+        } else if (cell.line === window.LINE_YELLOW && cell.dot === 2) {
           console.log('Blue dot at', x, y, 'is covered by yellow line')
           puzzle.valid = false
         }
       }
-      if (cell.color !== 0) {
+      if (cell.line !== window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != undefined) puzzleHasEnd = true
       }
@@ -253,10 +253,10 @@ function _regionCheck(puzzle, region) {
     if (cell.type === 'triangle') {
       var count = 0
       // @Bug! This does not work if the puzzle is not being live-updated. Because of course.
-      if (puzzle.getLine(pos.x - 1, pos.y) > 0) count++
-      if (puzzle.getLine(pos.x + 1, pos.y) > 0) count++
-      if (puzzle.getLine(pos.x, pos.y - 1) > 0) count++
-      if (puzzle.getLine(pos.x, pos.y + 1) > 0) count++
+      if (puzzle.getLine(pos.x - 1, pos.y) > window.LINE_NONE) count++
+      if (puzzle.getLine(pos.x + 1, pos.y) > window.LINE_NONE) count++
+      if (puzzle.getLine(pos.x, pos.y - 1) > window.LINE_NONE) count++
+      if (puzzle.getLine(pos.x, pos.y + 1) > window.LINE_NONE) count++
       if (cell.count !== count) {
         console.log('Triangle at grid['+pos.x+']['+pos.y+'] has', count, 'borders')
         veryInvalidElements.push(pos)

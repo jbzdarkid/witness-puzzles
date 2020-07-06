@@ -208,7 +208,7 @@ function _drawStartAndEnd(puzzle, svg) {
         }(puzzle, x, y, start, symStart))
 
         // The startpoint must have a primary line through it
-        if (cell.color !== 1 && cell.color !== 2) continue
+        if (cell.line !== window.LINE_BLACK && cell.line !== window.LINE_BLUE) continue
 
         // And that line must not be coming from any adjacent cells
         var leftCell = puzzle.getCell(x - 1, y)
@@ -295,8 +295,8 @@ function _drawSolution(puzzle, x, y) {
     x += dx
     y += dy
     // Unflag the cell, move into it, and reflag it
-    puzzle.updateCell2(x, y, 'color', 0)
+    puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
     onMove(41 * dx, 41 * dy)
-    puzzle.updateCell2(x, y, 'color', 1)
+    puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   }
 }

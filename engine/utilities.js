@@ -110,6 +110,12 @@ if (localStorage.theme === 'true') { // Dark scheme
   window.TEXT_COLOR      = '#000'
   window.PAGE_BACKGROUND = '#FFF'
 }
+
+window.LINE_NONE   = 0
+window.LINE_BLACK  = 1
+window.LINE_BLUE   = 2
+window.LINE_YELLOW = 3
+
 // pointer-events: none; allows for onclick events to bubble up
 var animations =
 '.line-1 {fill: ' + window.LINE_DEFAULT + '; pointer-events: none;}' +

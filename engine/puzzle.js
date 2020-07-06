@@ -69,15 +69,16 @@ class Puzzle {
     puzzle.grid = parsed.grid
     // @Legacy: Grid squares used to use 'false' to indicate emptiness.
     // @Legacy: Cells used to use undefined to indicate emptiness. (... I think this still happens for intermediates)
+    // @Legacy: Lines used to use 'line' instead of 'color'
     // Now, we use:
     // Cells default to {}
-    // Lines default to {'type':'line', 'color':0}
+    // Lines default to {'type':'line', 'line':0}
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
         var cell = puzzle.grid[x][y]
         if (cell === false || cell == undefined) {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = {}
-          else puzzle.grid[x][y] = {'type':'line', 'color':0}
+          else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
           if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
             // @Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
@@ -151,7 +152,7 @@ class Puzzle {
       this.grid[x] = []
       for (var y=0; y<height; y++) {
         if (x%2 === 1 && y%2 === 1) this.grid[x][y] = {}
-        else this.grid[x][y] = {'type':'line', 'color':0}
+        else this.grid[x][y] = {'type':'line', 'line':LINE_NONE}
       }
     }
     // Performance: A large value which is === 0 to be used for pillar wrapping.
@@ -229,7 +230,7 @@ class Puzzle {
     var cell = this.getCell(x, y)
     if (cell == undefined) return undefined
     if (cell.type !== 'line') return undefined
-    return cell.color
+    return cell.line
   }
 
   updateCell2(x, y, key, value) {
@@ -265,7 +266,7 @@ class Puzzle {
     this.hints = []
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
-        if (x%2 + y%2 === 1 && this.getLine(x, y) > 0) {
+        if (x%2 + y%2 === 1 && this.getLine(x, y) > window.LINE_NONE) {
           this.hints.push({'x':x, 'y':y})
         }
       }
@@ -286,7 +287,7 @@ class Puzzle {
     var badHints = []
 
     for (var hint of this.hints) {
-      if (this.getLine(hint.x, hint.y) > 0) {
+      if (this.getLine(hint.x, hint.y) > window.LINE_NONE) {
         // Solution will be broken by this hint
         goodHints.push(hint)
       } else {
@@ -309,7 +310,8 @@ class Puzzle {
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
         if (x%2 === 1 && y%2 === 1) continue
-        Object.assign(this.grid[x][y], {'color':0, 'dir':undefined})
+        this.grid[x][y].line = 0
+        this.grid[x][y].dir = undefined
       }
     }
   }
@@ -359,12 +361,13 @@ class Puzzle {
     var savedGrid = this.grid
     this.grid = []
     // Override all elements with empty lines -- this means that flood fill is just
-    // looking for lines with color 0.
+    // looking for lines with line=0.
     for (var x=0; x<this.width; x++) {
       this.grid[x] = []
       for (var y=0; y<this.height; y++) {
         var cell = savedGrid[x][y]
-        if (cell != undefined && cell.color > 0) {
+        // Optimization: Different code for cells/lines?
+        if (cell != undefined && cell.line > window.LINE_NONE) {
           if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
             // Traced lines which are mid-segment start or end points should not separate the region
             this.grid[x][y] = 0
@@ -445,7 +448,7 @@ class Puzzle {
         if (cell == undefined) output += '?'
         else if (cell.start === true) output += 'S'
         else if (cell.end != null) output += 'E'
-        else if (cell.type === 'line') output += cell.color
+        else if (cell.type === 'line') output += cell.line
         else output += '#'
       }
       output += '\n'
