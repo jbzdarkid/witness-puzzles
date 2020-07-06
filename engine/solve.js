@@ -182,7 +182,7 @@ function _runTaskLoop(partialCallback, finalCallback)  {
     if (tasks.length === 0) {
       var end = (new Date()).getTime()
       console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-      finalCallback(solutions)
+      finalCallback()
       return
     }
 
@@ -233,6 +233,15 @@ function _solveLoopAsync(puzzle, x, y, solutions, numEndpoints, earlyExitData, d
 
   // Note: I've intentionally excluded the large optimization here, to avoid redundancy.
   // Within depth 5, we aren't ever going to cut a large enough region for it to matter.
+  // However, we still have to update the object. Blah.
+  if (puzzle.pillar === false) {
+    var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
+    var newEarlyExitData = [
+      earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?
+      earlyExitData[2],                                         // The position before our current one
+      {'x':x, 'y':y, 'isEdge':isEdge}                           // Our current position.
+    ]
+  }
 
   if (cell.end != undefined) {
     puzzle.updateCell2(x, y, 'dir', 'none')
