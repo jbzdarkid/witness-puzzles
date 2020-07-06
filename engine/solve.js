@@ -180,8 +180,6 @@ function _runTaskLoop(partialCallback, finalCallback)  {
   var completed = 0
   function _doOneTask() {
     if (tasks.length === 0) {
-      var end = (new Date()).getTime()
-      console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
       finalCallback()
       return
     }
