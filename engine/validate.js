@@ -83,7 +83,7 @@ function validate(puzzle) {
       var regionData = puzzle.regionCache[key]
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
-        regionData = _regionCheckNegations(puzzle, region)
+        regionData = regionCheckNegations(puzzle, region)
         console.log('Region valid:', regionData.valid)
 
         if (!window.DISABLE_CACHE) {
@@ -171,7 +171,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
   return (regionData.valid ? regionData : firstRegionData)
 }
 
-function _regionCheckNegations(puzzle, region) {
+function regionCheckNegations(puzzle, region) {
   if (!puzzle.hasNegations) return _regionCheck(puzzle, region)
 
   // Get a list of negation symbols in the grid, and set them to 'nonce'

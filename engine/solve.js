@@ -106,7 +106,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData) {
       var regionY = earlyExitData[2].y + (earlyExitData[1].y - y)
 
       var region = puzzle.getRegion(regionX, regionY)
-      if (!window._regionCheckNegations(puzzle, region).valid) {
+      if (!window.regionCheckNegations(puzzle, region).valid) {
         // @Cutnpaste
         // Tail recursion: Back out of this cell
         puzzle.updateCell2(x, y, 'color', 0)
