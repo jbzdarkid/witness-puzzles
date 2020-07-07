@@ -413,12 +413,18 @@ function _showSolution(solutions, num) {
   var nextSolution = document.getElementById('nextSolution')
 
   // Buttons & text
-  if (solutions.length < 2) { // 0 or 1 solution(s), arrows are useless
-    solutionCount.innerText = solutions.length + ' of ' + solutions.length
+  if (solutions.length === 0) { // 0 solutions, arrows are useless
+    solutionCount.innerText = '0 of 0'
+    previousSolution.disabled = true
+    nextSolution.disabled = true
+  } else if (solutions.length === 1) { // 1 solution, arrows are useless
+    solutionCount.innerText = '1 of 1'
+    if (solutions.length === window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = true
     nextSolution.disabled = true
   } else {
     solutionCount.innerText = (num + 1) + ' of ' + solutions.length
+    if (solutions.length === window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
     previousSolution.onclick = function() {_showSolution(solutions, num - 1)}
