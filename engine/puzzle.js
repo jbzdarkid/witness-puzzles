@@ -24,7 +24,6 @@ class Region {
   }
 
   setCell(x, y) {
-    x = this._mod(x)
     if (this.getCell(x, y)) return
     this.grid[x] |= (1 << y)
     this.cells.push({'x':x, 'y':y})
@@ -319,12 +318,14 @@ class Puzzle {
   _floodFill(x, y, region) {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
-    var cell = this.grid[x][y]
+
+    var row = this.grid[x]
+    var cell = row[y]
     if (cell === undefined) return
     if (cell !== 0) {
       region.setCell(x, y)
     }
-    this.grid[x][y] = undefined
+    row[y] = undefined
 
     // @Performance: Why is this ordered TLBR?
     this._floodFill(x, y + 1, region)
