@@ -361,23 +361,20 @@ class Puzzle {
       this.grid[x] = []
       for (var y=0; y<this.height; y++) {
         var cell = savedGrid[x][y]
-        if (x%2 === 1 && y%2 === 1) {
+        // Optimization: Different code for cells/lines?
+        if (cell != undefined && cell.line > window.LINE_NONE) {
+          if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
+            // Traced lines which are mid-segment start or end points should not separate the region
+            this.grid[x][y] = 0
+          } else {
+            // Traced lines should not be a part of the region
+            this.grid[x][y] = undefined
+          }
+        } else if (cell != undefined && cell.gap === 2) {
+          this.grid[x][y] = 2
+        } else {
           // Indicates that this cell will be a part of the region
           this.grid[x][y] = 1
-        } else {
-          if (cell.line > window.LINE_NONE) {
-            if ((x === 0 || y === 0) && (cell.start === true || cell.end != undefined)) {
-              // Traced lines which are mid-segment start or end points should not separate the region
-              this.grid[x][y] = 0
-            } else {
-              // Traced lines should not be a part of the region
-              // this.grid[x][y] = undefined
-            }
-          } else if (cell.gap === 2) {
-            this.grid[x][y] = 2
-          } else {
-            this.grid[x][y] = 1
-          }
         }
       }
     }
