@@ -4,7 +4,6 @@
   * Try changing color strings into numbers. This is one of the major offenders for string compares.
     Didn't really help... though I didn't spend too much effort on it.
     I did rename 'color' to 'line' -- which saved 30s. :O
-  * In _switchToMaskedGrid, see if we can change the default (null/undef) to be our most comon case
   * Factor out path direction and keep a 'path' array instead -- since we mostly don't need the pathway.
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
 - Editor resize is outright broken. Somehow.
