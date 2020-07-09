@@ -148,7 +148,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
 
       var region = puzzle.getRegion(regionX, regionY)
       if (region != undefined) {
-        var regionData = window.regionCheckNegations(puzzle, region)
+        var regionData = window.regionCheckNegations(puzzle, region, true)
         if (!regionData.valid) return _tailRecurse(puzzle, x, y)
 
         for (var pos of region.cells) {
@@ -165,7 +165,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
 
   if (cell.end != undefined) {
     puzzle.updateCell2(x, y, 'dir', 'none')
-    window.validate(puzzle)
+    window.validate(puzzle, true)
     if (puzzle.valid) {
       solutions.push(puzzle.clone())
     }
