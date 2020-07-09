@@ -84,7 +84,7 @@ function validate(puzzle) {
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
         regionData = regionCheckNegations(puzzle, region)
-        console.log('Region valid:', regionData.valid)
+        console.log('Region valid:', regionData.valid())
 
         if (!window.DISABLE_CACHE) {
           puzzle.regionCache[key] = regionData
@@ -93,10 +93,30 @@ function validate(puzzle) {
       puzzle.negations = puzzle.negations.concat(regionData.negations)
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-      puzzle.valid &= regionData.valid
+      puzzle.valid &= regionData.valid()
     }
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
+}
+
+class RegionData {
+  constructor() {
+    this.invalidElements = []
+    this.veryInvalidElements = []
+    this.negations = []
+  }
+
+  addInvalid(elem) {
+    this.invalidElements.push(elem)
+  }
+
+  addVeryInvalid(elem) {
+    this.veryInvalidElements.push(elem)
+  }
+
+  valid() {
+    return (this.invalidElements.length === 0 && this.veryInvalidElements.length === 0)
+  }
 }
 
 function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0, index2=0) {
@@ -135,8 +155,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
     }
     for (; i<negationSymbols.length; i++) {
       puzzle.updateCell2(negationSymbols[i].x, negationSymbols[i].y, 'type', 'nega')
-      regionData.invalidElements.push(negationSymbols[i])
-      regionData.valid = false
+      regionData.addInvalid(negationSymbols[i])
     }
     return regionData
   }
@@ -159,7 +178,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
       firstRegionData = regionData
       firstRegionData.negations.push({'source':source, 'target':target})
     }
-    if (regionData.valid) {
+    if (regionData.valid()) {
       regionData.negations.push({'source':source, 'target':target})
       break
     }
@@ -168,7 +187,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
   puzzle.setCell(source.x, source.y, source.cell)
   // For display purposes only. The first attempt will always pair off the most negation symbols,
   // so it's the best choice to display (if we're going to fail).
-  return (regionData.valid ? regionData : firstRegionData)
+  return (regionData.valid() ? regionData : firstRegionData)
 }
 
 function regionCheckNegations(puzzle, region) {
@@ -187,7 +206,7 @@ function regionCheckNegations(puzzle, region) {
   console.debug('Found', negationSymbols.length, 'negation symbols')
   // Get a list of elements that are currently invalid (before any negations are applied)
   var regionData = _regionCheck(puzzle, region)
-  console.debug('Negation-less regioncheck valid:', regionData.valid)
+  console.debug('Negation-less regioncheck valid:', regionData.valid())
   // Perf: There's no reason to re-validate if there are no negation symbols.
   // Note that there may be no negations in *this* region, even if they are elsewhere in the puzzle.
   if (negationSymbols.length === 0) return regionData
@@ -231,11 +250,9 @@ function regionCheckNegations(puzzle, region) {
 }
 
 // Checks if a region (series of cells) is valid.
-// Since the path must be complete at this point, returns only true or false
 function _regionCheck(puzzle, region) {
   console.log('Validating region', region)
-  var veryInvalidElements = []
-  var invalidElements = []
+  var regionData = new RegionData()
 
   var coloredObjects = {}
   var squareColors = {}
@@ -246,20 +263,19 @@ function _regionCheck(puzzle, region) {
     // Check for uncovered dots
     if (cell.dot > 0) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
-      veryInvalidElements.push(pos)
+      regionData.addInvalid(pos)
     }
 
     // Check for triangles
     if (cell.type === 'triangle') {
       var count = 0
-      // @Bug! This does not work if the puzzle is not being live-updated. Because of course.
       if (puzzle.getLine(pos.x - 1, pos.y) > window.LINE_NONE) count++
       if (puzzle.getLine(pos.x + 1, pos.y) > window.LINE_NONE) count++
       if (puzzle.getLine(pos.x, pos.y - 1) > window.LINE_NONE) count++
       if (puzzle.getLine(pos.x, pos.y + 1) > window.LINE_NONE) count++
       if (cell.count !== count) {
         console.log('Triangle at grid['+pos.x+']['+pos.y+'] has', count, 'borders')
-        veryInvalidElements.push(pos)
+        regionData.addVeryInvalid(pos)
       }
     }
 
@@ -280,15 +296,15 @@ function _regionCheck(puzzle, region) {
     if (cell.type === 'square') {
       if (squareColorCount > 1) {
         console.log('Found a', cell.color, 'square in a region with', squareColorCount, 'square colors')
-        invalidElements.push(pos)
+        regionData.addInvalid(pos)
       }
     } else if (cell.type === 'star') {
       if (coloredObjects[cell.color] === 1) {
         console.log('Found a', cell.color, 'star in a region with 1', cell.color, 'object')
-        veryInvalidElements.push(pos)
+        regionData.addVeryInvalid(pos)
       } else if (coloredObjects[cell.color] > 2) {
         console.log('Found a', cell.color, 'star in a region with', coloredObjects[cell.color], cell.color, 'objects')
-        invalidElements.push(pos)
+        regionData.addInvalid(pos)
       }
     }
   }
@@ -299,18 +315,13 @@ function _regionCheck(puzzle, region) {
         var cell = puzzle.getCell(pos.x, pos.y)
         if (cell == undefined) continue
         if (cell.type === 'poly' || cell.type === 'ylop') {
-          invalidElements.push(pos)
+          regionData.addInvalid(pos)
         }
       }
     }
   }
 
-  console.debug('Region has', veryInvalidElements.length, 'very invalid elements')
-  console.debug('Region has', invalidElements.length, 'invalid elements')
-  return {
-    'veryInvalidElements': veryInvalidElements,
-    'invalidElements': invalidElements,
-    'negations': [],
-    'valid': (invalidElements.length === 0 && veryInvalidElements.length === 0)
-  }
+  console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')
+  console.debug('Region has', regionData.invalidElements.length, 'invalid elements')
+  return regionData
 }
