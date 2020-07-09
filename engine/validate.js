@@ -8,12 +8,13 @@ window.PRECISE_POLYOMINOS = true
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
 // negations: Negation symbols and their targets (for the purpose of darkening)
 // @Performance: Consider implementing a "no-ui/silent" validation mode which exits after the first error.
-function validate(puzzle) {
+function validate(puzzle, quick) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
   puzzle.invalidElements = []
   puzzle.negations = []
 
+  // TODO: Clean this up again!
   // @Perf: This could potentially be pre-computed. Not that running through the grid is *that* expensive...
   var puzzleHasSymbols = false
   var puzzleHasStart = false
@@ -64,6 +65,7 @@ function validate(puzzle) {
   if (!puzzleHasStart || !puzzleHasEnd) {
     console.log('There is no covered start or endpoint')
     puzzle.valid = false
+    if (quick) return
   }
 
   // Perf optimization: We can skip computing regions if the grid has no symbols.
@@ -83,7 +85,7 @@ function validate(puzzle) {
       var regionData = puzzle.regionCache[key]
       if (regionData == undefined) {
         console.log('Cache miss for region', region, 'key', key)
-        regionData = regionCheckNegations(puzzle, region)
+        regionData = regionCheckNegations(puzzle, region, quick)
         console.log('Region valid:', regionData.valid())
 
         if (!window.DISABLE_CACHE) {
@@ -94,6 +96,7 @@ function validate(puzzle) {
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
       puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
       puzzle.valid &= regionData.valid()
+      if (quick && !puzzle.valid) return
     }
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
@@ -122,7 +125,7 @@ class RegionData {
 function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0, index2=0) {
   if (index2 >= negationSymbols.length) {
     console.debug('0 negation symbols left, returning negation-less regionCheck')
-    return _regionCheck(puzzle, region)
+    return _regionCheck(puzzle, region, false) // TODO: quick?
   }
 
   if (index >= invalidElements.length) {
@@ -141,7 +144,8 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
     for (; i<negationSymbols.length; i++) {
       puzzle.updateCell2(negationSymbols[i].x, negationSymbols[i].y, 'type', 'nonce')
     }
-    var regionData = _regionCheck(puzzle, region)
+    // Cannot be quick, as we need the full list of invalid symbols.
+    var regionData = _regionCheck(puzzle, region, false)
 
     i = index2
     if (window.NEGATIONS_CANCEL_NEGATIONS) {
@@ -190,8 +194,8 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
   return (regionData.valid() ? regionData : firstRegionData)
 }
 
-function regionCheckNegations(puzzle, region) {
-  if (!puzzle.hasNegations) return _regionCheck(puzzle, region)
+function regionCheckNegations(puzzle, region, quick) {
+  if (!puzzle.hasNegations) return _regionCheck(puzzle, region, quick)
 
   // Get a list of negation symbols in the grid, and set them to 'nonce'
   var negationSymbols = []
@@ -205,7 +209,7 @@ function regionCheckNegations(puzzle, region) {
   }
   console.debug('Found', negationSymbols.length, 'negation symbols')
   // Get a list of elements that are currently invalid (before any negations are applied)
-  var regionData = _regionCheck(puzzle, region)
+  var regionData = _regionCheck(puzzle, region, false) // Pessimistic. TODO: Clean up.
   console.debug('Negation-less regioncheck valid:', regionData.valid())
   // Perf: There's no reason to re-validate if there are no negation symbols.
   // Note that there may be no negations in *this* region, even if they are elsewhere in the puzzle.
@@ -250,7 +254,7 @@ function regionCheckNegations(puzzle, region) {
 }
 
 // Checks if a region (series of cells) is valid.
-function _regionCheck(puzzle, region) {
+function _regionCheck(puzzle, region, quick) {
   console.log('Validating region', region)
   var regionData = new RegionData()
 
@@ -263,7 +267,8 @@ function _regionCheck(puzzle, region) {
     // Check for uncovered dots
     if (cell.dot > 0) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
-      regionData.addInvalid(pos)
+      regionData.addVeryInvalid(pos)
+      if (quick) return regionData
     }
 
     // Check for triangles
@@ -276,6 +281,7 @@ function _regionCheck(puzzle, region) {
       if (cell.count !== count) {
         console.log('Triangle at grid['+pos.x+']['+pos.y+'] has', count, 'borders')
         regionData.addVeryInvalid(pos)
+        if (quick) return regionData
       }
     }
 
@@ -297,14 +303,17 @@ function _regionCheck(puzzle, region) {
       if (squareColorCount > 1) {
         console.log('Found a', cell.color, 'square in a region with', squareColorCount, 'square colors')
         regionData.addInvalid(pos)
+        if (quick) return regionData
       }
     } else if (cell.type === 'star') {
       if (coloredObjects[cell.color] === 1) {
         console.log('Found a', cell.color, 'star in a region with 1', cell.color, 'object')
         regionData.addVeryInvalid(pos)
+        if (quick) return regionData
       } else if (coloredObjects[cell.color] > 2) {
         console.log('Found a', cell.color, 'star in a region with', coloredObjects[cell.color], cell.color, 'objects')
         regionData.addInvalid(pos)
+        if (quick) return regionData
       }
     }
   }
@@ -316,6 +325,7 @@ function _regionCheck(puzzle, region) {
         if (cell == undefined) continue
         if (cell.type === 'poly' || cell.type === 'ylop') {
           regionData.addInvalid(pos)
+          if (quick) return regionData
         }
       }
     }
