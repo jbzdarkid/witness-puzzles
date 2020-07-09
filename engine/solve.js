@@ -108,6 +108,9 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
     // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
     if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
 
+    var symCell = puzzle.getCell(sym.x, sym.y)
+    if (symCell.gap === 1 || symCell.gap === 2) return
+
     puzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
   }

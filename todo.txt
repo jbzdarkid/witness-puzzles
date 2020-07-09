@@ -1,12 +1,12 @@
 - Work on speedrunning solver / improving "unique puzzles"
   Simplest approach is just to have a simpler cache key, which is content-aware.
 - Perf TODOS:
-  * Try changing color strings into numbers. This is one of the major offenders for string compares.
-    Didn't really help... though I didn't spend too much effort on it.
-    I did rename 'color' to 'line' -- which saved 30s. :O
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
 - Editor resize is outright broken. Somehow.
   As is 'change puzzle type'. Yikes! Let's bug bash the editor.
+
+re-order validate functions
+comment validate functions
 
 Browse
 -- "Jump to top" button

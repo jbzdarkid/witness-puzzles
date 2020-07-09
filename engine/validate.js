@@ -11,12 +11,7 @@ window.PRECISE_POLYOMINOS = true
 function validate(puzzle, quick) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
-  puzzle.invalidElements = []
-  puzzle.negations = []
 
-  // TODO: Clean this up again!
-  // @Perf: This could potentially be pre-computed. Not that running through the grid is *that* expensive...
-  var puzzleHasSymbols = false
   var puzzleHasStart = false
   var puzzleHasEnd = false
   // Validate gap failures as an early exit.
@@ -24,41 +19,14 @@ function validate(puzzle, quick) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
-      if (['square', 'star', 'nega', 'poly', 'ylop'].includes(cell.type)) {
-        puzzleHasSymbols = true
-        continue
-      }
-      // TODO: Obvious cleanup: Write a helper function for each individual type?
-      if (cell.type === 'triangle') {
-        var count = 0
-        if (puzzle.getLine(x - 1, y) > window.LINE_NONE) count++
-        if (puzzle.getLine(x + 1, y) > window.LINE_NONE) count++
-        if (puzzle.getLine(x, y - 1) > window.LINE_NONE) count++
-        if (puzzle.getLine(x, y + 1) > window.LINE_NONE) count++
-        if (cell.count !== count) {
-          console.log('Triangle at grid['+x+']['+y+'] has', count, 'borders')
-          puzzle.invalidElements.push({'x':x, 'y':y})
-        }
-      }
-      if (cell.gap > 0 && cell.line > window.LINE_NONE) {
-        console.log('Gap at', x, y, 'is covered')
-        puzzle.valid = false
-      }
-      if (cell.dot > 0) {
-        if (cell.line === window.LINE_NONE) {
-          console.log('Dot at', x, y, 'is not covered')
-          puzzle.invalidElements.push({'x':x, 'y':y})
-        } else if (cell.line === window.LINE_BLUE && cell.dot === 3) {
-          console.log('Yellow dot at', x, y, 'is covered by blue line')
-          puzzle.valid = false
-        } else if (cell.line === window.LINE_YELLOW && cell.dot === 2) {
-          console.log('Blue dot at', x, y, 'is covered by yellow line')
-          puzzle.valid = false
-        }
-      }
-      if (cell.line !== window.LINE_NONE) {
+      if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != undefined) puzzleHasEnd = true
+        if (cell.dot > 1 && cell.line > window.LINE_BLACK && cell.dot !== cell.line) {
+          console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
+          puzzle.valid = false
+          if (quick) return
+        }
       }
     }
   }
@@ -68,36 +36,29 @@ function validate(puzzle, quick) {
     if (quick) return
   }
 
-  // Perf optimization: We can skip computing regions if the grid has no symbols.
-  if (!puzzleHasSymbols) {
-    // No complex symbols in the puzzle (i.e. symbols which require a region to determine)
-    // We have checked for dots, triangles, and gaps, but they are not 'symbols' in that sense.
-    puzzle.valid &= (puzzle.invalidElements.length === 0)
-  } else {
-    // Additional symbols, so we need to discard computation & divide the puzzle by regions
-    puzzle.invalidElements = []
-    var regions = puzzle.getRegions()
-    console.log('Found', regions.length, 'regions')
-    console.debug(regions)
+  puzzle.invalidElements = []
+  puzzle.negations = []
+  var regions = puzzle.getRegions()
+  console.log('Found', regions.length, 'regions')
+  console.debug(regions)
 
-    for (var region of regions) {
-      var key = region.grid.toString()
-      var regionData = puzzle.regionCache[key]
-      if (regionData == undefined) {
-        console.log('Cache miss for region', region, 'key', key)
-        regionData = regionCheckNegations(puzzle, region, quick)
-        console.log('Region valid:', regionData.valid())
+  for (var region of regions) {
+    var key = region.grid.toString()
+    var regionData = puzzle.regionCache[key]
+    if (regionData == undefined) {
+      console.log('Cache miss for region', region, 'key', key)
+      regionData = regionCheckNegations(puzzle, region, quick)
+      console.log('Region valid:', regionData.valid())
 
-        if (!window.DISABLE_CACHE) {
-          puzzle.regionCache[key] = regionData
-        }
+      if (!window.DISABLE_CACHE) {
+        puzzle.regionCache[key] = regionData
       }
-      puzzle.negations = puzzle.negations.concat(regionData.negations)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-      puzzle.valid &= regionData.valid()
-      if (quick && !puzzle.valid) return
     }
+    puzzle.negations = puzzle.negations.concat(regionData.negations)
+    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
+    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
+    puzzle.valid &= regionData.valid()
+    if (quick && !puzzle.valid) return
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
 }
