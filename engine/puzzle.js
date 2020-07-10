@@ -53,8 +53,6 @@ class Puzzle {
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
-    this.width = this.grid.length
-    this.height = this.grid[0].length
     this.regionCache = {}
     this.pillar = pillar
   }
@@ -67,7 +65,7 @@ class Puzzle {
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
     // @Legacy: Grid squares used to use 'false' to indicate emptiness.
-    // @Legacy: Cells used to use undefined to indicate emptiness. (... I think this still happens for intermediates)
+    // @Legacy: Cells may use {} to represent emptiness
     // @Legacy: Lines used to use 'line' instead of 'color'
     // Now, we use:
     // Cells default to {}
@@ -75,8 +73,8 @@ class Puzzle {
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
         var cell = puzzle.grid[x][y]
-        if (cell === false || cell == undefined) {
-          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = {}
+        if (cell === false || cell == undefined || cell.type == undefined) {
+          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
           else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
           if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
@@ -150,12 +148,16 @@ class Puzzle {
     for (var x=0; x<width; x++) {
       this.grid[x] = []
       for (var y=0; y<height; y++) {
-        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = {}
+        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = undefined
         else this.grid[x][y] = {'type':'line', 'line':LINE_NONE}
       }
     }
     // Performance: A large value which is === 0 to be used for pillar wrapping.
+    // Also performance: Javascript array length (might) have a nonzero cost.
+    // Definitely getting the length of the first element isn't optimized.
     this.largezero = width * height * 2
+    this.width = this.grid.length
+    this.height = this.grid[0].length
   }
 
   // Wrap a value around at the width of the grid. No-op if not in pillar mode.
