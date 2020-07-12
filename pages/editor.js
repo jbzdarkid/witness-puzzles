@@ -957,61 +957,6 @@ function resizePuzzle(dx, dy, id) {
     }
   }
 
-  return true;
-
-  if (puzzle.symmetry == undefined) return true;
-
-  // Symmetry copies one half of the grid to the other, and selects the far side from
-  // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
-  // internal elements, i.e. it feels like dragging away is just inserting a column/row.
-  // Note that these ranges are [min, max) i.e. [0, 4) which iterates 0-1-2-3.
-  var xRange = {'min': 0, 'max': width}
-  var yRange = {'min': 0, 'max': height}
-  if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
-  if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
-  if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
-  if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
-
-  console.debug('Copying grid X in range [' + xRange.min + ', ' + xRange.max + ')')
-  console.debug('Copying grid Y in range [' + yRange.min + ', ' + yRange.max + ')')
-  if (xRange.min % 1 !== 0) {
-    console.error('Invalid x iteration: ' + JSON.stringify(xRange))
-    return false
-  }
-  if (yRange.min % 1 !== 0) {
-    console.error('Invalid y iteration: ' + JSON.stringify(yRange))
-    return false
-  }
-
-  // @Hack: Why are we talking with offsets here? The new grid shouldn't care about that... right?
-  // Remove all start & endpoints which are not inside the copied half
-  for (var x=xOffset; x<puzzle.width + xOffset; x++) {
-    for (var y=yOffset; y<puzzle.height + yOffset; y++) {
-      if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) continue
-      if (puzzle.grid[x][y] == undefined) continue
-
-      console.spam('Clearing cell', JSON.stringify(puzzle.grid[x][y]), 'at', x, y)
-      puzzle.grid[x][y].start = undefined
-      puzzle.grid[x][y].end = undefined
-    }
-  }
-
-  // Copy all start & endpoints from the saved half back over
-  for (var x=xOffset; x<puzzle.width + xOffset; x++) {
-    for (var y=yOffset; y<puzzle.height + yOffset; y++) {
-      if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) {
-        if (puzzle.grid[x][y] == undefined) continue
-
-        var cell = puzzle.grid[x][y]
-        var sym = puzzle.getSymmetricalPos(x, y)
-      console.spam('Clearing cell', JSON.stringify(puzzle.grid[x][y]), 'at', x, y)
-        console.spam('Copying cell', JSON.stringify(cell), 'from', x, y, 'to', sym.x, sym.y)
-
-        puzzle.grid[sym.x][sym.y].start = cell.start
-        puzzle.grid[sym.x][sym.y].end = puzzle.getSymmetricalDir(cell.end)
-      }
-    }
-  }
   return true
 }
 
