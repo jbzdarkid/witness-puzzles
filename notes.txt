@@ -1,3 +1,9 @@
+# Whenever you update the version, ssh in and
+sudo vim /etc/httpd/conf.d/wsgi.conf
+# Move the WsgiDaemonProcess outside of the </VirtualHost> section
+sudo kilall httpd
+Restart the server from AWS
+
 Server setup:
 
 # Every time the server is reinstalled, follow these steps: [TODO: Automate]
