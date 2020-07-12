@@ -839,8 +839,8 @@ function resizePuzzle(dx, dy, id) {
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
+  for (var x=0; x<savedGrid.length; x++) {
+    for (var y=0; y<savedGrid[0].length; y++) {
       var cell = savedGrid[x][y]
       if (cell == undefined) continue
       if (cell.end != undefined) {
@@ -898,6 +898,7 @@ function resizePuzzle(dx, dy, id) {
 
 function _dragStart(event, elem) {
   dragging = {'x':event.clientX, 'y':event.clientY}
+  console.log('Drag started at', dragging.x, dragging.y)
 
   var anchor = document.createElement('div')
   document.body.appendChild(anchor)
@@ -908,15 +909,21 @@ function _dragStart(event, elem) {
   anchor.style.width = '99%'
   anchor.style.height = '100%'
   anchor.style.cursor = elem.style.cursor
-  anchor.onmousemove = function(event) {_dragMove(event, elem)}
-  anchor.onmouseup = function() {
-    dragging = undefined
-    var anchor = document.getElementById('anchor')
-    anchor.parentElement.removeChild(anchor)
+  document.onmousemove = function(event) {
+    if (event.buttons === 0) {
+      console.log('Drag ended')
+      dragging = undefined
+      var anchor = document.getElementById('anchor')
+      anchor.parentElement.removeChild(anchor)
+      document.onmousemove = undefined
+      return
+    }
+    _dragMove(event, elem)
   }
 }
 
 function _dragMove(event, elem) {
+  console.spam(event.clientX, event.clientY, dragging)
   if (dragging == undefined) return
   var dx = 0
   var dy = 0
