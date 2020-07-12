@@ -370,36 +370,45 @@ window.onload = function() {
   _drawColorButtons()
 
   var puzzleName = document.getElementById('puzzleName')
-  // Use oninput for default processing
-  puzzleName.oninput = function(event) {
-    // Prevent newlines in titles
-    if (this.innerText.includes('\n')) {
-      this.innerText = this.innerText.replace('\n', '')
-    }
-    // Ensure that puzzle names are non-empty (input box would disappear)
-    // TODO: This is wrong! Because now this is extremely awkward.
-    // if (this.innerText.length === 0) {
-    //   this.innerText = 'Unnamed Puzzle'
-    // }
-    // This only fires if onkeypress is bypassed somehow (e.g. paste)
-    if (this.innerText.length >= 50) {
-      this.innerText = this.innerText.substring(0, 50)
-    }
-    // Update the puzzle with the new name
-    puzzle.name = this.innerText
-    _writePuzzle()
-  }
+  // Both oninput and onkeypress fire for every text modification.
+
   // Use onkeypress when you need to prevent an action
   puzzleName.onkeypress = function(event) {
     // If the user tries to type past 50 characters
     if (this.innerText.length >= 50) {
       event.preventDefault()
     }
+
     // Allow using the enter key to confirm the puzzle name
     if (event.key === 'Enter') {
       event.preventDefault()
       this.blur()
     }
+  }
+
+  // Use oninput for backup processing
+  // You should always use a conditional here, because every time you modify the text,
+  // the cursor resets to the start of the string.
+  puzzleName.oninput = function(event) {
+    // Prevent newlines in titles
+    if (this.innerText.includes('\n')) this.innerText = this.innerText.replace('\n', '')
+    if (this.innerText.includes('\r')) this.innerText = this.innerText.replace('\r', '')
+    // Prevent the input box from disappearing
+    if (this.innerText.length === 0) this.innerText = '\u200B'
+    // Prevent too-long titles
+    if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
+  }
+
+  // Use onblur for final name confirmation.
+  puzzleName.onblur = function(event) {
+    // Remove leading/trailing whitespace
+    this.innerText = this.innerText.trim()
+    this.innerText = this.innerText.replace('\u200B', '')
+    // Ensure that puzzle names are non-empty
+    if (this.innerText.length === 0) this.innerText = 'Unnamed Puzzle'
+    // Update the puzzle with the new name
+    puzzle.name = this.innerText
+    _writePuzzle()
   }
 
   for (var resize of document.getElementsByClassName('resize')) {
