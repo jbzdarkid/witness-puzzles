@@ -169,12 +169,16 @@ function regionCheckNegations(puzzle, region, quick) {
     }
   }
   console.debug('Found', negationSymbols.length, 'negation symbols')
+  if (negationSymbols.length === 0) {
+    // No negation symbols in this region. Note that there must be negation symbols elsewhere
+    // in the puzzle, since puzzle.hasNegations was true.
+    return _regionCheck(puzzle, region, quick)
+  }
+
   // Get a list of elements that are currently invalid (before any negations are applied)
-  var regionData = _regionCheck(puzzle, region, false) // Pessimistic. TODO: Clean up.
+  // This cannot be quick, as we need a full list (for the purposes of negation).
+  var regionData = _regionCheck(puzzle, region, false)
   console.debug('Negation-less regioncheck valid:', regionData.valid())
-  // Perf: There's no reason to re-validate if there are no negation symbols.
-  // Note that there may be no negations in *this* region, even if they are elsewhere in the puzzle.
-  if (negationSymbols.length === 0) return regionData
 
   // Set 'nonce' back to 'nega' for the negation symbols
   for (var pos of negationSymbols) {
