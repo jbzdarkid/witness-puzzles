@@ -139,8 +139,8 @@ function _reloadPuzzle() {
       document.getElementById('solveAuto').disabled = true
     }
   } else if (puzzle.pillar === true) {
-    // 4x4 is the max for non-symmetry, pillar puzzles
-    if (puzzle.width > 9 || puzzle.height > 9) {
+    // 5x6 is the max for non-symmetry, pillar puzzles
+    if (puzzle.width > 13 || puzzle.height > 11) {
       document.getElementById('solveAuto').disabled = true
     }
   } else {
@@ -185,11 +185,95 @@ function _reloadPuzzle() {
 
 //** Buttons which the user can click on
 function createEmptyPuzzle() {
-  console.log('Creating empty puzzle')
-  newPuzzle = new Puzzle(4, 4)
-  newPuzzle.grid[0][8].start = true
-  newPuzzle.grid[8][0].end = 'right'
-  newPuzzle.name = 'Unnamed Puzzle'
+  var style = document.getElementById('puzzleStyle').value
+  console.log('Creating new puzzle with style', style)
+
+  switch (style) {
+  default:
+    console.error('Attempted to set unknown style', style, 'falling back to default')
+    style = 'Default'
+  case 'Default':
+    var newPuzzle = new Puzzle(4, 4)
+    newPuzzle.grid[0][8].start = true
+    newPuzzle.grid[8][0].end = 'right'
+    break;
+
+  case 'Horizontal Symmetry':
+    var newPuzzle = new Puzzle(4, 4)
+    newPuzzle.symmetry = {'x':true, 'y':false}
+    newPuzzle.grid[0][8].start = true
+    newPuzzle.grid[8][8].start = true
+    newPuzzle.grid[0][0].end = 'left'
+    newPuzzle.grid[8][0].end = 'right'
+    break;
+
+  case 'Vertical Symmetry':
+    var newPuzzle = new Puzzle(4, 4)
+    newPuzzle.symmetry = {'x':false, 'y':true}
+    newPuzzle.grid[0][0].start = true
+    newPuzzle.grid[0][8].start = true
+    newPuzzle.grid[8][0].end = 'right'
+    newPuzzle.grid[8][8].end = 'right'
+    break;
+
+  case 'Rotational Symmetry':
+    var newPuzzle = new Puzzle(4, 4)
+    newPuzzle.symmetry = {'x':true, 'y':true}
+    newPuzzle.grid[0][0].start = true
+    newPuzzle.grid[8][8].start = true
+    newPuzzle.grid[8][0].end = 'right'
+    newPuzzle.grid[0][8].end = 'left'
+    break;
+
+  case 'Pillar':
+    var newPuzzle = new Puzzle(6, 5, true)
+    newPuzzle.grid[6][10].start = true
+    newPuzzle.grid[6][0].end = 'top'
+    break;
+
+  case 'Pillar (H Symmetry)':
+    var newPuzzle = new Puzzle(6, 6, true)
+    newPuzzle.symmetry = {'x':true, 'y':false}
+    newPuzzle.grid[2][12].start = true
+    newPuzzle.grid[4][12].start = true
+    newPuzzle.grid[2][0].end = 'top'
+    newPuzzle.grid[4][0].end = 'top'
+    break;
+
+  case 'Pillar (V Symmetry)':
+    var newPuzzle = new Puzzle(6, 6, true)
+    newPuzzle.symmetry = {'x':false, 'y':true}
+    newPuzzle.grid[2][12].start = true
+    newPuzzle.grid[8][0].start = true
+    newPuzzle.grid[2][0].end = 'top'
+    newPuzzle.grid[8][12].end = 'bottom'
+    break;
+
+  case 'Pillar (R Symmetry)':
+    var newPuzzle = new Puzzle(6, 6, true)
+    newPuzzle.symmetry = {'x':true, 'y':true}
+    newPuzzle.grid[2][0].start = true
+    newPuzzle.grid[4][12].start = true
+    newPuzzle.grid[4][0].end = 'top'
+    newPuzzle.grid[2][12].end = 'bottom'
+    break;
+
+  case 'Pillar (Two Lines)':
+    var newPuzzle = new Puzzle(6, 6, true)
+    newPuzzle.symmetry = {'x':false, 'y':false}
+    newPuzzle.grid[2][12].start = true
+    newPuzzle.grid[8][12].start = true
+    newPuzzle.grid[2][0].end = 'top'
+    newPuzzle.grid[8][0].end = 'top'
+    break;
+
+  }
+
+  if (style == 'Default') {
+    newPuzzle.name = 'Unnamed Puzzle'
+  } else {
+    newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
+  }
   _writeNewPuzzle(newPuzzle)
 }
 
@@ -240,70 +324,6 @@ function importPuzzle() {
     // Only alert if user tried to enter data
     if (serialized) alert('Not a valid puzzle!')
   }
-}
-
-// Set the symmetry and pillar style, and ensure the puzzle is updated to match
-function setStyle(style) {
-  console.log('Setting style to', style)
-  if (style === 'Default' || style === 'Pillar') {
-    puzzle.symmetry = undefined
-  } else if (style === 'Horizontal Symmetry' || style === 'Pillar (H Symmetry)') {
-    puzzle.symmetry = {'x':true, 'y':false}
-  } else if (style === 'Vertical Symmetry' || style === 'Pillar (V Symmetry)') {
-    puzzle.symmetry = {'x':false, 'y':true}
-  } else if (style === 'Rotational Symmetry' || style === 'Pillar (R Symmetry)') {
-    puzzle.symmetry = {'x':true, 'y':true}
-  } else if (style === 'Pillar (Two Lines)') {
-    puzzle.symmetry = {'x':false, 'y':false}
-  } else {
-    console.error('Attempted to set unknown style', style)
-    return
-  }
-
-  // If the puzzle is in non-symmetry mode, replace all colored dots with black
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = puzzle.grid[x][y]
-      if (cell == undefined || cell.type != 'line') continue
-      if (puzzle.symmetry == undefined) {
-        if (cell.dot === 2 || cell.dot === 3) {
-          puzzle.grid[x][y].dot = 1
-        }
-      } else {
-        if (cell.start === true) {
-          var sym = puzzle.getSymmetricalPos(x, y)
-          console.debug('Copying startpoint from', x, y, 'to', sym.x, sym.y)
-          puzzle.updateCell2(sym.x, sym.y, 'start', true)
-        } else if (cell.end != undefined) {
-          var sym = puzzle.getSymmetricalPos(x, y)
-          console.debug('Copying endpoint from', x, y, 'to', sym.x, sym.y)
-          puzzle.updateCell2(sym.x, sym.y, 'end', puzzle.getSymmetricalDir(cell.end))
-        }
-      }
-    }
-  }
-
-  // Delayed until after symmetry enforcement to avoid oob
-  puzzle.pillar = style.includes('Pillar')
-
-  var width = puzzle.width
-  if (puzzle.pillar === true) {
-    if (puzzle.symmetry == undefined) {
-      // Width must be a multiple of 2 (rounding down)
-      if (width < 2) width = 2
-      else width -= width % 2
-    } else {
-      // Width must be a multiple of 4 (rounding up)
-      width += 3 - (width + 3) % 4
-    }
-  } else if (puzzle.pillar === false) {
-    // Pillar to non-pillar is always an increase
-    width += 1 - width % 2
-  }
-
-  resizePuzzle(width - puzzle.width, 0, 'right')
-  _writePuzzle()
-  _reloadPuzzle()
 }
 
 function setSolveMode(value) {
