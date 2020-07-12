@@ -3,7 +3,7 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
 - Increase drag size of editor handles
-- Symmetry puzzles cannot be 1xN along their symmetrical axis.
+- Symmetry puzzles cannot be 0xN along their symmetrical axis.
 
 re-order validate functions
 comment validate functions

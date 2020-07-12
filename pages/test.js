@@ -926,5 +926,14 @@ var tests = {
     puzzle.grid[9][7] = {'type': 'star', 'color': 'green'}
     puzzle.grid[9][9] = {'type': 'star', 'color': 'blue'}
     return [puzzle, 3]
+  }, 'tall-pillar-triangle': function() {
+    var puzzle = new Puzzle(1, 4, true)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[1][1] = {'type': 'triangle', 'color': 'orange', 'count': 2}
+    puzzle.grid[1][3] = {'type': 'triangle', 'color': 'orange', 'count': 2}
+    puzzle.grid[1][5] = {'type': 'triangle', 'color': 'orange', 'count': 2}
+    puzzle.grid[1][7] = {'type': 'triangle', 'color': 'orange', 'count': 2}
+    return [puzzle, 1]
   }
 }
