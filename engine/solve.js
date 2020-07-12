@@ -116,6 +116,7 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
   }
 
   // Large optimization -- Attempt to early exit once we cut out a region.
+  // Inspired by https://github.com/Overv/TheWitnessSolver
   // For non-pillar puzzles, every time we draw a line from one edge to another, we cut out two regions.
   // We can detect this by asking if we've ever left an edge, and determining if we've just touched an edge.
   // However, just touching the edge isn't sufficient, since we could still enter either region.
