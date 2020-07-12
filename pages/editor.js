@@ -853,8 +853,11 @@ function _shapeChooserClick(event, cell) {
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
 // and endpoints in sync with the original design.
 function resizePuzzle(dx, dy, id) {
-  var newWidth = puzzle.width + dx
-  var newHeight = puzzle.height + dy
+  // @Cleanup: Surely I don't need *all* of these.
+  var width = puzzle.width
+  var height = puzzle.height
+  var newWidth = width + dx
+  var newHeight = height + dy
   console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
 
   if (newWidth <= 0 || newHeight <= 0) return false
@@ -865,6 +868,30 @@ function resizePuzzle(dx, dy, id) {
 
   console.log('Shifting contents by', xOffset, yOffset)
 
+  var xRange = {'min': 0, 'max': width}
+  var yRange = {'min': 0, 'max': height}
+  if (puzzle.symmetry != undefined) {
+    // Symmetry copies one half of the grid to the other, and selects the far side from
+    // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
+    // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+    // Note that these ranges are [min, max) i.e. [0, 4) which iterates 0-1-2-3.
+    if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
+    if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
+    if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
+    if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
+  }
+
+  console.debug('Copying grid X in range [' + xRange.min + ', ' + xRange.max + ')')
+  console.debug('Copying grid Y in range [' + yRange.min + ', ' + yRange.max + ')')
+  if (xRange.min % 1 !== 0) {
+    console.error('Invalid x iteration: ' + JSON.stringify(xRange))
+    return false
+  }
+  if (yRange.min % 1 !== 0) {
+    console.error('Invalid y iteration: ' + JSON.stringify(yRange))
+    return false
+  }
+
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
@@ -872,53 +899,116 @@ function resizePuzzle(dx, dy, id) {
     for (var y=0; y<savedGrid[0].length; y++) {
       var cell = savedGrid[x][y]
       if (cell == undefined) continue
-      if (cell.end != undefined) {
-        var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
-        if (validDirs.length === 0) {
-          console.log('Endpoint at', x, y, 'no longer fits on the grid')
-          continue
+
+      if (puzzle.symmetry != undefined) {
+        if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) {
+          // If we're in the copy range, then verify that the endpoint is still valid,
+          // and if so, copy it across.
+
+          // @Cutnpaste
+          if (cell.end != undefined) {
+            var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
+            if (validDirs.length === 0) {
+              console.log('Endpoint at', x, y, 'no longer fits on the grid')
+              cell.end = undefined
+            } else if (!validDirs.includes(cell.end)) {
+              console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
+              cell.end = validDirs[0]
+            }
+            var sym = puzzle.getSymmetricalPos(x + xOffset, y + yOffset)
+            console.spam('Copying endpoint from', x, y, 'to', sym.x, sym.y)
+            puzzle.updateCell2(sym.x, sym.y, 'end', puzzle.getSymmetricalDir(cell.end))
+          }
+
+          if (cell.start) {
+            var sym = puzzle.getSymmetricalPos(x + xOffset, y + yOffset)
+            console.spam('Copying startpoint from', x, y, 'to', sym.x, sym.y)
+            puzzle.updateCell2(sym.x, sym.y, 'start', true)
+          }
+        } else {
+          // If we're not in the range, don't copy the start/endpoint values.
+
+          // @Hack: We're stealing start/end values from the target cell, in case our partner copy happened first.
+          var targetCell = puzzle.getCell(x + xOffset, y + yOffset)
+          console.spam('Clearing cell start/end', JSON.stringify(targetCell), 'at', x, y)
+          if (targetCell != undefined) {
+            cell.start = puzzle.getCell(x + xOffset, y + yOffset).start
+            cell.end = puzzle.getCell(x + xOffset, y + yOffset).end
+          }
         }
-        // @Cleanup: This is duplicated in onElementClicked, maybe this function should be smarter?
-        if (!validDirs.includes(cell.end)) {
-          console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
-          cell.end = validDirs[0]
+      } else {
+        if (cell.end != undefined) {
+          // @Cutnpaste
+          var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
+          if (validDirs.length === 0) {
+            console.log('Endpoint at', x, y, 'no longer fits on the grid')
+            cell.end = undefined
+          } else if (!validDirs.includes(cell.end)) {
+            console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
+            cell.end = validDirs[0]
+          }
         }
       }
+
+      // ...?
+      var targetCell = puzzle.getCell(x + xOffset, y + yOffset)
+      if (targetCell != undefined) Object.assign(cell, targetCell)
       puzzle.setCell(x + xOffset, y + yOffset, cell)
     }
   }
 
-  // Symmetry copies one half of the grid to the other,
-  // and selects the far side from the dragging edge to be the master copy.
-  // Note that these ranges are [,) i.e. [0, 4) iterates 0-1-2-3.
-  if (puzzle.symmetry != undefined) {
-    if (id.includes('right')) {
-      var xIter = [0, Math.floor(newWidth/2), 1]
-    } else if (id.includes('left')) {
-      var xIter = [newWidth-1, Math.ceil(newWidth/2)-1, -1]
-    } else {
-      var xIter = [0, newWidth-1, 1]
-    }
-    if (id.includes('bottom')) {
-      var yIter = [0, (newHeight-1)/2, 1]
-    } else if (id.includes('top')) {
-      var yIter = [newHeight-1, (newHeight-1)/2, -1]
-    } else {
-      var yIter = [0, newHeight, 1]
-    }
-    console.debug('Half-copying grid in range', xIter, yIter)
-    if (xIter[1]%1 !== 0) throw 'Invalid x iteration: ' + JSON.stringify(xIter)
-    if (yIter[1]%1 !== 0) throw 'Invalid y iteration: ' + JSON.stringify(yIter)
+  return true;
 
-    for (var x = xIter[0]; x != xIter[1]; x += xIter[2]) {
-      for (var y = yIter[0]; y != yIter[1]; y += yIter[2]) {
-        if ((x%2 === 1 || x%2 === -1) && y%2 === 1) continue
-        var cell = puzzle.getCell(x, y)
+  if (puzzle.symmetry == undefined) return true;
+
+  // Symmetry copies one half of the grid to the other, and selects the far side from
+  // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
+  // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+  // Note that these ranges are [min, max) i.e. [0, 4) which iterates 0-1-2-3.
+  var xRange = {'min': 0, 'max': width}
+  var yRange = {'min': 0, 'max': height}
+  if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
+  if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
+  if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
+  if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
+
+  console.debug('Copying grid X in range [' + xRange.min + ', ' + xRange.max + ')')
+  console.debug('Copying grid Y in range [' + yRange.min + ', ' + yRange.max + ')')
+  if (xRange.min % 1 !== 0) {
+    console.error('Invalid x iteration: ' + JSON.stringify(xRange))
+    return false
+  }
+  if (yRange.min % 1 !== 0) {
+    console.error('Invalid y iteration: ' + JSON.stringify(yRange))
+    return false
+  }
+
+  // @Hack: Why are we talking with offsets here? The new grid shouldn't care about that... right?
+  // Remove all start & endpoints which are not inside the copied half
+  for (var x=xOffset; x<puzzle.width + xOffset; x++) {
+    for (var y=yOffset; y<puzzle.height + yOffset; y++) {
+      if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) continue
+      if (puzzle.grid[x][y] == undefined) continue
+
+      console.spam('Clearing cell', JSON.stringify(puzzle.grid[x][y]), 'at', x, y)
+      puzzle.grid[x][y].start = undefined
+      puzzle.grid[x][y].end = undefined
+    }
+  }
+
+  // Copy all start & endpoints from the saved half back over
+  for (var x=xOffset; x<puzzle.width + xOffset; x++) {
+    for (var y=yOffset; y<puzzle.height + yOffset; y++) {
+      if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) {
+        if (puzzle.grid[x][y] == undefined) continue
+
+        var cell = puzzle.grid[x][y]
         var sym = puzzle.getSymmetricalPos(x, y)
-        console.spam('Copying cell', JSON.stringify(cell), 'at', x, y)
-        puzzle.updateCell2(sym.x, sym.y, 'start', cell.start)
-        puzzle.updateCell2(sym.x, sym.y, 'end', puzzle.getSymmetricalDir(cell.end))
-        console.spam('Updated cell', JSON.stringify(puzzle.getCell(sym.x, sym.y)), 'at', sym.x, sym.y)
+      console.spam('Clearing cell', JSON.stringify(puzzle.grid[x][y]), 'at', x, y)
+        console.spam('Copying cell', JSON.stringify(cell), 'from', x, y, 'to', sym.x, sym.y)
+
+        puzzle.grid[sym.x][sym.y].start = cell.start
+        puzzle.grid[sym.x][sym.y].end = puzzle.getSymmetricalDir(cell.end)
       }
     }
   }

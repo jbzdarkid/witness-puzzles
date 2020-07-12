@@ -101,19 +101,6 @@ function polyominoFromPolyshape(polyshape, ylop=false) {
   return polyomino
 }
 
-// @Cleanup: I don't *really* need these right now.
-window.POLYOMINOS = {
-  '1':[1],
-  '2':[3, 17, 33, 18],
-  '3':[7, 19, 22, 35, 37, 49, 50, 52, 67, 82, 97, 273, 274, 289, 290, 529, 530, 545],
-  '4':[15, 23, 39, 51, 54, 71, 85, 99, 113, 114, 116, 195, 275, 305, 306, 547, 561, 562, 771, 785, 802, 4369, 4386],
-  '5':[31, 47, 55, 62, 79, 87, 103, 115, 117, 118, 124, 143, 199, 227, 241, 242, 244, 248, 279, 307, 310, 369, 370, 372, 551, 563, 566, 611, 625, 626, 628, 787, 803, 806, 817, 818, 866, 868, 1095, 1123, 1137, 1138, 1140, 1571, 1585, 1586, 1809, 1826, 1860, 4371, 4401, 4402, 4881, 4898, 8739, 8753, 8754, 8977, 12561, 12834],
-/* Custom polyominos */
-  '6':[819],
-  '9':[1911],
-  '11':[32614],
-}
-
 // Attempt to fit polyominos in a region into the puzzle.
 // This function checks for early exits, and cleans up the grid to a numerical representation:
 // * 0 represents a square that does not need to be covered (outside the region)
