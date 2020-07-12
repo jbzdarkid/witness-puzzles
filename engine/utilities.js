@@ -188,7 +188,7 @@ function loadHeader(titleText) {
   var navbar = document.createElement('div')
   document.body.appendChild(navbar)
   navbar.className = 'navbar'
-  navbar.style = 'min-width: 700px; position: fixed; top: 0; width: 100%'
+  navbar.style = 'min-width: 700px; position: fixed; top: 0; width: 100%; z-index: 1'
   navbar.style.borderBottom = '2px solid ' + window.BORDER
   navbar.style.background = window.PAGE_BACKGROUND
 
