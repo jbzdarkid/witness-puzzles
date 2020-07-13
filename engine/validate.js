@@ -3,11 +3,30 @@ window.NEGATIONS_CANCEL_NEGATIONS = true
 window.SHAPELESS_ZERO_POLY = true
 window.PRECISE_POLYOMINOS = true
 
+class RegionData {
+  constructor() {
+    this.invalidElements = []
+    this.veryInvalidElements = []
+    this.negations = []
+  }
+
+  addInvalid(elem) {
+    this.invalidElements.push(elem)
+  }
+
+  addVeryInvalid(elem) {
+    this.veryInvalidElements.push(elem)
+  }
+
+  valid() {
+    return (this.invalidElements.length === 0 && this.veryInvalidElements.length === 0)
+  }
+}
+
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Whether or not the puzzle is valid
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
-// negations: Negation symbols and their targets (for the purpose of darkening)
-// @Performance: Consider implementing a "no-ui/silent" validation mode which exits after the first error.
+// negations: Negation pairs (for the purpose of darkening)
 function validate(puzzle, quick) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
@@ -67,30 +86,80 @@ function validate(puzzle, quick) {
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
 }
 
-class RegionData {
-  constructor() {
-    this.invalidElements = []
-    this.veryInvalidElements = []
-    this.negations = []
+// Determines whether or not a particular region is valid or not, including negation symbols.
+// If quick is true, exits after the first invalid element is found (small performance gain)
+// This function applies negations to all "very invalid elements", i.e. elements which cannot become
+// valid by another element being negated. Then, it passes off to _regionCheckNegations2,
+// which attempts to apply any remaining negations to any other invalid elements.
+function regionCheckNegations(puzzle, region, quick) {
+  if (!puzzle.hasNegations) return _regionCheck(puzzle, region, quick)
+
+  // Get a list of negation symbols in the grid, and set them to 'nonce'
+  var negationSymbols = []
+  for (var pos of region.cells) {
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell != undefined && cell.type === 'nega') {
+      pos.cell = cell
+      negationSymbols.push(pos)
+      puzzle.updateCell2(pos.x, pos.y, 'type', 'nonce')
+    }
+  }
+  console.debug('Found', negationSymbols.length, 'negation symbols')
+  if (negationSymbols.length === 0) {
+    // No negation symbols in this region. Note that there must be negation symbols elsewhere
+    // in the puzzle, since puzzle.hasNegations was true.
+    return _regionCheck(puzzle, region, quick)
   }
 
-  addInvalid(elem) {
-    this.invalidElements.push(elem)
+  // Get a list of elements that are currently invalid (before any negations are applied)
+  // This cannot be quick, as we need a full list (for the purposes of negation).
+  var regionData = _regionCheck(puzzle, region, false)
+  console.debug('Negation-less regioncheck valid:', regionData.valid())
+
+  // Set 'nonce' back to 'nega' for the negation symbols
+  for (var pos of negationSymbols) {
+    puzzle.updateCell2(pos.x, pos.y, 'type', 'nega')
   }
 
-  addVeryInvalid(elem) {
-    this.veryInvalidElements.push(elem)
+  var combinations = []
+
+  var invalidElements = regionData.invalidElements
+  var veryInvalidElements = regionData.veryInvalidElements
+
+  for (var i=0; i<invalidElements.length; i++) {
+    invalidElements[i].cell = puzzle.getCell(invalidElements[i].x, invalidElements[i].y)
+  }
+  for (var i=0; i<veryInvalidElements.length; i++) {
+    veryInvalidElements[i].cell = puzzle.getCell(veryInvalidElements[i].x, veryInvalidElements[i].y)
   }
 
-  valid() {
-    return (this.invalidElements.length === 0 && this.veryInvalidElements.length === 0)
+  console.debug('Forcibly negating', veryInvalidElements.length, 'symbols')
+  var baseCombination = []
+  while (negationSymbols.length > 0 && veryInvalidElements.length > 0) {
+    var source = negationSymbols.pop()
+    var target = veryInvalidElements.pop()
+    puzzle.setCell(source.x, source.y, null)
+    puzzle.setCell(target.x, target.y, null)
+    baseCombination.push({'source':source, 'target':target})
   }
+
+  var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements)
+
+  // Restore required negations
+  for (var combination of baseCombination) {
+    puzzle.setCell(combination.source.x, combination.source.y, combination.source.cell)
+    puzzle.setCell(combination.target.x, combination.target.y, combination.target.cell)
+    regionData.negations.push(combination)
+  }
+  return regionData
 }
 
+// Recursively matches negations and invalid elements from the grid. Note that this function
+// doesn't actually modify the two lists, it just iterates through them with index/index2.
 function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0, index2=0) {
   if (index2 >= negationSymbols.length) {
     console.debug('0 negation symbols left, returning negation-less regionCheck')
-    return _regionCheck(puzzle, region, false) // TODO: quick?
+    return _regionCheck(puzzle, region, false) // @Performance: We could pass quick here.
   }
 
   if (index >= invalidElements.length) {
@@ -159,70 +228,10 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
   return (regionData.valid() ? regionData : firstRegionData)
 }
 
-function regionCheckNegations(puzzle, region, quick) {
-  if (!puzzle.hasNegations) return _regionCheck(puzzle, region, quick)
-
-  // Get a list of negation symbols in the grid, and set them to 'nonce'
-  var negationSymbols = []
-  for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell != undefined && cell.type === 'nega') {
-      pos.cell = cell
-      negationSymbols.push(pos)
-      puzzle.updateCell2(pos.x, pos.y, 'type', 'nonce')
-    }
-  }
-  console.debug('Found', negationSymbols.length, 'negation symbols')
-  if (negationSymbols.length === 0) {
-    // No negation symbols in this region. Note that there must be negation symbols elsewhere
-    // in the puzzle, since puzzle.hasNegations was true.
-    return _regionCheck(puzzle, region, quick)
-  }
-
-  // Get a list of elements that are currently invalid (before any negations are applied)
-  // This cannot be quick, as we need a full list (for the purposes of negation).
-  var regionData = _regionCheck(puzzle, region, false)
-  console.debug('Negation-less regioncheck valid:', regionData.valid())
-
-  // Set 'nonce' back to 'nega' for the negation symbols
-  for (var pos of negationSymbols) {
-    puzzle.updateCell2(pos.x, pos.y, 'type', 'nega')
-  }
-
-  var combinations = []
-
-  var invalidElements = regionData.invalidElements
-  var veryInvalidElements = regionData.veryInvalidElements
-
-  for (var i=0; i<invalidElements.length; i++) {
-    invalidElements[i].cell = puzzle.getCell(invalidElements[i].x, invalidElements[i].y)
-  }
-  for (var i=0; i<veryInvalidElements.length; i++) {
-    veryInvalidElements[i].cell = puzzle.getCell(veryInvalidElements[i].x, veryInvalidElements[i].y)
-  }
-
-  console.debug('Forcibly negating', veryInvalidElements.length, 'symbols')
-  var baseCombination = []
-  while (negationSymbols.length > 0 && veryInvalidElements.length > 0) {
-    var source = negationSymbols.pop()
-    var target = veryInvalidElements.pop()
-    puzzle.setCell(source.x, source.y, null)
-    puzzle.setCell(target.x, target.y, null)
-    baseCombination.push({'source':source, 'target':target})
-  }
-
-  var regionData = _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements)
-
-  // Restore required negations
-  for (var combination of baseCombination) {
-    puzzle.setCell(combination.source.x, combination.source.y, combination.source.cell)
-    puzzle.setCell(combination.target.x, combination.target.y, combination.target.cell)
-    regionData.negations.push(combination)
-  }
-  return regionData
-}
-
-// Checks if a region (series of cells) is valid.
+// Checks if a region is valid. This does not handle negations -- we assume that there are none.
+// Note that this function needs to always ask the puzzle for the current contents of the cell,
+// since the region is only coordinate locations, and might be modified by _regionCheckNegations2
+// @Performance: This is a pretty core function to the solve loop.
 function _regionCheck(puzzle, region, quick) {
   console.log('Validating region', region)
   var regionData = new RegionData()

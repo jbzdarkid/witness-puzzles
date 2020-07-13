@@ -4,9 +4,6 @@
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
 - Symmetry puzzles cannot be 0xN along their symmetrical axis.
 
-re-order validate functions (to match standard calling order, validate -> rgn -> rgn2 -> rg)
-comment validate functions (general explanation of function purpose, might rename rgn2)
-
 Browse
 -- "Jump to top" button
 -- Batched list generation
