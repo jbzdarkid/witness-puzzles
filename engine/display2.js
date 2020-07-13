@@ -121,12 +121,12 @@ function _drawSymbols(puzzle, svg, target) {
         'y': y*41 + 23,
         'class': target + '_' + x + '_' + y,
       }
-      if (cell.dot > 0) {
+      if (cell.dot > window.DOT_NONE) {
         params.type = 'dot'
-        if (cell.dot === 1) params.color = 'black'
-        else if (cell.dot === 2) params.color = window.LINE_PRIMARY
-        else if (cell.dot === 3) params.color = window.LINE_SECONDARY
-        else if (cell.dot === 4) {
+        if (cell.dot === window.DOT_BLACK) params.color = 'black'
+        else if (cell.dot === window.DOT_BLUE) params.color = window.LINE_PRIMARY
+        else if (cell.dot === window.DOT_YELLOW) params.color = window.LINE_SECONDARY
+        else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = window.FOREGROUND
           // This makes the invisible dots visible, but only while we're in the editor.
           if (window.activeParams != undefined) {

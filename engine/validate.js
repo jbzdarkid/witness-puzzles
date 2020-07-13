@@ -26,7 +26,7 @@ function validate(puzzle, quick) {
       if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != undefined) puzzleHasEnd = true
-        if (cell.dot > 1 && cell.line > window.LINE_BLACK && cell.dot !== cell.line) {
+        if (cell.dot > window.DOT_BLACK && cell.line > window.LINE_BLACK && cell.dot !== cell.line) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
           puzzle.valid = false
           if (quick) return
@@ -234,7 +234,7 @@ function _regionCheck(puzzle, region, quick) {
     if (cell == undefined) continue
 
     // Check for uncovered dots
-    if (cell.dot > 0) {
+    if (cell.dot > window.DOT_NONE) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
       regionData.addVeryInvalid(pos)
       if (quick) return regionData

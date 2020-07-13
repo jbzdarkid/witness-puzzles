@@ -113,7 +113,7 @@ class Puzzle {
     // Now, they are flags on the individual lines.
     if (parsed.dots) {
       for (var dot of parsed.dots) {
-        puzzle.grid[dot.x][dot.y].dot = 1
+        puzzle.grid[dot.x][dot.y].dot = window.DOT_BLACK
       }
     }
     if (parsed.gaps) {
