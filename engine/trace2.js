@@ -379,7 +379,7 @@ function trace(event, puzzle, pos, start, symStart=undefined) {
     var cell = puzzle.getCell(data.pos.x, data.pos.y)
     if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
       data.cursor.onclick = null
-      window.validate(puzzle)
+      window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
       for (var negation of puzzle.negations) {
         console.debug('Rendering negation', negation)

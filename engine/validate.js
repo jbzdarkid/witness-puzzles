@@ -14,11 +14,15 @@ function validate(puzzle, quick) {
 
   var puzzleHasStart = false
   var puzzleHasEnd = false
+  puzzle.hasNegations = false
+  puzzle.hasPolyominos = false
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == undefined) continue
+      if (cell.type == 'nega') puzzle.hasNegations = true
+      if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
       if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != undefined) puzzleHasEnd = true
