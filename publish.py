@@ -23,7 +23,7 @@ def write(filename):
     return
 
   name, ext = filename.rsplit('.', 1)
-  sourcemap = 'sourcemaps/' + filename.rsplit('/', 1)[-1] + '.map'
+#  sourcemap = 'sourcemaps/' + filename.rsplit('/', 1)[-1] + '.map'
 
   if ext == 'js':
 #    contents = subprocess.run([
@@ -37,8 +37,8 @@ def write(filename):
 #    z.write(filename, f'sourcemaps/{filename}')
     contents = open(filename).read()
 
-    hash = hashlib.sha256()
-    hash.update(contents.encode('utf-8'))
+#    hash = hashlib.sha256()
+#    hash.update(contents.encode('utf-8'))
     # TODO: figure out how to get redirects / etc working
     # hashed_filename = f'{name}-{hash.hexdigest()[:8]}.{ext}'
     z.writestr(filename, contents)
@@ -54,7 +54,7 @@ write('data')
 write('engine')
 write('pages')
 write('requirements.txt')
-#write('.ebextensions')
+write('.ebextensions/https-instance.config')
 write('install-google-chrome.sh')
 z.writestr('application_hashes.py', hashfile)
 z.close()
