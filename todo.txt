@@ -2,9 +2,7 @@
   Simplest approach is just to have a simpler cache key, which is content-aware.
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
-- Increase drag size of editor handles
 - Symmetry puzzles cannot be 0xN along their symmetrical axis.
-- Manually solving polys is broken
 
 re-order validate functions (to match standard calling order, validate -> rgn -> rgn2 -> rg)
 comment validate functions (general explanation of function purpose, might rename rgn2)
