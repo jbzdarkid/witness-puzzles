@@ -862,6 +862,8 @@ function resizePuzzle(dx, dy, id) {
 
   if (newWidth <= 0 || newHeight <= 0) return false
   if (newWidth > 21 || newHeight > 21) return false
+  if (puzzle.symmetry != undefined && puzzle.symmetry.x && newWidth <= 2) return false
+  if (puzzle.symmetry != undefined && puzzle.symmetry.y && newHeight <= 2) return false
 
   var xOffset = (id.includes('left') ? dx : 0)
   var yOffset = (id.includes('top') ? dy : 0)
