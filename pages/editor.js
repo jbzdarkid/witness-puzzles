@@ -868,99 +868,113 @@ function resizePuzzle(dx, dy, id) {
 
   console.log('Shifting contents by', xOffset, yOffset)
 
-  var xRange = {'min': 0, 'max': width}
-  var yRange = {'min': 0, 'max': height}
+  var xRange = {'min': 0, 'max': width-1}
+  var yRange = {'min': 0, 'max': height-1}
   if (puzzle.symmetry != undefined) {
     // Symmetry copies one half of the grid to the other, and selects the far side from
     // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
     // internal elements, i.e. it feels like dragging away is just inserting a column/row.
-    // Note that these ranges are [min, max) i.e. [0, 4) which iterates 0-1-2-3.
     if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
     if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
     if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
     if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
   }
 
-  console.debug('Copying grid X in range [' + xRange.min + ', ' + xRange.max + ')')
-  console.debug('Copying grid Y in range [' + yRange.min + ', ' + yRange.max + ')')
+  console.debug('Persisting X in range [' + xRange.min + ', ' + xRange.max + ']')
+  console.debug('Persisting Y in range [' + yRange.min + ', ' + yRange.max + ']')
   if (xRange.min % 1 !== 0) {
-    console.error('Invalid x iteration: ' + JSON.stringify(xRange))
+    console.error('Invalid x range: ' + JSON.stringify(xRange))
     return false
   }
   if (yRange.min % 1 !== 0) {
-    console.error('Invalid y iteration: ' + JSON.stringify(yRange))
+    console.error('Invalid y range: ' + JSON.stringify(yRange))
     return false
   }
 
+  var oldPuzzle = puzzle.clone()
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
-  for (var x=0; x<savedGrid.length; x++) {
-    for (var y=0; y<savedGrid[0].length; y++) {
-      var cell = savedGrid[x][y]
-      if (cell == undefined) continue
+  // For each cell in the new grid, copy it from the appropriate location in the old grid.
 
-      if (cell.end != undefined) {
-        var validDirs = puzzle.getValidEndDirs(x + xOffset, y + yOffset)
-        if (validDirs.length === 0) {
-          console.log('Endpoint at', x, y, 'no longer fits on the grid')
-          cell.end = undefined
-        } else if (!validDirs.includes(cell.end)) {
-          console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
-          cell.end = validDirs[0]
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
+      // Copy contents directly, no special handling needed.
+      if (x%2 === 1 && y%2 === 1) {
+        var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
+        if (cell != undefined) {
+          puzzle.setCell(x, y, cell)
         }
-
-        if (puzzle.symmetry != undefined) {
-          if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) {
-            // If we're in the copy range, then verify that the endpoint is still valid,
-            // and if so, copy it across.
-
-            var sym = puzzle.getSymmetricalPos(x + xOffset, y + yOffset)
-            console.spam('Copying endpoint from', x, y, 'to', sym.x, sym.y)
-            puzzle.updateCell2(sym.x, sym.y, 'end', puzzle.getSymmetricalDir(cell.end))
-          } else {
-            // If we're not in the range, don't copy the start/endpoint values.
-
-            // @Hack: We're stealing start/end values from the target cell, in case our partner copy happened first.
-            var targetCell = puzzle.getCell(x + xOffset, y + yOffset)
-            console.spam('Clearing cell start/end', JSON.stringify(targetCell), 'at', x, y)
-            if (targetCell != undefined) {
-              cell.end = puzzle.getCell(x + xOffset, y + yOffset).end
-            }
-          }
-        }
+        continue
       }
 
-      if (cell.start != undefined && puzzle.symmetry != undefined) {
-        // @Cutnpaste. Blah.
-        if (xRange.min <= x && x <= xRange.max && yRange.min <= y && y <= yRange.max) {
-          // If we're in the copy range, then verify that the endpoint is still valid,
-          // and if so, copy it across.
+      var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
 
-          if (cell.start) {
-            var sym = puzzle.getSymmetricalPos(x + xOffset, y + yOffset)
-            console.spam('Copying startpoint from', x, y, 'to', sym.x, sym.y)
-            puzzle.updateCell2(sym.x, sym.y, 'start', true)
+      if (puzzle.symmetry != undefined) {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        // TODO: Comment.
+        if (x - xOffset < xRange.min || xRange.max < x - xOffset ||
+            y - yOffset < yRange.min || yRange.max < y - yOffset) {
+          var oldCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
+          if (oldCell != undefined) {
+            console.spam('At', x, y, 'copying', JSON.stringify(oldCell), 'from', sym.x - xOffset, sym.y - yOffset)
+            if (cell == undefined) cell = {}
+            cell.end = puzzle.getSymmetricalDir(oldCell.end)
+            cell.start = oldCell.start
           }
         } else {
-          // If we're not in the range, don't copy the start/endpoint values.
-
-          // @Hack: We're stealing start/end values from the target cell, in case our partner copy happened first.
-          var targetCell = puzzle.getCell(x + xOffset, y + yOffset)
-          console.spam('Clearing cell start/end', JSON.stringify(targetCell), 'at', x, y)
-          if (targetCell != undefined) {
-            cell.start = puzzle.getCell(x + xOffset, y + yOffset).start
-          }
+          console.spam('At', x, y, 'persisting', JSON.stringify(cell))
         }
       }
-
-      // ...?
-      var targetCell = puzzle.getCell(x + xOffset, y + yOffset)
-      if (targetCell != undefined) Object.assign(cell, targetCell)
-      puzzle.setCell(x + xOffset, y + yOffset, cell)
+      if (cell != undefined) {
+        puzzle.setCell(x, y, cell)
+      }
     }
   }
 
+  // Check to make sure that all endpoints are still pointing in valid directions.
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell == undefined) continue
+      if (cell.end == undefined) continue
+
+      if (puzzle.symmetry == undefined) {
+        var validDirs = puzzle.getValidEndDirs(x, y)
+        if (validDirs.includes(cell.end)) continue
+
+        if (validDirs.length === 0) {
+          console.log('Endpoint at', x, y, 'no longer fits on the grid')
+          puzzle.updateCell2(x, y, 'end', undefined)
+        } else {
+          console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
+          puzzle.updateCell2(x, y, 'end', validDirs[0])
+        }
+      } else {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        var symDir = puzzle.getSymmetricalDir(cell.end)
+        var validDirs = puzzle.getValidEndDirs(x, y)
+        var validSymDirs = puzzle.getValidEndDirs(sym.x, sym.y)
+        if (validDirs.includes(cell.end) && validSymDirs.includes(symDir)) continue
+
+        while (validDirs.length > 0) {
+          var dir = validDirs.pop()
+          symDir = puzzle.getSymmetricalDir(dir)
+          if (validDirs.includes(dir) && validSymDirs.includes(symDir)) {
+            console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', dir)
+            puzzle.updateCell2(x, y, 'end', dir)
+            puzzle.updateCell2(sym.x, sym.y, 'end', symDir)
+            break
+          }
+        }
+        if (validDirs.length === 0 || validSymDirs.length === 0) {
+          console.log('Endpoint at', x, y, 'no longer fits on the grid')
+          puzzle.updateCell2(x, y, 'end', undefined)
+          puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
+        }
+      }
+    }
+  }
   return true
 }
 
