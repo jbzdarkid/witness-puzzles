@@ -53,11 +53,17 @@ function _showSolution(solutions, num) {
 
 function isColored(grid, x, y) {
   var cell = grid[x][y]
-  return (cell != null && cell.color == 1)
+  return (cell != null && cell.line >= window.LINE_BLACK)
 }
 
 function solvePuzzle() {
-  var solutions = window.solve(puzzle)
+  window.MAX_SOLUTIONS = 100
+  var solutions = window.solve(puzzle, function(fraction) {
+    console.log(fraction * 100)
+  }, onSolvedPuzzle)
+}
+
+function onSolvedPuzzle(solutions) {
   for (var i=0; i<solutions.length; i++) {
     var solution = solutions[i]
     var edges = 0
@@ -66,7 +72,7 @@ function solvePuzzle() {
       for (var y=0; y<solution.grid[x].length; y++) {
         if (x%2 == 1 && y%2 == 1) continue
         var cell = solution.grid[x][y]
-        if (cell == null || cell.color == 0) continue
+        if (cell == null || cell.line === window.LINE_NONE) continue
 
         var topCell = solution.grid[x][y-1]
         var bottomCell = solution.grid[x][y+1]
