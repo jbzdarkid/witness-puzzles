@@ -247,12 +247,13 @@ function _placePolys(polys, puzzle) {
     for (var i=0; i<polys.length; i++) {
       var poly = polys.splice(i, 1)[0]
       console.spam('Selected poly', poly)
+      if (attemptedPolyshapes.includes(poly.polyshape)) {
+        console.spam('Polyshape', poly.polyshape, 'has already been attempted')
+        continue
+      }
+      attemptedPolyshapes.push(poly.polyshape)
       for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
-        if (attemptedPolyshapes.includes(polyshape)) {
-          console.spam('Polyshape', polyshape, 'has already been attempted')
-          continue
-        }
-        attemptedPolyshapes.push(polyshape)
+        console.spam('Selected polyshape', polyshape)
         var cells = polyominoFromPolyshape(polyshape)
         if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
           console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
