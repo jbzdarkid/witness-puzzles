@@ -3,6 +3,7 @@
   This might also have perf benefits, because our cache will be more effective.
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
+  * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 - Too-small grids are having odd symmetry bugs
 - Pillar + resize is still horrendously broken, of course.
 
