@@ -61,16 +61,24 @@
         </td>
       </tr><tr>
         <td style="text-align:center;">
+          <input class="checkbox" type="checkbox" id="solveMode" onchange="setSolveMode(this.checked)">
+          <label for="solveMode">Solve (manually)</label>
           <button id="solveAuto" onclick="solvePuzzle()">Solve (automatically)</button>
           <div style="display: inline-block; vertical-align:top">
+            <div id="progressBox" style="position: absolute; display:none; width: 220px; padding: 2px">
+              <label id="progressPercent" style="float: left">0%</label>
+              <div id="progress" style="position: absolute; z-index: -1; height: 100%; width: 0%; background-color: #339900"></div>
+            </div>
             <div id="solutionViewer" style="position: absolute; display:none">
               <button id="previousSolution">&larr;</button>
               <label id="solutionCount"></label>
               <button id="nextSolution">&rarr;</button>
-              <br>
-              <label id="solutionInfo"></label>
             </div>
           </div>
+        </td>
+      </tr><tr>
+        <td style="text-align:center;">
+          <label id="solutionInfo"></label>
         </td>
       </tr>
     </table>

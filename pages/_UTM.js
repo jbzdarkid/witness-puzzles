@@ -57,27 +57,23 @@ function isColored(grid, x, y) {
 }
 
 function solvePuzzle() {
-  window.MAX_SOLUTIONS = 100
-  var solutions = window.solve(puzzle, function(fraction) {
-    console.log(fraction * 100)
+  document.getElementById('solutionViewer').style.display = 'none'
+  document.getElementById('progressBox').style.display = null
+  var solutions = window.solve(puzzle, function(progress) {
+    var percent = Math.floor(100 * progress)
+    document.getElementById('progressPercent').innerText = percent + '%'
+    document.getElementById('progress').style.width = percent + '%'
   }, onSolvedPuzzle)
 }
 
 function onSolvedPuzzle(paths) {
-  var minPath = 9999
-  var minPaths = []
-  debugger;
-  for (var path of paths) {
-    if (path.length < minPath) {
-      minPath = path.length
-      minPaths = [path]
-    } else if (path.length === minPath) {
-      minPaths.push(path)
-    }
-  }
+  document.getElementById('progressBox').style.display = 'none'
+  document.getElementById('solutionViewer').style.display = null
+  document.getElementById('progressPercent').innerText = '0%'
+  document.getElementById('progress').style.width = '0%'
 
   var solutions = []
-  for (var path of minPaths) solutions.push(window.pathToSolution(puzzle, path))
+  for (var path of paths) solutions.push(window.pathToSolution(puzzle, path))
 
   for (var i=0; i<solutions.length; i++) {
     var solution = solutions[i]
