@@ -94,11 +94,6 @@ def validate_and_capture_image(puzzle_json, solution_json):
   except TimeoutException:
     data = 'Validation timed out.\n'
 
-  if not valid:
-    data += 'Console output:\n'
-    for line in driver.get_log('browser'):
-      data += f'{line["level"]}: {line["message"]}\n'
-
   driver.quit()
   return valid, data
 

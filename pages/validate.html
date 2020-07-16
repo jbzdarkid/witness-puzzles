@@ -9,13 +9,14 @@
   </head>
   <script>
     window.validate_and_capture_image = function(puzzle_json, solution_json) {
+      window.setLogLevel('log')
       var result = document.createElement('p')
       result.id = 'result'
       result.valid = false
       try {
         var solution = Puzzle.deserialize(solution_json)
         var puzzle = Puzzle.deserialize(puzzle_json)
-        validate(solution)
+        validate(solution, true) // Quick validation, since we aren't actually *showing* this to anyone.
         result.valid = solution.valid
       } catch (exc) {
         console.error(exc.stack)

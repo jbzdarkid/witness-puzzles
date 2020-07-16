@@ -80,7 +80,7 @@ function validate(puzzle, quick) {
     puzzle.negations = puzzle.negations.concat(regionData.negations)
     puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
     puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-    puzzle.valid &= regionData.valid()
+    puzzle.valid = puzzle.valid && regionData.valid()
     if (quick && !puzzle.valid) return
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
@@ -233,7 +233,7 @@ function _regionCheckNegations2(puzzle, region, negationSymbols, invalidElements
 // since the region is only coordinate locations, and might be modified by _regionCheckNegations2
 // @Performance: This is a pretty core function to the solve loop.
 function _regionCheck(puzzle, region, quick) {
-  console.log('Validating region', region)
+  console.log('Validating region of size', region.cells.length, region)
   var regionData = new RegionData()
 
   var coloredObjects = {}
