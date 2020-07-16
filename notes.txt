@@ -54,7 +54,21 @@ cd /opt/python/current/app
 sudo chmod 755 install-google-chrome.sh
 sudo ./install-google-chrome.sh
 
+# Contains HTTP logs (e.g. from the flask app)
+tail -f /var/log/httpd/error_log
+# Access logs
+tail -f /var/log/httpd/ssl_request_log
+tail -f /var/log/httpd/access_log
+tail -f /var/log/httpd/ssl_access_log
+# Contains wsgi / apache errors
+tail -f /var/log/httpd/ssl_error_log
+# Elastic Beanstalk actions log
+tail -f /var/log/eb-commandprocessor.log
+
 logout
+
+
+
 
 # Local development setup:
 ./venv/Scripts/activate

@@ -1,6 +1,6 @@
 boto3==1.9.120
 botocore==1.12.253
-chromedriver-py==80.0.3987.16
+chromedriver-py==83.*
 Click==7.0
 docutils==0.15.2
 Flask==1.1.1
