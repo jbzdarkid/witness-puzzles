@@ -351,13 +351,15 @@ function solvePuzzle() {
     var percent = Math.floor(100 * progress)
     document.getElementById('progressPercent').innerText = percent + '%'
     document.getElementById('progress').style.width = percent + '%'
-  }, function(solutions) {
+  }, function(paths) {
     document.getElementById('progressBox').style.display = 'none'
     document.getElementById('solutionViewer').style.display = null
     document.getElementById('progressPercent').innerText = '0%'
     document.getElementById('progress').style.width = '0%'
 
     puzzle.autoSolved = true
+    var solutions = []
+    for (var path of paths) solutions.push(window.pathToSolution(puzzle, path))
     _showSolution(solutions, 0)
   })
 }

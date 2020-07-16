@@ -22,32 +22,54 @@ function solve(puzzle, partialCallback=null, finalCallback=null) {
 
   var isSynchronous = (partialCallback == null && finalCallback == null)
 
-  var solutions = []
+  var paths = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
 
   if (isSynchronous) { // Run synchronously
     for (var pos of startPoints) {
-      _solveLoop(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, 0)
+      _solveLoop(puzzle, pos.x, pos.y, paths, numEndpoints, earlyExitData, 0, [pos])
     }
 
     var end = (new Date()).getTime()
     console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-    return solutions
+    return paths
   } else { // Run asynchronously
     for (var pos of startPoints) {
       tasks.push({'code': function() {
-        return _solveLoop(puzzle, pos.x, pos.y, solutions, numEndpoints, earlyExitData, 5)
+        return _solveLoop(puzzle, pos.x, pos.y, paths, numEndpoints, earlyExitData, 5, [pos])
       }, 'fraction': (1.0 / startPoints.length)})
     }
 
     _runTaskLoop(partialCallback, function() {
       var end = (new Date()).getTime()
       console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-      finalCallback(solutions)
+      finalCallback(paths)
     })
     return []
   }
+}
+
+function pathToSolution(puzzle, path) {
+  var newPuzzle = puzzle.clone()
+  var start = path[0]
+  var x = start.x
+  var y = start.y
+  for (var i=1; i<path.length; i++) {
+    newPuzzle.updateCell2(x, y, 'dir', path[i])
+    if (puzzle.symmetry == undefined) {
+      newPuzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
+    } else {
+      newPuzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
+      var sym = puzzle.getSymmetricalPos(x, y)
+      newPuzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
+    }
+    if (path[i] == "left") x--
+    else if (path[i] == "right") x++
+    else if (path[i] == "top") y--
+    else if (path[i] == "bottom") y++
+  }
+  return newPuzzle
 }
 
 var tasks = []
@@ -80,7 +102,7 @@ function _runTaskLoop(partialCallback, finalCallback)  {
 function _tailRecurse(puzzle, x, y) {
   // Tail recursion: Back out of this cell
   puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
-  puzzle.updateCell2(x, y, 'dir', undefined)
+  // puzzle.updateCell2(x, y, 'dir', undefined)
   if (puzzle.symmetry != undefined) {
     var sym = puzzle.getSymmetricalPos(x, y)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_NONE)
@@ -91,9 +113,9 @@ function _tailRecurse(puzzle, x, y) {
 // Any performance efforts should be focused here.
 // Note: Most mechanics are NP (or harder), so don't feel bad about solving them by brute force.
 // https://arxiv.org/pdf/1804.10193.pdf
-function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth) {
+function _solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path) {
   // Stop trying to solve once we reach our goal
-  if (solutions.length >= window.MAX_SOLUTIONS) return
+  if (paths.length >= window.MAX_SOLUTIONS) return
 
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
@@ -168,11 +190,11 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
   }
 
   if (cell.end != undefined) {
-    puzzle.updateCell2(x, y, 'dir', 'none')
+    path.push('none')
     window.validate(puzzle, true)
-    if (puzzle.valid) {
-      solutions.push(puzzle.clone())
-    }
+    if (puzzle.valid) paths.push(path.slice())
+    path.pop()
+
     // If there are no further endpoints, tail recurse.
     // Otherwise, keep going -- we might be able to reach another endpoint.
     numEndpoints--
@@ -184,17 +206,21 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
     // Extend path left and right
     if (y%2 === 0) {
-      puzzle.updateCell2(x, y, 'dir', 'left')
-      _solveLoop(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, 0)
-      puzzle.updateCell2(x, y, 'dir', 'right')
-      _solveLoop(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, 0)
+      path.push('left')
+      _solveLoop(puzzle, x - 1, y, paths, numEndpoints, newEarlyExitData, 0, path)
+      path.pop()
+      path.push('right')
+      _solveLoop(puzzle, x + 1, y, paths, numEndpoints, newEarlyExitData, 0, path)
+      path.pop()
     }
     // Extend path up and down
     if (x%2 === 0) {
-      puzzle.updateCell2(x, y, 'dir', 'top')
-      _solveLoop(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, 0)
-      puzzle.updateCell2(x, y, 'dir', 'bottom')
-      _solveLoop(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, 0)
+      path.push('top')
+      _solveLoop(puzzle, x, y - 1, paths, numEndpoints, newEarlyExitData, 0, path)
+      path.pop()
+      path.push('bottom')
+      _solveLoop(puzzle, x, y + 1, paths, numEndpoints, newEarlyExitData, 0, path)
+      path.pop()
     }
     return _tailRecurse(puzzle, x, y)
   } else {
@@ -202,31 +228,36 @@ function _solveLoop(puzzle, x, y, solutions, numEndpoints, earlyExitData, depth)
     // Note: The order reversed because we push these into a queue, then pop them to execute them.
 
     var newTasks = []
+
+    // Push an empty element on the end of the path, so that we can fill it correctly as we DFS.
+    // This element is popped when we tail recurse (which always happens *after* all of our DFS!)
+    path.push('')
     newTasks.push(function() {
+      path.pop()
       _tailRecurse(puzzle, x, y)
     })
 
     // Extend path up and down
     if (x%2 === 0) {
       newTasks.push(function() {
-        puzzle.updateCell2(x, y, 'dir', 'bottom')
-        return _solveLoop(puzzle, x, y + 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
+        path[path.length-1] = 'bottom'
+        return _solveLoop(puzzle, x, y + 1, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
       newTasks.push(function() {
-        puzzle.updateCell2(x, y, 'dir', 'top')
-        return _solveLoop(puzzle, x, y - 1, solutions, numEndpoints, newEarlyExitData, depth - 1)
+        path[path.length-1] = 'top'
+        return _solveLoop(puzzle, x, y - 1, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
     }
 
     // Extend path left and right
     if (y%2 === 0) {
       newTasks.push(function() {
-        puzzle.updateCell2(x, y, 'dir', 'right')
-        return _solveLoop(puzzle, x + 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
+        path[path.length-1] = 'right'
+        return _solveLoop(puzzle, x + 1, y, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
       newTasks.push(function() {
-        puzzle.updateCell2(x, y, 'dir', 'left')
-        return _solveLoop(puzzle, x - 1, y, solutions, numEndpoints, newEarlyExitData, depth - 1)
+        path[path.length-1] = 'left'
+        return _solveLoop(puzzle, x - 1, y, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
     }
 

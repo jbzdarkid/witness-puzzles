@@ -63,7 +63,22 @@ function solvePuzzle() {
   }, onSolvedPuzzle)
 }
 
-function onSolvedPuzzle(solutions) {
+function onSolvedPuzzle(paths) {
+  var minPath = 9999
+  var minPaths = []
+  debugger;
+  for (var path of paths) {
+    if (path.length < minPath) {
+      minPath = path.length
+      minPaths = [path]
+    } else if (path.length === minPath) {
+      minPaths.push(path)
+    }
+  }
+
+  var solutions = []
+  for (var path of minPaths) solutions.push(window.pathToSolution(puzzle, path))
+
   for (var i=0; i<solutions.length; i++) {
     var solution = solutions[i]
     var edges = 0
