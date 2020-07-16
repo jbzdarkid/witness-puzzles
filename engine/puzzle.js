@@ -133,8 +133,12 @@ class Puzzle {
   }
 
   clone() {
-    // This is just not that expensive.
-    return Puzzle.deserialize(this.serialize())
+    // Don't clone the regionCache, it can be *very* big.
+    var savedRegionCache = this.regionCache
+    this.regionCache = {}
+    var clone = Puzzle.deserialize(this.serialize())
+    this.regionCache = savedRegionCache
+    return clone
   }
 
   // This is explicitly *not* just clearing the grid, so that external references
