@@ -443,11 +443,16 @@ class Puzzle {
     for (var y=0; y<this.height; y++) {
       for (var x=0; x<this.width; x++) {
         var cell = this.getCell(x, y)
-        if (cell == undefined) output += '?'
+        if (cell == undefined) output += ' '
         else if (cell.start === true) output += 'S'
         else if (cell.end != null) output += 'E'
-        else if (cell.type === 'line') output += cell.line
-        else output += '#'
+        else if (cell.type === 'line') {
+          if (cell.line === 0) output += '.'
+          if (cell.line === 1) output += '#'
+          if (cell.line === 2) output += '#'
+          if (cell.line === 3) output += 'o'
+        }
+        else output += '?'
       }
       output += '\n'
     }
