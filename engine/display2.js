@@ -1,4 +1,6 @@
-function draw(puzzle, target='puzzle') {
+namespace(function() {
+
+window.draw = function(puzzle, target='puzzle') {
   if (puzzle == undefined) return
   var svg = document.getElementById(target)
   console.info('Drawing', puzzle, 'into', svg)
@@ -300,3 +302,5 @@ function _drawSolution(puzzle, x, y) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   }
 }
+
+})

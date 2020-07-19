@@ -1,3 +1,5 @@
+namespace(function() {
+
 // Validation settings
 window.NEGATIONS_CANCEL_NEGATIONS = true
 window.SHAPELESS_ZERO_POLY = true
@@ -27,7 +29,7 @@ class RegionData {
 // valid: Whether or not the puzzle is valid
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
 // negations: Negation pairs (for the purpose of darkening)
-function validate(puzzle, quick) {
+window.validate = function(puzzle, quick) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
 
@@ -70,7 +72,7 @@ function validate(puzzle, quick) {
     var regionData = puzzle.regionCache[key]
     if (regionData == undefined) {
       console.log('Cache miss for region', region, 'key', key)
-      regionData = regionCheckNegations(puzzle, region, quick)
+      regionData = validateRegion(puzzle, region, quick)
       console.log('Region valid:', regionData.valid())
 
       if (!window.DISABLE_CACHE) {
@@ -91,7 +93,7 @@ function validate(puzzle, quick) {
 // This function applies negations to all "very invalid elements", i.e. elements which cannot become
 // valid by another element being negated. Then, it passes off to _regionCheckNegations2,
 // which attempts to apply any remaining negations to any other invalid elements.
-function regionCheckNegations(puzzle, region, quick) {
+window.validateRegion = function(puzzle, region, quick) {
   if (!puzzle.hasNegations) return _regionCheck(puzzle, region, quick)
 
   // Get a list of negation symbols in the grid, and set them to 'nonce'
@@ -313,3 +315,4 @@ function _regionCheck(puzzle, region, quick) {
   console.debug('Region has', regionData.invalidElements.length, 'invalid elements')
   return regionData
 }
+})

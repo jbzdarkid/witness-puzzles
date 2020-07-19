@@ -1,6 +1,8 @@
+namespace(function() {
+
 window.MAX_SOLUTIONS = 10000
 // Generates a solution via DFS recursive backtracking
-function solve(puzzle, partialCallback=null, finalCallback=null) {
+window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
   var start = (new Date()).getTime()
 
   var startPoints = []
@@ -50,7 +52,7 @@ function solve(puzzle, partialCallback=null, finalCallback=null) {
   }
 }
 
-function pathToSolution(puzzle, path) {
+window.pathToSolution = function(puzzle, path) {
   var newPuzzle = puzzle.clone()
   var start = path[0]
   var x = start.x
@@ -174,7 +176,7 @@ function _solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, pat
 
       var region = puzzle.getRegion(regionX, regionY)
       if (region != undefined) {
-        var regionData = window.regionCheckNegations(puzzle, region, true)
+        var regionData = window.validateRegion(puzzle, region, true)
         if (!regionData.valid()) return _tailRecurse(puzzle, x, y)
 
         for (var pos of region.cells) {
@@ -264,3 +266,5 @@ function _solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, pat
     return newTasks
   }
 }
+
+})

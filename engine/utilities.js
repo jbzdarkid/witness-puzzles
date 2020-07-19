@@ -1,3 +1,9 @@
+function namespace(code) {
+  code()
+}
+
+namespace(function() {
+
 /*** Start cross-compatibility ***/
 // Used to detect if IDs include a direction, e.g. resize-top-left
 if (!String.prototype.includes) {
@@ -59,7 +65,7 @@ var tracks = {
   'abort': new Audio('/data/panel_abort_tracing.ogg')
 }
 
-function PLAY_SOUND(track) {
+window.PLAY_SOUND = function(track) {
   console.log('Playing sound:', track)
   for (var name in tracks) {
     var audio = tracks[name]
@@ -72,14 +78,14 @@ function PLAY_SOUND(track) {
   tracks[track].play()
 }
 
-function FEEDBACK(message) {
+window.FEEDBACK = function(message) {
   var request = new XMLHttpRequest()
   request.open('POST', '/feedback', true) // Fire and forget
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   request.send('data=' + message)
 }
 
-function ERROR(message) {
+window.ERROR = function(message) {
   var request = new XMLHttpRequest()
   request.open('POST', '/error', true) // Fire and forget
   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -147,7 +153,7 @@ var consoleSpam = console.log
 var consoleGroup = console.group
 var consoleGroupEnd = console.groupEnd
 
-function setLogLevel(level) {
+window.setLogLevel = function(level) {
   console.error = function() {}
   console.warn = function() {}
   console.info = function() {}
@@ -187,7 +193,8 @@ function setLogLevel(level) {
 }
 setLogLevel('info')
 
-function loadHeader(titleText) {
+// TODO: This should be a document.DOMContentLoaded listener, and detect the present of a placeholder.
+window.loadHeader = function(titleText) {
   document.body.style.marginLeft = '0px'
 
   var navbar = document.createElement('div')
@@ -367,11 +374,26 @@ function loadHeader(titleText) {
 
 
 
-
-
 /// ------------
 /// Everything below this is legacy, and should not be used.
 /// ============
+
+
+
+window.createLink = function(href, title, parent) {
+  parent = parent || document.currentScript.parentElement
+  var link = document.createElement('label')
+  parent.appendChild(link)
+  link.onclick = function() {
+    window.location = href
+  }
+  link.innerText = title
+  link.style = style
+  link.style.cursor = 'pointer'
+  link.style.color = window.TEXT_COLOR // Not inherited, sadly
+}
+
+///
 
 
 function loadFeedback() {
@@ -509,15 +531,5 @@ function loadSettings(parent) {
   }
 }
 
-function createLink(href, title, parent) {
-  parent = parent || document.currentScript.parentElement
-  var link = document.createElement('label')
-  parent.appendChild(link)
-  link.onclick = function() {
-    window.location = href
-  }
-  link.innerText = title
-  link.style = style
-  link.style.cursor = 'pointer'
-  link.style.color = window.TEXT_COLOR // Not inherited, sadly
-}
+
+})
