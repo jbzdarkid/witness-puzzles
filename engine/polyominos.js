@@ -1,3 +1,5 @@
+namespace(function() {
+
 function getPolySize(polyshape) {
   var size = 0
   for (var x=0; x<4; x++) {
@@ -20,7 +22,7 @@ function _isSet(polyshape, x, y) {
 
 ROTATION_BIT = _mask(5, 0)
 
-function isRotated(polyshape) {
+window.isRotated = function(polyshape) {
   return (polyshape & ROTATION_BIT) !== 0
 }
 
@@ -55,7 +57,7 @@ function fitsGrid(cells, x, y, puzzle) {
 // (0, 0) must also be a cell in the shape, so that
 // placing the shape at (x, y) will fill (x, y)
 // Ylops will have -1s on all adjacent cells, to break "overlaps" for polyominos.
-function polyominoFromPolyshape(polyshape, ylop=false) {
+window.polyominoFromPolyshape = function(polyshape, ylop=false) {
   for (var y=0; y<4; y++) {
     for (var x=0; x<4; x++) {
       if (_isSet(polyshape, x, y)) {
@@ -106,7 +108,7 @@ function polyominoFromPolyshape(polyshape, ylop=false) {
 // * 0 represents a square that does not need to be covered (outside the region)
 // * -1 represents a square that needs to be covered once (inside the region)
 // * 1 represents a square that has been double-covered (by two polyominos, e.g.)
-function polyFit(region, puzzle) {
+window.polyFit = function(region, puzzle) {
   var polys = []
   var ylops = []
   var polyCount = 0
@@ -285,3 +287,5 @@ function _logPolyGrid(puzzle) {
   }
   console.log(output)
 }
+
+})

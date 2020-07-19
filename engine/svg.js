@@ -1,8 +1,10 @@
-function createElement(type) {
+namespace(function() {
+
+window.createElement = function(type) {
   return document.createElementNS('http://www.w3.org/2000/svg', type)
 }
 
-function drawSymbol(params) {
+window.drawSymbol = function(params) {
   var svg = createElement('svg')
   svg.setAttribute('viewBox', '0 0 ' + params.width + ' ' + params.height)
   if (!params.x) params.x = 0
@@ -11,7 +13,7 @@ function drawSymbol(params) {
   return svg
 }
 
-function drawSymbolWithSvg(svg, params) {
+window.drawSymbolWithSvg = function(svg, params) {
   if (params.type === 'square') _square(svg, params)
   else if (params.type === 'dot') _dot(svg, params)
   else if (params.type === 'gap') _gap(svg, params)
@@ -347,3 +349,5 @@ function _minus(svg, params) {
   horiz.setAttribute('height', 2)
   horiz.setAttribute('fill', window.TEXT_COLOR)
 }
+
+})

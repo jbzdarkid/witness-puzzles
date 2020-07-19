@@ -1,3 +1,5 @@
+namespace(function() {
+
 window.BBOX_DEBUG = false
 
 class BoundingBox {
@@ -359,7 +361,7 @@ function addTraceStart(puzzle, pos, start, symStart=undefined) {
   }
 }
 
-function trace(event, puzzle, pos, start, symStart=undefined) {
+window.trace = function(event, puzzle, pos, start, symStart=undefined) {
   var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
     data.tracing = true
@@ -425,7 +427,7 @@ function clearAnimations() {
   }
 }
 
-function onTraceStart(puzzle, pos, svg, start, symStart=undefined) {
+window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   var x = parseFloat(start.getAttribute('cx'))
   var y = parseFloat(start.getAttribute('cy'))
 
@@ -514,7 +516,7 @@ document.onpointerlockchange = function() {
   }
 }
 
-function onMove(dx, dy) {
+window.onMove = function(dx, dy) {
   // Also handles some collision
   var colliedWith = _pushCursor(dx, dy)
   console.spam('Collided with', colliedWith)
@@ -876,3 +878,5 @@ function _changePos(bbox, pos, moveDir) {
     console.error('Cursor went out of bounds (into a cell)!')
   }
 }
+
+})
