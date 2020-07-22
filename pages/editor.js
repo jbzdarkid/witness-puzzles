@@ -791,7 +791,7 @@ function _shapeChooser() {
   chooser.style.display = 'flex'
   chooser.style.position = 'absolute'
   chooser.style.width = '100%'
-  chooser.style.height= '100%'
+  chooser.style.height = '100%'
   chooser.style.minWidth = '400px'
   chooser.style.zIndex = 1 // Position in front of the puzzle
 

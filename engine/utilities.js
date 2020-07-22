@@ -531,5 +531,4 @@ function loadSettings(parent) {
   }
 }
 
-
 })
