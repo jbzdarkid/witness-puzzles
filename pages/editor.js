@@ -879,22 +879,24 @@ function resizePuzzle(dx, dy, id) {
   // from the dragged edge. This will keep the puzzle contents stable as we add a row.
   // x,y should be locations from the original grid.
   function shouldCopyCell(x, y) {
+    if (puzzle.symmetry == undefined) return true
+
     var xRange = {'min': 0, 'max': width-1}
     var yRange = {'min': 0, 'max': height-1}
-    if (puzzle.symmetry != undefined) {
-      // Symmetry copies one half of the grid to the other, and selects the far side from
-      // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
-      // internal elements, i.e. it feels like dragging away is just inserting a column/row.
-      if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
-      if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
-      if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
-      if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
-    }
+    // Symmetry copies one half of the grid to the other, and selects the far side from
+    // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
+    // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+    if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
+    if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
+    if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
+    if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
 
-    if (x < xRange.min || xRange.max < x ||
-        y < yRange.min || yRange.max < y) {
-      return true // Within the copy region
-    }
+    // Within the copy region
+    if (x < xRange.min) return true
+    if (xRange.max < x) return true
+    if (y < yRange.min) return true
+    if (yRange.max < y) return true
+
     return false
   }
 
