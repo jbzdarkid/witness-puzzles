@@ -850,6 +850,7 @@ function _shapeChooserClick(event, cell) {
   _drawSymbolButtons()
 }
 
+
 // All puzzle elements remain fixed, the edge you're dragging is where the new
 // row/column is added. The endpoint will try to stay fixed, but may be re-oriented.
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
@@ -872,26 +873,28 @@ function resizePuzzle(dx, dy, id) {
 
   console.log('Shifting contents by', xOffset, yOffset)
 
-  var xRange = {'min': 0, 'max': width-1}
-  var yRange = {'min': 0, 'max': height-1}
-  if (puzzle.symmetry != undefined) {
-    // Symmetry copies one half of the grid to the other, and selects the far side from
-    // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
-    // internal elements, i.e. it feels like dragging away is just inserting a column/row.
-    if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
-    if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
-    if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
-    if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
-  }
+  // Determine if the cell at x, y should be copied from the original.
+  // For non-symmetrical puzzles, the answer is always 'no' -- all elements should be directly copied across.
+  // For non-pillar symmetry puzzles, we should persist all elements on the half the puzzle furthest
+  // from the dragged edge. This will keep the puzzle contents stable as we add a row.
+  // x,y should be locations from the original grid.
+  function shouldCopyCell(x, y) {
+    var xRange = {'min': 0, 'max': width-1}
+    var yRange = {'min': 0, 'max': height-1}
+    if (puzzle.symmetry != undefined) {
+      // Symmetry copies one half of the grid to the other, and selects the far side from
+      // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
+      // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+      if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
+      if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
+      if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
+      if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
+    }
 
-  console.debug('Persisting X in range [' + xRange.min + ', ' + xRange.max + ']')
-  console.debug('Persisting Y in range [' + yRange.min + ', ' + yRange.max + ']')
-  if (xRange.min % 1 !== 0) {
-    console.error('Invalid x range: ' + JSON.stringify(xRange))
-    return false
-  }
-  if (yRange.min % 1 !== 0) {
-    console.error('Invalid y range: ' + JSON.stringify(yRange))
+    if (x < xRange.min || xRange.max < x ||
+        y < yRange.min || yRange.max < y) {
+      return true // Within the copy region
+    }
     return false
   }
 
@@ -916,9 +919,7 @@ function resizePuzzle(dx, dy, id) {
 
       if (puzzle.symmetry != undefined) {
         var sym = puzzle.getSymmetricalPos(x, y)
-        // TODO: Comment.
-        if (x - xOffset < xRange.min || xRange.max < x - xOffset ||
-            y - yOffset < yRange.min || yRange.max < y - yOffset) {
+        if (shouldCopyCell(x - xOffset, y - yOffset)) {
           var oldCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
           if (oldCell != undefined) {
             console.spam('At', x, y, 'copying', JSON.stringify(oldCell), 'from', sym.x - xOffset, sym.y - yOffset)

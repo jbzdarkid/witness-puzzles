@@ -62,7 +62,6 @@ Low Prio / Misc
 -- Favicon still needs improving
     RM the dot, it's invisible
     Figure out something better for the tri (star?)
--- Animation for start-grow isn't playing for primary line
 -- Improvements to publish.py
     Javascript versioning/hashing would be nice
 -- Fix generation colors / general improvements to random puzzles
