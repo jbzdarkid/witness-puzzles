@@ -21,12 +21,12 @@ Browse
 Editor
 -- R symmetry pillars are just broken, resizing them does amazingly dumb stuff
 -- Clicking 'solve manually' should probably clear auto-solution
--- Look into "cancel" solving? Might be hard, since I'm on main thread.
-    Hard, look into old worker code
+-- Look into "cancel" solving? Just set max solutions to 0.
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.
 -- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
+-- Disable 'delete' button when there are no more puzzles to delete?
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward

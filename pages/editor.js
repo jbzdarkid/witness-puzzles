@@ -868,6 +868,7 @@ function resizePuzzle(dx, dy, id) {
   if (puzzle.symmetry != undefined && puzzle.symmetry.x && newWidth <= 2) return false
   if (puzzle.symmetry != undefined && puzzle.symmetry.y && newHeight <= 2) return false
 
+  // @Cleanup double negative dx
   var xOffset = (id.includes('left') ? dx : 0)
   var yOffset = (id.includes('top') ? dy : 0)
 
@@ -875,29 +876,28 @@ function resizePuzzle(dx, dy, id) {
 
   // Determine if the cell at x, y should be copied from the original.
   // For non-symmetrical puzzles, the answer is always 'no' -- all elements should be directly copied across.
-  // For non-pillar symmetry puzzles, we should persist all elements on the half the puzzle furthest
-  // from the dragged edge. This will keep the puzzle contents stable as we add a row.
-  // x,y should be locations from the original grid.
+  // For non-pillar symmetry puzzles, we should persist all elements on the half the puzzle which is furthest from the dragged edge. This will keep the puzzle contents stable as we add a row. The exception to this rule is when we expand. We are creating one new row or column which has no source location. For example, for width=3 newWidth=5, the column at x=2 is appearing from nowhere -- it should not have endpoints/startpoints. This is especially apparent in rotational symmetry puzzles.
+  // x,y should be locations from the new grid
+  var PERSIST = 0
+  var COPY = 1
+  var CLEAR = 2
   function shouldCopyCell(x, y) {
-    if (puzzle.symmetry == undefined) return true
+    if (puzzle.symmetry == undefined) return PERSIST
 
-    var xRange = {'min': 0, 'max': width-1}
-    var yRange = {'min': 0, 'max': height-1}
     // Symmetry copies one half of the grid to the other, and selects the far side from
     // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
     // internal elements, i.e. it feels like dragging away is just inserting a column/row.
-    if (id.includes('right')  && puzzle.symmetry.x) xRange.max = (width-1)/2
-    if (id.includes('left')   && puzzle.symmetry.x) xRange.min = (width-1)/2
-    if (id.includes('bottom') && puzzle.symmetry.y) yRange.max = (height-1)/2
-    if (id.includes('top')    && puzzle.symmetry.y) yRange.min = (height-1)/2
+    if (puzzle.symmetry.x) {
+      if (newWidth > width && x == (newWidth-1)/2) return CLEAR
+      if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
+      if (id.includes('left')   && x <= (newWidth-1)/2) return COPY
+    } else if (puzzle.symmetry.y) {
+      if (newHeight > height && y == (newHeight-1)/2) return CLEAR
+      if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
+      if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
+    }
 
-    // Within the copy region
-    if (x < xRange.min) return true
-    if (xRange.max < x) return true
-    if (y < yRange.min) return true
-    if (yRange.max < y) return true
-
-    return false
+    return PERSIST
   }
 
   var oldPuzzle = puzzle.clone()
@@ -912,7 +912,7 @@ function resizePuzzle(dx, dy, id) {
       if (x%2 === 1 && y%2 === 1) {
         var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
         if (cell != undefined) {
-          puzzle.setCell(x, y, cell)
+          puzzle.setCell(x, y, JSON.parse(JSON.stringify(cell)))
         }
         continue
       }
@@ -920,21 +920,28 @@ function resizePuzzle(dx, dy, id) {
       var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
 
       if (puzzle.symmetry != undefined) {
-        var sym = puzzle.getSymmetricalPos(x, y)
-        if (shouldCopyCell(x - xOffset, y - yOffset)) {
+        switch (shouldCopyCell(x, y)) {
+        case PERSIST:
+          console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
+          break
+        case COPY:
+          var sym = puzzle.getSymmetricalPos(x, y)
           var oldCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
           if (oldCell != undefined) {
-            console.spam('At', x, y, 'copying', JSON.stringify(oldCell), 'from', sym.x - xOffset, sym.y - yOffset)
+            console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(oldCell), 'from', sym.x - xOffset, sym.y - yOffset)
             if (cell == undefined) cell = {}
             cell.end = puzzle.getSymmetricalDir(oldCell.end)
             cell.start = oldCell.start
           }
-        } else {
-          console.spam('At', x, y, 'persisting', JSON.stringify(cell))
+          break
+        case CLEAR:
+          cell.start = false
+          cell.end = undefined
+          break
         }
       }
       if (cell != undefined) {
-        puzzle.setCell(x, y, cell)
+        puzzle.setCell(x, y, JSON.parse(JSON.stringify(cell)))
       }
     }
   }
@@ -1039,13 +1046,19 @@ function _dragMove(event, elem) {
     var yLim = 60
   }
 
-  if (Math.abs(dx) >= xLim || Math.abs(dy) >= yLim) {
-    if (!resizePuzzle(2*Math.round(dx/41), 2*Math.round(dy/yLim), elem.id)) return
+  while (Math.abs(dx) >= xLim) {
+    if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break
     _writePuzzle()
     _reloadPuzzle()
-
-    // If resize succeeded, set a new reference point for future drag operations
+    dx -= Math.sign(dx) * xLim
     dragging.x = event.clientX
+  }
+
+  while (Math.abs(dy) >= yLim) {
+    if (!resizePuzzle(0, 2 * Math.sign(dy), elem.id)) break
+    _writePuzzle()
+    _reloadPuzzle()
+    dy -= Math.sign(dy) * yLim
     dragging.y = event.clientY
   }
 }
