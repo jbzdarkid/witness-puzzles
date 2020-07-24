@@ -115,15 +115,6 @@ class PathSegment {
       }
     }
 
-    if (this.dir === 'none') { // Start point
-      this.circ.setAttribute('r', 24)
-      this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
-    } else {
-      // Only insert poly1 in non-startpoints
-      data.svg.insertBefore(this.poly1, data.cursor)
-      this.circ.setAttribute('r', 12)
-    }
-
     if (data.puzzle.symmetry == undefined) {
       this.poly1.setAttribute('class', 'line-1 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-1 ' + data.svg.id)
@@ -149,7 +140,6 @@ class PathSegment {
 
       this.symCirc.setAttribute('cx', data.symbbox.middle.x)
       this.symCirc.setAttribute('cy', data.symbbox.middle.y)
-      this.symCirc.setAttribute('r', this.circ.getAttribute('r'))
 
       if (data.puzzle.pillar === true) {
         // cx/cy are updated in redraw(), since symPillarCirc tracks the cursor
@@ -166,12 +156,22 @@ class PathSegment {
           this.symPillarCirc.setAttribute('cx', data.symbbox.middle.x)
         }
       }
+    }
 
-      if (this.dir === 'none') { // Start point
+    if (this.dir === 'none') { // Start point
+      this.circ.setAttribute('r', 24)
+      this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
+      if (data.puzzle.symmetry != undefined) {
+        this.symCirc.setAttribute('r', 24)
         this.symCirc.setAttribute('class', this.symCirc.getAttribute('class') + ' start')
-      } else {
-        // Only insert poly1 in non-startpoints
+      }
+    } else {
+      // Only insert poly1 in non-startpoints
+      data.svg.insertBefore(this.poly1, data.cursor)
+      this.circ.setAttribute('r', 12)
+      if (data.puzzle.symmetry != undefined) {
         data.svg.insertBefore(this.symPoly1, data.cursor)
+        this.symCirc.setAttribute('r', 12)
       }
     }
   }
