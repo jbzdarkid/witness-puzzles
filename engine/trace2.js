@@ -417,7 +417,7 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
   }
 }
 
-function clearAnimations() {
+window.clearAnimations = function() {
   if (data.animations == undefined) return
   for (var i=0; i<data.animations.cssRules.length; i++) {
     var rule = data.animations.cssRules[i]

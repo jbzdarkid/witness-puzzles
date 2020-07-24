@@ -247,12 +247,12 @@ function _placePolys(polys, puzzle) {
   for (var openCell of openCells) {
     var attemptedPolyshapes = []
     for (var i=0; i<polys.length; i++) {
-      var poly = polys.splice(i, 1)[0]
-      console.spam('Selected poly', poly)
-      if (attemptedPolyshapes.includes(poly.polyshape)) {
-        console.spam('Polyshape', poly.polyshape, 'has already been attempted')
+      console.spam('Selected poly', polys[i])
+      if (attemptedPolyshapes.includes(polys[i].polyshape)) {
+        console.spam('Polyshape', polys[i].polyshape, 'has already been attempted')
         continue
       }
+      var poly = polys.splice(i, 1)[0]
       attemptedPolyshapes.push(poly.polyshape)
       for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
         console.spam('Selected polyshape', polyshape)

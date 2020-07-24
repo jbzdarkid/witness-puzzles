@@ -89,7 +89,7 @@ function deletePuzzle() {
 // If there's a chance that you are in manual solve mode, call _reloadPuzzle().
 function _drawPuzzle() {
   window.draw(puzzle)
-  window.clearAnimations() // TODO: Should this be in window.draw?
+  window.clearAnimations()
 
   // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
   var puzzleElement = document.getElementById('puzzle')
