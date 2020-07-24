@@ -5,7 +5,7 @@ import hashlib
 import subprocess
 
 if len(sys.argv) < 2:
-  print('Please specify the release version as the first argument, e.g. ./publish.py v0.1')
+  print('Please specify the release version as the first argument, e.g. ./publish.py 1.21')
   exit(-1)
 version = sys.argv[1]
 
