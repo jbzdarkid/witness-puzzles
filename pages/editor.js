@@ -891,7 +891,8 @@ function resizePuzzle(dx, dy, id) {
       if (newWidth > width && x == (newWidth-1)/2) return CLEAR
       if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
       if (id.includes('left')   && x <= (newWidth-1)/2) return COPY
-    } else if (puzzle.symmetry.y) {
+    }
+    if (puzzle.symmetry.y) {
       if (newHeight > height && y == (newHeight-1)/2) return CLEAR
       if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
       if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
@@ -903,8 +904,6 @@ function resizePuzzle(dx, dy, id) {
   var oldPuzzle = puzzle.clone()
   var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
-
-  // For each cell in the new grid, copy it from the appropriate location in the old grid.
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
