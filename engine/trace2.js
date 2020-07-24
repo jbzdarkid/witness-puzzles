@@ -369,8 +369,7 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
     // Cleans drawn lines & puzzle state
     _clearGrid(svg, puzzle)
     onTraceStart(puzzle, pos, svg, start, symStart)
-    // 1/6 sec = 150ms
-    data.animations.insertRule('.' + svg.id + '.start {animation: 0.15s 1 forwards start-grow}')
+    data.animations.insertRule('.' + svg.id + '.start {animation: 150ms 1 forwards start-grow}\n')
     start.requestPointerLock()
   } else {
     event.stopPropagation()
@@ -385,21 +384,21 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
 
       for (var negation of puzzle.negations) {
         console.debug('Rendering negation', negation)
-        data.animations.insertRule('.' + svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}')
-        data.animations.insertRule('.' + svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}')
+        data.animations.insertRule('.' + svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
+        data.animations.insertRule('.' + svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
       }
 
       if (puzzle.valid) {
         window.PLAY_SOUND('success')
         // !important to override the child animation
-        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success !important}')
+        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
         if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
       } else {
         window.PLAY_SOUND('fail')
-        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}')
+        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
-          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}')
+          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
         }
       }
 

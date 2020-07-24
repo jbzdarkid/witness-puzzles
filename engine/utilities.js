@@ -129,14 +129,14 @@ window.DOT_INVISIBLE = 4
 
 // pointer-events: none; allows for onclick events to bubble up
 var animations =
-'.line-1 {fill: ' + window.LINE_DEFAULT + '; pointer-events: none;}' +
-'.line-2 {fill: ' + window.LINE_PRIMARY + '; pointer-events: none;}' +
-'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none;}' +
-'@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}' +
-'@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}' +
-'@keyframes error {to {fill: red;}}' +
-'@keyframes fade {to {opacity: 0.35;}}' +
-'@keyframes start-grow {from {r:12;} to {r: 24;}}'
+'.line-1 {fill: ' + window.LINE_DEFAULT + '; pointer-events: none;}\n' +
+'.line-2 {fill: ' + window.LINE_PRIMARY + '; pointer-events: none;}\n' +
+'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none;}\n' +
+'@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}\n' +
+'@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}\n' +
+'@keyframes error {to {fill: red;}}\n' +
+'@keyframes fade {to {opacity: 0.35;}}\n' +
+'@keyframes start-grow {from {r:12;} to {r: 24;}}\n'
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
