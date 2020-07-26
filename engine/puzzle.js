@@ -321,7 +321,9 @@ class Puzzle {
   // 0: In bounds, awaiting processing, but should not be part of the final region.
   // 1: In bounds, awaiting processing
   // 2: Gap-2, but not out of bounds so should be treated normally
+  // 3: Dot (of any kind), otherwise identical to 1.
   _floodFill(x, y, region) {
+    // Inlined safety checks so we can get the row, which is slightly more performant.
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
 
@@ -343,11 +345,10 @@ class Puzzle {
   // Re-uses the same grid, but only called on edges which border the outside
   // Called first to mark cells that are connected to the outside, i.e. should not be part of any region.
   _floodFillOutside(x, y) {
-    x = this._mod(x)
-    if (!this._safeCell(x, y)) return
-    var cell = this.grid[x][y]
+    var cell = this.getCell(x, y) // Needs safety checks because we're going around corners.
     if (cell === undefined) return
     if (x%2 !== y%2 && cell !== 2) return // Only flood-fill through gap-2
+    if (x%2 === 0 && y%2 === 0 && cell === 3) return // Don't flood-fill through dots
     this.grid[x][y] = undefined
 
     // @Performance: Why is this ordered TLBR?
@@ -379,6 +380,8 @@ class Puzzle {
           }
         } else if (cell != undefined && cell.gap === 2) {
           this.grid[x][y] = 2
+        } else if (cell != undefined && cell.dot > window.DOT_NONE) {
+          this.grid[x][y] = 3
         } else {
           // Indicates that this cell will be a part of the region
           this.grid[x][y] = 1
@@ -425,7 +428,7 @@ class Puzzle {
   }
 
   getRegion(x, y) {
-    if (x < 0 || y < 0 || x >= this.width || y >= this.height) return null
+    if (!this._safeCell(x, y)) return
 
     var savedGrid = this._switchToMaskedGrid()
     if (this.grid[x][y] == undefined) {
@@ -448,6 +451,7 @@ class Puzzle {
       for (var x=0; x<this.width; x++) {
         var cell = this.getCell(x, y)
         if (cell == undefined) output += ' '
+        else if (typeof(cell) == 'number') output += cell
         else if (cell.start === true) output += 'S'
         else if (cell.end != null) output += 'E'
         else if (cell.type === 'line') {

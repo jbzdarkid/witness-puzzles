@@ -935,5 +935,38 @@ var tests = {
     puzzle.grid[1][5] = {'type': 'triangle', 'color': 'orange', 'count': 2}
     puzzle.grid[1][7] = {'type': 'triangle', 'color': 'orange', 'count': 2}
     return [puzzle, 1]
+  }, 'dots-by-gap2': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.grid[0][1].gap = 1
+    puzzle.grid[0][2].dot = 1
+    puzzle.grid[0][4].start = true
+    puzzle.grid[1][0].gap = 1
+    puzzle.grid[2][2].dot = 1
+    puzzle.grid[3][4].gap = 2
+    puzzle.grid[4][0].end = 'right'
+    puzzle.grid[4][2].dot = 1
+    puzzle.grid[4][3].gap = 2
+    return [puzzle, 1]
+  }, 'floating-dot': function() {
+    var puzzle = new Puzzle(1, 1)
+    puzzle.grid[0][2].start = true
+    puzzle.grid[1][2].gap = 2
+    puzzle.grid[2][0].end = 'right'
+    puzzle.grid[2][1].gap = 2
+    puzzle.grid[2][2].dot = 1
+    return [puzzle, 0]
+  }, 'dots-all-alone': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.grid[0][4].start = true
+    puzzle.grid[1][2].gap = 2
+    puzzle.grid[1][4].gap = 2
+    puzzle.grid[2][1].gap = 2
+    puzzle.grid[2][2].dot = true
+    puzzle.grid[2][4].dot = true
+    puzzle.grid[4][0].end = 'right'
+    puzzle.grid[4][1].gap = 2
+    puzzle.grid[4][2].dot = true
+    puzzle.grid[4][4].dot = true
+    return [puzzle, 0]
   }
 }
