@@ -345,7 +345,11 @@ class Puzzle {
   // Re-uses the same grid, but only called on edges which border the outside
   // Called first to mark cells that are connected to the outside, i.e. should not be part of any region.
   _floodFillOutside(x, y) {
-    var cell = this.getCell(x, y) // Needs safety checks because we're going around corners.
+    // Needs safety checks because we're going around corners.
+    // Inlined so that we can easily set the cell after.
+    x = this._mod(x)
+    if (!this._safeCell(x, y)) return
+    var cell = this.grid[x][y]
     if (cell === undefined) return
     if (x%2 !== y%2 && cell !== 2) return // Only flood-fill through gap-2
     if (x%2 === 0 && y%2 === 0 && cell === 3) return // Don't flood-fill through dots
