@@ -37,10 +37,16 @@ window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
     console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
     return paths
   } else { // Run asynchronously
-    for (var pos of startPoints) {
+
+    // This awkward function exists to ensure that pos is copied for each task.
+    function addTask(pos) {
       tasks.push({'code': function() {
         return _solveLoop(puzzle, pos.x, pos.y, paths, numEndpoints, earlyExitData, 5, [pos])
       }, 'fraction': (1.0 / startPoints.length)})
+    }
+
+    for (var pos of startPoints) {
+      addTask(pos)
     }
 
     _runTaskLoop(partialCallback, function() {
