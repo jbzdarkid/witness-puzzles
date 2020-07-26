@@ -4,8 +4,6 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-- Too-small grids are having odd symmetry bugs
-- Pillar + resize is still horrendously broken, of course.
 
 Browse
 -- "Jump to top" button
@@ -19,14 +17,15 @@ Browse
     By mechanic?
 
 Editor
--- R symmetry pillars are just broken, resizing them does amazingly dumb stuff
--- Clicking 'solve manually' should probably clear auto-solution
--- Look into "cancel" solving? Just set max solutions to 0.
+-- Pillar + resize is still horrendously broken.
+-- Clicking 'solve manually' should probably clear auto-solution (I think this works?)
+-- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
 -- Crayons could be colored in, maybe.
 -- At the full drag limit, start points can shift by 0.5 cells
 -- Decide if shape chooser should pop over the right buttons or not.
 -- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
 -- Disable 'delete' button when there are no more puzzles to delete?
+-- Disable 'new' button (or make it no-op) when on an empty puzzle?
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward

@@ -450,12 +450,12 @@ function _showSolution(solutions, num) {
     nextSolution.disabled = true
   } else if (solutions.length === 1) { // 1 solution, arrows are useless
     solutionCount.innerText = '1 of 1'
-    if (solutions.length === window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    if (solutions.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = true
     nextSolution.disabled = true
   } else {
     solutionCount.innerText = (num + 1) + ' of ' + solutions.length
-    if (solutions.length === window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    if (solutions.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
     previousSolution.onclick = function() {_showSolution(solutions, num - 1)}
