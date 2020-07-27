@@ -4,6 +4,8 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
+- Go through all puzzles in the DB and remove puzzles which are invalid
+  Tighten up the solve rules for any patterns (e.g. symmetry bugs)
 
 Browse
 -- "Jump to top" button
@@ -53,16 +55,15 @@ Tutorial
 -- Should also have an explanation for the different 'styles' (which is probably how I'll implement settings)
 
 Low Prio / Misc
+-- Cross-browser compatibility
+    In order: Firefox, Safari, iOS Safari, Android Chrome
 -- Shift-click should jump by 10 in showSolution
 -- "Edit this puzzle"?
 -- Add all puzzles in the game to the system. Maybe a separate category / identifier?
     Add tests & speedrunner solver
--- Add 'happy' to feedback?
 -- Favicon still needs improving
     RM the dot, it's invisible
     Figure out something better for the tri (star?)
--- Improvements to publish.py
-    Javascript versioning/hashing would be nice
 -- Fix generation colors / general improvements to random puzzles
     >general support for random puzzles
 -- transform: scale(2) doesn't work on safari?
@@ -72,8 +73,5 @@ Low Prio / Misc
     use trace callback func
     maze can be 'click to reveal' like memory card game
     should play the music if I can
--- Nightly builds? https://semaphoreci.com/jbzdarkid/jbzdarkid-github-io/settings
 -- Mobile UI is terrible / non-functional.
 -- Update deps (?)
--- Formal object for lines?
-    Search for everything that calls setcell/getcell/grid reference, and see if it makes it better or worse.

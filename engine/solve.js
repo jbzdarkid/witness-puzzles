@@ -58,6 +58,11 @@ window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
   }
 }
 
+window.cancelSolving = function() {
+  window.MAX_SOLUTIONS = 0 // Causes all _solveLoop steps to exit immediately.
+  tasks = []
+}
+
 window.pathToSolution = function(puzzle, path) {
   var newPuzzle = puzzle.clone()
   var start = path[0]
