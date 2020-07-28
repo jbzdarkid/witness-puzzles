@@ -241,7 +241,9 @@ class Puzzle {
   updateCell2(x, y, key, value) {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
-    this.grid[x][y][key] = value
+    var cell = this.grid[x][y]
+    if (cell == undefined) return
+    cell[key] = value
   }
 
   getValidEndDirs(x, y) {
@@ -309,9 +311,8 @@ class Puzzle {
   clearLines() {
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
-        if (x%2 === 1 && y%2 === 1) continue
-        this.grid[x][y].line = 0
-        this.grid[x][y].dir = undefined
+        this.updateCell2(x, y, 'line', 0)
+        this.updateCell2(x, y, 'dir', undefined)
       }
     }
   }

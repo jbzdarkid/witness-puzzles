@@ -529,7 +529,7 @@ function _onElementClicked(x, y) {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
 
-    if (puzzle.grid[x][y].start == undefined) {
+    if (puzzle.grid[x][y].start != true) {
       puzzle.grid[x][y].start = true
     } else {
       puzzle.grid[x][y].start = undefined
@@ -850,17 +850,13 @@ function _shapeChooserClick(event, cell) {
   _drawSymbolButtons()
 }
 
-
 // All puzzle elements remain fixed, the edge you're dragging is where the new
 // row/column is added. The endpoint will try to stay fixed, but may be re-oriented.
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
 // and endpoints in sync with the original design.
 function resizePuzzle(dx, dy, id) {
-  // @Cleanup: Surely I don't need *all* of these.
-  var width = puzzle.width
-  var height = puzzle.height
-  var newWidth = width + dx
-  var newHeight = height + dy
+  var newWidth = puzzle.width + dx
+  var newHeight = puzzle.height + dy
   console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
 
   if (newWidth <= 0 || newHeight <= 0) return false
@@ -868,7 +864,6 @@ function resizePuzzle(dx, dy, id) {
   if (puzzle.symmetry != undefined && puzzle.symmetry.x && newWidth <= 2) return false
   if (puzzle.symmetry != undefined && puzzle.symmetry.y && newHeight <= 2) return false
 
-  // @Cleanup double negative dx
   var xOffset = (id.includes('left') ? dx : 0)
   var yOffset = (id.includes('top') ? dy : 0)
 
@@ -888,12 +883,12 @@ function resizePuzzle(dx, dy, id) {
     // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
     // internal elements, i.e. it feels like dragging away is just inserting a column/row.
     if (puzzle.symmetry.x) {
-      if (newWidth > width && x == (newWidth-1)/2) return CLEAR
+      if (dx > 0 && x == (newWidth-1)/2) return CLEAR
       if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
       if (id.includes('left')   && x <= (newWidth-1)/2) return COPY
     }
     if (puzzle.symmetry.y) {
-      if (newHeight > height && y == (newHeight-1)/2) return CLEAR
+      if (dy > 0 && y == (newHeight-1)/2) return CLEAR
       if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
       if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
     }
@@ -902,22 +897,15 @@ function resizePuzzle(dx, dy, id) {
   }
 
   var oldPuzzle = puzzle.clone()
-  var savedGrid = puzzle.grid
   puzzle.newGrid(newWidth, newHeight)
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
-      if (cell != undefined) {
-        // Make a copy (why?)
-        // cell = JSON.parse(JSON.stringify(cell))
-      } else {
-        // I think?
-        cell = puzzle.getCell(x, y)
-      }
 
       switch (shouldCopyCell(x, y)) {
       case PERSIST:
+        if (cell == undefined) continue // No need to 'persist' an empty cell
         console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
         break
       case COPY:
@@ -932,7 +920,7 @@ function resizePuzzle(dx, dy, id) {
         break
       case CLEAR:
         if (cell != undefined) {
-          cell.start = false
+          cell.start = undefined
           cell.end = undefined
         }
         break
@@ -979,6 +967,7 @@ function resizePuzzle(dx, dy, id) {
         }
         if (validDirs.length === 0 || validSymDirs.length === 0) {
           console.log('Endpoint at', x, y, 'no longer fits on the grid')
+          var cell = puzzle.getCell(x, y)
           puzzle.updateCell2(x, y, 'end', undefined)
           puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
         }
