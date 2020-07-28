@@ -907,41 +907,38 @@ function resizePuzzle(dx, dy, id) {
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
-      // Copy contents directly, no special handling needed.
-      if (x%2 === 1 && y%2 === 1) {
-        var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
-        if (cell != undefined) {
-          puzzle.setCell(x, y, JSON.parse(JSON.stringify(cell)))
-        }
-        continue
+      var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
+      if (cell != undefined) {
+        // Make a copy (why?)
+        // cell = JSON.parse(JSON.stringify(cell))
+      } else {
+        // I think?
+        cell = puzzle.getCell(x, y)
       }
 
-      var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
-
-      if (puzzle.symmetry != undefined) {
-        switch (shouldCopyCell(x, y)) {
-        case PERSIST:
-          console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
-          break
-        case COPY:
-          var sym = puzzle.getSymmetricalPos(x, y)
-          var oldCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
-          if (oldCell != undefined) {
-            console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(oldCell), 'from', sym.x - xOffset, sym.y - yOffset)
-            if (cell == undefined) cell = {}
-            cell.end = puzzle.getSymmetricalDir(oldCell.end)
-            cell.start = oldCell.start
-          }
-          break
-        case CLEAR:
+      switch (shouldCopyCell(x, y)) {
+      case PERSIST:
+        console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
+        break
+      case COPY:
+        var sym = puzzle.getSymmetricalPos(x, y)
+        var symCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
+        console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
+        if (symCell != undefined) {
+          if (cell == undefined) cell = {}
+          cell.end = puzzle.getSymmetricalDir(symCell.end)
+          cell.start = symCell.start
+        }
+        break
+      case CLEAR:
+        if (cell != undefined) {
           cell.start = false
           cell.end = undefined
-          break
         }
+        break
       }
-      if (cell != undefined) {
-        puzzle.setCell(x, y, JSON.parse(JSON.stringify(cell)))
-      }
+
+      puzzle.setCell(x, y, cell)
     }
   }
 
