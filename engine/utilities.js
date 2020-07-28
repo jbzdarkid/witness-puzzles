@@ -16,27 +16,6 @@ Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMove
 Event.prototype.requestPointerLock = Event.prototype.requestPointerLock || Event.prototype.mozRequestPointerLock
 /*** End cross-compatibility ***/
 
-// https://stackoverflow.com/q/11409895
-// Used to greatly simplify bbox translation by clamping cursor movement per-bbox
-Number.prototype.clamp = function(min, max) {
-  return this < min ? min : this > max ? max : this
-}
-
-// http://stackoverflow.com/q/901115
-// @Cleanup: Unneeded? I need to implement daily puzzles somehow, though.
-var urlParams
-(window.onpopstate = function () {
-    var match,
-        pl     = /\+/g,  // Regex for replacing addition symbol with a space
-        search = /([^&=]+)=?([^&]*)/g,
-        decode = function (s) {return decodeURIComponent(s.replace(pl, ' '))},
-        query  = window.location.search.substring(1)
-
-    urlParams = {}
-    while (match = search.exec(query))
-       urlParams[decode(match[1])] = decode(match[2])
-})()
-
 // https://stackoverflow.com/q/12571650
 window_onerror = window.onerror
 window.onerror = function(message, url, line) {

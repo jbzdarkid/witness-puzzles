@@ -75,3 +75,4 @@ Low Prio / Misc
     should play the music if I can
 -- Mobile UI is terrible / non-functional.
 -- Update deps (?)
+-- Startpoint collision

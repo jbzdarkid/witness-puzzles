@@ -2,6 +2,10 @@ namespace(function() {
 
 window.BBOX_DEBUG = false
 
+function clamp(value, min, max) {
+  return value < min ? min : value > max ? max : value
+}
+
 class BoundingBox {
   constructor(x1, x2, y1, y2, sym=false) {
     this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
@@ -53,11 +57,12 @@ class BoundingBox {
   }
 
   _update() {
-    // Check for endpoint adjustment
     this.x1 = this.raw.x1
     this.x2 = this.raw.x2
     this.y1 = this.raw.y1
     this.y2 = this.raw.y2
+
+    // Check for endpoint adjustment
     if (this.sym !== true) {
       var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
     } else {
@@ -191,8 +196,8 @@ class PathSegment {
 
   redraw() { // Uses raw bbox because of endpoints
     // Move the cursor and related objects
-    var x = data.x.clamp(data.bbox.x1, data.bbox.x2)
-    var y = data.y.clamp(data.bbox.y1, data.bbox.y2)
+    var x = clamp(data.x, data.bbox.x1, data.bbox.x2)
+    var y = clamp(data.y, data.bbox.y1, data.bbox.y2)
     data.cursor.setAttribute('cx', x)
     data.cursor.setAttribute('cy', y)
     if (data.puzzle.symmetry != undefined) {
@@ -215,13 +220,13 @@ class PathSegment {
     // Draw the first-half box
     var points1 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (this.dir === 'left') {
-      points1.x1 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
+      points1.x1 = clamp(data.x, data.bbox.middle.x, data.bbox.x2)
     } else if (this.dir === 'right') {
-      points1.x2 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
+      points1.x2 = clamp(data.x, data.bbox.x1, data.bbox.middle.x)
     } else if (this.dir === 'top') {
-      points1.y1 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
+      points1.y1 = clamp(data.y, data.bbox.middle.y, data.bbox.y2)
     } else if (this.dir === 'bottom') {
-      points1.y2 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
+      points1.y2 = clamp(data.y, data.bbox.y1, data.bbox.middle.y)
     }
     this.poly1.setAttribute('points',
       points1.x1 + ' ' + points1.y1 + ',' +
@@ -235,7 +240,7 @@ class PathSegment {
     // The second half of the line uses the raw so that it can enter the endpoint properly.
     var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
-      points2.x1 = data.x.clamp(data.bbox.x1, data.bbox.middle.x)
+      points2.x1 = clamp(data.x, data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
       if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
         points2.y1 += 17
@@ -243,13 +248,13 @@ class PathSegment {
       }
     } else if (data.x > data.bbox.middle.x && this.dir !== 'left') {
       points2.x1 = data.bbox.middle.x
-      points2.x2 = data.x.clamp(data.bbox.middle.x, data.bbox.x2)
+      points2.x2 = clamp(data.x, data.bbox.middle.x, data.bbox.x2)
       if (isEnd && data.pos.x%2 === 0 && data.pos.y%2 === 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
     } else if (data.y < data.bbox.middle.y && this.dir !== 'bottom') {
-      points2.y1 = data.y.clamp(data.bbox.y1, data.bbox.middle.y)
+      points2.y1 = clamp(data.y, data.bbox.y1, data.bbox.middle.y)
       points2.y2 = data.bbox.middle.y
       if (isEnd && data.pos.x%2 === 1 && data.pos.y%2 === 0) {
         points2.x1 += 17
@@ -257,7 +262,7 @@ class PathSegment {
       }
     } else if (data.y > data.bbox.middle.y && this.dir !== 'top') {
       points2.y1 = data.bbox.middle.y
-      points2.y2 = data.y.clamp(data.bbox.middle.y, data.bbox.y2)
+      points2.y2 = clamp(data.y, data.bbox.middle.y, data.bbox.y2)
       if (isEnd && data.pos.x%2 === 1 && data.pos.y%2 === 0) {
         points2.x1 += 17
         points2.x2 -= 17
@@ -728,17 +733,18 @@ function gapAndSymmetryCollision() {
 
   var gapSize = 0
   if (cell.gap === 1) {
+    console.spam('Collided with a gap')
     gapSize = 21
   } else if (data.puzzle.symmetry != undefined) {
     if (data.sym.x === data.pos.x && data.sym.y === data.pos.y) {
+      console.spam('Collided with our symmetrical line')
       gapSize = 13
-    }
-    // Symmetrical line hit a gap
-    if (data.puzzle.getCell(data.sym.x, data.sym.y).gap === 1) {
+    } else if (data.puzzle.getCell(data.sym.x, data.sym.y).gap === 1) {
+      console.spam('Symmetrical line hit a gap')
       gapSize = 21
     }
   }
-  if (gapSize === 0) return
+  if (gapSize === 0) return // Didn't collide with anything
 
   if (lastDir === 'left') {
     data.x = Math.max(data.bbox.middle.x + gapSize, data.x)
