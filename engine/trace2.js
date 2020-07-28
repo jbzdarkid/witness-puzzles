@@ -355,12 +355,6 @@ function clearGrid(svg, puzzle) {
   puzzle.clearLines()
 }
 
-function addTraceStart(puzzle, pos, start, symStart=undefined) {
-  start.onclick = function(event) {
-    trace(event, puzzle, pos, this, symStart)
-  }
-}
-
 window.trace = function(event, puzzle, pos, start, symStart=undefined) {
   var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
@@ -517,8 +511,10 @@ document.onpointerlockchange = function() {
 
 window.onMove = function(dx, dy) {
   // Also handles some collision
-  var colliedWith = pushCursor(dx, dy)
-  console.spam('Collided with', colliedWith)
+  {
+    var collidedWith = pushCursor(dx, dy)
+    console.spam('Collided with', collidedWith)
+  }
 
   while (true) {
     gapAndSymmetryCollision()
@@ -570,6 +566,7 @@ window.onMove = function(dx, dy) {
   }
 }
 
+// Helper function for pushCursor. Used to determine the direction and magnitude of redirection.
 function push(dx, dy, dir, targetDir) {
   // Fraction of movement to redirect in the other direction
   var movementRatio = undefined
@@ -617,6 +614,8 @@ function push(dx, dy, dir, targetDir) {
   return false
 }
 
+// Redirect momentum from pushing against walls, so that all further moment steps
+// will be strictly linear. Returns a string for logging purposes only.
 function pushCursor(dx, dy) {
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
@@ -720,6 +719,8 @@ function pushCursor(dx, dy) {
   }
 }
 
+// Check to see if we collided with any gaps, or with a symmetrical line.
+// In either case, abruptly zero momentum.
 function gapAndSymmetryCollision() {
   var lastDir = data.path[data.path.length - 1].dir
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
@@ -750,14 +751,12 @@ function gapAndSymmetryCollision() {
   }
 }
 
-// Change actual puzzle cells, and limit motion to only puzzle cells.
-// Returns the direction moved, or null otherwise.
-// @Bug: Handle start-point collision here.
+// Check to see if we've gone beyond the edge of puzzle cell, and if the next cell is safe,
+// i.e. not out of bounds. Reports the direction we are going to move (or 'none'),
+// but does not actually change data.pos
 function move() {
   var lastDir = data.path[data.path.length - 1].dir
 
-  // @Bug: This might be doing outer-wall collision against inner walls...?
-  // ^ Unlikely. This is absolute collision.
   if (data.x < data.bbox.x1 + 12) { // Moving left
     var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
     if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
@@ -834,7 +833,9 @@ function move() {
   return 'none'
 }
 
-// Adjust data.x by the width of the grid. This does preserve momentum around the edge.
+// Check to see if you moved beyond the edge of a pillar.
+// If so, wrap the cursor x to preserve momentum.
+// Note that this still does not change the position.
 function pillarWrap(moveDir) {
   if (moveDir === 'left' && data.pos.x === 0) {
     data.x += data.puzzle.width * 41
@@ -844,6 +845,9 @@ function pillarWrap(moveDir) {
   }
 }
 
+// Actually change the data position. (Note that this takes in pos to allow easier symmetry).
+// Note that this doesn't zero the momentum, so that we can adjust appropriately on further loops.
+// This function also shifts the bounding box that we use to determine the bounds of the cell.
 function changePos(bbox, pos, moveDir) {
   if (moveDir === 'left') {
     pos.x--
@@ -871,10 +875,6 @@ function changePos(bbox, pos, moveDir) {
   } else if (moveDir === 'bottom') {
     pos.y++
     bbox.shift('bottom', (pos.y%2 === 0 ? 24 : 58))
-  }
-
-  if (pos.x%2 === 1 && pos.y%2 === 1) {
-    console.error('Cursor went out of bounds (into a cell)!')
   }
 }
 
