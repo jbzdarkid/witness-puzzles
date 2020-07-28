@@ -29,18 +29,18 @@ window.draw = function(puzzle, target='puzzle') {
   rect.setAttribute('width', pixelWidth - 10) // Removing border
   rect.setAttribute('height', pixelHeight - 10) // Removing border
 
-  _drawGrid(puzzle, svg)
+  drawGrid(puzzle, svg)
   // Detects and returns the start element to begin tracing
-  var startData = _drawStartAndEnd(puzzle, svg)
+  var startData = drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
-  _drawSymbols(puzzle, svg, target)
+  drawSymbols(puzzle, svg, target)
   if (startData) {
     window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start, startData.symStart)
-    _drawSolution(puzzle, startData.x, startData.y)
+    drawSolution(puzzle, startData.x, startData.y)
   }
 }
 
-function _drawGrid(puzzle, svg) {
+function drawGrid(puzzle, svg) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
@@ -111,7 +111,7 @@ function _drawGrid(puzzle, svg) {
   }
 }
 
-function _drawSymbols(puzzle, svg, target) {
+function drawSymbols(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
@@ -149,7 +149,7 @@ function _drawSymbols(puzzle, svg, target) {
   }
 }
 
-function _drawStartAndEnd(puzzle, svg) {
+function drawStartAndEnd(puzzle, svg) {
   var startData = undefined
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
@@ -232,7 +232,7 @@ function _drawStartAndEnd(puzzle, svg) {
   return startData
 }
 
-function _drawSolution(puzzle, x, y) {
+function drawSolution(puzzle, x, y) {
   console.info('Drawing solution')
   var rows = '   |'
   for (var i=0; i<puzzle.width; i++) {

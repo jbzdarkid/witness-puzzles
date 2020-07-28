@@ -4,23 +4,23 @@ function getPolySize(polyshape) {
   var size = 0
   for (var x=0; x<4; x++) {
     for (var y=0; y<4; y++) {
-      if (_isSet(polyshape, x, y)) size++
+      if (isSet(polyshape, x, y)) size++
     }
   }
   return size
 }
 
-function _mask(x, y) {
+function mask(x, y) {
   return 1 << (x*4 + y)
 }
 
-function _isSet(polyshape, x, y) {
+function isSet(polyshape, x, y) {
   if (x < 0 || y < 0) return false
   if (x >= 4 || y >= 4) return false
-  return (polyshape & _mask(x, y)) !== 0
+  return (polyshape & mask(x, y)) !== 0
 }
 
-ROTATION_BIT = _mask(5, 0)
+ROTATION_BIT = mask(5, 0)
 
 window.isRotated = function(polyshape) {
   return (polyshape & ROTATION_BIT) !== 0
@@ -32,11 +32,11 @@ function getRotations(polyshape) {
   var rotations = [0, 0, 0, 0]
   for (var x=0; x<4; x++) {
     for (var y=0; y<4; y++) {
-      if (_isSet(polyshape, x, y)) {
-        rotations[0] ^= _mask(x, y)
-        rotations[1] ^= _mask(y, 3-x)
-        rotations[2] ^= _mask(3-x, 3-y)
-        rotations[3] ^= _mask(3-y, x)
+      if (isSet(polyshape, x, y)) {
+        rotations[0] ^= mask(x, y)
+        rotations[1] ^= mask(y, 3-x)
+        rotations[2] ^= mask(3-x, 3-y)
+        rotations[3] ^= mask(3-y, x)
       }
     }
   }
@@ -60,7 +60,7 @@ function fitsGrid(cells, x, y, puzzle) {
 window.polyominoFromPolyshape = function(polyshape, ylop=false) {
   for (var y=0; y<4; y++) {
     for (var x=0; x<4; x++) {
-      if (_isSet(polyshape, x, y)) {
+      if (isSet(polyshape, x, y)) {
         var topLeft = {'x':x, 'y':y}
         break
       }
@@ -72,7 +72,7 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false) {
   var polyomino = []
   for (var x=0; x<4; x++) {
     for (var y=0; y<4; y++) {
-      if (!_isSet(polyshape, x, y)) continue
+      if (!isSet(polyshape, x, y)) continue
       polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y)})
 
       // "Precise" polyominos adds cells in between the apparent squares in the polyomino.
@@ -80,20 +80,20 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false) {
       if (window.PRECISE_POLYOMINOS) {
         if (ylop) {
           // Ylops fill up/left if no adjacent cell, and always fill bottom/right
-          if (!_isSet(polyshape, x - 1, y)) {
+          if (!isSet(polyshape, x - 1, y)) {
             polyomino.push({'x':2*(x - topLeft.x) - 1, 'y':2*(y - topLeft.y)})
           }
-          if (!_isSet(polyshape, x, y - 1)) {
+          if (!isSet(polyshape, x, y - 1)) {
             polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) - 1})
           }
           polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
           polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
         } else {
           // Normal polys only fill bottom/right if there is an adjacent cell.
-          if (_isSet(polyshape, x + 1, y)) {
+          if (isSet(polyshape, x + 1, y)) {
             polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
           }
-          if (_isSet(polyshape, x, y + 1)) {
+          if (isSet(polyshape, x, y + 1)) {
             polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
           }
         }
@@ -158,14 +158,14 @@ window.polyFit = function(region, puzzle) {
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
-  var ret = _placeYlops(ylops.slice(), polys.slice(), puzzle)
+  var ret = placeYlops(ylops.slice(), polys.slice(), puzzle)
   puzzle.grid = savedGrid
   return ret
 }
 
 // If false, poly doesn't fit and grid is unmodified
 // If true, poly fits and grid is modified (with the placement)
-function _tryPlacePolyshape(cells, x, y, puzzle, sign) {
+function tryPlacePolyshape(cells, x, y, puzzle, sign) {
   console.spam('Placing at', x, y, 'with sign', sign)
   for (var i=0; i<cells.length; i++) {
     var cell = puzzle.getCell(cells[i].x + x, cells[i].y + y)
@@ -180,9 +180,9 @@ function _tryPlacePolyshape(cells, x, y, puzzle, sign) {
 
 // Places the ylops such that they are inside of the grid, then checks if the polys
 // zero the region.
-function _placeYlops(ylops, polys, puzzle) {
+function placeYlops(ylops, polys, puzzle) {
   // Base case: No more ylops to place, start placing polys
-  if (ylops.length === 0) return _placePolys(polys, puzzle)
+  if (ylops.length === 0) return placePolys(polys, puzzle)
 
   var ylop = ylops.pop()
   var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
@@ -191,11 +191,11 @@ function _placeYlops(ylops, polys, puzzle) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
         var cells = polyominoFromPolyshape(polyshape, true)
-        if (!_tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
+        if (!tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
         console.group('')
-        if (_placeYlops(ylops, polys, puzzle)) return true
+        if (placeYlops(ylops, polys, puzzle)) return true
         console.groupEnd('')
-        if (!_tryPlacePolyshape(cells, x, y, puzzle, +1)) continue
+        if (!tryPlacePolyshape(cells, x, y, puzzle, +1)) continue
       }
     }
   }
@@ -205,7 +205,7 @@ function _placeYlops(ylops, polys, puzzle) {
 // Returns whether or not a set of polyominos fit into a region.
 // Solves via recursive backtracking: Some piece must fill the top left square,
 // so try every piece to fill it, then recurse.
-function _placePolys(polys, puzzle) {
+function placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
   for (var y=0; y<puzzle.height; y++) {
     for (var x=0; x<puzzle.width; x++) {
@@ -257,35 +257,21 @@ function _placePolys(polys, puzzle) {
       for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
         console.spam('Selected polyshape', polyshape)
         var cells = polyominoFromPolyshape(polyshape)
-        if (!_tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
+        if (!tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
           console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
           continue
         }
         console.group('')
-        if (_placePolys(polys, puzzle)) return true
+        if (placePolys(polys, puzzle)) return true
         console.groupEnd('')
-        // Should not fail, as it's an inversion of the above _tryPlacePolyshape
-        _tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, -1)
+        // Should not fail, as it's an inversion of the above tryPlacePolyshape
+        tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, -1)
       }
       polys.splice(i, 0, poly)
     }
   }
   console.log('Grid non-empty with >0 polys, but no valid recursion.')
   return false
-}
-
-function _logPolyGrid(puzzle) {
-  var output = ''
-  for (var y=0; y<puzzle.height; y++) {
-    for (var x=0; x<puzzle.width; x++) {
-      var cell = puzzle.grid[x][y]
-      if (cell === -1) output += '-'
-      else if (0 <= cell && cell <= 9) output += cell
-      else output += '?'
-    }
-    output += '\n'
-  }
-  console.log(output)
 }
 
 })

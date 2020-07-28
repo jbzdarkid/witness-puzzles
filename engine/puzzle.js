@@ -64,9 +64,9 @@ class Puzzle {
     puzzle.name = parsed.name
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
-    // @Legacy: Grid squares used to use 'false' to indicate emptiness.
-    // @Legacy: Cells may use {} to represent emptiness
-    // @Legacy: Lines used to use 'line' instead of 'color'
+    // Legacy: Grid squares used to use 'false' to indicate emptiness.
+    // Legacy: Cells may use {} to represent emptiness
+    // Legacy: Lines used to use 'line' instead of 'color'
     // Now, we use:
     // Cells default to {}
     // Lines default to {'type':'line', 'line':0}
@@ -78,38 +78,38 @@ class Puzzle {
           else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
           if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
-            // @Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
+            // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
             // rot=all is a holdover that was used to represent rotation polyominos.
             puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
             puzzle.grid[x][y].rot = undefined
           } else if (cell.gap === true) {
-            // @Legacy: Gaps used to be undefined/true, are now undefined/1/2
+            // Legacy: Gaps used to be undefined/true, are now undefined/1/2
             puzzle.grid[x][y].gap = 1
           }
         }
       }
     }
-    // @Legacy: Startpoints used to be only parsed.start
+    // Legacy: Startpoints used to be only parsed.start
     if (parsed.start) {
       parsed.startPoints = [parsed.start]
     }
-    // @Legacy: Startpoints used to be a separate array, now they are flags
+    // Legacy: Startpoints used to be a separate array, now they are flags
     if (parsed.startPoints) {
       for (var startPoint of parsed.startPoints) {
         puzzle.grid[startPoint.x][startPoint.y].start = true
       }
     }
-    // @Legacy: Endpoints used to be only parsed.end
+    // Legacy: Endpoints used to be only parsed.end
     if (parsed.end) {
       parsed.endPoints = [parsed.end]
     }
-    // @Legacy: Endpoints used to be a separate array, now they are flags
+    // Legacy: Endpoints used to be a separate array, now they are flags
     if (parsed.endPoints) {
       for (var endPoint of parsed.endPoints) {
         puzzle.grid[endPoint.x][endPoint.y].end = endPoint.dir
       }
     }
-    // @Legacy: Dots and gaps used to be separate arrays
+    // Legacy: Dots and gaps used to be separate arrays
     // Now, they are flags on the individual lines.
     if (parsed.dots) {
       for (var dot of parsed.dots) {
@@ -204,7 +204,6 @@ class Puzzle {
     return dir
   }
 
-  // @Cleanup: Avoid duplicating x symmetry?
   getSymmetricalPos(x, y) {
     if (this.symmetry != undefined) {
       if (this.pillar === true) {
@@ -336,7 +335,6 @@ class Puzzle {
     }
     row[y] = undefined
 
-    // @Performance: Why is this ordered TLBR?
     this._floodFill(x, y + 1, region)
     this._floodFill(x + 1, y, region)
     this._floodFill(x, y - 1, region)
@@ -356,7 +354,6 @@ class Puzzle {
     if (x%2 === 0 && y%2 === 0 && cell === 3) return // Don't flood-fill through dots
     this.grid[x][y] = undefined
 
-    // @Performance: Why is this ordered TLBR?
     this._floodFillOutside(x, y + 1)
     this._floodFillOutside(x + 1, y)
     this._floodFillOutside(x, y - 1)

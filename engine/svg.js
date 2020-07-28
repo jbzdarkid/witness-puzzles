@@ -14,28 +14,24 @@ window.drawSymbol = function(params) {
 }
 
 window.drawSymbolWithSvg = function(svg, params) {
-  if (params.type === 'square') _square(svg, params)
-  else if (params.type === 'dot') _dot(svg, params)
-  else if (params.type === 'gap') _gap(svg, params)
-  else if (params.type === 'star') _star(svg, params)
-  else if (params.type === 'poly') _poly(svg, params)
-  else if (params.type === 'ylop') _ylop(svg, params)
-  else if (params.type === 'nega') _nega(svg, params)
+  if (params.type === 'square') square(svg, params)
+  else if (params.type === 'dot') dot(svg, params)
+  else if (params.type === 'gap') gap(svg, params)
+  else if (params.type === 'star') star(svg, params)
+  else if (params.type === 'poly') poly(svg, params)
+  else if (params.type === 'ylop') ylop(svg, params)
+  else if (params.type === 'nega') nega(svg, params)
   else if (params.type === 'nonce') { /* Do nothing */ }
-  else if (params.type === 'triangle') _triangle(svg, params)
-  else if (params.type === 'crayon') _crayon(svg, params)
-  else if (params.type === 'start') _start(svg, params)
-  else if (params.type === 'end') _end(svg, params)
-  else if (params.type === 'drag') _drag(svg, params)
-  else if (params.type === 'plus') _plus(svg, params)
-  else if (params.type === 'minus') _minus(svg, params)
-//  else if (params.type === undefined) { /* Do nothing */ }
-//  else {
-//    console.error('Unknown symbol type in params: ' + JSON.stringify(params))
-//  }
+  else if (params.type === 'triangle') triangle(svg, params)
+  else if (params.type === 'crayon') crayon(svg, params)
+  else if (params.type === 'start') start(svg, params)
+  else if (params.type === 'end') end(svg, params)
+  else if (params.type === 'drag') drag(svg, params)
+  else if (params.type === 'plus') plus(svg, params)
+  else if (params.type === 'minus') minus(svg, params)
 }
 
-function _square(svg, params) {
+function square(svg, params) {
   var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 28)
@@ -48,7 +44,7 @@ function _square(svg, params) {
   rect.setAttribute('class', params.class)
 }
 
-function _star(svg, params) {
+function star(svg, params) {
   var poly = createElement('polygon')
   svg.appendChild(poly)
   var points = [
@@ -75,7 +71,7 @@ function _star(svg, params) {
   poly.setAttribute('class', params.class)
 }
 
-function _poly(svg, params) {
+function poly(svg, params) {
   if (params.polyshape === 0) return
   var size = 10 // Side length of individual squares in the polyomino
   var space = 4 // Gap between squares in the polyomino
@@ -111,7 +107,7 @@ function _poly(svg, params) {
   }
 }
 
-function _ylop(svg, params) {
+function ylop(svg, params) {
   if (params.polyshape === 0) return
   var size = 12 // Side length of individual squares in the polyomino
   var space = 2 // Gap between squares in the polyomino
@@ -150,7 +146,7 @@ function _ylop(svg, params) {
   }
 }
 
-function _nega(svg, params) {
+function nega(svg, params) {
   var poly = createElement('polygon')
   svg.appendChild(poly)
   var points = [
@@ -183,7 +179,7 @@ var triangleDistributions = [
   [3, 3, 3]
 ]
 
-function _triangle(svg, params) {
+function triangle(svg, params) {
   var distribution = triangleDistributions[params.count]
   var high = distribution.length
   for (var y=0; y<high; y++) {
@@ -201,7 +197,7 @@ function _triangle(svg, params) {
   }
 }
 
-function _crayon(svg, params) {
+function crayon(svg, params) {
   var height = params.height
   var width = params.width
   var border = 2
@@ -229,7 +225,7 @@ function _crayon(svg, params) {
   txt.innerHTML = params.text
 }
 
-function _start(svg, params) {
+function start(svg, params) {
   var circ = createElement('circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 24)
@@ -238,7 +234,7 @@ function _start(svg, params) {
   circ.setAttribute('cy', params.width/2 + params.y)
 }
 
-function _end(svg, params) {
+function end(svg, params) {
   var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 24)
@@ -271,7 +267,7 @@ function _end(svg, params) {
   }
 }
 
-function _dot(svg, params) {
+function dot(svg, params) {
   var hex = createElement('polygon')
   svg.appendChild(hex)
   hex.setAttribute('points', '5.2 9, 10.4 0, 5.2 -9, -5.2 -9, -10.4 0, -5.2 9')
@@ -283,7 +279,7 @@ function _dot(svg, params) {
   hex.setAttribute('style', 'pointer-events:none;')
 }
 
-function _gap(svg, params) {
+function gap(svg, params) {
   if (!params.rot) params.rot = 0
   var centerX = params.height/2 + params.x
   var centerY = params.width/2 + params.y
@@ -308,7 +304,7 @@ function _gap(svg, params) {
   rect2.setAttribute('y', centerY - 12)
 }
 
-function _drag(svg, params) {
+function drag(svg, params) {
   if (!params.rot) params.rot = 0
 
   for (var i=0; i<6; i++) {
@@ -329,7 +325,7 @@ function _drag(svg, params) {
   }
 }
 
-function _plus(svg, params) {
+function plus(svg, params) {
   var verti = createElement('rect')
   svg.appendChild(verti)
   verti.setAttribute('x', params.width/2 - 1)
@@ -337,10 +333,10 @@ function _plus(svg, params) {
   verti.setAttribute('width', 2)
   verti.setAttribute('height', params.height - 6)
   verti.setAttribute('fill', window.TEXT_COLOR)
-  _minus(svg, params)
+  minus(svg, params)
 }
 
-function _minus(svg, params) {
+function minus(svg, params) {
   var horiz = createElement('rect')
   svg.appendChild(horiz)
   horiz.setAttribute('x', 3)

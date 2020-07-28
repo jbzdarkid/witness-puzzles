@@ -363,6 +363,20 @@ window.loadHeader = function(titleText) {
   }
 }
 
+window.createLink = function(href, title, parent) {
+  parent = parent || document.currentScript.parentElement
+  var link = document.createElement('label')
+  parent.appendChild(link)
+  link.onclick = function() {
+    window.location = href
+  }
+  link.innerText = title
+  link.style = style
+  link.style.cursor = 'pointer'
+  link.style.color = window.TEXT_COLOR // Not inherited, sadly
+}
+
+
 
 
 
@@ -377,24 +391,6 @@ window.loadHeader = function(titleText) {
 /// ------------
 /// Everything below this is legacy, and should not be used.
 /// ============
-
-
-
-window.createLink = function(href, title, parent) {
-  parent = parent || document.currentScript.parentElement
-  var link = document.createElement('label')
-  parent.appendChild(link)
-  link.onclick = function() {
-    window.location = href
-  }
-  link.innerText = title
-  link.style = style
-  link.style.cursor = 'pointer'
-  link.style.color = window.TEXT_COLOR // Not inherited, sadly
-}
-
-///
-
 
 function loadFeedback() {
   var feedbackButton = document.createElement('label')
