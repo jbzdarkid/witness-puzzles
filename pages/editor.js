@@ -835,8 +835,8 @@ function _shapeChooserClick(event, cell) {
     event.stopPropagation()
     return
   }
-  // Clicks inside the chooser box are non-closing
-  if (cell.id === 'chooser' || cell.id === 'chooserTable') {
+  // Clicks inside the green box are non-closing
+  if (cell.id === 'chooserTable') {
     event.stopPropagation()
     return
   }
