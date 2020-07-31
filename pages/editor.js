@@ -777,13 +777,13 @@ function _shapeChooser() {
   puzzle.style.opacity = 0
 
   var anchor = document.createElement('div')
+  document.body.appendChild(anchor)
   anchor.id = 'anchor'
   anchor.style.width = '99%'
   anchor.style.height = '100%'
   anchor.style.position = 'absolute'
   anchor.style.top = 0
   anchor.onmousedown = function(event) {_shapeChooserClick(event)}
-  document.body.appendChild(anchor)
 
   var chooser = document.createElement('div')
   puzzle.parentElement.insertBefore(chooser, puzzle)
@@ -794,6 +794,7 @@ function _shapeChooser() {
   chooser.style.height = '100%'
   chooser.style.minWidth = '400px'
   chooser.style.zIndex = 1 // Position in front of the puzzle
+  chooser.onmousedown = function(event) {_shapeChooserClick(event)}
 
   var chooserTable = document.createElement('table')
   chooser.appendChild(chooserTable)
