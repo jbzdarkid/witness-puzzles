@@ -368,27 +368,33 @@ class Puzzle {
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with line=0.
     for (var x=0; x<this.width; x++) {
-      this.grid[x] = []
+      var row = []
       for (var y=0; y<this.height; y++) {
         var cell = savedGrid[x][y]
-        // Optimization: Different code for cells/lines?
-        if (cell != undefined && cell.line > window.LINE_NONE) {
+
+        // Cells are always part of the region
+        if (x%2 === 1 && y%2 === 1) {
+          row.push(1)
+          continue
+        }
+
+        if (cell.line > window.LINE_NONE) {
           if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
             // Traced lines which are mid-segment start or end points should not separate the region
-            this.grid[x][y] = 0
+            row.push(0)
           } else {
             // Traced lines should not be a part of the region
-            this.grid[x][y] = undefined
+            row.push(undefined)
           }
-        } else if (cell != undefined && cell.gap === 2) {
-          this.grid[x][y] = 2
-        } else if (cell != undefined && cell.dot > window.DOT_NONE) {
-          this.grid[x][y] = 3
+        } else if (cell.gap === 2) {
+          row.push(2)
+        } else if (cell.dot > window.DOT_NONE) {
+          row.push(3)
         } else {
-          // Indicates that this cell will be a part of the region
-          this.grid[x][y] = 1
+          row.push(1)
         }
       }
+      this.grid[x] = row
     }
 
     // Mark all outside cells as 'not in any region' (aka undefined)
