@@ -323,17 +323,17 @@ class Puzzle {
   // 2: Gap-2, but not out of bounds so should be treated normally
   // 3: Dot (of any kind), otherwise identical to 1.
   _floodFill(x, y, region) {
-    // Inlined safety checks so we can get the row, which is slightly more performant.
+    // Inlined safety checks so we can get the col, which is slightly more performant.
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
 
-    var row = this.grid[x]
-    var cell = row[y]
+    var col = this.grid[x]
+    var cell = col[y]
     if (cell === undefined) return
     if (cell !== 0) {
       region.setCell(x, y)
     }
-    row[y] = undefined
+    col[y] = undefined
 
     this._floodFill(x, y + 1, region)
     this._floodFill(x + 1, y, region)
@@ -436,6 +436,7 @@ class Puzzle {
   }
 
   getRegion(x, y) {
+    x = this._mod(x)
     if (!this._safeCell(x, y)) return
 
     var savedGrid = this._switchToMaskedGrid()
