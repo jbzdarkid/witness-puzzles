@@ -295,19 +295,15 @@ function regionCheck(puzzle, region, quick) {
     if (quick) return regionData
   }
 
-  for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
-    if (cell.type === 'star') {
-      if (coloredObjects[cell.color] === 1) {
-        console.log('Found a', cell.color, 'star in a region with 1', cell.color, 'object')
-        regionData.addVeryInvalid(pos)
-        if (quick) return regionData
-      } else if (coloredObjects[cell.color] > 2) {
-        console.log('Found a', cell.color, 'star in a region with', coloredObjects[cell.color], cell.color, 'objects')
-        regionData.addInvalid(pos)
-        if (quick) return regionData
-      }
+  for (var star of stars) {
+    if (coloredObjects[star.color] === 1) {
+      console.log('Found a', star.color, 'star in a region with 1', star.color, 'object')
+      regionData.addVeryInvalid(star)
+      if (quick) return regionData
+    } else if (coloredObjects[star.color] > 2) {
+      console.log('Found a', star.color, 'star in a region with', coloredObjects[star.color], star.color, 'objects')
+      regionData.addInvalid(star)
+      if (quick) return regionData
     }
   }
 
