@@ -238,8 +238,11 @@ function regionCheck(puzzle, region, quick) {
   console.log('Validating region of size', region.cells.length, region)
   var regionData = new RegionData()
 
+  var squares = []
+  var stars = []
   var coloredObjects = {}
-  var squareColors = {}
+  var squareColor = undefined
+
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == undefined) continue
@@ -267,25 +270,35 @@ function regionCheck(puzzle, region, quick) {
 
     // Count color-based elements
     if (coloredObjects[cell.color] == undefined) {
-      coloredObjects[cell.color] = 0
+      coloredObjects[cell.color] = 1
+    } else {
+      coloredObjects[cell.color]++
     }
-    coloredObjects[cell.color]++
+
     if (cell.type === 'square') {
-      squareColors[cell.color] = true
+      squares.push(pos)
+      if (squareColor == undefined) {
+        squareColor = cell.color
+      } else if (squareColor != cell.color) {
+        squareColor = -1 // Signal value which indicates square color collision
+      }
+    }
+
+    if (cell.type === 'star') {
+      pos.color = cell.color
+      stars.push(pos)
     }
   }
-  var squareColorCount = Object.keys(squareColors).length
+
+  if (squareColor === -1) {
+    regionData.invalidElements = regionData.invalidElements.concat(squares)
+    if (quick) return regionData
+  }
 
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == undefined) continue
-    if (cell.type === 'square') {
-      if (squareColorCount > 1) {
-        console.log('Found a', cell.color, 'square in a region with', squareColorCount, 'square colors')
-        regionData.addInvalid(pos)
-        if (quick) return regionData
-      }
-    } else if (cell.type === 'star') {
+    if (cell.type === 'star') {
       if (coloredObjects[cell.color] === 1) {
         console.log('Found a', cell.color, 'star in a region with 1', cell.color, 'object')
         regionData.addVeryInvalid(pos)
