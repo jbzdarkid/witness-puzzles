@@ -316,7 +316,7 @@ class Puzzle {
     }
   }
 
-  // The grid contains 4 colors:
+  // The grid contains 5 colors:
   // undefined: Out of bounds or already processed
   // 0: In bounds, awaiting processing, but should not be part of the final region.
   // 1: In bounds, awaiting processing
