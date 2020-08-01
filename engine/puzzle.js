@@ -66,7 +66,6 @@ class Puzzle {
     puzzle.grid = parsed.grid
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
-    // Legacy: Lines used to use 'line' instead of 'color'
     // Now, we use:
     // Cells default to {}
     // Lines default to {'type':'line', 'line':0}
@@ -82,6 +81,10 @@ class Puzzle {
             // rot=all is a holdover that was used to represent rotation polyominos.
             puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
             puzzle.grid[x][y].rot = undefined
+          } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != undefined) {
+            // Legacy: Lines used to use 'line' instead of 'color'
+            cell.line = cell.color
+            delete cell.color
           } else if (cell.gap === true) {
             // Legacy: Gaps used to be undefined/true, are now undefined/1/2
             puzzle.grid[x][y].gap = 1
