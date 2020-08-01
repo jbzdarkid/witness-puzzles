@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
   <head>
-    <meta property="og:title" content="{{ title }}"/>
+    <meta property="og:title" content="{{ title|safe }}"/>
     <meta property="og:description" content="Witness Puzzle {{ display_hash }}"/>
     <meta property="og:type" content="website"/>
     <meta property="og:site_name" content="Witness Puzzles"/>
@@ -14,7 +14,7 @@
     <script type="text/javascript" src="/engine/svg.js"></script>
     <script type="text/javascript" src="/engine/display2.js"></script>
     <script type="text/javascript" src="/engine/trace2.js"></script>
-    <title>{{ title }}</title>
+    <title>{{ title|safe }}</title>
   </head>
   <body>
     <script>loadHeader('Loading puzzle...')</script>
@@ -25,10 +25,12 @@
   <script>
     window.display_hash = '{{ display_hash }}'
     window.onload = function() {
+      // Unescape HTML (https://paulschreiber.com/blog/2008/09/20)
+      var temp = document.createElement('div')
+      temp.innerHTML = '{{ title }}'
+      document.getElementById('title').innerText = temp.childNodes[0].nodeValue
+
       var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
-      var pageTitle = document.head.getElementsByTagName('title')[0]
-      pageTitle.innerText = 'Playing puzzle: {{ title }}'
-      document.getElementById('title').innerText = '{{ title }}'
       draw(puzzle)
     }
   </script>
