@@ -1,6 +1,6 @@
 - Work on speedrunning solver / improving "unique puzzles"
-  Simplest approach is just to have a simpler cache key, which is content-aware.
-  This might also have perf benefits, because our cache will be more effective.
+  Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.
+  Or I could make a key for the puzzle as a whole? Regardless, not as easy as just hacking the cache key.
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.

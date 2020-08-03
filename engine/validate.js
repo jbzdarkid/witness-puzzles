@@ -68,17 +68,8 @@ window.validate = function(puzzle, quick) {
   console.debug(regions)
 
   for (var region of regions) {
-    var key = region.grid.toString()
-    var regionData = puzzle.regionCache[key]
-    if (regionData == undefined) {
-      console.log('Cache miss for region', region, 'key', key)
-      regionData = validateRegion(puzzle, region, quick)
-      console.log('Region valid:', regionData.valid())
-
-      if (!window.DISABLE_CACHE) {
-        puzzle.regionCache[key] = regionData
-      }
-    }
+    regionData = validateRegion(puzzle, region, quick)
+    console.log('Region valid:', regionData.valid())
     puzzle.negations = puzzle.negations.concat(regionData.negations)
     puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
     puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)

@@ -1,4 +1,3 @@
-window.DISABLE_CACHE = true
 var activeParams = {'id':'', 'color':'black', 'polyshape':71}
 var puzzle
 var dragging

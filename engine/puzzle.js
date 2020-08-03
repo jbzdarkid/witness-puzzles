@@ -1,22 +1,10 @@
 class Region {
   constructor(length) {
+    this.cells = []
     this.grid = []
-    for (var i=0; i<length; i++) {
+    for (var x=0; x<length; x++) {
       this.grid.push(0)
     }
-    this.cells = []
-  }
-
-  clone() {
-    var clone = new Region(this.grid.length)
-    this.grid = this.grid.slice()
-    this.cells = this.cells.slice()
-    return clone
-  }
-
-  _mod(val) {
-    var mod = this.grid.length
-    return ((val % mod) + mod) % mod
   }
 
   getCell(x, y) {
@@ -27,13 +15,6 @@ class Region {
     if (this.getCell(x, y)) return
     this.grid[x] |= (1 << y)
     this.cells.push({'x':x, 'y':y})
-  }
-
-  merge(other) {
-    this.cells = this.cells.concat(other.cells)
-    for (var i=0; i<this.grid.length; i++) {
-      this.grid[i] += other.grid[i]
-    }
   }
 }
 
@@ -53,7 +34,6 @@ class Puzzle {
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
-    this.regionCache = {}
     this.pillar = pillar
   }
 
@@ -124,7 +104,6 @@ class Puzzle {
         puzzle.grid[gap.x][gap.y].gap = 1
       }
     }
-    if (parsed.regionCache != undefined) puzzle.regionCache = parsed.regionCache
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
     puzzle.largezero = puzzle.width * puzzle.height
@@ -136,12 +115,7 @@ class Puzzle {
   }
 
   clone() {
-    // Don't clone the regionCache, it can be *very* big.
-    var savedRegionCache = this.regionCache
-    this.regionCache = {}
-    var clone = Puzzle.deserialize(this.serialize())
-    this.regionCache = savedRegionCache
-    return clone
+    return Puzzle.deserialize(this.serialize())
   }
 
   // This is explicitly *not* just clearing the grid, so that external references

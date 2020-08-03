@@ -1,5 +1,3 @@
-window.DISABLE_CACHE = true
-
 window.onload = function() {
   var table = document.getElementById('meta')
   var failures = []
@@ -509,32 +507,14 @@ var tests = {
     puzzle.grid[7][7] = {'type':'poly', 'color':'yellow', 'polyshape':17}
     puzzle.end = {'x':0, 'y':0, 'dir':'top'}
     return [puzzle, 467]
-  }, 'pillar-triangles-bug-NOCACHE': function() {
-    window.DISABLE_CACHE = false
-    var puzzle = new Puzzle(4, 4, pillar=true)
-    puzzle.grid[0][8].start = true
-    puzzle.grid[0][0].end = 'top'
-    puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':3}
-    puzzle.grid[5][5] = {'type':'triangle', 'color':'orange', 'count':3}
-    return [puzzle, 111]
   }, 'pillar-triangles-bug': function() {
-    window.DISABLE_CACHE = true
     var puzzle = new Puzzle(4, 4, pillar=true)
     puzzle.grid[0][8].start = true
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':3}
     puzzle.grid[5][5] = {'type':'triangle', 'color':'orange', 'count':3}
     return [puzzle, 111]
-  }, 'small-pillar-triangles-bug-NOCACHE': function() {
-    window.DISABLE_CACHE = false
-    var puzzle = new Puzzle(3, 2, pillar=true)
-    puzzle.grid[0][4].start = true
-    puzzle.grid[0][0].end = 'top'
-    puzzle.grid[1][1] = {'type':'triangle', 'color':'orange', 'count':2}
-    puzzle.grid[3][3] = {'type':'triangle', 'color':'orange', 'count':2}
-    return [puzzle, 7]
   }, 'small-pillar-triangles-bug': function() {
-    window.DISABLE_CACHE = true
     var puzzle = new Puzzle(3, 2, pillar=true)
     puzzle.grid[0][4].start = true
     puzzle.grid[0][0].end = 'top'
