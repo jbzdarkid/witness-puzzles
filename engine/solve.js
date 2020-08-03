@@ -90,12 +90,11 @@ window.pathToSolution = function(puzzle, path) {
   return newPuzzle
 }
 
-window.drawPath = function(puzzle, path) {
-  var solution = pathToSolution(path)
-  drawSolution(solution, path[0].x, path[0].y)
-}
+window.drawSolution = function(puzzle, svg, startData) {
+  var x = startData.x
+  var y = startData.y
+  window.onTraceStart(puzzle, {'x':x, 'y':y}, svg, startData.start, startData.symStart)
 
-window.drawSolution = function(puzzle, x, y) {
   console.info('Drawing solution')
   var rows = '   |'
   for (var i=0; i<puzzle.width; i++) {

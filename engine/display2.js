@@ -35,8 +35,7 @@ window.draw = function(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
   if (startData) {
-    window.onTraceStart(puzzle, {'x':startData.x, 'y':startData.y}, svg, startData.start, startData.symStart)
-    window.drawSolution(puzzle, startData.x, startData.y)
+    window.drawSolution(puzzle, svg, startData)
   }
 }
 
