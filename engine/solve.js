@@ -90,7 +90,13 @@ window.pathToSolution = function(puzzle, path) {
   return newPuzzle
 }
 
-window.drawSolution = function(puzzle, svg) {
+window.drawPath = function(puzzle, path) {
+  var solution = pathToSolution(puzzle, path)
+  drawSolution(solution)
+}
+
+window.drawSolution = function(puzzle, target='puzzle') {
+  var svg = document.getElementById(target)
   var start = undefined
   var symStart = undefined
   for (var x=0; x<puzzle.width; x++) {
@@ -187,7 +193,6 @@ window.drawSolution = function(puzzle, svg) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   }
 }
-
 
 var tasks = []
 function runTaskLoop(partialCallback, finalCallback)  {

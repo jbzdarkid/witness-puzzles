@@ -30,11 +30,9 @@ window.draw = function(puzzle, target='puzzle') {
   rect.setAttribute('height', pixelHeight - 10) // Removing border
 
   drawGrid(puzzle, svg)
-  // Detects and returns the start element to begin tracing
   drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
-  window.drawSolution(puzzle, svg)
 }
 
 function drawGrid(puzzle, svg) {

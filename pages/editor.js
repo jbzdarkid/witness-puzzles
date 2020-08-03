@@ -357,9 +357,7 @@ function solvePuzzle() {
     document.getElementById('progress').style.width = '0%'
 
     puzzle.autoSolved = true
-    var solutions = []
-    for (var path of paths) solutions.push(window.pathToSolution(puzzle, path))
-    _showSolution(solutions, 0)
+    _showSolution(paths, 0)
   })
 }
 //** End of user interaction points
@@ -434,40 +432,40 @@ window.onload = function() {
   }
 }
 
-function _showSolution(solutions, num) {
-  if (num < 0) num = solutions.length - 1
-  if (num >= solutions.length) num = 0
+function _showSolution(paths, num) {
+  if (num < 0) num = paths.length - 1
+  if (num >= paths.length) num = 0
 
   var previousSolution = document.getElementById('previousSolution')
   var solutionCount = document.getElementById('solutionCount')
   var nextSolution = document.getElementById('nextSolution')
 
   // Buttons & text
-  if (solutions.length === 0) { // 0 solutions, arrows are useless
+  if (paths.length === 0) { // 0 paths, arrows are useless
     solutionCount.innerText = '0 of 0'
     previousSolution.disabled = true
     nextSolution.disabled = true
-  } else if (solutions.length === 1) { // 1 solution, arrows are useless
+  } else if (paths.length === 1) { // 1 path, arrows are useless
     solutionCount.innerText = '1 of 1'
-    if (solutions.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = true
     nextSolution.disabled = true
   } else {
-    solutionCount.innerText = (num + 1) + ' of ' + solutions.length
-    if (solutions.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    solutionCount.innerText = (num + 1) + ' of ' + paths.length
+    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
-    previousSolution.onclick = function() {_showSolution(solutions, num - 1)}
-    nextSolution.onclick = function() {_showSolution(solutions, num + 1)}
+    previousSolution.onclick = function() {_showSolution(paths, num - 1)}
+    nextSolution.onclick = function() {_showSolution(paths, num + 1)}
   }
-  if (solutions[num] != undefined) {
-    solutions[num].name = puzzle.name
-    puzzle = solutions[num]
+  if (paths[num] != undefined) {
     // Redraws the puzzle *and* adds editor hooks (so that we can return to editing)
     // There's no need to reload all the additional meta elements, since the puzzle isn't
     // actually changing, we're just drawing on it.
     _drawPuzzle()
-    // Only enable the publish button if there was a solution.
+    window.drawPath(puzzle, paths[num])
+
+    // Only enable the publish button if there was a path.
     document.getElementById('publish').disabled = false
   }
 }
