@@ -63,6 +63,11 @@ window.cancelSolving = function() {
   tasks = []
 }
 
+var PATH_NONE   = 0
+var PATH_LEFT   = 1
+var PATH_RIGHT  = 2
+var PATH_TOP    = 3
+var PATH_BOTTOM = 4
 window.pathToSolution = function(puzzle, path) {
   var newPuzzle = puzzle.clone()
   var start = path[0]
@@ -77,13 +82,90 @@ window.pathToSolution = function(puzzle, path) {
       var sym = puzzle.getSymmetricalPos(x, y)
       newPuzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
     }
-    if (path[i] == "left") x--
-    else if (path[i] == "right") x++
-    else if (path[i] == "top") y--
-    else if (path[i] == "bottom") y++
+    if (path[i] == PATH_LEFT) x--
+    else if (path[i] == PATH_RIGHT) x++
+    else if (path[i] == PATH_TOP) y--
+    else if (path[i] == PATH_BOTTOM) y++
   }
   return newPuzzle
 }
+
+window.drawPath = function(puzzle, path) {
+  var solution = pathToSolution(path)
+  drawSolution(solution, path[0].x, path[0].y)
+}
+
+window.drawSolution = function(puzzle, x, y) {
+  console.info('Drawing solution')
+  var rows = '   |'
+  for (var i=0; i<puzzle.width; i++) {
+    if (i < 10) rows += ' '
+    rows += '  ' + i + ' |'
+  }
+  console.info(rows)
+  for (var j=0; j<puzzle.height; j++) {
+    var output = ''
+    if (j < 10) output += ' '
+    output += j + ' |'
+    for (var i=0; i<puzzle.width; i++) {
+      var cell = puzzle.grid[i][j]
+      if (cell == undefined || cell.dir == undefined) {
+        output += '     |'
+      } else if (cell.dir === PATH_LEFT) {
+        output += 'left |'
+      } else if (cell.dir === PATH_RIGHT) {
+        output += 'right|'
+      } else if (cell.dir === PATH_TOP) {
+        output += 'up   |'
+      } else if (cell.dir === PATH_BOTTOM) {
+        output += 'down |'
+      } else if (cell.dir === PATH_NONE) {
+        output += 'none |'
+      }
+    }
+    console.info(output)
+  }
+
+  // Limited because there is a chance of infinite looping with bad input data.
+  for (var i=0; i<1000; i++) {
+    var cell = puzzle.getCell(x, y)
+    if (cell == undefined) {
+      console.error('Solution trace went out of bounds at', x, y)
+      return
+    }
+    var dir = cell.dir
+    var dx = 0
+    var dy = 0
+    if (dir === PATH_NONE) { // Reached an endpoint, move into it
+      var cell = puzzle.getCell(x, y)
+      console.log('Reached endpoint')
+      if (cell.end === 'left') {
+        window.onMove(-24, 0)
+      } else if (cell.end === 'right') {
+        window.onMove(24, 0)
+      } else if (cell.end === 'top') {
+        window.onMove(0, -24)
+      } else if (cell.end === 'bottom') {
+        window.onMove(0, 24)
+      }
+      return
+    }
+    else if (dir === PATH_LEFT)   dx = -1
+    else if (dir === PATH_RIGHT)  dx = 1
+    else if (dir === PATH_TOP)    dy = -1
+    else if (dir === PATH_BOTTOM) dy = 1
+
+    console.log('Currently at', x, y, cell, 'moving', dx, dy)
+
+    x += dx
+    y += dy
+    // Unflag the cell, move into it, and reflag it
+    puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
+    window.onMove(41 * dx, 41 * dy)
+    puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
+  }
+}
+
 
 var tasks = []
 function runTaskLoop(partialCallback, finalCallback)  {
@@ -150,6 +232,18 @@ function solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
   }
 
+  if (cell.end != undefined) {
+    path.push(PATH_NONE)
+    window.validate(puzzle, true)
+    if (puzzle.valid) paths.push(path.slice())
+    path.pop()
+
+    // If there are no further endpoints, tail recurse.
+    // Otherwise, keep going -- we might be able to reach another endpoint.
+    numEndpoints--
+    if (numEndpoints === 0) return tailRecurse(puzzle, x, y)
+  }
+
   // Large optimization -- Attempt to early exit once we cut out a region.
   // Inspired by https://github.com/Overv/TheWitnessSolver
   // For non-pillar puzzles, every time we draw a line from one edge to another, we cut out two regions.
@@ -167,10 +261,10 @@ function solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path
   //
   // Note that, once we have reached B, the puzzle is divided in half. However, we could go either
   // left or right -- so we don't know which region is safe to validate.
-  // Once we reach C, however, the region to the right is guaranteed to be un-enterable.
+  // Once we reach C, however, the region to the right is closed off.
   // As such, we can start a flood fill from the cell to the right of A, computed by A+(C-B).
   //
-  // Unfortunately, this optimization doesn't work for pillars, since the two regions are the same.
+  // Unfortunately, this optimization doesn't work for pillars, since the two regions are still connected.
   if (puzzle.pillar === false) {
     var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
     var newEarlyExitData = [
@@ -179,17 +273,16 @@ function solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path
       {'x':x, 'y':y, 'isEdge':isEdge}                           // Our current position.
     ]
     if (earlyExitData[0] && !earlyExitData[1].isEdge && earlyExitData[2].isEdge && isEdge) {
-      // Compute the X and Y of the region we just cut out.
-      // This is determined by looking at the delta between the current and last points,
-      // then replaying the *inverse* of that delta against the second-to-last point.
-      var regionX = earlyExitData[2].x + (earlyExitData[1].x - x)
-      var regionY = earlyExitData[2].y + (earlyExitData[1].y - y)
-
-      var region = puzzle.getRegion(regionX, regionY)
+      // See the above comment for an explanation of this math.
+      var floodX = earlyExitData[2].x + (earlyExitData[1].x - x)
+      var floodY = earlyExitData[2].y + (earlyExitData[1].y - y)
+      var region = puzzle.getRegion(floodX, floodY)
       if (region != undefined) {
         var regionData = window.validateRegion(puzzle, region, true)
         if (!regionData.valid()) return tailRecurse(puzzle, x, y)
 
+        // Additionally, we might have left an endpoint in the enclosed region.
+        // If so, we should decrement the number of remaining endpoints (and possibly tail recurse).
         for (var pos of region.cells) {
           var endCell = puzzle.getCell(pos.x, pos.y)
           if (endCell != undefined && endCell.end != undefined) numEndpoints--
@@ -202,36 +295,22 @@ function solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path
     var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
   }
 
-  if (cell.end != undefined) {
-    path.push('none')
-    window.validate(puzzle, true)
-    if (puzzle.valid) paths.push(path.slice())
-    path.pop()
-
-    // If there are no further endpoints, tail recurse.
-    // Otherwise, keep going -- we might be able to reach another endpoint.
-    numEndpoints--
-    if (numEndpoints === 0) return tailRecurse(puzzle, x, y)
-  }
-
   // Far down the stack, execute synchronously
   if (depth === 0) {
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-    // Extend path left and right
     if (y%2 === 0) {
-      path.push('left')
+      path.push(PATH_LEFT)
       solveLoop(puzzle, x - 1, y, paths, numEndpoints, newEarlyExitData, 0, path)
       path.pop()
-      path.push('right')
+      path.push(PATH_RIGHT)
       solveLoop(puzzle, x + 1, y, paths, numEndpoints, newEarlyExitData, 0, path)
       path.pop()
     }
-    // Extend path up and down
     if (x%2 === 0) {
-      path.push('top')
+      path.push(PATH_TOP)
       solveLoop(puzzle, x, y - 1, paths, numEndpoints, newEarlyExitData, 0, path)
       path.pop()
-      path.push('bottom')
+      path.push(PATH_BOTTOM)
       solveLoop(puzzle, x, y + 1, paths, numEndpoints, newEarlyExitData, 0, path)
       path.pop()
     }
@@ -240,36 +319,33 @@ function solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
     // Note: The order reversed because we push these into a queue, then pop them to execute them.
 
-    var newTasks = []
-
-    // Push an empty element on the end of the path, so that we can fill it correctly as we DFS.
+    // Push a dummy element on the end of the path, so that we can fill it correctly as we DFS.
     // This element is popped when we tail recurse (which always happens *after* all of our DFS!)
-    path.push('')
+    path.push(PATH_NONE)
+
+    var newTasks = []
     newTasks.push(function() {
       path.pop()
       tailRecurse(puzzle, x, y)
     })
 
-    // Extend path up and down
     if (x%2 === 0) {
       newTasks.push(function() {
-        path[path.length-1] = 'bottom'
+        path[path.length-1] = PATH_BOTTOM
         return solveLoop(puzzle, x, y + 1, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
       newTasks.push(function() {
-        path[path.length-1] = 'top'
+        path[path.length-1] = PATH_TOP
         return solveLoop(puzzle, x, y - 1, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
     }
-
-    // Extend path left and right
     if (y%2 === 0) {
       newTasks.push(function() {
-        path[path.length-1] = 'right'
+        path[path.length-1] = PATH_RIGHT
         return solveLoop(puzzle, x + 1, y, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
       newTasks.push(function() {
-        path[path.length-1] = 'left'
+        path[path.length-1] = PATH_LEFT
         return solveLoop(puzzle, x - 1, y, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       })
     }
