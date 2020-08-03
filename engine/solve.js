@@ -90,10 +90,33 @@ window.pathToSolution = function(puzzle, path) {
   return newPuzzle
 }
 
-window.drawSolution = function(puzzle, svg, startData) {
-  var x = startData.x
-  var y = startData.y
-  window.onTraceStart(puzzle, {'x':x, 'y':y}, svg, startData.start, startData.symStart)
+window.drawSolution = function(puzzle, svg) {
+  var start = undefined
+  var symStart = undefined
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
+      var cell = puzzle.getCell(x, y)
+      if (cell == undefined || cell.start !== true) continue
+      // The startpoint must have a primary line through it
+      if (cell.line !== window.LINE_BLACK && cell.line !== window.LINE_BLUE) continue
+      // And that line must not be coming from any adjacent cells
+      var leftCell   = puzzle.getCell(x - 1, y)
+      var rightCell  = puzzle.getCell(x + 1, y)
+      var topCell    = puzzle.getCell(x, y - 1)
+      var bottomCell = puzzle.getCell(x, y + 1)
+      if (leftCell   != undefined && leftCell.dir === PATH_RIGHT) continue
+      if (rightCell  != undefined && rightCell.dir === PATH_LEFT) continue
+      if (topCell    != undefined && topCell.dir === PATH_BOTTOM) continue
+      if (bottomCell != undefined && bottomCell.dir === PATH_TOP) continue
+
+      start = document.getElementById('start_' + svg.id + '_' + x + '_' + y)
+      symStart = document.getElementById('symStart_' + svg.id + '_' + x + '_' + y)
+      break
+    }
+    if (start != undefined) break
+  }
+  if (start == undefined) return // No startpoint to start the trace, so there's no path.
+  window.onTraceStart(puzzle, {'x':x, 'y':y}, svg, start, symStart)
 
   console.info('Drawing solution')
   var rows = '   |'

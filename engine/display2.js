@@ -31,12 +31,10 @@ window.draw = function(puzzle, target='puzzle') {
 
   drawGrid(puzzle, svg)
   // Detects and returns the start element to begin tracing
-  var startData = drawStartAndEnd(puzzle, svg)
+  drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
-  if (startData) {
-    window.drawSolution(puzzle, svg, startData)
-  }
+  window.drawSolution(puzzle, svg)
 }
 
 function drawGrid(puzzle, svg) {
@@ -149,7 +147,6 @@ function drawSymbols(puzzle, svg, target) {
 }
 
 function drawStartAndEnd(puzzle, svg) {
-  var startData = undefined
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
@@ -164,7 +161,7 @@ function drawStartAndEnd(puzzle, svg) {
         }
 
         window.drawSymbolWithSvg(svg, {
-          'type':'end',
+          'type': 'end',
           'width': 58,
           'height': 58,
           'dir': cell.end,
@@ -183,7 +180,7 @@ function drawStartAndEnd(puzzle, svg) {
           }
 
           window.drawSymbolWithSvg(svg, {
-            'type':'start',
+            'type': 'start',
             'width': 58,
             'height': 58,
             'x': sym.x*41 + 23,
@@ -191,44 +188,27 @@ function drawStartAndEnd(puzzle, svg) {
           })
           symStart = svg.lastChild
           symStart.style.display = 'none'
+          symStart.id = 'symStart_' + svg.id + '_' + x + '_' + y
         }
 
         window.drawSymbolWithSvg(svg, {
-          'type':'start',
+          'type': 'start',
           'width': 58,
           'height': 58,
           'x': x*41 + 23,
           'y': y*41 + 23,
         })
-        var start = svg.lastChild;
+        var start = svg.lastChild
+        start.id = 'start_' + svg.id + '_' + x + '_' + y
 
-        (function(puzzle, x, y, start, symStart) {
+        ;(function(puzzle, x, y, start, symStart) {
           start.onclick = function(event) {
             trace(event, puzzle, {'x':x, 'y':y}, start, symStart)
           }
         }(puzzle, x, y, start, symStart))
-
-        // The startpoint must have a primary line through it
-        if (cell.line !== window.LINE_BLACK && cell.line !== window.LINE_BLUE) continue
-
-        // And that line must not be coming from any adjacent cells
-        var leftCell = puzzle.getCell(x - 1, y)
-        if (leftCell != undefined && leftCell.dir === 'right') continue
-
-        var rightCell = puzzle.getCell(x + 1, y)
-        if (rightCell != undefined && rightCell.dir === 'left') continue
-
-        var topCell = puzzle.getCell(x, y - 1)
-        if (topCell != undefined && topCell.dir === 'bottom') continue
-
-        var bottomCell = puzzle.getCell(x, y + 1)
-        if (bottomCell != undefined && bottomCell.dir === 'top') continue
-
-        startData = {'x':x, 'y':y, 'start':start, 'symStart': symStart}
       }
     }
   }
-  return startData
 }
 
 })
