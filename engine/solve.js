@@ -68,104 +68,32 @@ var PATH_LEFT   = 1
 var PATH_RIGHT  = 2
 var PATH_TOP    = 3
 var PATH_BOTTOM = 4
-window.pathToSolution = function(puzzle, path) {
-  var newPuzzle = puzzle.clone()
-  var start = path[0]
-  var x = start.x
-  var y = start.y
-  for (var i=1; i<path.length; i++) {
-    newPuzzle.updateCell2(x, y, 'dir', path[i])
-    if (puzzle.symmetry == undefined) {
-      newPuzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
-    } else {
-      newPuzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
-      var sym = puzzle.getSymmetricalPos(x, y)
-      newPuzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
-    }
-    if (path[i] == PATH_LEFT) x--
-    else if (path[i] == PATH_RIGHT) x++
-    else if (path[i] == PATH_TOP) y--
-    else if (path[i] == PATH_BOTTOM) y++
-  }
-  return newPuzzle
-}
 
-window.drawPath = function(puzzle, path) {
-  var solution = pathToSolution(puzzle, path)
-  drawSolution(solution)
-}
-
-window.drawSolution = function(puzzle, target='puzzle') {
-  var svg = document.getElementById(target)
+// Uses trace2 to draw the path on the grid, logs a graphical representation of the solution,
+// and also modifies the puzzle to contain the solution path.
+window.drawPath = function(puzzle, path, target='puzzle') {
   var start = undefined
   var symStart = undefined
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = puzzle.getCell(x, y)
-      if (cell == undefined || cell.start !== true) continue
-      // The startpoint must have a primary line through it
-      if (cell.line !== window.LINE_BLACK && cell.line !== window.LINE_BLUE) continue
-      // And that line must not be coming from any adjacent cells
-      var leftCell   = puzzle.getCell(x - 1, y)
-      var rightCell  = puzzle.getCell(x + 1, y)
-      var topCell    = puzzle.getCell(x, y - 1)
-      var bottomCell = puzzle.getCell(x, y + 1)
-      if (leftCell   != undefined && leftCell.dir === PATH_RIGHT) continue
-      if (rightCell  != undefined && rightCell.dir === PATH_LEFT) continue
-      if (topCell    != undefined && topCell.dir === PATH_BOTTOM) continue
-      if (bottomCell != undefined && bottomCell.dir === PATH_TOP) continue
-
-      start = document.getElementById('start_' + svg.id + '_' + x + '_' + y)
-      symStart = document.getElementById('symStart_' + svg.id + '_' + x + '_' + y)
-      break
-    }
-    if (start != undefined) break
-  }
+  var x = path[0].x
+  var y = path[0].y
+  var svg = document.getElementById(target)
+  start = document.getElementById('start_' + svg.id + '_' + x + '_' + y)
   if (start == undefined) return // No startpoint to start the trace, so there's no path.
+  symStart = document.getElementById('symStart_' + svg.id + '_' + x + '_' + y)
   window.onTraceStart(puzzle, {'x':x, 'y':y}, svg, start, symStart)
 
   console.info('Drawing solution')
-  var rows = '   |'
-  for (var i=0; i<puzzle.width; i++) {
-    if (i < 10) rows += ' '
-    rows += '  ' + i + ' |'
-  }
-  console.info(rows)
-  for (var j=0; j<puzzle.height; j++) {
-    var output = ''
-    if (j < 10) output += ' '
-    output += j + ' |'
-    for (var i=0; i<puzzle.width; i++) {
-      var cell = puzzle.grid[i][j]
-      if (cell == undefined || cell.dir == undefined) {
-        output += '     |'
-      } else if (cell.dir === PATH_LEFT) {
-        output += 'left |'
-      } else if (cell.dir === PATH_RIGHT) {
-        output += 'right|'
-      } else if (cell.dir === PATH_TOP) {
-        output += 'up   |'
-      } else if (cell.dir === PATH_BOTTOM) {
-        output += 'down |'
-      } else if (cell.dir === PATH_NONE) {
-        output += 'none |'
-      }
-    }
-    console.info(output)
-  }
-
-  // Limited because there is a chance of infinite looping with bad input data.
-  for (var i=0; i<1000; i++) {
+  for (var i=1; i<path.length; i++) {
     var cell = puzzle.getCell(x, y)
     if (cell == undefined) {
       console.error('Solution trace went out of bounds at', x, y)
-      return
+      break
     }
-    var dir = cell.dir
+    console.log('Currently at', x, y, cell, 'moving', path[i])
+
     var dx = 0
     var dy = 0
-    if (dir === PATH_NONE) { // Reached an endpoint, move into it
-      var cell = puzzle.getCell(x, y)
+    if (path[i] == PATH_NONE) { // Reached an endpoint, move into it
       console.log('Reached endpoint')
       if (cell.end === 'left') {
         window.onMove(-24, 0)
@@ -176,12 +104,20 @@ window.drawSolution = function(puzzle, target='puzzle') {
       } else if (cell.end === 'bottom') {
         window.onMove(0, 24)
       }
-      return
+      continue
+    } else if (path[i] === PATH_LEFT) {
+      dx = -1
+      cell.dir = 'left'
+    } else if (path[i] === PATH_RIGHT) {
+      dx = +1
+      cell.dir = 'right'
+    } else if (path[i] === PATH_TOP) {
+      dy = -1
+      cell.dir = 'top'
+    } else if (path[i] === PATH_BOTTOM) {
+      dy = +1
+      cell.dir = 'down'
     }
-    else if (dir === PATH_LEFT)   dx = -1
-    else if (dir === PATH_RIGHT)  dx = 1
-    else if (dir === PATH_TOP)    dy = -1
-    else if (dir === PATH_BOTTOM) dy = 1
 
     console.log('Currently at', x, y, cell, 'moving', dx, dy)
 
@@ -190,7 +126,28 @@ window.drawSolution = function(puzzle, target='puzzle') {
     // Unflag the cell, move into it, and reflag it
     puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
     window.onMove(41 * dx, 41 * dy)
-    puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
+    if (puzzle.symmetry == undefined) {
+      cell.line = window.LINE_BLACK
+    } else {
+      cell.line = window.LINE_BLUE
+      var sym = puzzle.getSymmetricalPos(x, y)
+      newPuzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
+    }
+  }
+
+  var rows = '   |'
+  for (var x=0; x<puzzle.width; x++) {
+    rows += ('' + x).padEnd(5, ' ') + '|'
+  }
+  console.info(rows)
+  for (var y=0; y<puzzle.height; y++) {
+    var output = ('' + y).padEnd(5, ' ') + '|'
+    for (var x=0; x<puzzle.width; x++) {
+      var cell = puzzle.grid[x][y]
+      var dir = (cell != undefined && cell.dir != undefined ? cell.dir : '')
+      output += dir.padEnd(5, ' ') + '|'
+    }
+    console.info(output)
   }
 }
 

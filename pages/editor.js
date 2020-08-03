@@ -463,9 +463,11 @@ function _showSolution(paths, num) {
     // There's no need to reload all the additional meta elements, since the puzzle isn't
     // actually changing, we're just drawing on it.
     _drawPuzzle()
+
+    // Draws the given path, and also updates the puzzle to have path annotations on it.
     window.drawPath(puzzle, paths[num])
 
-    // Only enable the publish button if there was a path.
+    // Only enable the publish button if there was a valid path.
     document.getElementById('publish').disabled = false
   }
 }
