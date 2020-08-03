@@ -72,24 +72,21 @@ var PATH_BOTTOM = 4
 // Uses trace2 to draw the path on the grid, logs a graphical representation of the solution,
 // and also modifies the puzzle to contain the solution path.
 window.drawPath = function(puzzle, path, target='puzzle') {
-  var start = undefined
-  var symStart = undefined
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
+      puzzle.updateCell2(x, y, 'dir', undefined)
+    }
+  }
+
   var x = path[0].x
   var y = path[0].y
-  var svg = document.getElementById(target)
-  start = document.getElementById('start_' + svg.id + '_' + x + '_' + y)
-  if (start == undefined) return // No startpoint to start the trace, so there's no path.
-  symStart = document.getElementById('symStart_' + svg.id + '_' + x + '_' + y)
-  window.onTraceStart(puzzle, {'x':x, 'y':y}, svg, start, symStart)
+  var start = document.getElementById('start_' + target + '_' + x + '_' + y)
+  var symStart = document.getElementById('symStart_' + target + '_' + x + '_' + y)
+  window.onTraceStart(puzzle, {'x':x, 'y':y}, document.getElementById(target), start, symStart)
 
   console.info('Drawing solution')
   for (var i=1; i<path.length; i++) {
     var cell = puzzle.getCell(x, y)
-    if (cell == undefined) {
-      console.error('Solution trace went out of bounds at', x, y)
-      break
-    }
-    console.log('Currently at', x, y, cell, 'moving', path[i])
 
     var dx = 0
     var dy = 0
@@ -104,7 +101,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       } else if (cell.end === 'bottom') {
         window.onMove(0, 24)
       }
-      continue
+      break
     } else if (path[i] === PATH_LEFT) {
       dx = -1
       cell.dir = 'left'
