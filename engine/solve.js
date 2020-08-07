@@ -121,14 +121,14 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     x += dx
     y += dy
     // Unflag the cell, move into it, and reflag it
-    puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
+    cell.line = window.LINE_NONE
     window.onMove(41 * dx, 41 * dy)
     if (puzzle.symmetry == undefined) {
       cell.line = window.LINE_BLACK
     } else {
       cell.line = window.LINE_BLUE
       var sym = puzzle.getSymmetricalPos(x, y)
-      newPuzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
+      puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
     }
   }
 
