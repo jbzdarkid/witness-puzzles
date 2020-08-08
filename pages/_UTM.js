@@ -31,9 +31,9 @@ function loadSinglePuzzle(puzzleData) {
   window.draw(puzzle)
 }
 
-function _showSolution(solutions, num) {
-  if (num < 0) num = solutions.length - 1
-  if (num >= solutions.length) num = 0
+function _showSolution(paths, num) {
+  if (num < 0) num = paths.length - 1
+  if (num >= paths.length) num = 0
 
   var previousSolution = document.getElementById('previousSolution')
   var solutionCount = document.getElementById('solutionCount')
@@ -41,18 +41,25 @@ function _showSolution(solutions, num) {
   var nextSolution = document.getElementById('nextSolution')
 
   // Buttons & text
-  if (solutions.length < 2) { // 0 or 1 solution(s), arrows are useless
-    solutionCount.innerText = solutions.length + ' of ' + solutions.length
+  if (paths.length === 0) { // 0 paths, arrows are useless
+    solutionCount.innerText = '0 of 0'
+    previousSolution.disabled = true
+    nextSolution.disabled = true
+  } else if (paths.length === 1) { // 1 path, arrows are useless
+    solutionCount.innerText = '1 of 1'
+    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = true
     nextSolution.disabled = true
   } else {
-    solutionCount.innerText = (num + 1) + ' of ' + solutions.length
-    solutionInfo.innerText = solutions[num]['edges'] + ' edges, ' + solutions[num]['corners'] + ' corners'
-    previousSolution.onclick = function() {_showSolution(solutions, num - 1)}
-    nextSolution.onclick = function() {_showSolution(solutions, num + 1)}
+    solutionCount.innerText = (num + 1) + ' of ' + paths.length
+    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    previousSolution.disabled = false
+    nextSolution.disabled = false
+    previousSolution.onclick = function() {_showSolution(paths, num - 1)}
+    nextSolution.onclick = function() {_showSolution(paths, num + 1)}
   }
 
-  window.draw(solutions[num]['solution'])
+  window.drawPath(puzzle, paths[num])
   document.getElementById('solutionViewer').style.display = null
 }
 
@@ -64,7 +71,7 @@ function isColored(grid, x, y) {
 function solvePuzzle() {
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
-  var solutions = window.solve(puzzle, function(progress) {
+  window.solve(puzzle, function(progress) {
     var percent = Math.floor(100 * progress)
     document.getElementById('progressPercent').innerText = percent + '%'
     document.getElementById('progress').style.width = percent + '%'
@@ -77,11 +84,9 @@ function onSolvedPuzzle(paths) {
   document.getElementById('progressPercent').innerText = '0%'
   document.getElementById('progress').style.width = '0%'
 
-  var solutions = []
-  for (var path of paths) solutions.push(window.pathToSolution(puzzle, path))
-
-  for (var i=0; i<solutions.length; i++) {
-    var solution = solutions[i]
+  for (var i=0; i<paths.length; i++) {
+    /*
+    var solution = window.pathToSolution(puzzle, paths[i])
     var edges = 0
     var corners = 0
     for (var x=0; x<solution.grid.length; x++) {
@@ -114,14 +119,12 @@ function onSolvedPuzzle(paths) {
         }
       }
     }
-    solutions[i] = {
-      'sort': edges*100 + corners,
-      'edges': edges,
-      'corners': corners,
-      'solution': solution
-    }
+    */
+  }
+  function sortKey(pathA, pathB) {
+    return pathA.length - pathB.length
   }
 
-  solutions.sort(function(a, b){return a['sort']- b['sort']})
-  _showSolution(solutions, 0)
+  paths.sort(sortKey)
+  _showSolution(paths, 0)
 }
