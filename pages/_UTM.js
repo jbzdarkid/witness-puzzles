@@ -14,7 +14,12 @@ function loadPuzzleRegion(region) {
   for (var puzzleInfo of window.ALL_PUZZLES) {
     if (puzzleInfo['area'] != region) continue
     var option = document.createElement('option')
-    option.value = puzzleInfo['data']
+    try {
+      option.value = Puzzle.deserialize(puzzleInfo.data).serialize()
+    } catch {
+      option.value = puzzleInfo.data().serialize()
+    }
+
     option.innerText = puzzleInfo['name']
     areaPuzzles.appendChild(option)
   }
