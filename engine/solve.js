@@ -75,6 +75,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       puzzle.updateCell2(x, y, 'dir', undefined)
+      puzzle.updateCell2(x, y, 'line', undefined)
     }
   }
 
