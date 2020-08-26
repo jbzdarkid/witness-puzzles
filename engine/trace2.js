@@ -378,7 +378,7 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
     // At endpoint and in main box
     var cell = puzzle.getCell(data.pos.x, data.pos.y)
     if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
-      data.cursor.onclick = null
+      data.cursor.onpointerdown = null
       window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
       for (var negation of puzzle.negations) {
@@ -405,7 +405,7 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
       window.PLAY_SOUND('abort')
       clearGrid(svg, puzzle)
     } else { // Exit lock but allow resuming from the cursor
-      data.cursor.onclick = function(event) {
+      data.cursor.onpointerdown = function(event) {
         if (svg !== data.svg) return // Another puzzle is live, so data is gone
         data.tracing = true
         start.requestPointerLock()
@@ -498,19 +498,35 @@ document.onpointerlockchange = function() {
   if (document.pointerLockElement == null) {
     document.onmousemove = null
     document.ontouchmove = null
-    document.onclick = null
     document.ontouchend = null
   } else {
     var sens = parseFloat(document.getElementById('sens').value)
     document.onmousemove = function(event) {
       // Working around a race condition where movement events fire after the handler is removed.
       if (data.tracing !== true) return
+      // Semi hack. Prevent accidental fires of mousemove on ios.
+      if (!event.movementX) return
       onMove(sens * event.movementX, sens * event.movementY)
     }
     document.ontouchmove = function(event) {
-      // TODO: Save the identifier & x/y from the touchstart, then compute deltas
+      event.preventDefault() // Prevent scrolling effects, maybe
+      if (data.tracing !== true) return
+      var newPos = {'x': event.pageX, 'y': event.pageY}
+      if (data.lastTouchPos) {
+        onMove(newPos.x - data.lastTouchPos.x, newPos.y - data.lastTouchPos.y)
+      }
+      data.lastTouchPos = newPos
     }
-    // document.ontouchend = function(event) {_stopTrace(event)}
+    document.ontouchend = function(event) {
+      data.lastTouchPos = null
+      // Only call window.trace (to stop tracing) if we're really in an endpoint.
+      // @Cutnpaste
+      var cell = puzzle.getCell(data.pos.x, data.pos.y)
+      if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
+        // svg is maybe a hack.
+        window.trace(event, data.puzzle, null, {'parentElement':data.svg}, null)
+      }
+    }
   }
 }
 

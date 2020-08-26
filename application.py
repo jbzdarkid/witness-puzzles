@@ -121,4 +121,5 @@ if __name__ == '__main__':
       continue
     for file in files:
       extra_files.append(root + os.sep + file)
+  # To make this server visible from the local network, add host='0.0.0.0'
   application.run(extra_files=extra_files)
