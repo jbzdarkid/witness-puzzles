@@ -1,5 +1,5 @@
 @font-face { src: url('Constantia.ttf'); }
-label, button, select, option, input, a {
+label, select, option, input, a {
   font-family: Constantia;
   font-variant: small-caps;
   font-weight: bold;
@@ -35,4 +35,30 @@ body { text-align: center; }
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
+}
+
+button { /* Neutral */
+  background-color: rgb(239, 239, 239);
+  border: 0.5px solid rgb(118, 118, 118);
+  border-radius: 2px;
+  display: inline-block;
+  font-family: Constantia;
+  font-size: 28px;
+  font-variant: small-caps;
+  font-weight: bold;
+  margin: 0;
+  outline: none;
+  padding: 1px 6px;
+  -moz-appearance: none;
+}
+button:hover { /* Hover-over */
+  background-color: rgb(229, 229, 229);
+  border-color: rgb(79, 79, 79);
+}
+button:active { /* Mouse held down */
+  background-color: rgb(245, 245, 245);
+  border-color: rgb(141, 141, 141);
+}
+button:focus { /* Selected */
+  outline: none; /* https://stackoverflow.com/a/63108630 */
 }
