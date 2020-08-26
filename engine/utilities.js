@@ -13,7 +13,14 @@ if (!String.prototype.includes) {
 }
 Event.prototype.movementX = Event.prototype.movementX || Event.prototype.mozMovementX
 Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMovementY
-Event.prototype.requestPointerLock = Event.prototype.requestPointerLock || Event.prototype.mozRequestPointerLock
+Element.prototype.requestPointerLock = Element.prototype.requestPointerLock || Element.prototype.mozRequestPointerLock || function() {
+  document.pointerLockElement = this
+  document.onpointerlockchange()
+}
+document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || function() {
+  document.pointerLockElement = null
+  document.onpointerlockchange()
+}
 /*** End cross-compatibility ***/
 
 // https://stackoverflow.com/q/12571650
@@ -37,11 +44,12 @@ if (window.location.href.startsWith("http://127.0.0.1")) {
   window.assert = function(condition) {}
 }
 
+var audio = new Audio()
 var tracks = {
-  'start': new Audio('/data/panel_start_tracing.ogg'),
-  'success': new Audio('/data/panel_success.ogg'),
-  'fail': new Audio('/data/panel_failure.ogg'),
-  'abort': new Audio('/data/panel_abort_tracing.ogg')
+  'start': '/data/panel_start_tracing.ogg',
+  'success': '/data/panel_success.ogg',
+  'fail': '/data/panel_failure.ogg',
+  'abort': '/data/panel_abort_tracing.ogg',
 }
 
 window.PLAY_SOUND = function(track) {
@@ -53,8 +61,9 @@ window.PLAY_SOUND = function(track) {
       audio.currentTime = 0
     }
   }
-  tracks[track].volume = localStorage.volume
-  tracks[track].play()
+  audio.volume = localStorage.volume
+  audio.src = tracks[track].src
+  audio.play()
 }
 
 window.FEEDBACK = function(message) {

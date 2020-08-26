@@ -5,7 +5,9 @@ label, select, option, input, a {
   font-weight: bold;
   font-size: 28px;
 }
-a { text-decoration: none }
+/* On iOS, this prevents buttons from being rounded */
+button {-webkit-appearance: none; }
+a { text-decoration: none; }
 table { margin: auto; }
 .resize { position: absolute; }
 input.checkbox {
