@@ -54,15 +54,10 @@ var tracks = {
 
 window.PLAY_SOUND = function(track) {
   console.log('Playing sound:', track)
-  for (var name in tracks) {
-    var audio = tracks[name]
-    if (audio.pause) {
-      audio.pause()
-      audio.currentTime = 0
-    }
-  }
-  audio.volume = localStorage.volume
+  audio.pause()
   audio.src = tracks[track].src
+  audio.currentTime = 0
+  audio.volume = localStorage.volume
   audio.play()
 }
 
@@ -116,10 +111,16 @@ window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
 
 // pointer-events: none; allows for onclick events to bubble up
+// -webkit-touch-callout applies to iOS devices only. Unfortunately, iOS devices have a small pixel gap between the line segments. Adding crispedges isn't the *most* elegant solution, but it works.
 var animations =
-'.line-1 {fill: ' + window.LINE_DEFAULT + '; pointer-events: none;}\n' +
-'.line-2 {fill: ' + window.LINE_PRIMARY + '; pointer-events: none;}\n' +
-'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none;}\n' +
+'.line-1 {fill: ' + window.LINE_DEFAULT   + '; pointer-events: none; }\n' +
+'.line-2 {fill: ' + window.LINE_PRIMARY   + '; pointer-events: none; }\n' +
+'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none; }\n' +
+'@supports (-webkit-touch-callout: none) {\n' +
+'  .line-1 { shape-rendering: crispedges; }\n' +
+'  .line-2 { shape-rendering: crispedges; }\n' +
+'  .line-3 { shape-rendering: crispedges; }\n' +
+'}\n' +
 '@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}\n' +
 '@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}\n' +
 '@keyframes error {to {fill: red;}}\n' +

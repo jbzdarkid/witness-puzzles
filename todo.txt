@@ -6,9 +6,10 @@
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 - Go through all puzzles in the DB and remove puzzles which are invalid
   Tighten up the solve rules for any patterns (e.g. symmetry bugs)
-- Add a color for the button backgrounds (for consistency).
-- Fix border highlights (so that they look like windows)
-- Audio in iOS is tricky. It might be working, see https://www.ibm.com/developerworks/library/wa-ioshtml5/wa-ioshtml5-pdf.pdf
+- iOS:
+  Audio in iOS is tricky. It might be working, see https://www.ibm.com/developerworks/library/wa-ioshtml5/wa-ioshtml5-pdf.pdf
+  Fix drag handles
+  Fix dumb scrolling bug
 
 Browse
 -- "Jump to top" button
