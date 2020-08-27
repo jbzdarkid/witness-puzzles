@@ -44,20 +44,57 @@ if (window.location.href.startsWith("http://127.0.0.1")) {
   window.assert = function(condition) {}
 }
 
+var trackNames = ['start', 'success', 'fail', 'abort']
 var tracks = {
   'start':   new Audio(src='/data/panel_start_tracing.aac'),
   'success': new Audio(src='/data/panel_success.aac'),
   'fail':    new Audio(src='/data/panel_failure.aac'),
   'abort':   new Audio(src='/data/panel_abort_tracing.aac'),
 }
+for (var name of trackNames) tracks[name].muted = true
 
-window.PLAY_SOUND = function(track) {
-  console.log('Playing sound:', track)
-  var audio = tracks[track]
-  audio.currentTime = 0
-  audio.volume = localStorage.volume
-  // Safari complains if we do not handle this promise.
-  audio.play().then(function() {}).catch(function() {})
+window.PLAY_SOUND = function(targetAudio) {
+  console.log('Playing sound:', targetAudio)
+  tracks[targetAudio].pause()
+  tracks[targetAudio].play().then(function() {
+    // If the audio plays, then we're all set -- mark it as good and continue.
+    // This is the expected behavior on all non-iOS platforms.
+    console.debug('Played successfully')
+    tracks[targetAudio].currentTime = 0
+    tracks[targetAudio].volume = localStorage.volume
+    tracks[targetAudio].muted = false
+  }).catch(function() {
+    // If the audio does not play, swap it out for an audio element that works.
+    // This will usually cause lag, since the target audio track needs to be fetched again.
+    console.debug('Audio failed')
+
+    var badAudio = targetAudio
+    targetAudio = null
+    for (var name of trackNames) {
+      if (!tracks[name].muted) {
+        targetAudio = name
+        break
+      }
+    }
+    console.debug('Selected alternative audio object: ' + targetAudio)
+    if (!targetAudio) return // No good audio tracks available.
+
+    var tmp = tracks[badAudio]
+    tmp.src = tracks[badAudio].src
+    tracks[badAudio] = tracks[targetAudio]
+    tracks[badAudio].src = tracks[targetAudio].src
+    tracks[targetAudio] = tmp
+    tracks[targetAudio].src = tmp.src
+    tracks[targetAudio].pause()
+    tracks[targetAudio].play().then(function() {
+      console.debug('Backup audio track worked')
+      tracks[targetAudio].currentTime = 0
+      tracks[targetAudio].volume = localStorage.volume
+    }).catch(function(error) {
+      // Welp, we tried.
+      console.error('Backup audio track failed: ' + error)
+    })
+  })
 }
 
 window.FEEDBACK = function(message) {
