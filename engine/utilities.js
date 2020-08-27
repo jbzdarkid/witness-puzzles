@@ -44,21 +44,20 @@ if (window.location.href.startsWith("http://127.0.0.1")) {
   window.assert = function(condition) {}
 }
 
-var audio = new Audio()
 var tracks = {
-  'start': '/data/panel_start_tracing.ogg',
-  'success': '/data/panel_success.ogg',
-  'fail': '/data/panel_failure.ogg',
-  'abort': '/data/panel_abort_tracing.ogg',
+  'start':   new Audio(src='/data/panel_start_tracing.aac'),
+  'success': new Audio(src='/data/panel_success.aac'),
+  'fail':    new Audio(src='/data/panel_failure.aac'),
+  'abort':   new Audio(src='/data/panel_abort_tracing.aac'),
 }
 
 window.PLAY_SOUND = function(track) {
   console.log('Playing sound:', track)
-  audio.pause()
-  audio.src = tracks[track].src
+  var audio = tracks[track]
   audio.currentTime = 0
   audio.volume = localStorage.volume
-  audio.play()
+  // Safari complains if we do not handle this promise.
+  audio.play().then(function() {}).catch(function() {})
 }
 
 window.FEEDBACK = function(message) {
