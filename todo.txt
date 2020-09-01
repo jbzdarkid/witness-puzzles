@@ -7,9 +7,12 @@
 - Go through all puzzles in the DB and remove puzzles which are invalid
   Tighten up the solve rules for any patterns (e.g. symmetry bugs)
 - iOS:
-  Audio in iOS is tricky. It might be working, see https://www.ibm.com/developerworks/library/wa-ioshtml5/wa-ioshtml5-pdf.pdf
   Fix drag handles
-  Fix dumb scrolling bug
+- For the various settings (precise polys, nega cancel nega, etc) add a settings object to the puzzle.
+  Then, I should dupe some of my tests with other settings
+  Add a setting for 'do not flash for errors'
+  This should probably also have a 'custom symbols' array, which contains {name, drawFunction, validateFunction}
+
 
 Browse
 -- "Jump to top" button
