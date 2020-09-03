@@ -948,5 +948,11 @@ var tests = {
     puzzle.grid[4][2].dot = true
     puzzle.grid[4][4].dot = true
     return [puzzle, 0]
+  }, 'too-wide-poly-on-pillar': function() {
+    var puzzle = new Puzzle(2, 4, true)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[1][5] = {'type': 'poly', 'color': 'yellow', 'polyshape': 38505}
+    return [puzzle, 41]
   }
 }

@@ -1,10 +1,5 @@
 namespace(function() {
 
-// Validation settings
-window.NEGATIONS_CANCEL_NEGATIONS = true
-window.SHAPELESS_ZERO_POLY = true
-window.PRECISE_POLYOMINOS = true
-
 class RegionData {
   constructor() {
     this.invalidElements = []
@@ -158,7 +153,7 @@ function regionCheckNegations2(puzzle, region, negationSymbols, invalidElements,
   if (index >= invalidElements.length) {
     var i = index2
     // pair off all negation symbols, 2 at a time
-    if (window.NEGATIONS_CANCEL_NEGATIONS) {
+    if (puzzle.settings.NEGATIONS_CANCEL_NEGATIONS) {
       for (; i<negationSymbols.length-1; i+=2) {
         var source = negationSymbols[i]
         var target = negationSymbols[i+1]
@@ -175,7 +170,7 @@ function regionCheckNegations2(puzzle, region, negationSymbols, invalidElements,
     var regionData = regionCheck(puzzle, region, false)
 
     i = index2
-    if (window.NEGATIONS_CANCEL_NEGATIONS) {
+    if (puzzle.settings.NEGATIONS_CANCEL_NEGATIONS) {
       for (; i<negationSymbols.length-1; i+=2) {
         var source = negationSymbols[i]
         var target = negationSymbols[i+1]

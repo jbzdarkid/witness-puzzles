@@ -57,7 +57,7 @@ function fitsGrid(cells, x, y, puzzle) {
 // (0, 0) must also be a cell in the shape, so that
 // placing the shape at (x, y) will fill (x, y)
 // Ylops will have -1s on all adjacent cells, to break "overlaps" for polyominos.
-window.polyominoFromPolyshape = function(polyshape, ylop=false) {
+window.polyominoFromPolyshape = function(polyshape, ylop=false, precise=true) {
   for (var y=0; y<4; y++) {
     for (var x=0; x<4; x++) {
       if (isSet(polyshape, x, y)) {
@@ -77,7 +77,7 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false) {
 
       // "Precise" polyominos adds cells in between the apparent squares in the polyomino.
       // This prevents the solution line from going through polyominos in the solution.
-      if (window.PRECISE_POLYOMINOS) {
+      if (precise) {
         if (ylop) {
           // Ylops fill up/left if no adjacent cell, and always fill bottom/right
           if (!isSet(polyshape, x - 1, y)) {
@@ -127,14 +127,14 @@ window.polyFit = function(region, puzzle) {
     }
   }
   if (polys.length + ylops.length === 0) {
-    console.log('No polyominos or onimylops inside the region, vacuously true')
+    console.log('No polyominos or onimoylops inside the region, vacuously true')
     return true
   }
   if (polyCount > 0 && polyCount !== regionSize) {
     console.log('Combined size of polyominos and onimoylops', polyCount, 'does not match region size', regionSize)
     return false
   }
-  if (polyCount === 0 && window.SHAPELESS_ZERO_POLY) {
+  if (polyCount === 0 && puzzle.settings.SHAPELESS_ZERO_POLY) {
     console.log('Combined size of polyominos and onimoylops is zero')
     return true
   }
@@ -190,7 +190,7 @@ function placeYlops(ylops, polys, puzzle) {
     for (var y=1; y<puzzle.height; y+=2) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
-        var cells = polyominoFromPolyshape(polyshape, true)
+        var cells = polyominoFromPolyshape(polyshape, true, puzzle.settings.PRECISE_POLYOMINOS)
         if (!tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
         console.group('')
         if (placeYlops(ylops, polys, puzzle)) return true
@@ -256,7 +256,7 @@ function placePolys(polys, puzzle) {
       attemptedPolyshapes.push(poly.polyshape)
       for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
         console.spam('Selected polyshape', polyshape)
-        var cells = polyominoFromPolyshape(polyshape)
+        var cells = polyominoFromPolyshape(polyshape, false, puzzle.settings.PRECISE_POLYOMINOS)
         if (!tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
           console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
           continue

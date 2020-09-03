@@ -35,6 +35,14 @@ class Puzzle {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
     this.pillar = pillar
+    this.settings = {
+      // If true, negation symbols are allowed to cancel other negation symbols.
+      NEGATIONS_CANCEL_NEGATIONS: true,
+      // If true, and the count of polyominos and onimoylops is zero, they cancel regardless of shape.
+      SHAPELESS_ZERO_POLY: false,
+      // If true, the traced line cannot go through the placement of a polyomino.
+      PRECISE_POLYOMINOS: true,
+    }
   }
 
   static deserialize(json) {
@@ -104,6 +112,7 @@ class Puzzle {
         puzzle.grid[gap.x][gap.y].gap = 1
       }
     }
+    if (parsed.settings) puzzle.settings = parsed.settings
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
     puzzle.largezero = puzzle.width * puzzle.height
