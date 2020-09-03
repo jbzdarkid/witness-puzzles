@@ -1,5 +1,7 @@
 JavaScript implementation of the puzzles in The Witness
 
+If you want to see the product, head over to [witnesspuzzles.com](https://witnesspuzzles.com)
+
 # Table of Contents
 1. [Overview / Explanation of files](#Overview)
     1. [utilities.js](#utilitiesjs)
@@ -61,9 +63,9 @@ At this point, all of the resulting movement is linear, though the direction is 
 Additionally, prevent the cursor from leaving the grid if the momentum is too serious.  
 If the direction is none, we stop the loop at this time.  
 4. If we moved to wrap around a pillar, update data.x to account for this motion.  
-5a. If this direction is the opposite of the last direction, we backed up into the previous cell. In this case, we remove a segment from the path and then change data.pos (our location in the grid).  
-5b. If this direction is not the opposite, we entered a new cell. In this case, change data.pos and then add a segment to the path.  
-6. Goto 2  
+  4a. If this direction is the opposite of the last direction, we backed up into the previous cell. In this case, we remove a segment from the path and then change data.pos (our location in the grid).  
+  4b. If this direction is not the opposite, we entered a new cell. In this case, change data.pos and then add a segment to the path.  
+5. Goto 2  
 
 ## solve.js
 This is a very straightforwards brute-force solver. We do depth-first recursive backtracking to try every single solution to the puzzle. We compute if the current cell is valid (not already colored), and then recurse in all 4 directions.  
