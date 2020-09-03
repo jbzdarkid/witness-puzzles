@@ -361,8 +361,8 @@ function clearGrid(svg, puzzle) {
 }
 
 window.trace = function(event, puzzle, pos, start, symStart=undefined) {
-  var svg = start.parentElement
   if (document.pointerLockElement == null) { // Started tracing a solution
+    var svg = start.parentElement
     data.tracing = true
     window.PLAY_SOUND('start')
     // Cleans drawn lines & puzzle state
@@ -383,28 +383,29 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
 
       for (var negation of puzzle.negations) {
         console.debug('Rendering negation', negation)
-        data.animations.insertRule('.' + svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
-        data.animations.insertRule('.' + svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
+        data.animations.insertRule('.' + data.svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
+        data.animations.insertRule('.' + data.svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
       }
 
       if (puzzle.valid) {
         window.PLAY_SOUND('success')
         // !important to override the child animation
-        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
+        data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
         if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
       } else {
         window.PLAY_SOUND('fail')
-        data.animations.insertRule('.' + svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
+        data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
         // Get list of invalid elements
         for (var invalidElement of puzzle.invalidElements) {
-          data.animations.insertRule('.' + svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
+          data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
         }
       }
 
-    } else if (event.which === 3) { // Right-clicked, not at the end: Clear puzzle
+    // Right-clicked (or double-tapped) and not at the end: Clear puzzle
+    } else if (event.which === 3 || (event.touches && event.touches.length > 1)) {
       window.PLAY_SOUND('abort')
-      clearGrid(svg, puzzle)
-    } else { // Exit lock but allow resuming from the cursor
+      clearGrid(data.svg, puzzle)
+    } else { // Exit lock but allow resuming from the cursor (Desktop only)
       data.cursor.onpointerdown = function(event) {
         if (svg !== data.svg) return // Another puzzle is live, so data is gone
         data.tracing = true
@@ -494,9 +495,32 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   data.path.push(new PathSegment('none')) // Must be created after initializing data.symbbox
 }
 
+var passive = false
+try {
+  window.addEventListener('test', null, Object.defineProperty({}, 'passive', {
+    get: function() {
+      passive = {passive: false}
+    }
+  }))
+} catch {}
+
+function isEventWithinPuzzle(event) {
+  for (var node = event.target; node != undefined; node = node.parentElement) {
+    if (node == data.svg) return true
+  }
+  return false
+}
+
+document.addEventListener('touchmove', function() {
+  if (data.tracing !== true) return
+  // Prevent scrolling if the touch event is within the puzzle.
+  if (isEventWithinPuzzle(event)) event.preventDefault()
+}, passive)
+
 document.onpointerlockchange = function() {
   if (document.pointerLockElement == null) {
     document.onmousemove = null
+    document.ontouchstart = null
     document.ontouchmove = null
     document.ontouchend = null
   } else {
@@ -504,27 +528,31 @@ document.onpointerlockchange = function() {
     document.onmousemove = function(event) {
       // Working around a race condition where movement events fire after the handler is removed.
       if (data.tracing !== true) return
-      // Semi hack. Prevent accidental fires of mousemove on ios.
+      // Prevent accidental fires on ios (which is handled via ontouchmove).
       if (!event.movementX) return
       onMove(sens * event.movementX, sens * event.movementY)
     }
-    document.ontouchmove = function(event) {
-      event.preventDefault() // Prevent scrolling effects, maybe
-      if (data.tracing !== true) return
-      var newPos = {'x': event.pageX, 'y': event.pageY}
-      if (data.lastTouchPos) {
-        onMove(newPos.x - data.lastTouchPos.x, newPos.y - data.lastTouchPos.y)
+    document.ontouchstart = function(event) {
+      if (event.touches.length > 1) {
+        // Stop tracing for two+ finger touches (the equivalent of a right click on desktop)
+        window.trace(event, data.puzzle, null, null, null)
+        return
       }
+      data.lastTouchPos = {'x': event.pageX, 'y': event.pageY}
+    }
+    document.ontouchmove = function(event) {
+      if (data.tracing !== true) return
+      if (!isEventWithinPuzzle(event)) return
+      var newPos = {'x': event.pageX, 'y': event.pageY}
+      onMove(newPos.x - data.lastTouchPos.x, newPos.y - data.lastTouchPos.y)
       data.lastTouchPos = newPos
     }
     document.ontouchend = function(event) {
       data.lastTouchPos = null
       // Only call window.trace (to stop tracing) if we're really in an endpoint.
-      // @Cutnpaste
-      var cell = puzzle.getCell(data.pos.x, data.pos.y)
+      var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
       if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
-        // svg is maybe a hack.
-        window.trace(event, data.puzzle, null, {'parentElement':data.svg}, null)
+        window.trace(event, data.puzzle, null, null, null)
       }
     }
   }

@@ -4,14 +4,16 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-- Go through all puzzles in the DB and remove puzzles which are invalid
-  Tighten up the solve rules for any patterns (e.g. symmetry bugs)
-- iOS:
-  Fix drag handles
 - For the various settings (precise polys, nega cancel nega, etc) add a settings object to the puzzle.
   Then, I should dupe some of my tests with other settings
   Add a setting for 'do not flash for errors'
   This should probably also have a 'custom symbols' array, which contains {name, drawFunction, validateFunction}
+- Consider "PointPool"
+  Change all current {x:, y:} to be point(x, y) [probably good anyways]
+  Compare perf of above ^
+  Then, try using the pool from https://github.com/Overv/TheWitnessSolver/blob/master/src/shared.js#L74
+  (and again, compare perf)
+  Could also consider a class here -- then, maybe our internal representation is 100*x + y -- and then comparison is cheap?
 
 
 Browse

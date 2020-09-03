@@ -411,7 +411,9 @@ window.onload = function() {
   }
 
   for (var resize of document.getElementsByClassName('resize')) {
-    resize.onmousedown = function(event) {_dragStart(event, this)}
+    resize.onpointerdown = function(event) {
+      _dragStart(event, this)
+    }
     if (resize.id === 'resize-left' || resize.id === 'resize-right') {
       var svg = drawSymbol({'type': 'drag', 'rot':1, 'width':6, 'height':22})
       svg.style.width = '6px'
@@ -782,7 +784,7 @@ function _shapeChooser() {
   anchor.style.height = '100%'
   anchor.style.position = 'absolute'
   anchor.style.top = 0
-  anchor.onmousedown = function(event) {_shapeChooserClick(event)}
+  anchor.onpointerdown = function(event) {_shapeChooserClick(event)}
 
   var chooser = document.createElement('div')
   puzzle.parentElement.insertBefore(chooser, puzzle)
@@ -793,7 +795,7 @@ function _shapeChooser() {
   chooser.style.height = '100%'
   chooser.style.minWidth = '400px'
   chooser.style.zIndex = 1 // Position in front of the puzzle
-  chooser.onmousedown = function(event) {_shapeChooserClick(event)}
+  chooser.onpointerdown = function(event) {_shapeChooserClick(event)}
 
   var chooserTable = document.createElement('table')
   chooser.appendChild(chooserTable)
@@ -803,13 +805,13 @@ function _shapeChooser() {
   chooserTable.style.padding = 25
   chooserTable.style.background = window.BACKGROUND
   chooserTable.style.border = window.BORDER
-  chooserTable.onmousedown = function(event) {_shapeChooserClick(event, this)}
+  chooserTable.onpointerdown = function(event) {_shapeChooserClick(event, this)}
   for (var x=0; x<4; x++) {
     var row = chooserTable.insertRow(x)
     for (var y=0; y<4; y++) {
       var cell = row.insertCell(y)
       cell.powerOfTwo = 1 << (x + y*4)
-      cell.onmousedown = function(event) {_shapeChooserClick(event, this)}
+      cell.onpointerdown = function(event) {_shapeChooserClick(event, this)}
       cell.style.width = 58
       cell.style.height = 58
       if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
@@ -977,8 +979,24 @@ function resizePuzzle(dx, dy, id) {
   return true
 }
 
+var passive = false
+try {
+  window.addEventListener('test', null, Object.defineProperty({}, 'passive', {
+    get: function() {
+      passive = {passive: false}
+    }
+  }))
+} catch {}
+
+document.addEventListener('touchmove', function(event) {
+  if (dragging) event.preventDefault()
+}, passive)
+
 function _dragStart(event, elem) {
-  dragging = {'x':event.clientX, 'y':event.clientY}
+  dragging = {
+    'x': event.pageX || event.clientX,
+    'y': event.pageY || event.clientY,
+  }
   console.log('Drag started at', dragging.x, dragging.y)
 
   var anchor = document.createElement('div')
@@ -990,34 +1008,43 @@ function _dragStart(event, elem) {
   anchor.style.width = '99%'
   anchor.style.height = '100%'
   anchor.style.cursor = elem.style.cursor
-  document.onmousemove = function(event) {
-    if (event.buttons === 0) {
-      console.log('Drag ended')
-      dragging = undefined
-      var anchor = document.getElementById('anchor')
-      anchor.parentElement.removeChild(anchor)
-      document.onmousemove = undefined
-      return
-    }
-    _dragMove(event, elem)
-  }
+  document.onmousemove = function(event) {_dragMove(event, elem)}
+  document.ontouchmove = function(event) {_dragMove(event, elem)}
+  document.ontouchend = function(event) {_dragEnd(event, elem)}
+}
+
+function _dragEnd(event, elem) {
+  console.log('Drag ended')
+  dragging = undefined
+  var anchor = document.getElementById('anchor')
+  anchor.parentElement.removeChild(anchor)
+  document.onmousemove = undefined
+  document.ontouchmove = undefined
+  document.ontouchend = undefined
 }
 
 function _dragMove(event, elem) {
-  console.spam(event.clientX, event.clientY, dragging)
+  var newDragging = {
+    'x': event.pageX || event.clientX,
+    'y': event.pageY || event.clientY,
+  }
+  console.spam(newDragging.x, newDragging.y)
+  if (event.buttons === 0) return _dragEnd(event, elem)
   if (dragging == undefined) return
   var dx = 0
   var dy = 0
   if (elem.id.includes('left')) {
-    dx = dragging.x - event.clientX
+    dx = dragging.x - newDragging.x
   } else if (elem.id.includes('right')) {
-    dx = event.clientX - dragging.x
+    dx = newDragging.x - dragging.x
   }
   if (elem.id.includes('top')) {
-    dy = dragging.y - event.clientY
+    dy = dragging.y - newDragging.y
   } else if (elem.id.includes('bottom')) {
-    dy = event.clientY - dragging.y
+    dy = newDragging.y - dragging.y
   }
+
+  console.log(dx, dy)
 
   var xLim = 40
   // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
@@ -1031,12 +1058,14 @@ function _dragMove(event, elem) {
     var yLim = 60
   }
 
+  // Note: We only adjust dragging when we reach a limit. 
+
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break
     _writePuzzle()
     _reloadPuzzle()
     dx -= Math.sign(dx) * xLim
-    dragging.x = event.clientX
+    dragging.x = newDragging.x
   }
 
   while (Math.abs(dy) >= yLim) {
@@ -1044,6 +1073,6 @@ function _dragMove(event, elem) {
     _writePuzzle()
     _reloadPuzzle()
     dy -= Math.sign(dy) * yLim
-    dragging.y = event.clientY
+    dragging.y = newDragging.y
   }
 }
