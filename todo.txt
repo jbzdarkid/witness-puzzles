@@ -8,13 +8,6 @@
   Then, I should dupe some of my tests with other settings
   Add a setting for 'do not flash for errors'
   This should probably also have a 'custom symbols' array, which contains {name, drawFunction, validateFunction}
-- Consider "PointPool"
-  Change all current {x:, y:} to be point(x, y) [probably good anyways]
-  Compare perf of above ^
-  Then, try using the pool from https://github.com/Overv/TheWitnessSolver/blob/master/src/shared.js#L74
-  (and again, compare perf)
-  Could also consider a class here -- then, maybe our internal representation is 100*x + y -- and then comparison is cheap?
-
 
 Browse
 -- "Jump to top" button
