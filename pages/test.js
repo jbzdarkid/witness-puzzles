@@ -7,6 +7,11 @@ window.onload = function() {
   for (var i=0; i<testNames.length; i++) {
     if (i%3 === 0) table.insertRow()
     var testName = testNames[i]
+    if (!testName.match(/^[_a-zA-Z]+[_a-zA-Z0-9-]*$/g)) {
+      console.error('Test name is not a valid CSS selector: ' + testName)
+      failures.push(testName)
+      return
+    }
 
     var cell = table.rows[table.rows.length - 1].insertCell()
     cell.style.textAlign = 'center'
@@ -155,6 +160,40 @@ var tests = {
     puzzle.grid[5][3] = {'type':'square', 'color':'blue'}
     puzzle.grid[2][2].dot = 1
     return [puzzle, 86]
+  }, 'no-ncn-simple-double-negation': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.settings.NEGATIONS_CANCEL_NEGATIONS = false
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[5][1] = {'type':'nega', 'color':'white'}
+    puzzle.grid[5][5] = {'type':'nega', 'color':'white'}
+    puzzle.grid[1][1] = {'type':'square', 'color':'orange'}
+    puzzle.grid[3][1] = {'type':'square', 'color':'blue'}
+    puzzle.grid[3][5] = {'type':'poly', 'color': 'yellow', 'polyshape':1}
+    return [puzzle, 42]
+  }, 'no-ncn-double-negation-with-double-squares': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.settings.NEGATIONS_CANCEL_NEGATIONS = false
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
+    puzzle.grid[3][1] = {'type':'nega', 'color':'white'}
+    puzzle.grid[1][3] = {'type':'square', 'color':'orange'}
+    puzzle.grid[3][3] = {'type':'square', 'color':'blue'}
+    puzzle.grid[5][3] = {'type':'square', 'color':'blue'}
+    return [puzzle, 48]
+  }, 'no-ncn-double-negation-with-double-squares-2': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.settings.NEGATIONS_CANCEL_NEGATIONS = false
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[1][1] = {'type':'nega', 'color':'white'}
+    puzzle.grid[3][1] = {'type':'nega', 'color':'white'}
+    puzzle.grid[1][3] = {'type':'square', 'color':'orange'}
+    puzzle.grid[3][3] = {'type':'square', 'color':'blue'}
+    puzzle.grid[5][3] = {'type':'square', 'color':'blue'}
+    puzzle.grid[2][2].dot = 1
+    return [puzzle, 48]
   }, 'negation-complexity': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[0][4].start = true
@@ -262,7 +301,15 @@ var tests = {
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     return [puzzle, 4]
-  }, 'polyomino/ylop-with-center-start': function() {
+  }, 'imprecise-polyomino-with-center-start': function() {
+    var puzzle = new Puzzle(3, 2)
+    puzzle.settings.PRECISE_POLYOMINOS = false
+    puzzle.grid[2][2].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':273}
+    puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':273}
+    return [puzzle, 12]
+  }, 'polyomino-and-ylop-with-center-start': function() {
     var puzzle = new Puzzle(3, 2)
     puzzle.grid[2][2].start = true
     puzzle.grid[6][0].end = 'right'
@@ -270,14 +317,23 @@ var tests = {
     puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':273}
     puzzle.grid[3][1] = {'type':'ylop', 'color':'blue', 'polyshape':3}
     return [puzzle, 2]
-  }, 'polyomino/ylop-with-center-start-2': function() {
+  }, 'imprecise-polyomino-and-ylop-with-center-start': function() {
+    var puzzle = new Puzzle(3, 2)
+    puzzle.settings.PRECISE_POLYOMINOS = false
+    puzzle.grid[2][2].start = true
+    puzzle.grid[6][0].end = 'right'
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':273}
+    puzzle.grid[1][3] = {'type':'poly', 'color':'yellow', 'polyshape':273}
+    puzzle.grid[3][1] = {'type':'ylop', 'color':'blue', 'polyshape':3}
+    return [puzzle, 6]
+  }, 'polyomino-and-ylop-with-center-start-2': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[2][4].start = true
     puzzle.grid[6][0].end = 'right'
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':1911}
     puzzle.grid[3][1] = {'type':'ylop', 'color':'blue', 'polyshape':51}
     return [puzzle, 4]
-  }, 'polyomino/ylop-with-edge-start': function() {
+  }, 'polyomino-and-ylop-with-edge-start': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][2].start = true
     puzzle.grid[6][6].end = 'right'
@@ -311,7 +367,22 @@ var tests = {
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':3}
     puzzle.grid[3][3] = {'type':'ylop', 'color':'blue', 'polyshape':3}
     return [puzzle, 6]
-  }, 'half-of-game-puzzle': function() {
+  }, 'shouldnt-completely-cancel': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.grid[0][4].start = true
+    puzzle.grid[4][0].end = 'right'
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':3}
+    puzzle.grid[3][3] = {'type':'ylop', 'color':'blue', 'polyshape':17}
+    return [puzzle, 0]
+  }, 'szp-shouldnt-completely-cancel': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.settings.SHAPELESS_ZERO_POLY = true
+    puzzle.grid[0][4].start = true
+    puzzle.grid[4][0].end = 'right'
+    puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':3}
+    puzzle.grid[3][3] = {'type':'ylop', 'color':'blue', 'polyshape':17}
+    return [puzzle, 6]
+    }, 'half-of-game-puzzle': function() {
     var puzzle = new Puzzle(4, 2)
     puzzle.grid[0][4].start = true
     puzzle.grid[8][0].end = 'right'
