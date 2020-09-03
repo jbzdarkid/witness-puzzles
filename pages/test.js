@@ -486,6 +486,7 @@ var tests = {
     return [puzzle, 12]
   }, 'triple-negation': function() {
     var puzzle = new Puzzle(3, 3)
+    puzzle.settings.FLASH_FOR_ERRORS = false
     puzzle.grid[0][6].start = true
     puzzle.grid[6][0].end = 'right'
     puzzle.grid[1][1] = {'type':'nega', 'color':'white'}

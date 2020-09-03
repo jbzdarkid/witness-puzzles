@@ -4,10 +4,6 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-- [Done]For the various settings (precise polys, nega cancel nega, etc) add a settings object to the puzzle.
-  [Done]Then, I should dupe some of my tests with other settings
-  Add a setting for 'do not flash for errors'
-  This should probably also have a 'custom symbols' array, which contains {name, drawFunction, validateFunction}
 - 4x4 rpoly in editor is clipping
 
 Browse

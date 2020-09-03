@@ -42,6 +42,8 @@ class Puzzle {
       SHAPELESS_ZERO_POLY: false,
       // If true, the traced line cannot go through the placement of a polyomino.
       PRECISE_POLYOMINOS: true,
+      // If false, incorrect elements will not flash when failing the puzzle.
+      FLASH_FOR_ERRORS: true,
     }
   }
 
@@ -112,7 +114,11 @@ class Puzzle {
         puzzle.grid[gap.x][gap.y].gap = 1
       }
     }
-    if (parsed.settings) puzzle.settings = parsed.settings
+    if (parsed.settings) {
+      for (var key of Object.keys(parsed.settings)) {
+        puzzle.settings[key] = parsed.settings[key]
+      }
+    }
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
     puzzle.largezero = puzzle.width * puzzle.height

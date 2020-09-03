@@ -1,6 +1,6 @@
 namespace(function() {
 
-window.BBOX_DEBUG = false
+var BBOX_DEBUG = false
 
 function clamp(value, min, max) {
   return value < min ? min : value > max ? max : value
@@ -10,7 +10,7 @@ class BoundingBox {
   constructor(x1, x2, y1, y2, sym=false) {
     this.raw = {'x1':x1, 'x2':x2, 'y1':y1, 'y2':y2}
     this.sym = sym
-    if (window.BBOX_DEBUG === true) {
+    if (BBOX_DEBUG === true) {
       this.debug = createElement('rect')
       data.svg.appendChild(this.debug)
       this.debug.setAttribute('opacity', 0.5)
@@ -396,8 +396,10 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
         window.PLAY_SOUND('fail')
         data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
         // Get list of invalid elements
-        for (var invalidElement of puzzle.invalidElements) {
-          data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
+        if (puzzle.settings.FLASH_FOR_ERRORS) {
+          for (var invalidElement of puzzle.invalidElements) {
+            data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
+          }
         }
       }
 
