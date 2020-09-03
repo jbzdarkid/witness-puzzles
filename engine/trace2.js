@@ -529,7 +529,7 @@ document.onpointerlockchange = function() {
       // Working around a race condition where movement events fire after the handler is removed.
       if (data.tracing !== true) return
       // Prevent accidental fires on ios (which is handled via ontouchmove).
-      if (!event.movementX) return
+      if (event.movementX == undefined) return
       onMove(sens * event.movementX, sens * event.movementY)
     }
     document.ontouchstart = function(event) {
