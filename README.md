@@ -73,3 +73,5 @@ The solution path is saved on the grid to allow for easy re-tracing.
 # Contributing
 I'm not accepting contributions at this time, but I am accepting feedback via the main site. Thank you for your interest!
 
+# Legal
+This code is licensed under BSD 3-Clause. You are free to fork this project and play with it, within the limits of [the license](LICENSE.md).
