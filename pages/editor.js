@@ -741,7 +741,16 @@ function _drawSymbolButtons() {
       }
     }
     while (button.firstChild) button.removeChild(button.firstChild)
-    button.appendChild(window.drawSymbol(params))
+    var svg = window.drawSymbol(params)
+    button.appendChild(svg)
+
+    if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
+      var is4Wide = (activeParams.polyshape & 15) && (activeParams.polyshape & 1110016)
+      var is4Tall = (activeParams.polyshape & 4369) && (activeParams.polyshape & 34952)
+      if (is4Wide || is4Tall) {
+        svg.setAttribute('viewBox', '-8 -8 80 80')
+      }
+    }
   }
 }
 
@@ -1058,7 +1067,7 @@ function _dragMove(event, elem) {
     var yLim = 60
   }
 
-  // Note: We only adjust dragging when we reach a limit. 
+  // Note: We only adjust dragging when we reach a limit.
 
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break

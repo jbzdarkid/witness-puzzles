@@ -4,7 +4,6 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-- 4x4 rpoly in editor is clipping
 
 Browse
 -- "Jump to top" button
