@@ -1,3 +1,5 @@
+namespace(function() {
+
 var activeParams = {'id':'', 'color':'black', 'polyshape':71}
 var puzzle
 var dragging
@@ -69,7 +71,7 @@ function _writePuzzle() {
 }
 
 // Delete the active puzzle then read the next one.
-function deletePuzzle() {
+window.deletePuzzle = function() {
   var puzzleList = _readPuzzleList()
   if (puzzleList.length === 0) return
   var puzzleName = puzzleList.shift()
@@ -183,7 +185,7 @@ function _reloadPuzzle() {
 }
 
 //** Buttons which the user can click on
-function createEmptyPuzzle() {
+window.createEmptyPuzzle = function() {
   var style = document.getElementById('puzzleStyle').value
   console.log('Creating new puzzle with style', style)
 
@@ -276,7 +278,7 @@ function createEmptyPuzzle() {
   _writeNewPuzzle(newPuzzle)
 }
 
-function loadPuzzle() {
+window.loadPuzzle = function() {
   var puzzleList = _readPuzzleList()
   if (puzzleList.length === 0) return
 
@@ -310,7 +312,7 @@ function loadPuzzle() {
   }
 }
 
-function importPuzzle() {
+window.importPuzzle = function() {
   var serialized = prompt('Paste your puzzle here:')
 
   console.log('Creating puzzle from serialized', serialized)
@@ -325,7 +327,7 @@ function importPuzzle() {
   }
 }
 
-function setSolveMode(value) {
+window.setSolveMode = function(value) {
   document.getElementById('solveMode').checked = value
   if (value === true) {
     window.TRACE_COMPLETION_FUNC = function(solution) {
@@ -342,7 +344,7 @@ function setSolveMode(value) {
 }
 
 // Automatically solve the puzzle
-function solvePuzzle() {
+window.solvePuzzle = function() {
   setSolveMode(false)
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
@@ -475,7 +477,7 @@ function _showSolution(paths, num) {
 }
 
 var currentPublishRequest
-function publishPuzzle() {
+window.publishPuzzle = function() {
   // Clone the puzzle to ensure it's not modified while the request is being constructed
   var puzzleCopy = puzzle.clone()
   var request = new XMLHttpRequest()
@@ -1087,3 +1089,5 @@ function _dragMove(event, elem) {
     dragging.y = newDragging.y
   }
 }
+
+})

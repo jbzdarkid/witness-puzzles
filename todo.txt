@@ -19,7 +19,7 @@ Browse
 Editor
 -- Pillar + resize is still horrendously broken.
 -- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
-   Seems like this doesn't actually abort, for some reason.
+   Seems like this doesn't actually abort quickly, for some reason.
 -- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
 -- Disable 'delete' button when there are no more puzzles to delete?
 -- Disable 'new' button (or make it no-op) when on an empty puzzle?
