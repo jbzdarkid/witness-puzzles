@@ -4,7 +4,7 @@ var activeParams = {'id':'', 'color':'black', 'polyshape':71}
 var puzzle
 var dragging
 
-function _readPuzzleList() {
+function readPuzzleList() {
   try {
     var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
     if (puzzleList == null || !Array.isArray(puzzleList)) return []
@@ -14,16 +14,16 @@ function _readPuzzleList() {
   }
 }
 
-function _writePuzzleList(puzzleList) {
+function writePuzzleList(puzzleList) {
   if (puzzleList == undefined) throw 'Attempted to write puzzle list but none was provided'
   window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
 
 // Read the first puzzle in the list, and try to load it.
 // Recurses until success or the list is exhausted, in which case we make an empty puzzle.
-function _readPuzzle() {
+function readPuzzle() {
   console.log('Trying to read first puzzle')
-  var puzzleList = _readPuzzleList()
+  var puzzleList = readPuzzleList()
   if (puzzleList.length === 0) {
     console.log('No puzzles left, clearing storage and creating new one')
     window.localStorage.clear()
@@ -35,7 +35,7 @@ function _readPuzzle() {
     var serialized = window.localStorage.getItem(puzzleList[0])
     puzzle = Puzzle.deserialize(serialized)
 
-    _reloadPuzzle()
+    reloadPuzzle()
   } catch (e) {
     console.log(e)
     console.log('Could not parse puzzle, deleting')
@@ -46,49 +46,49 @@ function _readPuzzle() {
 // Write a new puzzle to the puzzle list.
 // We add a new empty puzzle to the list, modify the global puzzle,
 // and then call the "current puzzle out of date" function.
-function _writeNewPuzzle(newPuzzle) {
-  var puzzleList = _readPuzzleList()
+function writeNewPuzzle(newPuzzle) {
+  var puzzleList = readPuzzleList()
   puzzleList.unshift(undefined)
-  _writePuzzleList(puzzleList)
+  writePuzzleList(puzzleList)
 
   puzzle = newPuzzle
-  _writePuzzle()
-  _reloadPuzzle()
+  writePuzzle()
+  reloadPuzzle()
 }
 
 // The current puzzle (element 0 in the puzzle list) is out of date.
 // Clean it up, and reserialize it.
-function _writePuzzle() {
+function writePuzzle() {
   console.log('Writing puzzle', puzzle)
   var puzzleToSave = puzzle.clone()
   puzzleToSave.clearLines()
 
-  var puzzleList = _readPuzzleList()
+  var puzzleList = readPuzzleList()
   // @Robustness: Some intelligence about showing day / month / etc depending on date age
   puzzleList[0] = puzzleToSave.name + ' on ' + (new Date()).toLocaleString()
   window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
-  _writePuzzleList(puzzleList)
+  writePuzzleList(puzzleList)
 }
 
 // Delete the active puzzle then read the next one.
 window.deletePuzzle = function() {
-  var puzzleList = _readPuzzleList()
+  var puzzleList = readPuzzleList()
   if (puzzleList.length === 0) return
   var puzzleName = puzzleList.shift()
   console.log('Removing puzzle', puzzleName)
   window.localStorage.removeItem(puzzleName)
-  _writePuzzleList(puzzleList)
+  writePuzzleList(puzzleList)
 
   // Try to read the next puzzle from the list.
-  _readPuzzle()
+  readPuzzle()
 }
 
 // Clear animations from the puzzle, redraw it, and add editor hooks.
 // Note that this function DOES NOT reload the style, check for the automatic solver,
 // reset the publish button, and other such 'meta' cleanup steps.
 // You should only call this function if you're *sure* you're not in manual solve mode.
-// If there's a chance that you are in manual solve mode, call _reloadPuzzle().
-function _drawPuzzle() {
+// If there's a chance that you are in manual solve mode, call reloadPuzzle().
+function drawPuzzle() {
   window.draw(puzzle)
   window.clearAnimations()
 
@@ -100,7 +100,7 @@ function _drawPuzzle() {
   }
 
   var addOnClick = function(elem, x, y) {
-    elem.onclick = function() {_onElementClicked(x, y)}
+    elem.onclick = function() {onElementClicked(x, y)}
   }
 
   var xPos = 40
@@ -127,7 +127,7 @@ function _drawPuzzle() {
   }
 }
 
-function _reloadPuzzle() {
+function reloadPuzzle() {
   setSolveMode(false) // Disable the Solve (manually) button, clear lines, and redraw the puzzle
 
   document.getElementById('puzzleName').innerText = puzzle.name
@@ -275,11 +275,11 @@ window.createEmptyPuzzle = function() {
   } else {
     newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
   }
-  _writeNewPuzzle(newPuzzle)
+  writeNewPuzzle(newPuzzle)
 }
 
 window.loadPuzzle = function() {
-  var puzzleList = _readPuzzleList()
+  var puzzleList = readPuzzleList()
   if (puzzleList.length === 0) return
 
   var buttons = document.getElementById('metaButtons')
@@ -299,13 +299,13 @@ window.loadPuzzle = function() {
     console.log('Loading puzzle', this.value)
 
     // Re-order to the front of the list
-    var puzzleList = _readPuzzleList()
+    var puzzleList = readPuzzleList()
     var index = puzzleList.indexOf(this.value)
     puzzleList.unshift(puzzleList.splice(index, 1)[0])
-    _writePuzzleList(puzzleList)
+    writePuzzleList(puzzleList)
 
     // Then try reading the first puzzle
-    _readPuzzle()
+    readPuzzle()
 
     buttons.parentElement.removeChild(buttons.previousSibling)
     document.getElementById('metaButtons').style.display = 'inline'
@@ -318,7 +318,7 @@ window.importPuzzle = function() {
   console.log('Creating puzzle from serialized', serialized)
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
-    _writeNewPuzzle(newPuzzle)
+    writeNewPuzzle(newPuzzle)
   } catch (e) {
     console.error('Failed to load serialized puzzle', e)
 
@@ -339,7 +339,7 @@ window.setSolveMode = function(value) {
   } else {
     puzzle.clearLines()
     window.TRACE_COMPLETION_FUNC = undefined
-    _drawPuzzle()
+    drawPuzzle()
   }
 }
 
@@ -359,16 +359,16 @@ window.solvePuzzle = function() {
     document.getElementById('progress').style.width = '0%'
 
     puzzle.autoSolved = true
-    _showSolution(paths, 0)
+    showSolution(paths, 0)
   })
 }
 //** End of user interaction points
 
 window.onload = function() {
-  _readPuzzle() // Will fall back to a new puzzle if needed.
+  readPuzzle() // Will fall back to a new puzzle if needed.
 
-  _drawSymbolButtons()
-  _drawColorButtons()
+  drawSymbolButtons()
+  drawColorButtons()
 
   var puzzleName = document.getElementById('puzzleName')
   // Both oninput and onkeypress fire for every text modification.
@@ -409,12 +409,12 @@ window.onload = function() {
     if (this.innerText.length === 0) this.innerText = 'Unnamed Puzzle'
     // Update the puzzle with the new name
     puzzle.name = this.innerText
-    _writePuzzle()
+    writePuzzle()
   }
 
   for (var resize of document.getElementsByClassName('resize')) {
     resize.onpointerdown = function(event) {
-      _dragStart(event, this)
+      dragStart(event, this)
     }
     if (resize.id === 'resize-left' || resize.id === 'resize-right') {
       var svg = drawSymbol({'type': 'drag', 'rot':1, 'width':6, 'height':22})
@@ -436,7 +436,7 @@ window.onload = function() {
   }
 }
 
-function _showSolution(paths, num) {
+function showSolution(paths, num) {
   if (num < 0) num = paths.length - 1
   if (num >= paths.length) num = 0
 
@@ -459,14 +459,14 @@ function _showSolution(paths, num) {
     if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
-    previousSolution.onclick = function() {_showSolution(paths, num - 1)}
-    nextSolution.onclick = function() {_showSolution(paths, num + 1)}
+    previousSolution.onclick = function() {showSolution(paths, num - 1)}
+    nextSolution.onclick = function() {showSolution(paths, num + 1)}
   }
   if (paths[num] != undefined) {
     // Redraws the puzzle *and* adds editor hooks (so that we can return to editing)
     // There's no need to reload all the additional meta elements, since the puzzle isn't
     // actually changing, we're just drawing on it.
-    _drawPuzzle()
+    drawPuzzle()
 
     // Draws the given path, and also updates the puzzle to have path annotations on it.
     window.drawPath(puzzle, paths[num])
@@ -518,7 +518,7 @@ window.publishPuzzle = function() {
 // Returns the next value in the list.
 // If the value is not found, defaults to the first element.
 // If the value is found, but is the last value, returns undefined.
-function _getNextValue(list, value) {
+function getNextValue(list, value) {
   var index = list.indexOf(value)
   return list[index + 1]
 }
@@ -527,7 +527,7 @@ function _getNextValue(list, value) {
 // what combination of shape & color are currently selected.
 // This function also ensures that the resulting puzzle is still sane, and will modify
 // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
-function _onElementClicked(x, y) {
+function onElementClicked(x, y) {
   if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
@@ -550,7 +550,7 @@ function _onElementClicked(x, y) {
     // If (x, y) is an endpoint, loop to the next direction
     // If the direction loops past the end (or there are no valid directions),
     // remove the endpoint by setting to undefined.
-    var dir = _getNextValue(validDirs, puzzle.grid[x][y].end)
+    var dir = getNextValue(validDirs, puzzle.grid[x][y].end)
     puzzle.grid[x][y].end = dir
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
@@ -565,11 +565,11 @@ function _onElementClicked(x, y) {
       dotColors.push(3)
     }
     dotColors.push(4)
-    puzzle.grid[x][y].dot = _getNextValue(dotColors, puzzle.grid[x][y].dot)
+    puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
     puzzle.grid[x][y].gap = undefined
   } else if (activeParams.type === 'gap') {
     if (x%2 === y%2) return
-    puzzle.grid[x][y].gap = _getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
+    puzzle.grid[x][y].gap = getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
     puzzle.grid[x][y].dot = undefined
     puzzle.grid[x][y].start = undefined
     puzzle.grid[x][y].end = undefined
@@ -670,8 +670,8 @@ function _onElementClicked(x, y) {
       }
     }
   }
-  _writePuzzle()
-  _reloadPuzzle()
+  writePuzzle()
+  reloadPuzzle()
 }
 
 var symbolData = {
@@ -688,7 +688,7 @@ var symbolData = {
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
   'rylop': {'type':'ylop', 'title':'Rotatable negation polyomino'},
 }
-function _drawSymbolButtons() {
+function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
   symbolTable.style.display = null
   for (var button of symbolTable.getElementsByTagName('button')) {
@@ -716,30 +716,30 @@ function _drawSymbolButtons() {
         button.params.polyshape &= ~window.ROTATION_BIT
       }
       button.onclick = function() {
-        _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
           activeParams = Object.assign(activeParams, this.params)
-          _shapeChooser()
+          shapeChooser()
         } else {
           activeParams = Object.assign(activeParams, this.params)
-          _drawSymbolButtons()
+          drawSymbolButtons()
         }
       }
     } else if (button.id === 'triangle') {
       button.onclick = function() {
-        _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
           symbolData.triangle.count = symbolData.triangle.count % 4 + 1
           activeParams.count = symbolData.triangle.count
         }
         activeParams = Object.assign(activeParams, this.params)
-        _drawSymbolButtons()
+        drawSymbolButtons()
       }
     } else {
       button.onclick = function() {
-        _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         activeParams = Object.assign(activeParams, this.params)
-        _drawSymbolButtons()
+        drawSymbolButtons()
       }
     }
     while (button.firstChild) button.removeChild(button.firstChild)
@@ -756,13 +756,13 @@ function _drawSymbolButtons() {
   }
 }
 
-function _drawColorButtons() {
+function drawColorButtons() {
   var colorTable = document.getElementById('colorButtons')
   colorTable.style.display = null
   var changeActiveColor = function() {
-    _reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+    reloadPuzzle() // Disable manual solve mode to allow puzzle editing
     activeParams.color = this.id
-    _drawColorButtons()
+    drawColorButtons()
   }
   for (var button of colorTable.getElementsByTagName('button')) {
     var params = {'width':146, 'height':45, 'border':2}
@@ -784,7 +784,7 @@ function _drawColorButtons() {
   }
 }
 
-function _shapeChooser() {
+function shapeChooser() {
   var puzzle = document.getElementById('puzzle')
   puzzle.style.opacity = 0
   puzzle.style.minWidth = '432px'
@@ -796,7 +796,7 @@ function _shapeChooser() {
   anchor.style.height = '100%'
   anchor.style.position = 'absolute'
   anchor.style.top = 0
-  anchor.onpointerdown = function(event) {_shapeChooserClick(event)}
+  anchor.onpointerdown = function(event) {shapeChooserClick(event)}
 
   var chooser = document.createElement('div')
   puzzle.parentElement.insertBefore(chooser, puzzle)
@@ -807,7 +807,7 @@ function _shapeChooser() {
   chooser.style.height = '100%'
   chooser.style.minWidth = '400px'
   chooser.style.zIndex = 1 // Position in front of the puzzle
-  chooser.onpointerdown = function(event) {_shapeChooserClick(event)}
+  chooser.onpointerdown = function(event) {shapeChooserClick(event)}
 
   var chooserTable = document.createElement('table')
   chooser.appendChild(chooserTable)
@@ -817,13 +817,13 @@ function _shapeChooser() {
   chooserTable.style.padding = 25
   chooserTable.style.background = window.BACKGROUND
   chooserTable.style.border = window.BORDER
-  chooserTable.onpointerdown = function(event) {_shapeChooserClick(event, this)}
+  chooserTable.onpointerdown = function(event) {shapeChooserClick(event, this)}
   for (var x=0; x<4; x++) {
     var row = chooserTable.insertRow(x)
     for (var y=0; y<4; y++) {
       var cell = row.insertCell(y)
       cell.powerOfTwo = 1 << (x + y*4)
-      cell.onpointerdown = function(event) {_shapeChooserClick(event, this)}
+      cell.onpointerdown = function(event) {shapeChooserClick(event, this)}
       cell.style.width = 58
       cell.style.height = 58
       if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
@@ -837,7 +837,7 @@ function _shapeChooser() {
   }
 }
 
-function _shapeChooserClick(event, cell) {
+function shapeChooserClick(event, cell) {
   var chooser = document.getElementById('chooser')
   if (cell == undefined) {
     var anchor = document.getElementById('anchor')
@@ -862,7 +862,7 @@ function _shapeChooserClick(event, cell) {
   } else {
     cell.style.background = window.FOREGROUND
   }
-  _drawSymbolButtons()
+  drawSymbolButtons()
 }
 
 // All puzzle elements remain fixed, the edge you're dragging is where the new
@@ -1005,7 +1005,7 @@ document.addEventListener('touchmove', function(event) {
   if (dragging) event.preventDefault()
 }, passive)
 
-function _dragStart(event, elem) {
+function dragStart(event, elem) {
   dragging = {
     'x': event.pageX || event.clientX,
     'y': event.pageY || event.clientY,
@@ -1021,12 +1021,12 @@ function _dragStart(event, elem) {
   anchor.style.width = '99%'
   anchor.style.height = '100%'
   anchor.style.cursor = elem.style.cursor
-  document.onmousemove = function(event) {_dragMove(event, elem)}
-  document.ontouchmove = function(event) {_dragMove(event, elem)}
-  document.ontouchend = function(event) {_dragEnd(event, elem)}
+  document.onmousemove = function(event) {dragMove(event, elem)}
+  document.ontouchmove = function(event) {dragMove(event, elem)}
+  document.ontouchend = function(event) {dragEnd(event, elem)}
 }
 
-function _dragEnd(event, elem) {
+function dragEnd(event, elem) {
   console.log('Drag ended')
   dragging = undefined
   var anchor = document.getElementById('anchor')
@@ -1036,13 +1036,13 @@ function _dragEnd(event, elem) {
   document.ontouchend = undefined
 }
 
-function _dragMove(event, elem) {
+function dragMove(event, elem) {
   var newDragging = {
     'x': event.pageX || event.clientX,
     'y': event.pageY || event.clientY,
   }
   console.spam(newDragging.x, newDragging.y)
-  if (event.buttons === 0) return _dragEnd(event, elem)
+  if (event.buttons === 0) return dragEnd(event, elem)
   if (dragging == undefined) return
   var dx = 0
   var dy = 0
@@ -1075,16 +1075,16 @@ function _dragMove(event, elem) {
 
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break
-    _writePuzzle()
-    _reloadPuzzle()
+    writePuzzle()
+    reloadPuzzle()
     dx -= Math.sign(dx) * xLim
     dragging.x = newDragging.x
   }
 
   while (Math.abs(dy) >= yLim) {
     if (!resizePuzzle(0, 2 * Math.sign(dy), elem.id)) break
-    _writePuzzle()
-    _reloadPuzzle()
+    writePuzzle()
+    reloadPuzzle()
     dy -= Math.sign(dy) * yLim
     dragging.y = newDragging.y
   }
