@@ -18,10 +18,8 @@ Browse
 
 Editor
 -- Pillar + resize is still horrendously broken.
--- Clicking 'solve manually' should probably clear auto-solution (I think this works?)
 -- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
--- Crayons could be colored in, maybe.
--- At the full drag limit, start points can shift by 0.5 cells
+   Seems like this doesn't actually abort, for some reason.
 -- Decide if shape chooser should pop over the right buttons or not.
 -- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
 -- Disable 'delete' button when there are no more puzzles to delete?
