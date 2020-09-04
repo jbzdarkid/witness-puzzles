@@ -785,6 +785,7 @@ function _drawColorButtons() {
 function _shapeChooser() {
   var puzzle = document.getElementById('puzzle')
   puzzle.style.opacity = 0
+  puzzle.style.minWidth = '432px'
 
   var anchor = document.createElement('div')
   document.body.appendChild(anchor)
@@ -843,6 +844,7 @@ function _shapeChooserClick(event, cell) {
     chooser.parentElement.removeChild(chooser)
     anchor.parentElement.removeChild(anchor)
     puzzle.style.opacity = null
+    puzzle.style.minWidth = null
     event.stopPropagation()
     return
   }
