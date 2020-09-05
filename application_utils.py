@@ -14,17 +14,6 @@ import boto3
 
 application = Flask(__name__, template_folder='pages')
 
-def http_to_https():
-  if request.is_secure:
-    return
-  if request.headers.get('X-Forwarded-Proto', '') == 'https':
-    return
-  return redirect(request.url.replace('http://', 'https://', 1), code=301)
-
-def disable_caching(request):
-  request.headers['Cache-Control'] = 'no-cache'
-  return request
-
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 if 'RDS_DB_NAME' in os.environ: # Running on AWS
   application.config.update({
@@ -39,14 +28,25 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
     'S3_SECRET_ACCESS_KEY': os.environ['S3_SECRET_ACCESS_KEY'],
     'SECRET_KEY': os.environ['SECRET_KEY'], # CSRF secret key
   })
-  # Enforce HTTPS-only in the presence of a certificate
-  application.before_request(http_to_https)
+
+  def http_to_https():
+    if request.is_secure:
+      return
+    if request.headers.get('X-Forwarded-Proto', '') == 'https':
+      return
+    return redirect(request.url.replace('http://', 'https://', 1), code=301)
+  application.before_request(http_to_https) # HTTPS connections only
   application.debug = False
+
 else: # Running locally
   application.config.update({
     'SQLALCHEMY_DATABASE_URI':'sqlite:///:memory:',
     'SECRET_KEY': 'default',
   })
+
+  def disable_caching(request):
+    request.headers['Cache-Control'] = 'no-cache'
+    return request
   application.after_request(disable_caching) # Auto-reload should not cache contents.
   application.debug = True # Required to do auto-reload
 

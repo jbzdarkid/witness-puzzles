@@ -6,7 +6,6 @@ from traceback import format_exc
 
 from application_database import *
 from application_utils import *
-import application_hashes
 
 # Home page
 host_redirect('/pages/browse.html', '/')

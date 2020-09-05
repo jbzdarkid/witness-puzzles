@@ -31,7 +31,6 @@ Tracing
     If it makes it easier, rm cursor when finishing
 
 Server
--- Start versioning JS? That way caching works and doesn't shoot me in the foot.
 -- Sign-in?
 
 Tutorial
