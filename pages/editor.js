@@ -193,6 +193,7 @@ window.createEmptyPuzzle = function() {
   default:
     console.error('Attempted to set unknown style', style, 'falling back to default')
     style = 'Default'
+    // Intentional fall-through
   case 'Default':
     var newPuzzle = new Puzzle(4, 4)
     newPuzzle.grid[0][8].start = true

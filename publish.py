@@ -2,7 +2,6 @@ from pathlib import Path
 import zipfile
 import sys
 import hashlib
-import subprocess
 
 if len(sys.argv) < 2:
   print('Please specify the release version as the first argument, e.g. ./publish.py 1.21')

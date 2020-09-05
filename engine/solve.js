@@ -39,7 +39,7 @@ window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
   } else { // Run asynchronously
 
     // This awkward function exists to ensure that pos is copied for each task.
-    function addTask(pos) {
+    addTask = function(pos) {
       tasks.push({'code': function() {
         return solveLoop(puzzle, pos.x, pos.y, paths, numEndpoints, earlyExitData, 5, [pos])
       }, 'fraction': (1.0 / startPoints.length)})

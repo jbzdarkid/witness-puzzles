@@ -34,16 +34,6 @@ window.onerror = function(message, url, line) {
   }
 }
 
-if (window.location.href.startsWith("http://127.0.0.1")) {
-  window.assert = function(condition) {
-    if (!condition) {
-      debugger;
-    }
-  }
-} else {
-  window.assert = function(condition) {}
-}
-
 var trackNames = ['start', 'success', 'fail', 'abort']
 var tracks = {
   'start':   new Audio(src='/data/panel_start_tracing.aac'),
