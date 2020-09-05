@@ -6,10 +6,6 @@
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 Browse
--- "Jump to top" button
--- Batched list generation
-    Infinite scrolling?
-    Consider preloading puzzles in the python layer.
 -- Sorting
     Date (default, currently implemented)
     Solve count?

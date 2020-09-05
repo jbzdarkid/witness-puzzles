@@ -208,7 +208,7 @@ window.setLogLevel = function(level) {
 }
 setLogLevel('info')
 
-// TODO: This should be a document.DOMContentLoaded listener, and detect the present of a placeholder.
+// TODO: This should be a document.DOMContentLoaded listener, and detect the presence of a placeholder.
 window.loadHeader = function(titleText) {
   document.body.style.marginLeft = '0px'
 
@@ -241,6 +241,15 @@ window.loadHeader = function(titleText) {
   if (window.location.href.endsWith('browse.html')) {
     link.innerText = 'Create a puzzle'
     link.onclick = function() {window.location = '/editor.html'}
+
+    var link2 = document.createElement('label')
+    navbar.appendChild(link2)
+    link2.style = 'float: left; margin-left: 20px; cursor: pointer; line-height: 60px; display: none'
+    link2.className = 'navbar-content'
+    link2.innerText = 'Jump to top'
+    link2.id = 'scrollToTop'
+    link2.onclick = function() {window.scrollTo(0, 0)}
+
   } else if (window.location.href.includes('/play/')) {
     link.innerText = 'Back to all puzzles'
     link.onclick = function() {window.location = '/browse.html'}
