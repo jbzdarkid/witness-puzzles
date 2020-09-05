@@ -86,7 +86,9 @@ application.add_url_rule('/play/<display_hash>', 'play', play)
 def browse():
   sort_type = request.args.get('sort_type', 'date') # date
   order = request.args.get('order', '') # asc, desc
-  puzzles = get_puzzles(sort_type, order)
+  offset = request.args.get('offset', 0)
+  limit = request.args.get('limit', 100)
+  puzzles = get_puzzles(sort_type, order, offset, limit)
 
   output = []
   for puzzle in puzzles:

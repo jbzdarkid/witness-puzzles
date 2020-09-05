@@ -45,18 +45,17 @@ def create_puzzle(title, puzzle_json, solution_json, img_bytes):
 def get_puzzle(display_hash):
   return db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).first()
 
-def get_puzzles(sort_type, order, offset=0, limit=100):
-  # @Feature: query.offset() and query.limit()
+def get_puzzles(sort_type, order, offset, limit):
   if sort_type == 'date':
     column = Puzzle.date
   else:
-    print('Recieved request for puzzles with unknown sort_type: "' + sort_type + '"')
+    print('Received request for puzzles with unknown sort_type: "' + sort_type + '"')
     return []
 
   if order == 'desc':
     column = column.desc()
 
-  return db.session.query(Puzzle).order_by(column)
+  return db.session.query(Puzzle).order_by(column).offset(offset).limit(limit)
 
 class Feedback(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
