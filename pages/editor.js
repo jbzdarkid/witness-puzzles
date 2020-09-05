@@ -438,8 +438,8 @@ window.onload = function() {
 }
 
 function showSolution(paths, num) {
-  if (num < 0) num = paths.length - 1
-  if (num >= paths.length) num = 0
+  while (num < 0) num = paths.length + num
+  while (num >= paths.length) num = num - paths.length
 
   var previousSolution = document.getElementById('previousSolution')
   var solutionCount = document.getElementById('solutionCount')
@@ -460,8 +460,20 @@ function showSolution(paths, num) {
     if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
-    previousSolution.onclick = function() {showSolution(paths, num - 1)}
-    nextSolution.onclick = function() {showSolution(paths, num + 1)}
+    previousSolution.onclick = function(event) {
+      if (event.shiftKey) {
+        showSolution(paths, num - 10)
+      } else {
+        showSolution(paths, num - 1)
+      }
+    }
+    nextSolution.onclick = function(event) {
+      if (event.shiftKey) {
+        showSolution(paths, num + 10)
+      } else {
+        showSolution(paths, num + 1)
+      }
+    }
   }
   if (paths[num] != undefined) {
     // Redraws the puzzle *and* adds editor hooks (so that we can return to editing)
