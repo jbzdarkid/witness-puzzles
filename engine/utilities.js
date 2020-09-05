@@ -208,7 +208,6 @@ window.setLogLevel = function(level) {
 }
 setLogLevel('info')
 
-// TODO: This should be a document.DOMContentLoaded listener, and detect the presence of a placeholder.
 window.loadHeader = function(titleText) {
   document.body.style.marginLeft = '0px'
 
@@ -387,18 +386,6 @@ window.loadHeader = function(titleText) {
   }
 }
 
-window.createLink = function(href, title, parent) {
-  parent = parent || document.currentScript.parentElement
-  var link = document.createElement('label')
-  parent.appendChild(link)
-  link.onclick = function() {
-    window.location = href
-  }
-  link.innerText = title
-  link.style = style
-  link.style.cursor = 'pointer'
-  link.style.color = window.TEXT_COLOR // Not inherited, sadly
-}
 
 
 

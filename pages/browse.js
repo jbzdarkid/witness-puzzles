@@ -7,7 +7,7 @@ window.onload = function() {
 var offset = 0
 var currentLoadRequest = null
 var puzzleHashes = []
-window.loadPuzzles = function() {
+function loadPuzzles() {
   if (currentLoadRequest != null) return
   currentLoadRequest = new XMLHttpRequest()
   currentLoadRequest.onreadystatechange = function() {
@@ -40,11 +40,16 @@ window.loadPuzzles = function() {
       img.src = puzzle.url
 
       cell.appendChild(document.createElement('br'))
-      window.createLink(puzzle.url, puzzle.title, parent=cell)
+
+      var link = document.createElement('label')
+      cell.appendChild(link)
+      link.href = puzzle.url
+      link.innerText = puzzle.title
+      link.style.cursor = 'pointer'
+      link.style.color = window.TEXT_COLOR
     }
     console.log('Loaded puzzles')
     currentLoadRequest = null
-
   }
   currentLoadRequest.timeout = 10000 // 10,000 milliseconds = 10 seconds
   currentLoadRequest.open('GET', '/browse?sort_type=date&order=desc&limit=100&offset=' + offset)
