@@ -2,8 +2,6 @@ from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from flask import request
 from hashlib import sha256
-from sqlalchemy_utils import UUIDType
-from json import loads
 
 from application_utils import *
 

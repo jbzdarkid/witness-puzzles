@@ -5,8 +5,6 @@ label, select, option, input, a {
   font-weight: bold;
   font-size: 28px;
 }
-/* On iOS, this prevents buttons from being rounded */
-button {-webkit-appearance: none; }
 a { text-decoration: none; }
 table { margin: auto; }
 .resize { position: absolute; }
@@ -52,6 +50,7 @@ button { /* Neutral */
   outline: none;
   padding: 1px 6px;
   -moz-appearance: none;
+  -webkit-appearance: none;
 }
 button:hover { /* Hover-over */
   background-color: rgb(229, 229, 229);

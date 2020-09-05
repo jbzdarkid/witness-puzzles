@@ -1,5 +1,4 @@
 from flask import render_template, request
-from datetime import datetime
 from json import dumps as to_json_string
 import os
 from traceback import format_exc
