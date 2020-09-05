@@ -84,28 +84,13 @@ def add_error(data):
 db.create_all()
 
 if application.debug:
-  db.session.add(Puzzle(
-    display_hash = '2D99CC28',
-    puzzle_json = '{}',
-    solution_json = '{}',
-    date = datetime(2001, 1, 1),
-    url = '/images/2D/2D99CC28.png',
-    title = 'foo',
-  ))
-  db.session.add(Puzzle(
-    display_hash = 'EB678CA3',
-    puzzle_json = '{}',
-    solution_json = '{}',
-    date = datetime(2002, 2, 2),
-    url = '/images/EB/EB678CA3.png',
-    title = 'bar',
-  ))
-  db.session.add(Puzzle(
-    display_hash = 'F23DF4F6',
-    puzzle_json = '{}',
-    solution_json = '{}',
-    date = datetime(2003, 3, 3),
-    url = '/images/F2/F23DF4F6.png',
-    title = 'baz',
-  ))
+  for i in range(1234):
+    db.session.add(Puzzle(
+      display_hash = str(i),
+      puzzle_json = '{}',
+      solution_json = '{}',
+      date = datetime(2001, 1, 1),
+      url = '/images/26/267BCA24.png',
+      title = 'Puzzle ' + str(i),
+    ))
   db.session.commit()

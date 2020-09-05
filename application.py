@@ -43,6 +43,8 @@ if application.debug:
   host_statically('pages/_UTM.js')
   host_statically('pages/_UTM2.js')
 
+  host_statically('images')
+
 def page_not_found(error):
   return render_template('404_generic.html'), 404
 application.register_error_handler(404, page_not_found)
