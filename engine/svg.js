@@ -200,7 +200,7 @@ function triangle(svg, params) {
 function crayon(svg, params) {
   var height = params.height
   var width = params.width
-  var border = 2
+  var border = 4
 
   var poly = createElement('polygon')
   svg.appendChild(poly)
