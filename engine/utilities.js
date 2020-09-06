@@ -140,12 +140,13 @@ window.DOT_BLUE      = 2
 window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
 
-// pointer-events: none; allows for onclick events to bubble up
-// -webkit-touch-callout applies to iOS devices only. Unfortunately, iOS devices have a small pixel gap between the line segments. Adding crispedges isn't the *most* elegant solution, but it works.
 var animations =
+// pointer-events: none; allows for onclick events to bubble up
 '.line-1 {fill: ' + window.LINE_DEFAULT   + '; pointer-events: none; }\n' +
 '.line-2 {fill: ' + window.LINE_PRIMARY   + '; pointer-events: none; }\n' +
 '.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none; }\n' +
+// -webkit-touch-callout applies to iOS devices only. Unfortunately, iOS devices have a small
+// gap between the line segments. Adding crispedges isn't the *most* elegant solution, but it works.
 '@supports (-webkit-touch-callout: none) {\n' +
 '  .line-1 { shape-rendering: crispedges; }\n' +
 '  .line-2 { shape-rendering: crispedges; }\n' +
@@ -156,7 +157,8 @@ var animations =
 '@keyframes error {to {fill: red;}}\n' +
 '@keyframes fade {to {opacity: 0.35;}}\n' +
 '@keyframes start-grow {from {r:12;} to {r: 24;}}\n' +
-'button {\n' + // Neutral
+// Neutral button style
+'button {\n' +
 '  background-color: ' + window.ALT_BACKGROUND + ';\n' +
 '  border: 0.5px solid ' + window.BORDER + ';\n' +
 '  border-radius: 2px;\n' +
@@ -168,12 +170,17 @@ var animations =
 '  font-weight: bold;\n' +
 '  margin: 0;\n' +
 '  outline: none;\n' +
+'  opacity: 1.0;\n' +
 '  padding: 1px 6px;\n' +
 '  -moz-appearance: none;\n' +
 '  -webkit-appearance: none;\n' +
 '}\n' +
+// Active (while held down) button style
 'button:active {background-color: ' + window.ACTIVE_COLOR + ';}\n' +
-'button:focus {outline: none;}\n' // Selected (from: https://stackoverflow.com/a/63108630)
+// Disabled button style
+'button:disabled {opacity: 0.5;}\n' +
+// Selected button style (see https://stackoverflow.com/a/63108630)
+'button:focus {outline: none;}\n'
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
