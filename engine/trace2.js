@@ -341,22 +341,10 @@ function clearGrid(svg, puzzle) {
     data.symbbox = undefined
   }
 
-  while (svg.getElementsByClassName('cursor').length > 0) {
-    svg.getElementsByClassName('cursor')[0].remove()
-  }
-
-  while (svg.getElementsByClassName('line-1').length > 0) {
-    svg.getElementsByClassName('line-1')[0].remove()
-  }
-
-  while (svg.getElementsByClassName('line-2').length > 0) {
-    svg.getElementsByClassName('line-2')[0].remove()
-  }
-
-  while (svg.getElementsByClassName('line-3').length > 0) {
-    svg.getElementsByClassName('line-3')[0].remove()
-  }
-
+  window.deleteElementsByClassName(svg, 'cursor')
+  window.deleteElementsByClassName(svg, 'line-1')
+  window.deleteElementsByClassName(svg, 'line-2')
+  window.deleteElementsByClassName(svg, 'line-3')
   puzzle.clearLines()
 }
 

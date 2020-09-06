@@ -208,6 +208,14 @@ window.setLogLevel = function(level) {
 }
 setLogLevel('info')
 
+window.deleteElementsByClassName = function(rootElem, className) {
+  var elems = rootElem.getElementsByClassName(className)
+  while (elems.length > 0) {
+    elems[0].remove()
+    elems = rootElem.getElementsByClassName(className)
+  }
+}
+
 window.loadHeader = function(titleText) {
   document.body.style.marginLeft = '0px'
 
