@@ -7,13 +7,13 @@ window.draw = function(puzzle, target='puzzle') {
   while (svg.firstChild) svg.removeChild(svg.firstChild)
 
   if (puzzle.pillar === true) {
-    // 41*(width-1) + 30*2 (padding) + 10*2 (border)
-    var pixelWidth = 41*puzzle.width + 80
+    // 41*width + 30*2 (padding) + 10*2 (border)
+    var pixelWidth = 41 * puzzle.width + 80
   } else {
     // 41*(width-1) + 24 (extra edge) + 30*2 (padding) + 10*2 (border)
-    var pixelWidth = 41*puzzle.width + 63
+    var pixelWidth = 41 * puzzle.width + 63
   }
-  var pixelHeight = 41*puzzle.height + 63
+  var pixelHeight = 41 * puzzle.height + 63
   svg.setAttribute('viewbox', '0 0 ' + pixelWidth + ' ' + pixelHeight)
   svg.style.width = pixelWidth
   svg.style.height = pixelHeight
