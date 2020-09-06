@@ -31,59 +31,12 @@ function loadSinglePuzzle(puzzleData) {
   window.draw(puzzle)
 }
 
-function _showSolution(paths, num) {
-  if (num < 0) num = paths.length - 1
-  if (num >= paths.length) num = 0
-
-  var previousSolution = document.getElementById('previousSolution')
-  var solutionCount = document.getElementById('solutionCount')
-  var solutionInfo = document.getElementById('solutionInfo')
-  var nextSolution = document.getElementById('nextSolution')
-
-  // Buttons & text
-  if (paths.length === 0) { // 0 paths, arrows are useless
-    solutionCount.innerText = '0 of 0'
-    previousSolution.disabled = true
-    nextSolution.disabled = true
-  } else if (paths.length === 1) { // 1 path, arrows are useless
-    solutionCount.innerText = '1 of 1'
-    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
-    previousSolution.disabled = true
-    nextSolution.disabled = true
-  } else {
-    solutionCount.innerText = (num + 1) + ' of ' + paths.length
-    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
-    previousSolution.disabled = false
-    nextSolution.disabled = false
-    previousSolution.onclick = function() {_showSolution(paths, num - 1)}
-    nextSolution.onclick = function() {_showSolution(paths, num + 1)}
-  }
-
-  window.drawPath(puzzle, paths[num])
-  document.getElementById('solutionViewer').style.display = null
-}
-
 function isColored(grid, x, y) {
   var cell = grid[x][y]
   return (cell != null && cell.line >= window.LINE_BLACK)
 }
 
-function solvePuzzle() {
-  document.getElementById('solutionViewer').style.display = 'none'
-  document.getElementById('progressBox').style.display = null
-  window.solve(puzzle, function(progress) {
-    var percent = Math.floor(100 * progress)
-    document.getElementById('progressPercent').innerText = percent + '%'
-    document.getElementById('progress').style.width = percent + '%'
-  }, onSolvedPuzzle)
-}
-
-function onSolvedPuzzle(paths) {
-  document.getElementById('progressBox').style.display = 'none'
-  document.getElementById('solutionViewer').style.display = null
-  document.getElementById('progressPercent').innerText = '0%'
-  document.getElementById('progress').style.width = '0%'
-
+window.onSolvedPuzzle = function(paths) {
   for (var i=0; i<paths.length; i++) {
     /*
     var solution = window.pathToSolution(puzzle, paths[i])
@@ -126,5 +79,5 @@ function onSolvedPuzzle(paths) {
   }
 
   paths.sort(sortKey)
-  _showSolution(paths, 0)
+  return paths
 }

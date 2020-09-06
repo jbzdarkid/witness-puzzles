@@ -292,7 +292,6 @@ window.loadHeader = function(titleText) {
   sourceLink.className = 'navbar-content'
   sourceLink.onclick = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
 
-
   var collapsedSettings = drawSymbol({'type': 'plus', 'width':20, 'height':20})
   navbar.appendChild(collapsedSettings)
   collapsedSettings.style = 'width: 20px; height: 20px; position: absolute; left: 0; cursor: pointer'
@@ -395,6 +394,138 @@ window.loadHeader = function(titleText) {
   }
 }
 
+// Automatically solve the puzzle
+function solvePuzzle(puzzle, onSolvedPuzzle) {
+  if (window.setSolveMode) window.setSolveMode(false)
+  document.getElementById('solutionViewer').style.display = 'none'
+  document.getElementById('progressBox').style.display = null
+  window.solve(puzzle, function(progress) {
+    var percent = Math.floor(100 * progress)
+    document.getElementById('progressPercent').innerText = percent + '%'
+    document.getElementById('progress').style.width = percent + '%'
+  }, function(paths) {
+    document.getElementById('progressBox').style.display = 'none'
+    document.getElementById('solutionViewer').style.display = null
+    document.getElementById('progressPercent').innerText = '0%'
+    document.getElementById('progress').style.width = '0%'
+
+    puzzle.autoSolved = true
+    paths = window.onSolvedPuzzle(paths)
+    showSolution(puzzle, paths, 0)
+  })
+}
+
+function showSolution(puzzle, paths, num) {
+  var previousSolution = document.getElementById('previousSolution')
+  var solutionCount = document.getElementById('solutionCount')
+  var nextSolution = document.getElementById('nextSolution')
+
+  if (paths.length === 0) { // 0 paths, arrows are useless
+    solutionCount.innerText = '0 of 0'
+    previousSolution.disabled = true
+    nextSolution.disabled = true
+    return
+  }
+
+  while (num < 0) num = paths.length + num
+  while (num >= paths.length) num = num - paths.length
+
+  if (paths.length === 1) { // 1 path, arrows are useless
+    solutionCount.innerText = '1 of 1'
+    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    previousSolution.disabled = true
+    nextSolution.disabled = true
+  } else {
+    solutionCount.innerText = (num + 1) + ' of ' + paths.length
+    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
+    previousSolution.disabled = false
+    nextSolution.disabled = false
+    previousSolution.onclick = function(event) {
+      if (event.shiftKey) {
+        showSolution(puzzle, paths, num - 10)
+      } else {
+        showSolution(puzzle, paths, num - 1)
+      }
+    }
+    nextSolution.onclick = function(event) {
+      if (event.shiftKey) {
+        showSolution(puzzle, paths, num + 10)
+      } else {
+        showSolution(puzzle, paths, num + 1)
+      }
+    }
+  }
+  if (paths[num] != undefined) {
+    // Draws the given path, and also updates the puzzle to have path annotations on it.
+    window.drawPath(puzzle, paths[num])
+  }
+}
+
+// Required global variables/functions:
+// window.puzzle
+// window.onSolvedPuzzle()
+window.addSolveButtons = function() {
+  var parent = document.currentScript.parentElement
+
+  var input = document.createElement('input')
+  parent.appendChild(input)
+  input.className = 'checkbox'
+  input.type = 'checkbox'
+  input.id = 'solveMode'
+  input.onchange = function() {
+    if (window.setSolveMode) window.setSolveMode(this.checked)
+  }
+
+  var label = document.createElement('label')
+  parent.appendChild(label)
+  label.for = 'solveMode'
+  label.innerText = 'Solve (manually)'
+
+  var button = document.createElement('button')
+  parent.appendChild(button)
+  button.id = 'solveAuto'
+  button.onclick = function() {solvePuzzle(window.puzzle, window.onSolvedPuzzle)}
+  button.innerText = 'Solve (automatically)'
+
+  var div = document.createElement('div')
+  parent.appendChild(div)
+  div.style = 'display: inline-block; vertical-align:top'
+
+  var progressBox = document.createElement('div')
+  div.appendChild(progressBox)
+  progressBox.id = 'progressBox'
+  progressBox.style = 'position: absolute; display:none; width: 220px; padding: 2px'
+
+  var progressPercent = document.createElement('label')
+  progressBox.appendChild(progressPercent)
+  progressPercent.id = 'progressPercent'
+  progressPercent.style = 'float: left'
+  progressPercent.innerText = '0%'
+
+  var progress = document.createElement('div')
+  progressBox.appendChild(progress)
+  progress.id = 'progress'
+  progress.style = 'position: absolute; z-index: -1; height: 100%; width: 0%; background-color: #339900'
+
+  var solutionViewer = document.createElement('div')
+  div.appendChild(solutionViewer)
+  solutionViewer.id = 'solutionViewer'
+  solutionViewer.style = 'position: absolute; display:none'
+
+  var previousSolution = document.createElement('button')
+  solutionViewer.appendChild(previousSolution)
+  previousSolution.id = 'previousSolution'
+  previousSolution.innerHTML = '&larr;'
+
+  var solutionCount = document.createElement('label')
+  solutionViewer.appendChild(solutionCount)
+  solutionCount.id = 'solutionCount'
+
+  var nextSolution = document.createElement('button')
+  solutionViewer.appendChild(nextSolution)
+  nextSolution.id = 'nextSolution'
+  nextSolution.innerHTML = '&rarr;'
+}
 
 
 

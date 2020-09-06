@@ -62,6 +62,5 @@ Low Prio / Misc
     use trace callback func
     maze can be 'click to reveal' like memory card game
     should play the music if I can
--- Mobile UI is terrible / non-functional.
 -- Update deps (?)
 -- Startpoint collision

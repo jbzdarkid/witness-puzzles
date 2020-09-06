@@ -1,8 +1,8 @@
 namespace(function() {
 
 var activeParams = {'id':'', 'color':'black', 'polyshape':71}
-var puzzle
-var dragging
+window.puzzle = null
+var dragging = null
 
 function readPuzzleList() {
   try {
@@ -343,26 +343,6 @@ window.setSolveMode = function(value) {
     drawPuzzle()
   }
 }
-
-// Automatically solve the puzzle
-window.solvePuzzle = function() {
-  setSolveMode(false)
-  document.getElementById('solutionViewer').style.display = 'none'
-  document.getElementById('progressBox').style.display = null
-  window.solve(puzzle, function(progress) {
-    var percent = Math.floor(100 * progress)
-    document.getElementById('progressPercent').innerText = percent + '%'
-    document.getElementById('progress').style.width = percent + '%'
-  }, function(paths) {
-    document.getElementById('progressBox').style.display = 'none'
-    document.getElementById('solutionViewer').style.display = null
-    document.getElementById('progressPercent').innerText = '0%'
-    document.getElementById('progress').style.width = '0%'
-
-    puzzle.autoSolved = true
-    showSolution(paths, 0)
-  })
-}
 //** End of user interaction points
 
 window.onload = function() {
@@ -437,56 +417,12 @@ window.onload = function() {
   }
 }
 
-function showSolution(paths, num) {
-  while (num < 0) num = paths.length + num
-  while (num >= paths.length) num = num - paths.length
-
-  var previousSolution = document.getElementById('previousSolution')
-  var solutionCount = document.getElementById('solutionCount')
-  var nextSolution = document.getElementById('nextSolution')
-
-  // Buttons & text
-  if (paths.length === 0) { // 0 paths, arrows are useless
-    solutionCount.innerText = '0 of 0'
-    previousSolution.disabled = true
-    nextSolution.disabled = true
-  } else if (paths.length === 1) { // 1 path, arrows are useless
-    solutionCount.innerText = '1 of 1'
-    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
-    previousSolution.disabled = true
-    nextSolution.disabled = true
-  } else {
-    solutionCount.innerText = (num + 1) + ' of ' + paths.length
-    if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
-    previousSolution.disabled = false
-    nextSolution.disabled = false
-    previousSolution.onclick = function(event) {
-      if (event.shiftKey) {
-        showSolution(paths, num - 10)
-      } else {
-        showSolution(paths, num - 1)
-      }
-    }
-    nextSolution.onclick = function(event) {
-      if (event.shiftKey) {
-        showSolution(paths, num + 10)
-      } else {
-        showSolution(paths, num + 1)
-      }
-    }
-  }
-  if (paths[num] != undefined) {
-    // Redraws the puzzle *and* adds editor hooks (so that we can return to editing)
-    // There's no need to reload all the additional meta elements, since the puzzle isn't
-    // actually changing, we're just drawing on it.
-    drawPuzzle()
-
-    // Draws the given path, and also updates the puzzle to have path annotations on it.
-    window.drawPath(puzzle, paths[num])
-
-    // Only enable the publish button if there was a valid path.
+window.onSolvedPuzzle = function(paths) {
+  // Only enable the publish button if there was a valid path.
+  if (paths.length > 0) {
     document.getElementById('publish').disabled = false
   }
+  return paths
 }
 
 var currentPublishRequest
