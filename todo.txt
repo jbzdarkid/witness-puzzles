@@ -4,6 +4,8 @@
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
+- iOS still has an awkward 'double click' effect on everything. Gah.
+- Audio not working in mac safari
 
 Browse
 -- Sorting
@@ -45,8 +47,6 @@ Tutorial
 -- Should also have an explanation for the different 'styles' (which is probably how I'll implement settings)
 
 Low Prio / Misc
--- Cross-browser compatibility
-    In order: Firefox, Safari, iOS Safari, Android Chrome
 -- "Edit this puzzle"?
 -- Add all puzzles in the game to the system. Maybe a separate category / identifier?
     Add tests & speedrunner solver
@@ -55,8 +55,6 @@ Low Prio / Misc
     Figure out something better for the tri (star?)
 -- Fix generation colors / general improvements to random puzzles
     >general support for random puzzles
--- transform: scale(2) doesn't work on safari?
-    Checkboxes are terrible. Maybe write my own?
 -- random generation for challenges
     copy game RNG should be easy (now that I do it myself)
     use trace callback func
@@ -64,4 +62,3 @@ Low Prio / Misc
     should play the music if I can
 -- Update deps (?)
 -- Startpoint collision
--- Change style.css to support dark-theme buttons

@@ -351,6 +351,11 @@ window.onload = function() {
   drawSymbolButtons()
   drawColorButtons()
 
+  // Add theme-appropriate coloring to the style dropdown
+  var puzzleStyle = document.getElementById('puzzleStyle')
+  puzzleStyle.style.background = window.PAGE_BACKGROUND
+  puzzleStyle.style.color = window.TEXT_COLOR
+
   var puzzleName = document.getElementById('puzzleName')
   // Both oninput and onkeypress fire for every text modification.
 
