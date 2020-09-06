@@ -8,7 +8,7 @@
 - Audio not working in mac safari
 - Fix fonts -- find a real copy of Constantia (maybe in the game files?)
   Mac chrome is busted here
-- Add right-click handler in editor *only* - should remove element regardless of active type.
+- Editor triangle button rmb should cycle backwards
 
 Browse
 -- Sorting
@@ -20,10 +20,8 @@ Browse
 Editor
 -- Pillar + resize is still horrendously broken.
 -- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
-   Seems like this doesn't actually abort quickly, for some reason.
+   Seems like this doesn't actually abort quickly, for some reason. Try to use the profiler?
 -- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
--- Disable 'delete' button when there are no more puzzles to delete?
--- Disable 'new' button (or make it no-op) when on an empty puzzle?
 -- Custom slider to better match TW
    Slider is a gradient from #2D2D2D to #515151
    Icon is a loose hexagon at #727272
@@ -38,7 +36,6 @@ Tracing
 -- Tracing down against walls and gap-2 is awkward
     The game is awful at this too.
 -- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
-    If it makes it easier, rm cursor when finishing
 
 Server
 -- Sign-in?
@@ -73,4 +70,3 @@ Low Prio / Misc
     maze can be 'click to reveal' like memory card game
     should play the music if I can
 -- Update deps (?)
--- Startpoint collision
