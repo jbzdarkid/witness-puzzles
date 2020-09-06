@@ -212,7 +212,7 @@ window.deleteElementsByClassName = function(rootElem, className) {
   var elems = []
   while (true) {
     elems = rootElem.getElementsByClassName(className)
-    if (elems.length > 0) break
+    if (elems.length === 0) break
     elems[0].remove()
   }
 }
