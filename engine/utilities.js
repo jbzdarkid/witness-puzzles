@@ -494,23 +494,22 @@ function showSolution(puzzle, paths, num) {
 window.addSolveButtons = function() {
   var parent = document.currentScript.parentElement
 
-  var div = document.createElement('div')
-  parent.appendChild(div)
-  div.id = 'solveMode'
-  div.style.width = '22px'
-  div.style.height = '22px'
-  div.style.borderRadius = '6px'
-  div.style.display = 'inline-block'
-  div.style.verticalAlign = 'text-bottom'
-  div.style.marginRight = '6px'
-  div.style.borderWidth = '1.5px'
-  div.style.borderStyle = 'solid'
+  var solveMode = document.createElement('div')
+  parent.appendChild(solveMode)
+  solveMode.id = 'solveMode'
+  solveMode.style.width = '22px'
+  solveMode.style.height = '22px'
+  solveMode.style.borderRadius = '6px'
+  solveMode.style.display = 'inline-block'
+  solveMode.style.verticalAlign = 'text-bottom'
+  solveMode.style.marginRight = '6px'
+  solveMode.style.borderWidth = '1.5px'
+  solveMode.style.borderStyle = 'solid'
+  solveMode.style.borderColor = window.BORDER
+  solveMode.style.background = window.PAGE_BACKGROUND
+  solveMode.style.color = window.TEXT_COLOR
 
-  div.style.borderColor = window.BORDER
-  div.style.background = window.PAGE_BACKGROUND
-  div.style.color = window.TEXT_COLOR
-
-  div.onpointerdown = function() {
+  solveMode.onpointerdown = function() {
     this.checked = !this.checked
     this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
     if (window.setSolveMode) window.setSolveMode(this.checked)
@@ -518,14 +517,15 @@ window.addSolveButtons = function() {
 
   var label = document.createElement('label')
   parent.appendChild(label)
-  label.htmlFor = 'solveMode'
+  label.style.marginRight = '8px'
+  label.onpointerdown = function() {solveMode.onpointerdown()}
   label.innerText = 'Solve (manually)'
 
-  var button = document.createElement('button')
-  parent.appendChild(button)
-  button.id = 'solveAuto'
-  button.onclick = function() {solvePuzzle(window.puzzle, window.onSolvedPuzzle)}
-  button.innerText = 'Solve (automatically)'
+  var solveAuto = document.createElement('button')
+  parent.appendChild(solveAuto)
+  solveAuto.id = 'solveAuto'
+  solveAuto.onclick = function() {solvePuzzle(window.puzzle, window.onSolvedPuzzle)}
+  solveAuto.innerText = 'Solve (automatically)'
 
   var div = document.createElement('div')
   parent.appendChild(div)
