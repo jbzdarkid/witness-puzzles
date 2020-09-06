@@ -100,7 +100,7 @@ function drawPuzzle() {
   }
 
   var addOnClick = function(elem, x, y) {
-    elem.onpointerdown = function() {onElementClicked(x, y)}
+    elem.onpointerdown = function(event) {onElementClicked(event, x, y)}
   }
 
   var xPos = 40
@@ -481,8 +481,21 @@ function getNextValue(list, value) {
 // what combination of shape & color are currently selected.
 // This function also ensures that the resulting puzzle is still sane, and will modify
 // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
-function onElementClicked(x, y) {
-  if (activeParams.type === 'start') {
+function onElementClicked(event, x, y) {
+  if (event.isRightClick()) {
+    // Clear the associated cell
+    if (x%2 === 1 && y%2 === 1) {
+      puzzle.grid[x][y] = {}
+    } else {
+      puzzle.grid[x][y].end = undefined
+      puzzle.grid[x][y].start = undefined
+      if (puzzle.symmetry != undefined) {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        puzzle.updateCell2(sym.x, sym.y, 'start', undefined)
+        puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
+      }
+    }
+  } else if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
 
