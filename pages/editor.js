@@ -696,7 +696,7 @@ function drawSymbolButtons() {
     button.appendChild(svg)
 
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
-      var is4Wide = (activeParams.polyshape & 15) && (activeParams.polyshape & 1110016)
+      var is4Wide = (activeParams.polyshape & 15) && (activeParams.polyshape & 61440)
       var is4Tall = (activeParams.polyshape & 4369) && (activeParams.polyshape & 34952)
       if (is4Wide || is4Tall) {
         svg.setAttribute('viewBox', '-8 -8 80 80')
@@ -788,10 +788,14 @@ function shapeChooser() {
 
 function shapeChooserClick(event, cell) {
   var chooser = document.getElementById('chooser')
-  if (cell == undefined) {
+  if (cell == undefined) { // Clicked outside the chooser, close the selection window
     var anchor = document.getElementById('anchor')
     var puzzle = document.getElementById('puzzle')
 
+    if (activeParams.polyshape === 0 || activeParams.polyshape === 1048576) {
+      activeParams.polyshape += 1 // Ensure that at least one square is filled
+      drawSymbolButtons()
+    }
     chooser.parentElement.removeChild(chooser)
     anchor.parentElement.removeChild(anchor)
     puzzle.style.opacity = null
