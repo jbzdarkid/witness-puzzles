@@ -392,7 +392,7 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
       }
 
     // Right-clicked (or double-tapped) and not at the end: Clear puzzle
-    } else if (event.which === 3 || (event.touches && event.touches.length > 1)) {
+    } else if (event.isRightClick()) {
       window.PLAY_SOUND('abort')
       clearGrid(data.svg, puzzle)
     } else { // Exit lock but allow resuming from the cursor (Desktop only)

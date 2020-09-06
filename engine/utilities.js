@@ -13,6 +13,9 @@ if (!String.prototype.includes) {
 }
 Event.prototype.movementX = Event.prototype.movementX || Event.prototype.mozMovementX
 Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMovementY
+Event.prototype.isRightClick = function() {
+  return this.which === 3 || (this.touches && this.touches.length > 1)
+}
 Element.prototype.requestPointerLock = Element.prototype.requestPointerLock || Element.prototype.mozRequestPointerLock || function() {
   document.pointerLockElement = this
   document.onpointerlockchange()
