@@ -27,6 +27,7 @@ function readPuzzle() {
   if (puzzleList.length === 0) {
     console.log('No puzzles left, clearing storage and creating new one')
     window.localStorage.clear()
+    document.getElementById('loadButton').disabled = true
     createEmptyPuzzle()
     return
   }
@@ -34,7 +35,7 @@ function readPuzzle() {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
     puzzle = Puzzle.deserialize(serialized)
-
+    puzzleModified()
     reloadPuzzle()
   } catch (e) {
     console.log(e)
@@ -276,7 +277,15 @@ window.createEmptyPuzzle = function() {
   } else {
     newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
   }
-  writeNewPuzzle(newPuzzle)
+  if (document.getElementById('newButton').disabled == true) {
+    // Previous puzzle was unmodified
+    puzzle = newPuzzle
+    reloadPuzzle()
+  } else {
+    document.getElementById('newButton').disabled = true
+    document.getElementById('deleteButton').disabled = true
+    writeNewPuzzle(newPuzzle)
+  }
 }
 
 window.loadPuzzle = function() {
@@ -640,6 +649,7 @@ function onElementClicked(event, x, y) {
       }
     }
   }
+  puzzleModified()
   writePuzzle()
   reloadPuzzle()
 }
@@ -1045,7 +1055,7 @@ function dragMove(event, elem) {
     var yLim = 60
   }
 
-  // Note: We only adjust dragging when we reach a limit.
+  // Note: We only modify dragging when we reach a limit.
 
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break
@@ -1062,6 +1072,12 @@ function dragMove(event, elem) {
     dy -= Math.sign(dy) * yLim
     dragging.y = newDragging.y
   }
+}
+
+function puzzleModified() {
+  document.getElementById('newButton').disabled = false
+  document.getElementById('loadButton').disabled = false
+  document.getElementById('deleteButton').disabled = false
 }
 
 })
