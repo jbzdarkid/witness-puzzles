@@ -289,6 +289,9 @@ window.loadPuzzle = function() {
   loadList.style.width = buttons.offsetWidth
   buttons.style.display = 'none'
 
+  loadList.style.background = window.PAGE_BACKGROUND
+  loadList.style.color = window.TEXT_COLOR
+
   for (var puzzleName of puzzleList) {
     var option = document.createElement('option')
     option.innerText = puzzleName
