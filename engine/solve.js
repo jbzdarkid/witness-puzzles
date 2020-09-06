@@ -139,7 +139,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   }
   console.info(rows)
   for (var y=0; y<puzzle.height; y++) {
-    var output = ('' + y).padEnd(5, ' ') + '|'
+    var output = ('' + y).padEnd(3, ' ') + '|'
     for (var x=0; x<puzzle.width; x++) {
       var cell = puzzle.grid[x][y]
       var dir = (cell != undefined && cell.dir != undefined ? cell.dir : '')
