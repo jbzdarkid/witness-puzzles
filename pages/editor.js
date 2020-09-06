@@ -96,11 +96,11 @@ function drawPuzzle() {
   var puzzleElement = document.getElementById('puzzle')
   // Remove all 'onTraceStart' calls, they should be interacted through solveManually only.
   for (var child of puzzleElement.children) {
-    child.onclick = null
+    child.onpointerdown = null
   }
 
   var addOnClick = function(elem, x, y) {
-    elem.onclick = function() {onElementClicked(x, y)}
+    elem.onpointerdown = function() {onElementClicked(x, y)}
   }
 
   var xPos = 40
