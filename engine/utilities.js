@@ -105,15 +105,17 @@ window.LINE_PRIMARY = '#8FF'
 window.LINE_SECONDARY = '#FF2'
 
 if (localStorage.theme === 'true') { // Dark scheme
-  window.BACKGROUND      = '#221' // '#000'
+  window.BACKGROUND      = '#221'
   window.FOREGROUND      = '#751' // '#873'
   window.BORDER          = '#666'
   window.LINE_DEFAULT    = '#888' // '#FD8'
   window.LINE_SUCCESS    = '#BBB' // '#FA0'
   window.LINE_FAIL       = '#000'
   window.CURSOR          = '#FFF'
-  window.TEXT_COLOR      = '#CCC'
+  window.TEXT_COLOR      = '#AAA'
   window.PAGE_BACKGROUND = '#000'
+  window.ALT_BACKGROUND  = '#333' // An off-black. Good for mild contrast.
+  window.ACTIVE_COLOR    = '#555' // Color for 'while the element is being pressed'
 } else { // Light scheme
   window.BACKGROUND      = '#0A8'
   window.FOREGROUND      = '#344'
@@ -124,6 +126,8 @@ if (localStorage.theme === 'true') { // Dark scheme
   window.CURSOR          = '#FFF'
   window.TEXT_COLOR      = '#000'
   window.PAGE_BACKGROUND = '#FFF'
+  window.ALT_BACKGROUND  = '#EEE' // An off-white. Good for mild contrast.
+  window.ACTIVE_COLOR    = '#DDD' // Color for 'while the element is being pressed'
 }
 
 window.LINE_NONE     = 0
@@ -151,7 +155,25 @@ var animations =
 '@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}\n' +
 '@keyframes error {to {fill: red;}}\n' +
 '@keyframes fade {to {opacity: 0.35;}}\n' +
-'@keyframes start-grow {from {r:12;} to {r: 24;}}\n'
+'@keyframes start-grow {from {r:12;} to {r: 24;}}\n' +
+'button {\n' + // Neutral
+'  background-color: ' + window.ALT_BACKGROUND + ';\n' +
+'  border: 0.5px solid ' + window.BORDER + ';\n' +
+'  border-radius: 2px;\n' +
+'  color: ' + window.TEXT_COLOR + ';\n' +
+'  display: inline-block;\n' +
+'  font-family: Constantia;\n' +
+'  font-size: 28px;\n' +
+'  font-variant: small-caps;\n' +
+'  font-weight: bold;\n' +
+'  margin: 0;\n' +
+'  outline: none;\n' +
+'  padding: 1px 6px;\n' +
+'  -moz-appearance: none;\n' +
+'  -webkit-appearance: none;\n' +
+'}\n' +
+'button:active {background-color: ' + window.ACTIVE_COLOR + ';}\n' +
+'button:focus {outline: none;}\n' // Selected (from: https://stackoverflow.com/a/63108630)
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
@@ -265,7 +287,6 @@ window.loadHeader = function(titleText) {
     link.innerText = 'View all puzzles'
     link.onclick = function() {window.location = '/browse.html'}
   }
-
 
   var feedbackButton = document.createElement('label')
   navbar.appendChild(feedbackButton)
@@ -466,18 +487,31 @@ function showSolution(puzzle, paths, num) {
 window.addSolveButtons = function() {
   var parent = document.currentScript.parentElement
 
-  var input = document.createElement('input')
-  parent.appendChild(input)
-  input.className = 'checkbox'
-  input.type = 'checkbox'
-  input.id = 'solveMode'
-  input.onchange = function() {
+  var div = document.createElement('div')
+  parent.appendChild(div)
+  div.id = 'solveMode'
+  div.style.width = '22px'
+  div.style.height = '22px'
+  div.style.borderRadius = '6px'
+  div.style.display = 'inline-block'
+  div.style.verticalAlign = 'text-bottom'
+  div.style.marginRight = '6px'
+  div.style.borderWidth = '1.5px'
+  div.style.borderStyle = 'solid'
+
+  div.style.borderColor = window.BORDER
+  div.style.background = window.PAGE_BACKGROUND
+  div.style.color = window.TEXT_COLOR
+
+  div.onpointerdown = function() {
+    this.checked = !this.checked
+    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
     if (window.setSolveMode) window.setSolveMode(this.checked)
   }
 
   var label = document.createElement('label')
   parent.appendChild(label)
-  label.for = 'solveMode'
+  label.htmlFor = 'solveMode'
   label.innerText = 'Solve (manually)'
 
   var button = document.createElement('button')

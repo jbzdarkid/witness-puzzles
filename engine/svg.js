@@ -221,6 +221,7 @@ function crayon(svg, params) {
   poly.setAttribute('fill', params.color)
   var txt = createElement('text')
   svg.appendChild(txt)
+  txt.setAttribute('fill', window.TEXT_COLOR)
   txt.setAttribute('transform', 'translate(' + (height/2 + 10) + ', ' + (height/2 + 6) + ')')
   txt.innerHTML = params.text
 }
