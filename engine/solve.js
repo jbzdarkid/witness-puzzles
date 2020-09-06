@@ -72,6 +72,7 @@ var PATH_BOTTOM = 4
 // Uses trace2 to draw the path on the grid, logs a graphical representation of the solution,
 // and also modifies the puzzle to contain the solution path.
 window.drawPath = function(puzzle, path, target='puzzle') {
+  // Clear out the grid before drawing another solution
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       puzzle.updateCell2(x, y, 'dir', undefined)
@@ -79,6 +80,10 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     }
   }
 
+  window.deleteElementsByClassName(document, 'line-1')
+  window.deleteElementsByClassName(document, 'cursor')
+
+  // Extract the start data from the first path element
   var x = path[0].x
   var y = path[0].y
   var start = document.getElementById('start_' + target + '_' + x + '_' + y)

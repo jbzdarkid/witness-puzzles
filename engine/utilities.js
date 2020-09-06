@@ -209,10 +209,11 @@ window.setLogLevel = function(level) {
 setLogLevel('info')
 
 window.deleteElementsByClassName = function(rootElem, className) {
-  var elems = rootElem.getElementsByClassName(className)
-  while (elems.length > 0) {
-    elems[0].remove()
+  var elems = []
+  while (true) {
     elems = rootElem.getElementsByClassName(className)
+    if (elems.length > 0) break
+    elems[0].remove()
   }
 }
 
