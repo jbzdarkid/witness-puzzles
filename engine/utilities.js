@@ -329,24 +329,23 @@ window.loadHeader = function(titleText) {
   expandedSettings.appendChild(document.createElement('br'))
 
   // Theme
-  var themeBox = document.createElement('input')
-  expandedSettings.appendChild(themeBox)
-  themeBox.className = 'checkbox'
-  themeBox.type = 'checkbox'
-  themeBox.id = 'theme'
-  themeBox.onchange = function() {
-    localStorage.theme = this.checked
-    location.reload()
-  }
-  themeBox.checked = (localStorage.theme === 'true')
-  // This needs to happen now, since the document body hasn't yet loaded.
   document.body.style.color = window.TEXT_COLOR
   document.body.style.background = window.PAGE_BACKGROUND
-
-  var themeLabel = document.createElement('label')
-  expandedSettings.appendChild(themeLabel)
-  themeLabel.htmlFor = 'theme'
-  themeLabel.innerText = ' Dark theme'
+  var themeButton = document.createElement('button')
+  expandedSettings.appendChild(themeButton)
+  if (localStorage.theme === 'true') {
+    themeButton.innerText = 'Dark theme'
+    themeButton.onclick = function() {
+      localStorage.theme = 'false'
+      location.reload()
+    }
+  } else {
+    themeButton.innerText = 'Light theme'
+    themeButton.onclick = function() {
+      localStorage.theme = 'true'
+      location.reload()
+    }
+  }
 
   expandedSettings.appendChild(document.createElement('br'))
   expandedSettings.appendChild(document.createElement('br'))
