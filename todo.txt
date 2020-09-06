@@ -6,6 +6,7 @@
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 - iOS still has an awkward 'double click' effect on everything. Gah.
 - Audio not working in mac safari
+- Fix fonts -- find a real copy of Constantia (maybe in the game files?)
 
 Browse
 -- Sorting
