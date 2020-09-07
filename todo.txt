@@ -22,15 +22,6 @@ Editor
 -- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
    Seems like this doesn't actually abort quickly, for some reason. Try to use the profiler?
 -- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
--- Custom slider to better match TW
-   Slider is a gradient from #2D2D2D to #515151
-   Icon is a loose hexagon at #727272
-   Bar is 15px tall
-   Hex is 17px wide
-   Hex extends 9px above/below the slider (just make it with pixel art, jagged edges are fine here)
-     Probably use #666 for the hex, so it's inoffensive on light and dark?
-     can play with it p easily
-
 
 Tracing
 -- Tracing down against walls and gap-2 is awkward

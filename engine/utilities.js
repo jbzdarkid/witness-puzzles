@@ -379,7 +379,6 @@ window.loadHeader = function(titleText) {
   }
 
   expandedSettings.appendChild(document.createElement('br'))
-  expandedSettings.appendChild(document.createElement('br'))
 
   // Sensitivity
   var sensLabel = document.createElement('label')
@@ -390,7 +389,6 @@ window.loadHeader = function(titleText) {
   if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
   var sens = document.createElement('input')
   expandedSettings.appendChild(sens)
-  sens.style.width = '100%'
   sens.type = 'range'
   sens.id = 'sens'
   sens.min = '0.1'
@@ -400,6 +398,7 @@ window.loadHeader = function(titleText) {
   sens.onchange = function() {
     localStorage.sensitivity = this.value
   }
+  sens.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 
   // Volume
   var volumeLabel = document.createElement('label')
@@ -412,7 +411,6 @@ window.loadHeader = function(titleText) {
   }
   var volume = document.createElement('input')
   expandedSettings.appendChild(volume)
-  volume.style.width = '100%'
   volume.type = 'range'
   volume.id = 'volume'
   volume.min = '0'
@@ -422,6 +420,7 @@ window.loadHeader = function(titleText) {
   volume.onchange = function() {
     localStorage.volume = this.value
   }
+  volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 }
 
 // Automatically solve the puzzle
