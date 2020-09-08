@@ -1,6 +1,11 @@
 namespace(function() {
 
-window.MAX_SOLUTIONS = 10000
+window.MAX_SOLUTIONS = 0
+window.cancelSolving = function() {
+  window.MAX_SOLUTIONS = 0 // Causes all new solveLoop calls to exit immediately.
+  tasks = []
+}
+
 // Generates a solution via DFS recursive backtracking
 window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
   var start = (new Date()).getTime()
@@ -27,6 +32,7 @@ window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
   var paths = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
+  window.MAX_SOLUTIONS = 10000
 
   if (isSynchronous) { // Run synchronously
     for (var pos of startPoints) {
@@ -56,11 +62,6 @@ window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
     })
     return []
   }
-}
-
-window.cancelSolving = function() {
-  window.MAX_SOLUTIONS = 0 // Causes all solveLoop steps to exit immediately.
-  tasks = []
 }
 
 var PATH_NONE   = 0
@@ -283,22 +284,22 @@ function solveLoop(puzzle, x, y, paths, numEndpoints, earlyExitData, depth, path
   }
 
   // Far down the stack, execute synchronously
-  if (depth === 0) {
+  if (depth <= 0) {
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
     if (y%2 === 0) {
       path.push(PATH_LEFT)
-      solveLoop(puzzle, x - 1, y, paths, numEndpoints, newEarlyExitData, 0, path)
+      solveLoop(puzzle, x - 1, y, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       path.pop()
       path.push(PATH_RIGHT)
-      solveLoop(puzzle, x + 1, y, paths, numEndpoints, newEarlyExitData, 0, path)
+      solveLoop(puzzle, x + 1, y, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       path.pop()
     }
     if (x%2 === 0) {
       path.push(PATH_TOP)
-      solveLoop(puzzle, x, y - 1, paths, numEndpoints, newEarlyExitData, 0, path)
+      solveLoop(puzzle, x, y - 1, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       path.pop()
       path.push(PATH_BOTTOM)
-      solveLoop(puzzle, x, y + 1, paths, numEndpoints, newEarlyExitData, 0, path)
+      solveLoop(puzzle, x, y + 1, paths, numEndpoints, newEarlyExitData, depth - 1, path)
       path.pop()
     }
     return tailRecurse(puzzle, x, y)

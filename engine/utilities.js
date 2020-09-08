@@ -493,6 +493,7 @@ function showSolution(puzzle, paths, num) {
 // Required global variables/functions:
 // window.puzzle
 // window.onSolvedPuzzle()
+// window.MAX_SOLUTIONS // defined by solve.js
 window.addSolveButtons = function() {
   var parent = document.currentScript.parentElement
 
