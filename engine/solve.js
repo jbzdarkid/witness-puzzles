@@ -186,7 +186,6 @@ function runTaskLoop(partialCallback, finalCallback)  {
 function tailRecurse(puzzle, x, y) {
   // Tail recursion: Back out of this cell
   puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
-  // puzzle.updateCell2(x, y, 'dir', undefined)
   if (puzzle.symmetry != undefined) {
     var sym = puzzle.getSymmetricalPos(x, y)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_NONE)
