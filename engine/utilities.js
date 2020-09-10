@@ -144,16 +144,21 @@ window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
 
 var animations =
-// pointer-events: none; allows for onclick events to bubble up
-'.line-1 {fill: ' + window.LINE_DEFAULT   + '; pointer-events: none; }\n' +
-'.line-2 {fill: ' + window.LINE_PRIMARY   + '; pointer-events: none; }\n' +
-'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none; }\n' +
-// -webkit-touch-callout applies to iOS devices only. Unfortunately, iOS devices have a small
-// gap between the line segments. Adding crispedges isn't the *most* elegant solution, but it works.
-'@supports (-webkit-touch-callout: none) {\n' +
-'  .line-1 { shape-rendering: crispedges; }\n' +
-'  .line-2 { shape-rendering: crispedges; }\n' +
-'  .line-3 { shape-rendering: crispedges; }\n' +
+// pointer-events: none; allows for onclick events to bubble up (so that editor hooks still work)
+'.line-1 {\n' + 
+'  fill: ' + window.LINE_DEFAULT + ';\n' + 
+'  pointer-events: none;\n' + 
+'  shape-rendering: crispedges;\n' + 
+'}\n' +
+'.line-2 {\n' + 
+'  fill: ' + window.LINE_PRIMARY + ';\n' + 
+'  pointer-events: none;\n' + 
+'  shape-rendering: crispedges;\n' + 
+'}\n' +
+'.line-3 {\n' + 
+'  fill: ' + window.LINE_SECONDARY + ';\n' + 
+'  pointer-events: none;\n' + 
+'  shape-rendering: crispedges;\n' + 
 '}\n' +
 '@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}\n' +
 '@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}\n' +
@@ -527,7 +532,13 @@ window.addSolveButtons = function() {
   var solveAuto = document.createElement('button')
   parent.appendChild(solveAuto)
   solveAuto.id = 'solveAuto'
-  solveAuto.onclick = function() {solvePuzzle(window.puzzle, window.onSolvedPuzzle)}
+  solveAuto.onclick = function() {
+    solvePuzzle(window.puzzle, window.onSolvedPuzzle)
+    this.innerText = 'Cancel Solving'
+    this.onclick = function() {
+      window.cancelSolving()
+    }
+  }
   solveAuto.innerText = 'Solve (automatically)'
 
   var div = document.createElement('div')
