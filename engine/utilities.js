@@ -143,48 +143,51 @@ window.DOT_BLUE      = 2
 window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
 
-var animations =
+var animations = ''
+function l(line) {animations += line + '\n'}
 // pointer-events: none; allows for onclick events to bubble up (so that editor hooks still work)
-'.line-1 {\n' + 
-'  fill: ' + window.LINE_DEFAULT + ';\n' + 
-'  pointer-events: none;\n' + 
-'  shape-rendering: crispedges;\n' + 
-'}\n' +
-'.line-2 {\n' + 
-'  fill: ' + window.LINE_PRIMARY + ';\n' + 
-'  pointer-events: none;\n' + 
-'  shape-rendering: crispedges;\n' + 
-'}\n' +
-'.line-3 {\n' + 
-'  fill: ' + window.LINE_SECONDARY + ';\n' + 
-'  pointer-events: none;\n' + 
-'  shape-rendering: crispedges;\n' + 
-'}\n' +
-'@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}\n' +
-'@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}\n' +
-'@keyframes error {to {fill: red;}}\n' +
-'@keyframes fade {to {opacity: 0.35;}}\n' +
-'@keyframes start-grow {from {r:12;} to {r: 24;}}\n' +
+l('.line-1 {') 
+l('  fill: ' + window.LINE_DEFAULT + ';') 
+l('  pointer-events: none;')
+l('  shape-rendering: crispedges;') 
+l('}')
+l('.line-2 {')
+l('  fill: ' + window.LINE_PRIMARY + ';')
+l('  pointer-events: none;')
+l('  shape-rendering: crispedges;')
+l('}')
+l('.line-3 {') 
+l('  fill: ' + window.LINE_SECONDARY + ';') 
+l('  pointer-events: none;') 
+l('  shape-rendering: crispedges;') 
+l('}')
+l('@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}')
+l('@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}')
+l('@keyframes error {to {fill: red;}}')
+l('@keyframes fade {to {opacity: 0.35;}}')
+l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
 // Neutral button style
-'button {\n' +
-'  background-color: ' + window.ALT_BACKGROUND + ';\n' +
-'  border: 0.5px solid ' + window.BORDER + ';\n' +
-'  border-radius: 2px;\n' +
-'  color: ' + window.TEXT_COLOR + ';\n' +
-'  display: inline-block;\n' +
-'  margin: 0;\n' +
-'  outline: none;\n' +
-'  opacity: 1.0;\n' +
-'  padding: 1px 6px;\n' +
-'  -moz-appearance: none;\n' +
-'  -webkit-appearance: none;\n' +
-'}\n' +
+l('button {')
+l('  background-color: ' + window.ALT_BACKGROUND + ';')
+l('  border: 0.5px solid ' + window.BORDER + ';')
+l('  border-radius: 2px;')
+l('  color: ' + window.TEXT_COLOR + ';')
+l('  display: inline-block;')
+l('  margin: 0;')
+l('  outline: none;')
+l('  opacity: 1.0;')
+l('  padding: 1px 6px;')
+l('  -moz-appearance: none;')
+l('  -webkit-appearance: none;')
+l('}')
 // Active (while held down) button style
-'button:active {background-color: ' + window.ACTIVE_COLOR + ';}\n' +
+l('button:active {background-color: ' + window.ACTIVE_COLOR + ';}')
 // Disabled button style
-'button:disabled {opacity: 0.5;}\n' +
+l('button:disabled {opacity: 0.5;}')
 // Selected button style (see https://stackoverflow.com/a/63108630)
-'button:focus {outline: none;}\n'
+l('button:focus {outline: none;}')
+l = null
+
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
