@@ -162,10 +162,6 @@ var animations =
 '  border-radius: 2px;\n' +
 '  color: ' + window.TEXT_COLOR + ';\n' +
 '  display: inline-block;\n' +
-'  font-family: Constantia;\n' +
-'  font-size: 28px;\n' +
-'  font-variant: small-caps;\n' +
-'  font-weight: bold;\n' +
 '  margin: 0;\n' +
 '  outline: none;\n' +
 '  padding: 1px 6px;\n' +
