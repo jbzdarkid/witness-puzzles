@@ -107,7 +107,7 @@ window.ERROR = function(message) {
 window.LINE_PRIMARY = '#8FF'
 window.LINE_SECONDARY = '#FF2'
 
-if (localStorage.theme === 'true') { // Dark scheme
+if (localStorage.theme === 'true') { // Dark theme
   window.BACKGROUND      = '#221'
   window.FOREGROUND      = '#751' // '#873'
   window.BORDER          = '#666'
@@ -119,8 +119,9 @@ if (localStorage.theme === 'true') { // Dark scheme
   window.PAGE_BACKGROUND = '#000'
   window.ALT_BACKGROUND  = '#333' // An off-black. Good for mild contrast.
   window.ACTIVE_COLOR    = '#555' // Color for 'while the element is being pressed'
-} else { // Light scheme
+} else { // Light theme
   window.BACKGROUND      = '#0A8'
+  window.BACKGROUND2     = '#143'
   window.FOREGROUND      = '#344'
   window.BORDER          = '#000'
   window.LINE_DEFAULT    = '#AAA'
