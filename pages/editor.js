@@ -27,6 +27,7 @@ function readPuzzle() {
   if (puzzleList.length === 0) {
     console.log('No puzzles left, clearing storage and creating new one')
     window.localStorage.clear()
+    document.getElementById('loadButton').disabled = true
     createEmptyPuzzle()
     return
   }
@@ -34,7 +35,7 @@ function readPuzzle() {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
     puzzle = Puzzle.deserialize(serialized)
-
+    puzzleModified()
     reloadPuzzle()
   } catch (e) {
     console.log(e)
@@ -100,7 +101,7 @@ function drawPuzzle() {
   }
 
   var addOnClick = function(elem, x, y) {
-    elem.onpointerdown = function() {onElementClicked(x, y)}
+    elem.onpointerdown = function(event) {onElementClicked(event, x, y)}
   }
 
   var xPos = 40
@@ -276,7 +277,15 @@ window.createEmptyPuzzle = function() {
   } else {
     newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
   }
-  writeNewPuzzle(newPuzzle)
+  if (document.getElementById('newButton').disabled == true) {
+    // Previous puzzle was unmodified
+    puzzle = newPuzzle
+    reloadPuzzle()
+  } else {
+    document.getElementById('newButton').disabled = true
+    document.getElementById('deleteButton').disabled = true
+    writeNewPuzzle(newPuzzle)
+  }
 }
 
 window.loadPuzzle = function() {
@@ -288,6 +297,9 @@ window.loadPuzzle = function() {
   buttons.parentElement.insertBefore(loadList, buttons)
   loadList.style.width = buttons.offsetWidth
   buttons.style.display = 'none'
+
+  loadList.style.background = window.PAGE_BACKGROUND
+  loadList.style.color = window.TEXT_COLOR
 
   for (var puzzleName of puzzleList) {
     var option = document.createElement('option')
@@ -481,8 +493,21 @@ function getNextValue(list, value) {
 // what combination of shape & color are currently selected.
 // This function also ensures that the resulting puzzle is still sane, and will modify
 // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
-function onElementClicked(x, y) {
-  if (activeParams.type === 'start') {
+function onElementClicked(event, x, y) {
+  if (event.isRightClick()) {
+    // Clear the associated cell
+    if (x%2 === 1 && y%2 === 1) {
+      puzzle.grid[x][y] = {}
+    } else {
+      puzzle.grid[x][y].end = undefined
+      puzzle.grid[x][y].start = undefined
+      if (puzzle.symmetry != undefined) {
+        var sym = puzzle.getSymmetricalPos(x, y)
+        puzzle.updateCell2(sym.x, sym.y, 'start', undefined)
+        puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
+      }
+    }
+  } else if (activeParams.type === 'start') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
 
@@ -624,6 +649,7 @@ function onElementClicked(x, y) {
       }
     }
   }
+  puzzleModified()
   writePuzzle()
   reloadPuzzle()
 }
@@ -1029,7 +1055,7 @@ function dragMove(event, elem) {
     var yLim = 60
   }
 
-  // Note: We only adjust dragging when we reach a limit.
+  // Note: We only modify dragging when we reach a limit.
 
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break
@@ -1046,6 +1072,12 @@ function dragMove(event, elem) {
     dy -= Math.sign(dy) * yLim
     dragging.y = newDragging.y
   }
+}
+
+function puzzleModified() {
+  document.getElementById('newButton').disabled = false
+  document.getElementById('loadButton').disabled = false
+  document.getElementById('deleteButton').disabled = false
 }
 
 })

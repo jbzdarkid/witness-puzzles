@@ -31,3 +31,44 @@ body { text-align: center; }
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+/* Slider control main bar */
+input[type="range"] {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border-radius: 3px;
+  height: 15px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  outline: none;
+  width: 100%;
+}
+/* Slider control icon */
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: url('slider.png');
+  background-size: 17px 33px;
+  height: 33px;
+  width: 17px;
+}
+input[type="range"]::-moz-range-thumb {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: url('slider.png');
+  background-size: 17px 33px;
+  height: 33px;
+  width: 17px;
+}
+input[type="range"]::-ms-thumb {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: url('slider.png');
+  background-size: 17px 33px;
+  height: 33px;
+  width: 17px;
+}

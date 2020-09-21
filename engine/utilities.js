@@ -13,6 +13,9 @@ if (!String.prototype.includes) {
 }
 Event.prototype.movementX = Event.prototype.movementX || Event.prototype.mozMovementX
 Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMovementY
+Event.prototype.isRightClick = function() {
+  return this.which === 3 || (this.touches && this.touches.length > 1)
+}
 Element.prototype.requestPointerLock = Element.prototype.requestPointerLock || Element.prototype.mozRequestPointerLock || function() {
   document.pointerLockElement = this
   document.onpointerlockchange()
@@ -140,23 +143,30 @@ window.DOT_BLUE      = 2
 window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
 
-// pointer-events: none; allows for onclick events to bubble up
-// -webkit-touch-callout applies to iOS devices only. Unfortunately, iOS devices have a small pixel gap between the line segments. Adding crispedges isn't the *most* elegant solution, but it works.
 var animations =
-'.line-1 {fill: ' + window.LINE_DEFAULT   + '; pointer-events: none; }\n' +
-'.line-2 {fill: ' + window.LINE_PRIMARY   + '; pointer-events: none; }\n' +
-'.line-3 {fill: ' + window.LINE_SECONDARY + '; pointer-events: none; }\n' +
-'@supports (-webkit-touch-callout: none) {\n' +
-'  .line-1 { shape-rendering: crispedges; }\n' +
-'  .line-2 { shape-rendering: crispedges; }\n' +
-'  .line-3 { shape-rendering: crispedges; }\n' +
+// pointer-events: none; allows for onclick events to bubble up (so that editor hooks still work)
+'.line-1 {\n' + 
+'  fill: ' + window.LINE_DEFAULT + ';\n' + 
+'  pointer-events: none;\n' + 
+'  shape-rendering: crispedges;\n' + 
+'}\n' +
+'.line-2 {\n' + 
+'  fill: ' + window.LINE_PRIMARY + ';\n' + 
+'  pointer-events: none;\n' + 
+'  shape-rendering: crispedges;\n' + 
+'}\n' +
+'.line-3 {\n' + 
+'  fill: ' + window.LINE_SECONDARY + ';\n' + 
+'  pointer-events: none;\n' + 
+'  shape-rendering: crispedges;\n' + 
 '}\n' +
 '@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}\n' +
 '@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}\n' +
 '@keyframes error {to {fill: red;}}\n' +
 '@keyframes fade {to {opacity: 0.35;}}\n' +
 '@keyframes start-grow {from {r:12;} to {r: 24;}}\n' +
-'button {\n' + // Neutral
+// Neutral button style
+'button {\n' +
 '  background-color: ' + window.ALT_BACKGROUND + ';\n' +
 '  border: 0.5px solid ' + window.BORDER + ';\n' +
 '  border-radius: 2px;\n' +
@@ -164,12 +174,17 @@ var animations =
 '  display: inline-block;\n' +
 '  margin: 0;\n' +
 '  outline: none;\n' +
+'  opacity: 1.0;\n' +
 '  padding: 1px 6px;\n' +
 '  -moz-appearance: none;\n' +
 '  -webkit-appearance: none;\n' +
 '}\n' +
+// Active (while held down) button style
 'button:active {background-color: ' + window.ACTIVE_COLOR + ';}\n' +
-'button:focus {outline: none;}\n' // Selected (from: https://stackoverflow.com/a/63108630)
+// Disabled button style
+'button:disabled {opacity: 0.5;}\n' +
+// Selected button style (see https://stackoverflow.com/a/63108630)
+'button:focus {outline: none;}\n'
 var style = document.createElement('style')
 style.type = 'text/css'
 style.title = 'animations'
@@ -365,7 +380,6 @@ window.loadHeader = function(titleText) {
   }
 
   expandedSettings.appendChild(document.createElement('br'))
-  expandedSettings.appendChild(document.createElement('br'))
 
   // Sensitivity
   var sensLabel = document.createElement('label')
@@ -376,7 +390,6 @@ window.loadHeader = function(titleText) {
   if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
   var sens = document.createElement('input')
   expandedSettings.appendChild(sens)
-  sens.style.width = '100%'
   sens.type = 'range'
   sens.id = 'sens'
   sens.min = '0.1'
@@ -386,6 +399,7 @@ window.loadHeader = function(titleText) {
   sens.onchange = function() {
     localStorage.sensitivity = this.value
   }
+  sens.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 
   // Volume
   var volumeLabel = document.createElement('label')
@@ -398,7 +412,6 @@ window.loadHeader = function(titleText) {
   }
   var volume = document.createElement('input')
   expandedSettings.appendChild(volume)
-  volume.style.width = '100%'
   volume.type = 'range'
   volume.id = 'volume'
   volume.min = '0'
@@ -408,6 +421,7 @@ window.loadHeader = function(titleText) {
   volume.onchange = function() {
     localStorage.volume = this.value
   }
+  volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 }
 
 // Automatically solve the puzzle
@@ -480,26 +494,26 @@ function showSolution(puzzle, paths, num) {
 // Required global variables/functions:
 // window.puzzle
 // window.onSolvedPuzzle()
+// window.MAX_SOLUTIONS // defined by solve.js
 window.addSolveButtons = function() {
   var parent = document.currentScript.parentElement
 
-  var div = document.createElement('div')
-  parent.appendChild(div)
-  div.id = 'solveMode'
-  div.style.width = '22px'
-  div.style.height = '22px'
-  div.style.borderRadius = '6px'
-  div.style.display = 'inline-block'
-  div.style.verticalAlign = 'text-bottom'
-  div.style.marginRight = '6px'
-  div.style.borderWidth = '1.5px'
-  div.style.borderStyle = 'solid'
+  var solveMode = document.createElement('div')
+  parent.appendChild(solveMode)
+  solveMode.id = 'solveMode'
+  solveMode.style.width = '22px'
+  solveMode.style.height = '22px'
+  solveMode.style.borderRadius = '6px'
+  solveMode.style.display = 'inline-block'
+  solveMode.style.verticalAlign = 'text-bottom'
+  solveMode.style.marginRight = '6px'
+  solveMode.style.borderWidth = '1.5px'
+  solveMode.style.borderStyle = 'solid'
+  solveMode.style.borderColor = window.BORDER
+  solveMode.style.background = window.PAGE_BACKGROUND
+  solveMode.style.color = window.TEXT_COLOR
 
-  div.style.borderColor = window.BORDER
-  div.style.background = window.PAGE_BACKGROUND
-  div.style.color = window.TEXT_COLOR
-
-  div.onpointerdown = function() {
+  solveMode.onpointerdown = function() {
     this.checked = !this.checked
     this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
     if (window.setSolveMode) window.setSolveMode(this.checked)
@@ -507,14 +521,21 @@ window.addSolveButtons = function() {
 
   var label = document.createElement('label')
   parent.appendChild(label)
-  label.htmlFor = 'solveMode'
+  label.style.marginRight = '8px'
+  label.onpointerdown = function() {solveMode.onpointerdown()}
   label.innerText = 'Solve (manually)'
 
-  var button = document.createElement('button')
-  parent.appendChild(button)
-  button.id = 'solveAuto'
-  button.onclick = function() {solvePuzzle(window.puzzle, window.onSolvedPuzzle)}
-  button.innerText = 'Solve (automatically)'
+  var solveAuto = document.createElement('button')
+  parent.appendChild(solveAuto)
+  solveAuto.id = 'solveAuto'
+  solveAuto.onclick = function() {
+    solvePuzzle(window.puzzle, window.onSolvedPuzzle)
+    this.innerText = 'Cancel Solving'
+    this.onclick = function() {
+      window.cancelSolving()
+    }
+  }
+  solveAuto.innerText = 'Solve (automatically)'
 
   var div = document.createElement('div')
   parent.appendChild(div)

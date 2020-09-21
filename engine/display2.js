@@ -6,6 +6,11 @@ window.draw = function(puzzle, target='puzzle') {
   console.info('Drawing', puzzle, 'into', svg)
   while (svg.firstChild) svg.removeChild(svg.firstChild)
 
+  // Prevent context menu popups within the puzzle
+  svg.oncontextmenu = function(event) {
+    event.preventDefault()
+  }
+
   if (puzzle.pillar === true) {
     // 41*width + 30*2 (padding) + 10*2 (border)
     var pixelWidth = 41 * puzzle.width + 80
