@@ -1,13 +1,18 @@
+Ship Blockers
+- iOS still has an awkward 'double click' effect on everything. Gah.
+- Audio not working in mac safari
+- Fix fonts -- find a real copy of Constantia (maybe in the game files?)
+  Mac chrome is busted here
+- Fix async cancel
+(Maybe)
+- Recolor inside vs outside to better indicate 'this applies to the puzzle' and 'this does not'
+
 - Work on speedrunning solver / improving "unique puzzles"
   Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.
   Or I could make a key for the puzzle as a whole? Regardless, not as easy as just hacking the cache key.
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-- iOS still has an awkward 'double click' effect on everything. Gah.
-- Audio not working in mac safari
-- Fix fonts -- find a real copy of Constantia (maybe in the game files?)
-  Mac chrome is busted here
 - Editor triangle button rmb should cycle backwards
 
 Browse
