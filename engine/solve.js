@@ -44,19 +44,21 @@ window.solve = function(puzzle, partialCallback=null, finalCallback=null) {
     console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
     return solutionPaths
   } else { // Run asynchronously
-
-    // This awkward function exists to ensure that pos is copied for each task.
-    addTask = function(pos) {
-      tasks.push({'code': function() {
-        return solveLoop(puzzle, pos.x, pos.y, numEndpoints, earlyExitData, 5, [pos])
-      }, 'fraction': (1.0 / startPoints.length)})
+    completed = 0.0
+    task = {
+      'code': function() {
+        var newTasks = []
+        // TODO: Maybe bug with multiple startpoints
+        for (var pos of startPoints) {
+          newTasks.push(function() {
+            return solveLoop(puzzle, pos.x, pos.y, numEndpoints, earlyExitData, 999, [pos])
+          })
+        }
+        return newTasks
+      },
+      'fraction': 1.0,
     }
-
-    for (var pos of startPoints) {
-      addTask(pos)
-    }
-
-    runTaskLoop(partialCallback, function() {
+    doOneTask(partialCallback, function() {
       var end = (new Date()).getTime()
       console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
       finalCallback(solutionPaths)
@@ -156,31 +158,45 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   }
 }
 
-var tasks = []
-function runTaskLoop(partialCallback, finalCallback)  {
-  var completed = 0.0
-  function doOneTask() {
-    if (tasks.length === 0) {
-      finalCallback()
-      return
-    }
+var asyncTimer = 0
+var completed = 0.0
+var task = undefined
+function doOneTask(partialCallback, finalCallback) {
+  if (task == undefined) {
+    finalCallback()
+    return
+  }
 
-    var task = tasks.pop()
-    var newTasks = task.code()
+  var newTasks = task.code()
 
-    if (newTasks == undefined || newTasks.length === 0) {
-      // No new tasks
-      completed += task.fraction
-      partialCallback(completed)
-    } else {
-      for (var i=0; i<newTasks.length; i++) {
-        tasks.push({'code':newTasks[i], 'fraction': task.fraction / newTasks.length})
+  if (newTasks == undefined || newTasks.length === 0) {
+    // No new tasks
+    completed += task.fraction
+    partialCallback(completed)
+    task = task.nextTask
+  } else {
+    // Tasks are pushed in order. To do DFS, we need to enqueue them in reverse order.
+    var fraction = task.fraction / newTasks.length
+    task = task.nextTask // Pop this task before adding more tasks
+
+    for (var i=newTasks.length - 1; i >= 0; i--) {
+      task = {
+        'code': newTasks[i],
+        'fraction': fraction,
+        'nextTask': task,
       }
     }
-
-    setTimeout(doOneTask, 0)
   }
-  setTimeout(doOneTask, 0)
+
+  // Asynchronizing is expensive. As such, we don't want to do it too often.
+  // However, we would like 'cancel solving' to be responsive. As such, we asynchronize every 100 calls.
+  if (++asyncTimer % 100 === 0) {
+    setTimeout(function() {
+      doOneTask(partialCallback, finalCallback)
+    }, 0)
+  } else {
+    doOneTask(partialCallback, finalCallback)
+  }
 }
 
 function tailRecurse(puzzle, x, y) {
@@ -304,39 +320,38 @@ function solveLoop(puzzle, x, y, numEndpoints, earlyExitData, depth, path) {
     }
     return tailRecurse(puzzle, x, y)
   } else {
-    // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-    // Note: The order reversed because we push these into a queue, then pop them to execute them.
-
     // Push a dummy element on the end of the path, so that we can fill it correctly as we DFS.
     // This element is popped when we tail recurse (which always happens *after* all of our DFS!)
     path.push(PATH_NONE)
 
+    // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
     var newTasks = []
-    newTasks.push(function() {
-      path.pop()
-      tailRecurse(puzzle, x, y)
-    })
-
-    if (x%2 === 0) {
-      newTasks.push(function() {
-        path[path.length-1] = PATH_BOTTOM
-        return solveLoop(puzzle, x, y + 1, numEndpoints, newEarlyExitData, depth - 1, path)
-      })
-      newTasks.push(function() {
-        path[path.length-1] = PATH_TOP
-        return solveLoop(puzzle, x, y - 1, numEndpoints, newEarlyExitData, depth - 1, path)
-      })
-    }
     if (y%2 === 0) {
-      newTasks.push(function() {
-        path[path.length-1] = PATH_RIGHT
-        return solveLoop(puzzle, x + 1, y, numEndpoints, newEarlyExitData, depth - 1, path)
-      })
       newTasks.push(function() {
         path[path.length-1] = PATH_LEFT
         return solveLoop(puzzle, x - 1, y, numEndpoints, newEarlyExitData, depth - 1, path)
       })
+      newTasks.push(function() {
+        path[path.length-1] = PATH_RIGHT
+        return solveLoop(puzzle, x + 1, y, numEndpoints, newEarlyExitData, depth - 1, path)
+      })
     }
+
+    if (x%2 === 0) {
+      newTasks.push(function() {
+        path[path.length-1] = PATH_TOP
+        return solveLoop(puzzle, x, y - 1, numEndpoints, newEarlyExitData, depth - 1, path)
+      })
+      newTasks.push(function() {
+        path[path.length-1] = PATH_BOTTOM
+        return solveLoop(puzzle, x, y + 1, numEndpoints, newEarlyExitData, depth - 1, path)
+      })
+    }
+
+    newTasks.push(function() {
+      path.pop()
+      tailRecurse(puzzle, x, y)
+    })
 
     return newTasks
   }
