@@ -174,7 +174,7 @@ l('  border: 0.5px solid ' + window.BORDER + ';')
 l('  border-radius: 2px;')
 l('  color: ' + window.TEXT_COLOR + ';')
 l('  display: inline-block;')
-l('  margin: 0;')
+l('  margin: 0px;')
 l('  outline: none;')
 l('  opacity: 1.0;')
 l('  padding: 1px 6px;')
@@ -429,11 +429,17 @@ window.loadHeader = function(titleText) {
 }
 
 // Automatically solve the puzzle
-function solvePuzzle(puzzle, onSolvedPuzzle) {
+function solvePuzzle() {
   if (window.setSolveMode) window.setSolveMode(false)
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
-  window.solve(puzzle, function(progress) {
+  document.getElementById('solveAuto').innerText = 'Cancel Solving'
+  document.getElementById('solveAuto').onclick = function() {
+    window.cancelSolving()
+    this.innerText = 'Solve (automatically)'
+  }
+
+  window.solve(window.puzzle, function(progress) {
     var percent = Math.floor(100 * progress)
     document.getElementById('progressPercent').innerText = percent + '%'
     document.getElementById('progress').style.width = percent + '%'
@@ -442,10 +448,11 @@ function solvePuzzle(puzzle, onSolvedPuzzle) {
     document.getElementById('solutionViewer').style.display = null
     document.getElementById('progressPercent').innerText = '0%'
     document.getElementById('progress').style.width = '0%'
+    document.getElementById('solveAuto').innerText = 'Solve (automatically)'
 
-    puzzle.autoSolved = true
+    window.puzzle.autoSolved = true
     paths = window.onSolvedPuzzle(paths)
-    showSolution(puzzle, paths, 0)
+    showSolution(window.puzzle, paths, 0)
   })
 }
 
@@ -532,14 +539,8 @@ window.addSolveButtons = function() {
   var solveAuto = document.createElement('button')
   parent.appendChild(solveAuto)
   solveAuto.id = 'solveAuto'
-  solveAuto.onclick = function() {
-    solvePuzzle(window.puzzle, window.onSolvedPuzzle)
-    this.innerText = 'Cancel Solving'
-    this.onclick = function() {
-      window.cancelSolving()
-    }
-  }
   solveAuto.innerText = 'Solve (automatically)'
+  solveAuto.onclick = solvePuzzle
 
   var div = document.createElement('div')
   parent.appendChild(div)

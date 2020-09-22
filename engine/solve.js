@@ -2,6 +2,7 @@ namespace(function() {
 
 window.MAX_SOLUTIONS = 0
 window.cancelSolving = function() {
+  console.error('Cancelled solving')
   window.MAX_SOLUTIONS = 0 // Causes all new solveLoop calls to exit immediately.
   tasks = []
 }
