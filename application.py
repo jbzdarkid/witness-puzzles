@@ -36,6 +36,7 @@ host_statically('pages/triangles.js')
 if application.debug:
   host_statically('pages/test.html')
   host_statically('pages/test.js')
+  host_statically('pages/testSolve.js')
   host_statically('pages/editor_test.html')
   host_statically('pages/editor_test.js')
 

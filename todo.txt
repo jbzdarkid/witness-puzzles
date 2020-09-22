@@ -3,13 +3,14 @@ Ship Blockers
 - Audio not working in mac safari
 - Fix fonts -- find a real copy of Constantia (maybe in the game files?)
   Mac chrome is busted here
-- Fix async cancel
 - Fix solver accuracy by using a "validation: none" mode
   Pre-pass to get total nodes to visit
   As you visit nodes, update the count
   If you would prune, instead of returning, disable until we pop back the stack
+- Merge some logic between the two solvers
 (Maybe)
 - Recolor inside vs outside to better indicate 'this applies to the puzzle' and 'this does not'
+
 
 - Work on speedrunning solver / improving "unique puzzles"
   Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.

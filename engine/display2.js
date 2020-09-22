@@ -204,6 +204,8 @@ function drawStartAndEnd(puzzle, svg) {
         var start = svg.lastChild
         start.id = 'start_' + svg.id + '_' + x + '_' + y
 
+        // ;(function(a){}(a))
+        // This syntax is used to forcibly copy all of the arguments
         ;(function(puzzle, x, y, start, symStart) {
           start.onpointerdown = function(event) {
             window.trace(event, puzzle, {'x':x, 'y':y}, start, symStart)
