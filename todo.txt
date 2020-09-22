@@ -4,6 +4,10 @@ Ship Blockers
 - Fix fonts -- find a real copy of Constantia (maybe in the game files?)
   Mac chrome is busted here
 - Fix async cancel
+- Fix solver accuracy by using a "validation: none" mode
+  Pre-pass to get total nodes to visit
+  As you visit nodes, update the count
+  If you would prune, instead of returning, disable until we pop back the stack
 (Maybe)
 - Recolor inside vs outside to better indicate 'this applies to the puzzle' and 'this does not'
 
