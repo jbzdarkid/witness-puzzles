@@ -288,21 +288,22 @@ function gap(svg, params) {
 
   var rect = createElement('rect')
   svg.appendChild(rect)
-  rect.setAttribute('width', 58)
+  rect.setAttribute('width', 33)
   rect.setAttribute('height', 24)
   rect.setAttribute('fill', window.FOREGROUND)
   rect.setAttribute('transform', rotate(90 * params.rot))
-  rect.setAttribute('x', centerX - 29)
+  rect.setAttribute('x', centerX - 41)
   rect.setAttribute('y', centerY - 12)
 
-  var rect2 = createElement('rect')
-  svg.appendChild(rect2)
-  rect2.setAttribute('width', 18)
-  rect2.setAttribute('height', 24)
-  rect2.setAttribute('fill', window.BACKGROUND)
-  rect2.setAttribute('transform', rotate(90 * params.rot))
-  rect2.setAttribute('x', centerX - 9)
-  rect2.setAttribute('y', centerY - 12)
+  var rect = createElement('rect')
+  svg.appendChild(rect)
+  rect.setAttribute('width', 33)
+  rect.setAttribute('height', 24)
+  rect.setAttribute('fill', window.FOREGROUND)
+  rect.setAttribute('transform', rotate(90 * params.rot))
+  rect.setAttribute('x', centerX + 9)
+  rect.setAttribute('y', centerY - 12)
+
 }
 
 function drag(svg, params) {

@@ -27,13 +27,29 @@ window.draw = function(puzzle, target='puzzle') {
   svg.appendChild(rect)
   rect.setAttribute('stroke-width', 10)
   rect.setAttribute('stroke', window.BORDER)
-  rect.setAttribute('fill', window.BACKGROUND)
+  rect.setAttribute('fill', window.OUTER_BACKGROUND)
   // Accounting for the border thickness
   rect.setAttribute('x', 5)
   rect.setAttribute('y', 5)
   rect.setAttribute('width', pixelWidth - 10) // Removing border
   rect.setAttribute('height', pixelHeight - 10) // Removing border
 
+  var savedGrid = puzzle._switchToMaskedGrid()
+  for (var x=1; x<puzzle.width; x += 2) {
+    for (var y=1; y<puzzle.height; y += 2) {
+      if (puzzle.grid[x][y] == undefined) continue // Cell borders the outside
+
+      var rect = createElement('rect')
+      svg.appendChild(rect)
+      rect.setAttribute('x', 41 * x + 11)
+      rect.setAttribute('y', 41 * y + 11)
+      rect.setAttribute('width', 82)
+      rect.setAttribute('height', 82)
+      rect.setAttribute('fill', window.BACKGROUND)
+      rect.setAttribute('shape-rendering', 'crispedges')
+    }
+  }
+  puzzle.grid = savedGrid
   drawGrid(puzzle, svg)
   drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
@@ -50,6 +66,7 @@ function drawGrid(puzzle, svg) {
       line.setAttribute('stroke-linecap', 'round')
       line.setAttribute('stroke', window.FOREGROUND)
       if (x%2 === 1 && y%2 === 0) { // Horizontal
+        if (cell.gap === 1) continue
         line.setAttribute('x1', (x-1)*41 + 52)
         // Adjust the length if it's a pillar -- the grid is not as wide!
         if (puzzle.pillar === true && x === puzzle.width - 1) {
@@ -61,33 +78,42 @@ function drawGrid(puzzle, svg) {
         line.setAttribute('y2', y*41 + 52)
         svg.appendChild(line)
       } else if (x%2 === 0 && y%2 === 1) { // Vertical
+        if (cell.gap === 1) continue
         line.setAttribute('x1', x*41 + 52)
         line.setAttribute('x2', x*41 + 52)
         line.setAttribute('y1', (y-1)*41 + 52)
         line.setAttribute('y2', (y+1)*41 + 52)
         svg.appendChild(line)
       } else if (x%2 === 0 && y%2 === 0) { // Intersection
-        var cell = puzzle.getCell(x, y)
-        // Only for non-endpoints
-        if (cell != undefined && cell.end == undefined) {
-          var surroundingLines = 0
-          var leftCell = puzzle.getCell(x - 1, y)
-          if (leftCell != undefined && leftCell.gap !== 2) surroundingLines++
-          var rightCell = puzzle.getCell(x + 1, y)
-          if (rightCell != undefined && rightCell.gap !== 2) surroundingLines++
-          var topCell = puzzle.getCell(x, y - 1)
-          if (topCell != undefined && topCell.gap !== 2) surroundingLines++
-          var bottomCell = puzzle.getCell(x, y + 1)
-          if (bottomCell != undefined && bottomCell.gap !== 2) surroundingLines++
-          if (surroundingLines === 1) {
-            var rect = createElement('rect')
-            rect.setAttribute('x', x*41 + 40)
-            rect.setAttribute('y', y*41 + 40)
-            rect.setAttribute('width', 24)
-            rect.setAttribute('height', 24)
-            rect.setAttribute('fill', window.FOREGROUND)
-            svg.appendChild(rect)
-          }
+        var surroundingLines = 0
+        if (cell.end != undefined) surroundingLines++
+        var leftCell = puzzle.getCell(x - 1, y)
+        if (leftCell != undefined && leftCell.gap !== 2) surroundingLines++
+        var rightCell = puzzle.getCell(x + 1, y)
+        if (rightCell != undefined && rightCell.gap !== 2) surroundingLines++
+        var topCell = puzzle.getCell(x, y - 1)
+        if (topCell != undefined && topCell.gap !== 2) surroundingLines++
+        var bottomCell = puzzle.getCell(x, y + 1)
+        if (bottomCell != undefined && bottomCell.gap !== 2) surroundingLines++
+
+        if (surroundingLines === 1) {
+          // Add square caps for dead ends which are non-endpoints
+          var rect = createElement('rect')
+          rect.setAttribute('x', x*41 + 40)
+          rect.setAttribute('y', y*41 + 40)
+          rect.setAttribute('width', 24)
+          rect.setAttribute('height', 24)
+          rect.setAttribute('fill', window.FOREGROUND)
+          svg.appendChild(rect)
+        } else if (surroundingLines > 1) {
+          // Add rounding for other intersections (handling gap-only corners)
+          var circ = createElement('circle')
+          circ.setAttribute('cx', x*41 + 52)
+          circ.setAttribute('cy', y*41 + 52)
+          circ.setAttribute('r', 12)
+          circ.setAttribute('fill', window.FOREGROUND)
+          circ.id = 'foo'
+          svg.appendChild(circ)
         }
       }
     }

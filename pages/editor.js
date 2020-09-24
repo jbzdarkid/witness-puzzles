@@ -121,7 +121,7 @@ function drawPuzzle() {
       rect.setAttribute('opacity', 0)
       yPos += height
       addOnClick(rect, x, y)
-      rect.onmouseover = function() {this.setAttribute('opacity', 0.1)}
+      rect.onmouseover = function() {this.setAttribute('opacity', 0.25)}
       rect.onmouseout = function() {this.setAttribute('opacity', 0)}
     }
     xPos += width
