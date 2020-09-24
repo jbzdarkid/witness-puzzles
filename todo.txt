@@ -7,7 +7,6 @@ Ship Blockers
   Pre-pass to get total nodes to visit
   As you visit nodes, update the count
   If you would prune, instead of returning, disable until we pop back the stack
-- Merge some logic between the two solvers
 
 
 - Work on speedrunning solver / improving "unique puzzles"

@@ -14,6 +14,7 @@ var completed = 0.0
 var task = undefined
 var puzzle = undefined
 var path = []
+window.SOLVE_SYNC = false // For testing purposes
 
 // Generates a solution via DFS recursive backtracking
 window.solve = function(p, partialCallback, finalCallback) {
@@ -65,8 +66,9 @@ window.solve = function(p, partialCallback, finalCallback) {
   taskLoop(partialCallback, function() {
     var end = (new Date()).getTime()
     console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
-    finalCallback(solutionPaths)
+    if (finalCallback) finalCallback(solutionPaths)
   })
+  return solutionPaths
 }
 
 function taskLoop(partialCallback, finalCallback) {
@@ -80,7 +82,7 @@ function taskLoop(partialCallback, finalCallback) {
   if (newTasks == undefined || newTasks.length === 0) {
     // No new tasks
     completed += task.fraction
-    partialCallback(completed)
+    if (partialCallback) partialCallback(completed)
     task = task.nextTask
   } else {
     // Tasks are pushed in order. To do DFS, we need to enqueue them in reverse order.
@@ -98,7 +100,7 @@ function taskLoop(partialCallback, finalCallback) {
 
   // Asynchronizing is expensive. As such, we don't want to do it too often.
   // However, we would like 'cancel solving' to be responsive. As such, we asynchronize every 100 calls.
-  if (++asyncTimer % 100 === 0) {
+  if (!window.SOLVE_SYNC && ++asyncTimer % 100 === 0) {
     setTimeout(function() {
       taskLoop(partialCallback, finalCallback)
     }, 0)
@@ -207,40 +209,65 @@ function solveLoop(x, y, numEndpoints, earlyExitData) {
     var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
   }
 
-  // Push a dummy element on the end of the path, so that we can fill it correctly as we DFS.
-  // This element is popped when we tail recurse (which always happens *after* all of our DFS!)
-  path.push(PATH_NONE)
+  if (window.SOLVE_SYNC) {
+    path.push(PATH_NONE)
 
-  // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
-  var newTasks = []
-  if (y%2 === 0) {
-    newTasks.push(function() {
+    // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
+    if (y%2 === 0) {
       path[path.length-1] = PATH_LEFT
-      return solveLoop(x - 1, y, numEndpoints, newEarlyExitData, path)
-    })
-    newTasks.push(function() {
+      solveLoop(x - 1, y, numEndpoints, newEarlyExitData, path)
+
       path[path.length-1] = PATH_RIGHT
-      return solveLoop(x + 1, y, numEndpoints, newEarlyExitData, path)
-    })
-  }
+      solveLoop(x + 1, y, numEndpoints, newEarlyExitData, path)
+    }
 
-  if (x%2 === 0) {
-    newTasks.push(function() {
+    if (x%2 === 0) {
       path[path.length-1] = PATH_TOP
-      return solveLoop(x, y - 1, numEndpoints, newEarlyExitData, path)
-    })
-    newTasks.push(function() {
-      path[path.length-1] = PATH_BOTTOM
-      return solveLoop(x, y + 1, numEndpoints, newEarlyExitData, path)
-    })
-  }
+      solveLoop(x, y - 1, numEndpoints, newEarlyExitData, path)
 
-  newTasks.push(function() {
+      path[path.length-1] = PATH_BOTTOM
+      solveLoop(x, y + 1, numEndpoints, newEarlyExitData, path)
+    }
+
     path.pop()
     tailRecurse(x, y)
-  })
 
-  return newTasks
+  } else {
+    // Push a dummy element on the end of the path, so that we can fill it correctly as we DFS.
+    // This element is popped when we tail recurse (which always happens *after* all of our DFS!)
+    path.push(PATH_NONE)
+
+    // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
+    var newTasks = []
+    if (y%2 === 0) {
+      newTasks.push(function() {
+        path[path.length-1] = PATH_LEFT
+        return solveLoop(x - 1, y, numEndpoints, newEarlyExitData, path)
+      })
+      newTasks.push(function() {
+        path[path.length-1] = PATH_RIGHT
+        return solveLoop(x + 1, y, numEndpoints, newEarlyExitData, path)
+      })
+    }
+
+    if (x%2 === 0) {
+      newTasks.push(function() {
+        path[path.length-1] = PATH_TOP
+        return solveLoop(x, y - 1, numEndpoints, newEarlyExitData, path)
+      })
+      newTasks.push(function() {
+        path[path.length-1] = PATH_BOTTOM
+        return solveLoop(x, y + 1, numEndpoints, newEarlyExitData, path)
+      })
+    }
+
+    newTasks.push(function() {
+      path.pop()
+      tailRecurse(x, y)
+    })
+
+    return newTasks
+  }
 }
 
 window.cancelSolving = function() {

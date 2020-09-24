@@ -4,6 +4,7 @@ window.onload = function() {
   var drawTime = 0
   var solveTime = 0
   var testNames = Object.keys(tests)
+  window.SOLVE_SYNC = true
   for (var i=0; i<testNames.length; i++) {
     if (i%3 === 0) table.insertRow()
     var testName = testNames[i]
