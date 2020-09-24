@@ -8,8 +8,6 @@ Ship Blockers
   As you visit nodes, update the count
   If you would prune, instead of returning, disable until we pop back the stack
 - Merge some logic between the two solvers
-(Maybe)
-- Recolor inside vs outside to better indicate 'this applies to the puzzle' and 'this does not'
 
 
 - Work on speedrunning solver / improving "unique puzzles"
