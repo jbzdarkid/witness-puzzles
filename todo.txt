@@ -3,11 +3,8 @@ Ship Blockers
 - Audio not working in mac safari
 - Fix fonts -- find a real copy of Constantia (maybe in the game files?)
   Mac chrome is busted here
-- Fix solver accuracy by using a "validation: none" mode
-  Pre-pass to get total nodes to visit
-  As you visit nodes, update the count
-  If you would prune, instead of returning, disable until we pop back the stack
 - Async solver got very slow (4x5 taking >1m). Bisect to figure out why.
+  Probably because I got rid of 'synchronous at depth X'.
 - Pillars are broken with new 'outer' mode. This is maybe a good moment to use a gradient.
   https://www.w3.org/TR/SVG11/pservers.html#LinearGradients
 
