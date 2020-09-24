@@ -438,6 +438,7 @@ function solvePuzzle() {
   document.getElementById('solveAuto').onclick = function() {
     window.cancelSolving()
     this.innerText = 'Solve (automatically)'
+    this.onclick = solvePuzzle
   }
 
   window.solve(window.puzzle, function(progress) {
