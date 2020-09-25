@@ -142,12 +142,13 @@ function taskLoop(partialCallback, finalCallback) {
   // Asynchronizing is expensive. As such, we don't want to do it too often.
   // However, we would like 'cancel solving' to be responsive. So, we call setTimeout every so often.
   var doAsync = false
-  if (!window.SOLVE_SYNC) doAsync = (asyncTimer++ % 100 === 0)
-
-  while (nodes >= percentages[0]) {
-    if (partialCallback) partialCallback(100 - percentages.length)
-    percentages.shift()
-    doAsync = true
+  if (!window.SOLVE_SYNC) {
+    doAsync = (asyncTimer++ % 100 === 0)
+    while (nodes >= percentages[0]) {
+      if (partialCallback) partialCallback(100 - percentages.length)
+      percentages.shift()
+      doAsync = true
+    }
   }
 
   if (doAsync) {
