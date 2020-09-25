@@ -437,12 +437,11 @@ function solvePuzzle() {
   document.getElementById('solveAuto').innerText = 'Cancel Solving'
   document.getElementById('solveAuto').onclick = function() {
     window.cancelSolving()
-    this.innerText = 'Solve (automatically)'
-    this.onclick = solvePuzzle
+    this.innerText = 'Cancelling...'
+    this.onclick = null
   }
 
-  window.solve(window.puzzle, function(progress) {
-    var percent = Math.floor(100 * progress)
+  window.solve(window.puzzle, function(percent) {
     document.getElementById('progressPercent').innerText = percent + '%'
     document.getElementById('progress').style.width = percent + '%'
   }, function(paths) {
@@ -451,6 +450,7 @@ function solvePuzzle() {
     document.getElementById('progressPercent').innerText = '0%'
     document.getElementById('progress').style.width = '0%'
     document.getElementById('solveAuto').innerText = 'Solve (automatically)'
+    document.getElementById('solveAuto').onclick = solvePuzzle
 
     window.puzzle.autoSolved = true
     paths = window.onSolvedPuzzle(paths)

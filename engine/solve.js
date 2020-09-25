@@ -14,9 +14,9 @@ var task = undefined
 var puzzle = undefined
 var path = []
 window.SOLVE_SYNC = false // For testing purposes
-var SYNC_THRESHOLD = 7 // Depth at which we switch to a synchronous solver (for perf)
+var SYNC_THRESHOLD = 9 // Depth at which we switch to a synchronous solver (for perf)
 
-var totalNodes = 0
+var percentages = []
 var NODE_DEPTH = 9
 var nodes = 0
 function countNodes(x, y, depth) {
@@ -82,7 +82,12 @@ window.solve = function(p, partialCallback, finalCallback) {
   for (var pos of startPoints) {
     countNodes(pos.x, pos.y, 0)
   }
-  totalNodes = nodes
+  console.info('Pretraversal found', nodes, 'nodes')
+  percentages = []
+  for (var i=0; i<100; i++) {
+    percentages.push(Math.floor(i * nodes / 100))
+  }
+  console.info(JSON.stringify(percentages))
   nodes = 0
 
   solutionPaths = []
@@ -134,15 +139,18 @@ function taskLoop(partialCallback, finalCallback) {
     }
   }
 
-  var threshold = Math.floor(totalNodes / 100)
-  if (nodes % threshold === 0) {
-    if (partialCallback) partialCallback(nodes / totalNodes)
-  }
-
-
   // Asynchronizing is expensive. As such, we don't want to do it too often.
   // However, we would like 'cancel solving' to be responsive. So, we call setTimeout every so often.
-  if (!window.SOLVE_SYNC && asyncTimer++ % 100 === 0) {
+  var doAsync = false
+  if (!window.SOLVE_SYNC) doAsync = (asyncTimer++ % 100 === 0)
+
+  while (nodes >= percentages[0]) {
+    if (partialCallback) partialCallback(100 - percentages.length)
+    percentages.shift()
+    doAsync = true
+  }
+
+  if (doAsync) {
     setTimeout(function() {
       taskLoop(partialCallback, finalCallback)
     }, 0)
@@ -315,7 +323,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 }
 
 window.cancelSolving = function() {
-  console.error('Cancelled solving')
+  console.info('Cancelled solving')
   window.MAX_SOLUTIONS = 0 // Causes all new solveLoop calls to exit immediately.
   tasks = []
 }

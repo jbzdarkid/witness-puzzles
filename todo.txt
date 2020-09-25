@@ -3,8 +3,6 @@ Ship Blockers
 - Audio not working in mac safari
 - Fix fonts -- find a real copy of Constantia (maybe in the game files?)
   Mac chrome is busted here
-- Async solver got very slow (4x5 taking >1m). Bisect to figure out why.
-  Probably because I got rid of 'synchronous at depth X'.
 - Pillars are broken with new 'outer' mode. This is maybe a good moment to use a gradient.
   https://www.w3.org/TR/SVG11/pservers.html#LinearGradients
 
