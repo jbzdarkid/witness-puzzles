@@ -1,8 +1,13 @@
-@font-face { src: url('Constantia.ttf'); }
+@font-face {
+  font-family: "Constantia-Bold";
+  src: url("Constantia.eot?")  format("embedded-opentype"),
+       url("Constantia.otf")   format("opentype"),
+       url("Constantia.ttf")   format("truetype"),
+       url("Constantia.woff2") format("woff2");
+}
 label, select, option, input, a, button {
-  font-family: Constantia;
+  font-family: "Constantia-Bold";
   font-variant: small-caps;
-  font-weight: bold;
   font-size: 28px;
 }
 a { text-decoration: none; }

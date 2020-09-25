@@ -1,8 +1,6 @@
 Ship Blockers
 - iOS still has an awkward 'double click' effect on everything. Gah.
 - Audio not working in mac safari
-- Fix fonts -- find a real copy of Constantia (maybe in the game files?)
-  Mac chrome is busted here
 - Fix tracing on pillars (at least rounded edges, if not adding fading)
 
 - Work on speedrunning solver / improving "unique puzzles"
