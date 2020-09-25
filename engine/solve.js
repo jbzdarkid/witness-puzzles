@@ -14,8 +14,10 @@ var task = undefined
 var puzzle = undefined
 var path = []
 window.SOLVE_SYNC = false // For testing purposes
+var SYNC_THRESHOLD = 7 // Depth at which we switch to a synchronous solver (for perf)
 
 var totalNodes = 0
+var NODE_DEPTH = 9
 var nodes = 0
 function countNodes(x, y, depth) {
   // Check for collisions (outside, gap, self, other)
@@ -38,7 +40,7 @@ function countNodes(x, y, depth) {
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
   }
 
-  if (depth < 20) {
+  if (depth < NODE_DEPTH) {
     nodes++
 
     if (y%2 === 0) {
@@ -186,7 +188,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
   }
 
-  if (depth < 20) nodes++
+  if (depth < NODE_DEPTH) nodes++
 
   if (cell.end != undefined) {
     path.push(PATH_NONE)
@@ -251,7 +253,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
   }
 
-  if (window.SOLVE_SYNC || depth > 20) {
+  if (window.SOLVE_SYNC || depth > SYNC_THRESHOLD) {
     path.push(PATH_NONE)
 
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
