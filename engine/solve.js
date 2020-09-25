@@ -80,7 +80,7 @@ window.solve = function(p, partialCallback, finalCallback) {
   }
 
   for (var pos of startPoints) {
-    countNodes(pos.x, pos.y, numEndpoints)
+    countNodes(pos.x, pos.y, 0)
   }
   totalNodes = nodes
   nodes = 0
