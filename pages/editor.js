@@ -129,7 +129,9 @@ function drawPuzzle() {
 }
 
 function reloadPuzzle() {
-  setSolveMode(false) // Disable the Solve (manually) button, clear lines, and redraw the puzzle
+  // Disable the Solve (manually) button, clear lines, and redraw the puzzle
+  document.getElementById('solveMode').checked = true
+  document.getElementById('solveMode').onpointerdown()
 
   document.getElementById('puzzleName').innerText = puzzle.name
   document.getElementById('solutionViewer').style.display = 'none'
