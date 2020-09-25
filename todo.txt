@@ -1,7 +1,6 @@
 Ship Blockers
-- iOS still has an awkward 'double click' effect on everything. Gah.
-- Audio not working in mac safari
 - Fix tracing on pillars (at least rounded edges, if not adding fading)
+- Crayons look bad.
 
 - Work on speedrunning solver / improving "unique puzzles"
   Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.
