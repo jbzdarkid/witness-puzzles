@@ -87,7 +87,6 @@ window.solve = function(p, partialCallback, finalCallback) {
   for (var i=0; i<100; i++) {
     percentages.push(Math.floor(i * nodes / 100))
   }
-  console.info(JSON.stringify(percentages))
   nodes = 0
 
   solutionPaths = []

@@ -171,7 +171,7 @@ l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
 // Neutral button style
 l('button {')
 l('  background-color: ' + window.ALT_BACKGROUND + ';')
-l('  border: 0.5px solid ' + window.BORDER + ';')
+l('  border: 1px solid ' + window.BORDER + ';')
 l('  border-radius: 2px;')
 l('  color: ' + window.TEXT_COLOR + ';')
 l('  display: inline-block;')
