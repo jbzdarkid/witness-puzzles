@@ -36,32 +36,45 @@ window.draw = function(puzzle, target='puzzle') {
 
   // For pillar puzzles, add faders for the left and right sides
   if (puzzle.pillar === true) {
-    // Left + (Left - Right) / 3
     if (localStorage.theme === 'true') {
-      var hackColor = '#2C2108'
+      // These are the third intervals (33% and 66% respectively) between OUTER_BACKGROUND and FOREGROUND
+      var oneThird = '#2C2108' // Left  + (Left - Right) / 3
+      var twoThird = '#523B0D' // Right - (Left - Right) / 3
     } else {
-      var hackColor = '#1C3C39'
+      var oneThird = '#1C3C39'
+      var twoThird = '#28403E'
     }
     var defs = window.createElement('defs')
-    // TODO: Probably rename these :)
     defs.innerHTML = '' +
-    '<linearGradient id="fadeIn">\n' +
+    '<linearGradient id="fadeInCenter">\n' +
     '  <stop offset="0%"   stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.BACKGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
-    '<linearGradient id="fadeIn2">\n' +
+    '<linearGradient id="fadeInWrapIndicator">\n' +
     '  <stop offset="0%"   stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
-    '<linearGradient id="fadeIn3">\n' +
-    '  <stop offset="0%"   stop-color="' + hackColor + '"></stop>\n' +
+    '<linearGradient id="fadeInVerticalLine">\n' +
+    '  <stop offset="0%"   stop-color="' + oneThird + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
-    '<linearGradient id="fadeOut">\n' +
+    '<linearGradient id="fadeInVerticalGap" x1="0" x2="0" y1="1" y2="0">\n' +
+    '  <stop offset="0%"   stop-color="' + oneThird + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeInHorizontalLine">\n' +
+    '  <stop offset="0%"    stop-color="' + twoThird + '"></stop>\n' +
+    '  <stop offset="14.6%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeInHorizontalGap">\n' +
+    '  <stop offset="0%"   stop-color="' + twoThird + '"></stop>\n' +
+    '  <stop offset="33%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeOutCenter">\n' +
     '  <stop offset="70%"  stop-color="' + window.BACKGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
-    '<linearGradient id="fadeOut2">\n' +
+    '<linearGradient id="fadeOutHorizontal">\n' +
     '  <stop offset="70%"  stop-color="' + window.FOREGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>'
@@ -87,7 +100,7 @@ function drawCenters(puzzle, svg) {
       rect.setAttribute('y', 41 * y + 11)
       rect.setAttribute('width', 24)
       rect.setAttribute('height', 82)
-      rect.setAttribute('fill', 'url(#fadeIn)')
+      rect.setAttribute('fill', 'url(#fadeInCenter)')
       svg.appendChild(rect)
     }
   }
@@ -102,7 +115,7 @@ function drawCenters(puzzle, svg) {
       rect.setAttribute('width', 82)
       rect.setAttribute('height', 82)
       if (puzzle.pillar === true && x == puzzle.width - 1) {
-        rect.setAttribute('fill', 'url(#fadeOut)')
+        rect.setAttribute('fill', 'url(#fadeOutCenter)')
       } else {
         rect.setAttribute('fill', window.BACKGROUND)
       }
@@ -127,8 +140,12 @@ function drawGrid(puzzle, svg) {
         rect.setAttribute('width', 82)
         rect.setAttribute('height', 24)
         // Adjust the edge if it's a pillar
-        if (puzzle.pillar === true && x === puzzle.width - 1) {
-          rect.setAttribute('fill', 'url(#fadeOut2)')
+        if (puzzle.pillar === true) {
+          if (x === puzzle.width - 1) {
+            rect.setAttribute('fill', 'url(#fadeOutHorizontal)')
+          } else if (x === 1) {
+            rect.setAttribute('fill', 'url(#fadeInHorizontalLine)')
+          }
         }
         svg.appendChild(rect)
       } else if (x%2 === 0 && y%2 === 1) { // Vertical
@@ -139,7 +156,7 @@ function drawGrid(puzzle, svg) {
         rect.setAttribute('height', 82)
         // Adjust the edge if it's a pillar
         if (puzzle.pillar === true && x === 0) {
-          rect.setAttribute('fill', 'url(#fadeIn3)')
+          rect.setAttribute('fill', 'url(#fadeInVerticalLine)')
         }
         svg.appendChild(rect)
       } else if (x%2 === 0 && y%2 === 0) { // Intersection
@@ -163,7 +180,7 @@ function drawGrid(puzzle, svg) {
           rect.setAttribute('height', 24)
           rect.setAttribute('fill', window.FOREGROUND)
           if (puzzle.pillar === true && x === 0) {
-            rect.setAttribute('fill', 'url(#fadeIn3)')
+            rect.setAttribute('fill', 'url(#fadeInVerticalLine)')
           }
           svg.appendChild(rect)
         } else if (surroundingLines > 1) {
@@ -174,7 +191,7 @@ function drawGrid(puzzle, svg) {
           circ.setAttribute('r', 12)
           circ.setAttribute('fill', window.FOREGROUND)
           if (puzzle.pillar === true && x === 0) {
-            circ.setAttribute('fill', 'url(#fadeIn3)')
+            circ.setAttribute('fill', 'url(#fadeInVerticalLine)')
           }
           svg.appendChild(circ)
         }
@@ -187,7 +204,7 @@ function drawGrid(puzzle, svg) {
       var cell = puzzle.getCell(-1, y)
       if (cell == undefined || cell.gap === 2) continue
       var rect = createElement('rect')
-      rect.setAttribute('fill', 'url(#fadeIn2)')
+      rect.setAttribute('fill', 'url(#fadeInWrapIndicator)')
       rect.setAttribute('x', 28)
       rect.setAttribute('y', y*41 + 40)
       rect.setAttribute('width', 36)
@@ -227,9 +244,17 @@ function drawSymbols(puzzle, svg, target) {
         params.type = 'gap'
         if (x%2 === 0 && y%2 === 1) params.rot = 1
         drawSymbolWithSvg(svg, params)
-        if (puzzle.pillar === true && x === puzzle.width - 1) {
-          svg.lastChild.setAttribute('fill', 'url(#fadeOut2)')
+        if (puzzle.pillar === true) {
+          if (x === puzzle.width - 1) {
+            svg.lastChild.setAttribute('fill', 'url(#fadeOutHorizontal)')
+          } else if (x === 0) {
+            svg.lastChild.setAttribute('fill', 'url(#fadeInVerticalGap)')
+            svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInVerticalGap)')
+          } else if (x === 1) {
+            svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInHorizontalGap)')
+          }
         }
+
       } else if (x%2 === 1 && y%2 === 1) {
         Object.assign(params, cell)
         window.drawSymbolWithSvg(svg, params)
