@@ -141,8 +141,8 @@ function taskLoop(partialCallback, finalCallback) {
 
 
   // Asynchronizing is expensive. As such, we don't want to do it too often.
-  // However, we would like 'cancel solving' to be responsive. As such, we asynchronize every 100 calls.
-  if (!window.SOLVE_SYNC && ++asyncTimer % 100 === 0) {
+  // However, we would like 'cancel solving' to be responsive. So, we call setTimeout every so often.
+  if (!window.SOLVE_SYNC && asyncTimer++ % 100 === 0) {
     setTimeout(function() {
       taskLoop(partialCallback, finalCallback)
     }, 0)
