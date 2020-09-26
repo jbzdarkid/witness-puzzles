@@ -1027,5 +1027,13 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[1][5] = {'type': 'poly', 'color': 'yellow', 'polyshape': 38505}
     return [puzzle, 41]
+  }, 'Seren-broken-stars': function() {
+    var puzzle = new Puzzle(1, 2)
+    puzzle.grid[2][0].end = 'top'
+    puzzle.grid[1][1] = {'type': 'star', 'color': 'orange'}
+    puzzle.grid[1][2].start = true
+    puzzle.grid[1][3] = {'type': 'triangle', 'color': 'orange', 'count': 3}
+    puzzle.grid[0][4].start = true
+    return [puzzle, 0]
   }
 }

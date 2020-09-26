@@ -371,8 +371,8 @@ class Puzzle {
         }
 
         if (cell.line > window.LINE_NONE) {
-          if (x%2 !== y%2 && (cell.start === true || cell.end != undefined)) {
-            // Traced lines which are mid-segment start or end points should not separate the region
+          if (x%2 !== y%2 && cell.end != undefined) {
+            // Traced mid-segment endpoints should not separate the region
             row.push(0)
           } else {
             // Traced lines should not be a part of the region
@@ -387,6 +387,11 @@ class Puzzle {
         }
       }
       this.grid[x] = row
+    }
+
+    // Starting at a mid-segment startpoint should not separate the region
+    if (this.startPoint != undefined && this.startPoint.x%2 !== this.startPoint.y%2) {
+      this.grid[this.startPoint.x][this.startPoint.y] = 0
     }
 
     // Mark all outside cells as 'not in any region' (aka undefined)

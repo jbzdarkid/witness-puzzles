@@ -104,6 +104,7 @@ window.solve = function(p, partialCallback, finalCallback) {
         ;(function(pos) {
           newTasks.push(function() {
             path = [pos]
+            puzzle.startPoint = pos
             return solveLoop(pos.x, pos.y, numEndpoints, earlyExitData, 0)
           })
         }(pos))

@@ -439,6 +439,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   data.sym = puzzle.getSymmetricalPos(pos.x, pos.y)
   data.puzzle = puzzle
   data.path = []
+  puzzle.startPoint = pos
 
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
@@ -473,7 +474,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
       data.bbox.raw.x2 + dx,
       data.bbox.raw.y1 + dy,
       data.bbox.raw.y2 + dy,
-      sym=true)
+      sym = true)
 
     data.symcursor = createElement('circle')
     svg.appendChild(data.symcursor)
@@ -549,8 +550,8 @@ document.onpointerlockchange = function() {
 }
 
 window.onMove = function(dx, dy) {
-  // Also handles some collision
   {
+    // Also handles some collision
     var collidedWith = pushCursor(dx, dy)
     console.spam('Collided with', collidedWith)
   }
