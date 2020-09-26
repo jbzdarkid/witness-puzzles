@@ -312,7 +312,7 @@ class Puzzle {
   // undefined: Out of bounds or already processed
   // 0: In bounds, awaiting processing, but should not be part of the final region.
   // 1: In bounds, awaiting processing
-  // 2: Gap-2, but not out of bounds so should be treated normally
+  // 2: Gap-2. After _floodFillOutside, this means "treat normally" (it will be undefined if oob)
   // 3: Dot (of any kind), otherwise identical to 1.
   _floodFill(x, y, region) {
     // Inlined safety checks so we can get the col, which is slightly more performant.
@@ -345,6 +345,8 @@ class Puzzle {
     if (x%2 !== y%2 && cell !== 2) return // Only flood-fill through gap-2
     if (x%2 === 0 && y%2 === 0 && cell === 3) return // Don't flood-fill through dots
     this.grid[x][y] = undefined
+
+    if (x%2 === 0 && y%2 === 0) return // Don't flood fill through corners
 
     this._floodFillOutside(x, y + 1)
     this._floodFillOutside(x + 1, y)

@@ -1,7 +1,5 @@
 Ship Blockers
 - Fix tracing on pillars (at least rounded edges, if not adding fading)
-  Fix startpoints not having pillar fade effects (left)
-  Fix startpoints not having pillar fade effects (right)
 - Add some GUI tests for pillar puzzles (i.e. the 'what is outside part')
 - Crayons look bad.
 - Fix whatever is forcing us to make copies in editor/COPY

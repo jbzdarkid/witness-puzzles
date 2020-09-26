@@ -82,7 +82,7 @@ window.solve = function(p, partialCallback, finalCallback) {
   for (var pos of startPoints) {
     countNodes(pos.x, pos.y, 0)
   }
-  console.info('Pretraversal found', nodes, 'nodes')
+  console.log('Pretraversal found', nodes, 'nodes')
   percentages = []
   for (var i=0; i<100; i++) {
     percentages.push(Math.floor(i * nodes / 100))
