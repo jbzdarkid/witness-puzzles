@@ -149,11 +149,11 @@ function drawGrid(puzzle, svg) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell != undefined && cell.gap === 2) continue
+      if (cell != undefined && cell.gap === window.GAP_FULL) continue
       var rect = createElement('rect')
       rect.setAttribute('fill', window.FOREGROUND)
       if (x%2 === 1 && y%2 === 0) { // Horizontal
-        if (cell.gap === 1) continue
+        if (cell.gap === window.GAP_BREAK) continue
         rect.setAttribute('x', (x-1)*41 + 52)
         rect.setAttribute('y', y*41 + 40)
         rect.setAttribute('width', 82)
@@ -168,7 +168,7 @@ function drawGrid(puzzle, svg) {
         }
         svg.appendChild(rect)
       } else if (x%2 === 0 && y%2 === 1) { // Vertical
-        if (cell.gap === 1) continue
+        if (cell.gap === window.GAP_BREAK) continue
         rect.setAttribute('x', x*41 + 40)
         rect.setAttribute('y', (y-1)*41 + 52)
         rect.setAttribute('width', 24)
@@ -182,13 +182,13 @@ function drawGrid(puzzle, svg) {
         var surroundingLines = 0
         if (cell.end != undefined) surroundingLines++
         var leftCell = puzzle.getCell(x - 1, y)
-        if (leftCell != undefined && leftCell.gap !== 2) surroundingLines++
+        if (leftCell != undefined && leftCell.gap !== window.GAP_FULL) surroundingLines++
         var rightCell = puzzle.getCell(x + 1, y)
-        if (rightCell != undefined && rightCell.gap !== 2) surroundingLines++
+        if (rightCell != undefined && rightCell.gap !== window.GAP_FULL) surroundingLines++
         var topCell = puzzle.getCell(x, y - 1)
-        if (topCell != undefined && topCell.gap !== 2) surroundingLines++
+        if (topCell != undefined && topCell.gap !== window.GAP_FULL) surroundingLines++
         var bottomCell = puzzle.getCell(x, y + 1)
-        if (bottomCell != undefined && bottomCell.gap !== 2) surroundingLines++
+        if (bottomCell != undefined && bottomCell.gap !== window.GAP_FULL) surroundingLines++
 
         if (surroundingLines === 1) {
           // Add square caps for dead ends which are non-endpoints
@@ -221,7 +221,7 @@ function drawGrid(puzzle, svg) {
   if (puzzle.pillar === true) {
     for (var y=0; y<puzzle.height; y+=2) {
       var cell = puzzle.getCell(-1, y)
-      if (cell == undefined || cell.gap === 2) continue
+      if (cell == undefined || cell.gap === window.GAP_FULL) continue
       var rect = createElement('rect')
       rect.setAttribute('fill', 'url(#fadeInWrapIndicator)')
       rect.setAttribute('x', 28)
@@ -259,7 +259,7 @@ function drawSymbols(puzzle, svg, target) {
           }
         }
         drawSymbolWithSvg(svg, params)
-      } else if (cell.gap === 1) {
+      } else if (cell.gap === window.GAP_BREAK) {
         params.type = 'gap'
         if (x%2 === 0 && y%2 === 1) params.rot = 1
         drawSymbolWithSvg(svg, params)

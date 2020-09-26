@@ -664,22 +664,22 @@ function pushCursor(dx, dy) {
   // Only consider non-endpoints or endpoints which are parallel
   if ([undefined, 'top', 'bottom'].includes(cell.end)) {
     var leftCell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
-    if (leftCell == undefined || leftCell.gap === 2) {
+    if (leftCell == undefined || leftCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'left', 'top')) return 'left outer wall'
     }
     var rightCell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
-    if (rightCell == undefined || rightCell.gap === 2) {
+    if (rightCell == undefined || rightCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'right', 'top')) return 'right outer wall'
     }
   }
   // Only consider non-endpoints or endpoints which are parallel
   if ([undefined, 'left', 'right'].includes(cell.end)) {
     var topCell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
-    if (topCell == undefined || topCell.gap === 2) {
+    if (topCell == undefined || topCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'top', 'right')) return 'top outer wall'
     }
     var bottomCell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
-    if (bottomCell == undefined || bottomCell.gap === 2) {
+    if (bottomCell == undefined || bottomCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'bottom', 'right')) return 'bottom outer wall'
     }
   }
@@ -767,14 +767,14 @@ function gapAndSymmetryCollision() {
   if (cell == undefined) return
 
   var gapSize = 0
-  if (cell.gap === 1) {
+  if (cell.gap === window.GAP_BREAK) {
     console.spam('Collided with a gap')
     gapSize = 21
   } else if (data.puzzle.symmetry != undefined) {
     if (data.sym.x === data.pos.x && data.sym.y === data.pos.y) {
       console.spam('Collided with our symmetrical line')
       gapSize = 13
-    } else if (data.puzzle.getCell(data.sym.x, data.sym.y).gap === 1) {
+    } else if (data.puzzle.getCell(data.sym.x, data.sym.y).gap === window.GAP_BREAK) {
       console.spam('Symmetrical line hit a gap')
       gapSize = 21
     }
@@ -800,7 +800,7 @@ function move() {
 
   if (data.x < data.bbox.x1 + 12) { // Moving left
     var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x1 + 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'right') {
@@ -808,7 +808,7 @@ function move() {
       data.x = data.bbox.x1 + 12
     } else if (data.puzzle.symmetry != undefined) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x - 1, data.pos.y)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.x = data.bbox.x1 + 12
       }
@@ -818,7 +818,7 @@ function move() {
     }
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
     var cell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x2 - 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'left') {
@@ -826,7 +826,7 @@ function move() {
       data.x = data.bbox.x2 - 12
     } else if (data.puzzle.symmetry != undefined) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x + 1, data.pos.y)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.x = data.bbox.x2 - 12
       }
@@ -836,7 +836,7 @@ function move() {
     }
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.y = data.bbox.y1 + 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'bottom') {
@@ -844,7 +844,7 @@ function move() {
       data.y = data.bbox.y1 + 12
     } else if (data.puzzle.symmetry != undefined) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x, data.pos.y - 1)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.y = data.bbox.y1 + 12
       }
@@ -854,7 +854,7 @@ function move() {
     }
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === 2) {
+    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2')
       data.y = data.bbox.y2 - 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'top') {
@@ -862,7 +862,7 @@ function move() {
       data.y = data.bbox.y2 - 12
     } else if (data.puzzle.symmetry != undefined) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x, data.pos.y + 1)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === 2) {
+      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.y = data.bbox.y2 - 12
       }

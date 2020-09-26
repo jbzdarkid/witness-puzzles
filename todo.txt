@@ -1,11 +1,7 @@
 Ship Blockers
 - Fix tracing on pillars (at least rounded edges, if not adding fading)
-- Add some GUI tests for pillar puzzles (i.e. the 'what is outside part')
 - Crayons look bad.
 - Fix whatever is forcing us to make copies in editor/COPY
-- rename and make use of GAP_0
-- Make start pillar test symmetrical up/down
-  Or just dupe it for various symmetries.
 
 - Work on speedrunning solver / improving "unique puzzles"
   Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.

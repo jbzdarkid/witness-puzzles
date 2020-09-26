@@ -6,7 +6,6 @@ var PATH_RIGHT  = 2
 var PATH_TOP    = 3
 var PATH_BOTTOM = 4
 
-
 window.MAX_SOLUTIONS = 0
 var solutionPaths = []
 var asyncTimer = 0
@@ -23,7 +22,7 @@ function countNodes(x, y, depth) {
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
-  if (cell.gap === 1 || cell.gap === 2) return
+  if (cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
 
   if (puzzle.symmetry == undefined) {
@@ -34,7 +33,7 @@ function countNodes(x, y, depth) {
     if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
-    if (symCell.gap === 1 || symCell.gap === 2) return
+    if (symCell.gap > window.GAP_NONE) return
 
     puzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
@@ -180,7 +179,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
   if (cell == undefined) return
-  if (cell.gap === 1 || cell.gap === 2) return
+  if (cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
 
   if (puzzle.symmetry == undefined) {
@@ -191,7 +190,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
-    if (symCell.gap === 1 || symCell.gap === 2) return
+    if (symCell.gap > window.GAP_NONE) return
 
     puzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)

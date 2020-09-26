@@ -77,7 +77,7 @@ class Puzzle {
             delete cell.color
           } else if (cell.gap === true) {
             // Legacy: Gaps used to be undefined/true, are now undefined/1/2
-            puzzle.grid[x][y].gap = 1
+            puzzle.grid[x][y].gap = window.GAP_BREAK
           }
         }
       }
@@ -111,7 +111,7 @@ class Puzzle {
     }
     if (parsed.gaps) {
       for (var gap of parsed.gaps) {
-        puzzle.grid[gap.x][gap.y].gap = 1
+        puzzle.grid[gap.x][gap.y].gap = window.GAP_BREAK
       }
     }
     if (parsed.settings) {
@@ -243,13 +243,13 @@ class Puzzle {
 
     var dirs = []
     var leftCell = this.getCell(x - 1, y)
-    if (leftCell == undefined || leftCell.gap === 2) dirs.push('left')
+    if (leftCell == undefined || leftCell.gap === window.GAP_FULL) dirs.push('left')
     var topCell = this.getCell(x, y - 1)
-    if (topCell == undefined || topCell.gap === 2) dirs.push('top')
+    if (topCell == undefined || topCell.gap === window.GAP_FULL) dirs.push('top')
     var rightCell = this.getCell(x + 1, y)
-    if (rightCell == undefined || rightCell.gap === 2) dirs.push('right')
+    if (rightCell == undefined || rightCell.gap === window.GAP_FULL) dirs.push('right')
     var bottomCell = this.getCell(x, y + 1)
-    if (bottomCell == undefined || bottomCell.gap === 2) dirs.push('bottom')
+    if (bottomCell == undefined || bottomCell.gap === window.GAP_FULL) dirs.push('bottom')
     return dirs
   }
 
@@ -272,7 +272,7 @@ class Puzzle {
   // Returns the shown hint.
   showHint(hint) {
     if (hint != undefined) {
-      this.grid[hint.x][hint.y].gap = 1
+      this.grid[hint.x][hint.y].gap = window.GAP_BREAK
       return
     }
 
@@ -294,7 +294,7 @@ class Puzzle {
     } else {
       return
     }
-    this.grid[hint.x][hint.y].gap = 1
+    this.grid[hint.x][hint.y].gap = window.GAP_BREAK
     this.hints = badHints.concat(goodHints)
     return hint
   }
@@ -380,7 +380,7 @@ class Puzzle {
             // Traced lines should not be a part of the region
             row.push(undefined)
           }
-        } else if (cell.gap === 2) {
+        } else if (cell.gap === window.GAP_FULL) {
           row.push(2)
         } else if (cell.dot > window.DOT_NONE) {
           row.push(3)

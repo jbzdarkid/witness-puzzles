@@ -144,9 +144,9 @@ window.DOT_BLACK     = 1
 window.DOT_BLUE      = 2
 window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
-window.GAP_0         = 0
-window.GAP_1         = 1
-window.GAP_2         = 2
+window.GAP_NONE      = 0
+window.GAP_BREAK     = 1
+window.GAP_FULL      = 2
 
 var animations = ''
 function l(line) {animations += line + '\n'}
