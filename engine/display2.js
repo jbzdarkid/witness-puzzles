@@ -36,14 +36,17 @@ window.draw = function(puzzle, target='puzzle') {
 
   // For pillar puzzles, add faders for the left and right sides
   if (puzzle.pillar === true) {
+    // These are the third intervals (0%, 33%, 66%, 100%) from OUTER_BACKGROUND to FOREGROUND
+    var zero = window.OUTER_BACKGROUND
+    var three = window.FOREGROUND
     if (localStorage.theme === 'true') {
-      // These are the third intervals (33% and 66% respectively) between OUTER_BACKGROUND and FOREGROUND
-      var oneThird = '#2C2108' // Left  + (Left - Right) / 3
-      var twoThird = '#523B0D' // Right - (Left - Right) / 3
+      var one = '#2C2108' // Left  + (Left - Right) / 3
+      var two = '#523B0D' // Right - (Left - Right) / 3
     } else {
-      var oneThird = '#1C3C39'
-      var twoThird = '#28403E'
+      var one = '#1C3C39'
+      var two = '#28403E'
     }
+
     var defs = window.createElement('defs')
     defs.innerHTML = '' +
     '<linearGradient id="fadeInCenter">\n' +
@@ -51,31 +54,47 @@ window.draw = function(puzzle, target='puzzle') {
     '  <stop offset="100%" stop-color="' + window.BACKGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeInWrapIndicator">\n' +
-    '  <stop offset="0%"   stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
-    '  <stop offset="100%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="0%"   stop-color="' + zero + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + three + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeInVerticalLine">\n' +
-    '  <stop offset="0%"   stop-color="' + oneThird + '"></stop>\n' +
-    '  <stop offset="100%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="0%"   stop-color="' + one + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + three + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeInVerticalGap" x1="0" x2="0" y1="1" y2="0">\n' +
-    '  <stop offset="0%"   stop-color="' + oneThird + '"></stop>\n' +
-    '  <stop offset="100%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="0%"   stop-color="' + one + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + three + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeInHorizontalLine">\n' +
-    '  <stop offset="0%"    stop-color="' + twoThird + '"></stop>\n' +
-    '  <stop offset="14.6%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="0%"    stop-color="' + two + '"></stop>\n' +
+    '  <stop offset="14.6%" stop-color="' + three + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeInHorizontalGap">\n' +
-    '  <stop offset="0%"   stop-color="' + twoThird + '"></stop>\n' +
-    '  <stop offset="33%" stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="0%"  stop-color="' + two + '"></stop>\n' +
+    '  <stop offset="33%" stop-color="' + three + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeInLeftEndSquare">\n' +
+    '  <stop offset="0%"   stop-color="' + zero + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + two + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeInLeftEndCircle">\n' +
+    '  <stop offset="50%"  stop-color="' + zero + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + one + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeInRightEnd">\n' +
+    '  <stop offset="0%"  stop-color="' + two + '"></stop>\n' +
+    '  <stop offset="50%" stop-color="' + three + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeInStart">\n' +
+    '  <stop offset="0%"  stop-color="' + zero + '"></stop>\n' +
+    '  <stop offset="75%" stop-color="' + three + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeOutCenter">\n' +
-    '  <stop offset="70%"  stop-color="' + window.BACKGROUND + '"></stop>\n' +
+    '  <stop offset="78%"  stop-color="' + window.BACKGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeOutHorizontal">\n' +
-    '  <stop offset="70%"  stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="78%"  stop-color="' + window.FOREGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>'
     svg.appendChild(defs)
@@ -248,8 +267,8 @@ function drawSymbols(puzzle, svg, target) {
           if (x === puzzle.width - 1) {
             svg.lastChild.setAttribute('fill', 'url(#fadeOutHorizontal)')
           } else if (x === 0) {
-            svg.lastChild.setAttribute('fill', 'url(#fadeInVerticalGap)')
             svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInVerticalGap)')
+            svg.lastChild.setAttribute('fill', 'url(#fadeInVerticalGap)')
           } else if (x === 1) {
             svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInHorizontalGap)')
           }
@@ -285,6 +304,18 @@ function drawStartAndEnd(puzzle, svg) {
           'x': x*41 + 23,
           'y': y*41 + 23,
         })
+
+        if (puzzle.pillar === true && x === 0) {
+          if (cell.end == 'top' || cell.end == 'bottom') {
+            svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInVerticalLine)')
+            svg.lastChild.setAttribute('fill', 'url(#fadeInVerticalLine)')
+          } else if (cell.end == 'left') {
+            svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInLeftEndSquare)')
+            svg.lastChild.setAttribute('fill', 'url(#fadeInLeftEndCircle)')
+          } else if (cell.end == 'right') {
+            svg.lastChild.previousSibling.setAttribute('fill', 'url(#fadeInRightEnd)')
+          }
+        }
       }
 
       if (cell.start === true) {
@@ -317,6 +348,10 @@ function drawStartAndEnd(puzzle, svg) {
         })
         var start = svg.lastChild
         start.id = 'start_' + svg.id + '_' + x + '_' + y
+
+        if (puzzle.pillar === true && x === 0) {
+          start.setAttribute('fill', 'url(#fadeInStart)')
+        }
 
         // ;(function(a){}(a))
         // This syntax is used to forcibly copy all of the arguments
