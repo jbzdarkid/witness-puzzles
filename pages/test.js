@@ -1035,5 +1035,44 @@ var tests = {
     puzzle.grid[1][3] = {'type': 'triangle', 'color': 'orange', 'count': 3}
     puzzle.grid[0][4].start = true
     return [puzzle, 0]
+  }, 'pillar-graphics-startpoint': function() {
+    var puzzle = new Puzzle(1, 3, true)
+    puzzle.grid[0][0].start = true
+    puzzle.grid[0][3].start = true
+    puzzle.grid[1][6].start = true
+    return [puzzle, 0]
+  }, 'pillar-graphics-endpoint': function() {
+    var puzzle = new Puzzle(1, 3, true)
+    puzzle.grid[0][0].end = 'top'
+    puzzle.grid[0][1].end = 'left'
+    puzzle.grid[0][2].end = 'bottom'
+    puzzle.grid[0][3].gap = 2
+    puzzle.grid[0][4].end = 'top'
+    puzzle.grid[0][5].end = 'right'
+    puzzle.grid[0][6].end = 'bottom'
+    return [puzzle, 0]
+  }, 'pillar-graphics-gap': function() {
+    var puzzle = new Puzzle(3, 4, true)
+    puzzle.grid[1][0].gap = 1
+    puzzle.grid[3][0].gap = 1
+    puzzle.grid[5][0].gap = 1
+    puzzle.grid[0][1].gap = 1
+    puzzle.grid[2][1].gap = 1
+    puzzle.grid[0][3].gap = 2
+    puzzle.grid[2][3].gap = 2
+    puzzle.grid[4][3].gap = 2
+    puzzle.grid[1][4].gap = 1
+    puzzle.grid[3][4].gap = 1
+    puzzle.grid[5][4].gap = 1
+    puzzle.grid[0][5].gap = 1
+    puzzle.grid[2][5].gap = 2
+    puzzle.grid[1][6].gap = 2
+    puzzle.grid[3][6].gap = 2
+    puzzle.grid[5][6].gap = 2
+    puzzle.grid[0][7].gap = 1
+    puzzle.grid[2][7].gap = 2
+    puzzle.grid[1][8].gap = 2
+    puzzle.grid[3][8].gap = 2
+    return [puzzle, 0]
   }
 }
