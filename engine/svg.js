@@ -93,7 +93,7 @@ function poly(svg, params) {
     var pos = polyomino[i]
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var rect = createElement('rect')
-    svg.appendChild(rect)
+    rect.style.pointerEvents = 'none'
     var transform = 'translate(' + (centerX + pos.x*offset) + ', ' + (centerY + pos.y*offset) + ')'
     if (isRotated(params.polyshape)) {
       // -30 degree rotation around the midpoint of the square
@@ -104,6 +104,7 @@ function poly(svg, params) {
     rect.setAttribute('width', size)
     rect.setAttribute('fill', params.color)
     rect.setAttribute('class', params.class)
+    svg.appendChild(rect)
   }
 }
 
@@ -129,7 +130,7 @@ function ylop(svg, params) {
     var pos = polyomino[i]
     if (pos.x%2 !== 0 || pos.y%2 !== 0) continue
     var poly = createElement('polygon')
-    svg.appendChild(poly)
+    poly.style.pointerEvents = 'none'
     var points = [
       '0 0', '12 0', '12 12', '0 12', '0 3',
       '3 3', '3 9', '9 9', '9 3', '0 3',
@@ -143,6 +144,7 @@ function ylop(svg, params) {
     poly.setAttribute('transform', transform)
     poly.setAttribute('fill', params.color)
     poly.setAttribute('class', params.class)
+    svg.appendChild(poly)
   }
 }
 

@@ -55,7 +55,7 @@ window.draw = function(puzzle, target='puzzle') {
     '</linearGradient>\n' +
     '<linearGradient id="fadeInWrapIndicator">\n' +
     '  <stop offset="0%"   stop-color="' + zero + '"></stop>\n' +
-    '  <stop offset="100%" stop-color="' + three + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + two + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeInVerticalLine">\n' +
     '  <stop offset="0%"   stop-color="' + one + '"></stop>\n' +
@@ -90,19 +90,19 @@ window.draw = function(puzzle, target='puzzle') {
     '  <stop offset="75%" stop-color="' + three + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeOutCenter">\n' +
-    '  <stop offset="78%"  stop-color="' + window.BACKGROUND + '"></stop>\n' +
+    '  <stop offset="75%"  stop-color="' + window.BACKGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeOutHorizontal">\n' +
-    '  <stop offset="78%"  stop-color="' + window.FOREGROUND + '"></stop>\n' +
+    '  <stop offset="75%"  stop-color="' + window.FOREGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>'
     svg.appendChild(defs)
   }
 
   drawCenters(puzzle, svg)
-  drawGrid(puzzle, svg)
   drawStartAndEnd(puzzle, svg)
+  drawGrid(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
 }
@@ -152,6 +152,7 @@ function drawGrid(puzzle, svg) {
       if (cell != undefined && cell.gap === window.GAP_FULL) continue
       var rect = createElement('rect')
       rect.setAttribute('fill', window.FOREGROUND)
+      rect.style.pointerEvents = 'none'
       if (x%2 === 1 && y%2 === 0) { // Horizontal
         if (cell.gap === window.GAP_BREAK) continue
         rect.setAttribute('x', (x-1)*41 + 52)
@@ -178,7 +179,13 @@ function drawGrid(puzzle, svg) {
           rect.setAttribute('fill', 'url(#fadeInVerticalLine)')
         }
         svg.appendChild(rect)
-      } else if (x%2 === 0 && y%2 === 0) { // Intersection
+      }
+    }
+  }
+  // Add intersection coverings after
+  for (var x=0; x<puzzle.width; x++) {
+    for (var y=0; y<puzzle.height; y++) {
+      if (x%2 === 0 && y%2 === 0) { // Intersection
         var surroundingLines = 0
         if (cell.end != undefined) surroundingLines++
         var leftCell = puzzle.getCell(x - 1, y)
@@ -193,6 +200,7 @@ function drawGrid(puzzle, svg) {
         if (surroundingLines === 1) {
           // Add square caps for dead ends which are non-endpoints
           var rect = createElement('rect')
+          rect.style.pointerEvents = 'none'
           rect.setAttribute('x', x*41 + 40)
           rect.setAttribute('y', y*41 + 40)
           rect.setAttribute('width', 24)
@@ -205,6 +213,7 @@ function drawGrid(puzzle, svg) {
         } else if (surroundingLines > 1) {
           // Add rounding for other intersections (handling gap-only corners)
           var circ = createElement('circle')
+          circ.style.pointerEvents = 'none'
           circ.setAttribute('cx', x*41 + 52)
           circ.setAttribute('cy', y*41 + 52)
           circ.setAttribute('r', 12)
@@ -223,10 +232,11 @@ function drawGrid(puzzle, svg) {
       var cell = puzzle.getCell(-1, y)
       if (cell == undefined || cell.gap === window.GAP_FULL) continue
       var rect = createElement('rect')
+      rect.style.pointerEvents = 'none'
       rect.setAttribute('fill', 'url(#fadeInWrapIndicator)')
       rect.setAttribute('x', 28)
       rect.setAttribute('y', y*41 + 40)
-      rect.setAttribute('width', 36)
+      rect.setAttribute('width', 24)
       rect.setAttribute('height', 24)
       svg.appendChild(rect)
     }
