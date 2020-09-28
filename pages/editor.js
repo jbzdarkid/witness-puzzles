@@ -902,6 +902,8 @@ function resizePuzzle(dx, dy, id) {
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
+      if (x%2 === 1 && y%2 === 1) continue // Don't copy centers
+
       var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
 
       switch (shouldCopyCell(x, y)) {
@@ -914,7 +916,7 @@ function resizePuzzle(dx, dy, id) {
         var symCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
         console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
         if (symCell != undefined) {
-          if (cell == undefined) cell = {}
+          if (cell == undefined) cell = {'type': 'line'}
           cell.end = puzzle.getSymmetricalDir(symCell.end)
           cell.start = symCell.start
         }
