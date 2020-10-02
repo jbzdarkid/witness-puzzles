@@ -28,9 +28,13 @@ function readPuzzle() {
     console.log('No puzzles left, clearing storage and creating new one')
     window.localStorage.clear()
     document.getElementById('loadButton').disabled = true
+    document.getElementById('deleteButton').disabled = true
     createEmptyPuzzle()
     return
+  } else if (puzzleList.length === 1) {
+    document.getElementById('loadButton').disabled = true
   }
+
   try {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
@@ -51,6 +55,10 @@ function writeNewPuzzle(newPuzzle) {
   var puzzleList = readPuzzleList()
   puzzleList.unshift(undefined)
   writePuzzleList(puzzleList)
+
+  if (puzzleList.length > 1) {
+    document.getElementById('loadButton').disabled = false
+  }
 
   puzzle = newPuzzle
   writePuzzle()
@@ -74,7 +82,13 @@ function writePuzzle() {
 // Delete the active puzzle then read the next one.
 window.deletePuzzle = function() {
   var puzzleList = readPuzzleList()
-  if (puzzleList.length === 0) return
+  if (puzzleList.length === 0) {
+    document.getElementById('deleteButton').disabled = true
+    return
+  }
+  if (puzzleList.length === 1) {
+    document.getElementById('loadButton').disabled = true
+  }
   var puzzleName = puzzleList.shift()
   console.log('Removing puzzle', puzzleName)
   window.localStorage.removeItem(puzzleName)
@@ -280,12 +294,12 @@ window.createEmptyPuzzle = function() {
     newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
   }
   if (document.getElementById('newButton').disabled == true) {
-    // Previous puzzle was unmodified
+    // Previous puzzle was unmodified, overwrite it
     puzzle = newPuzzle
     reloadPuzzle()
   } else {
+    // Previous puzzle had modifications
     document.getElementById('newButton').disabled = true
-    document.getElementById('deleteButton').disabled = true
     writeNewPuzzle(newPuzzle)
   }
 }
@@ -929,6 +943,9 @@ function resizePuzzle(dx, dy, id) {
         break
       }
 
+      // Note that we are making a copy here because ... some bug with resizing.
+      if (cell != undefined) cell = JSON.parse(JSON.stringify(cell))
+
       puzzle.setCell(x, y, cell)
     }
   }
@@ -1080,7 +1097,6 @@ function dragMove(event, elem) {
 
 function puzzleModified() {
   document.getElementById('newButton').disabled = false
-  document.getElementById('loadButton').disabled = false
   document.getElementById('deleteButton').disabled = false
 }
 

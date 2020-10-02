@@ -25,12 +25,8 @@
             <button id="newButton" onclick="createEmptyPuzzle()">New</button>
             <button id="loadButton" onclick="loadPuzzle()">Load</button>
             <button id="deleteButton" onclick="deletePuzzle()">Delete</button>
-            <button id="importButton" onclick="importPuzzle()">Import</button>
           </div>
-        </td>
-      </tr><tr>
-        <td style="text-align: center;">
-          <label for="puzzleStyle">Puzzle Style: </label>
+          <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
           <select id="puzzleStyle" onchange="createEmptyPuzzle()">
             <option>Default</option>
             <option>Horizontal Symmetry</option>
