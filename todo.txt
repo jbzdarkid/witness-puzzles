@@ -1,8 +1,10 @@
 Ship Blockers
 - Fix tracing on pillars (at least rounded edges, if not adding fading)
-- Fix whatever is forcing us to make copies in editor/COPY
+  Just take pillarCirc and symPillarCirc and make them... not circles!
 - Crayons look bad. Trying triangles for a bit.
-
+- Fix whatever is forcing us to make copies in editor/COPY
+  It's pillar puzzles being resized. Of course :(
+- Turn on crispedges only for horizontally traced segments. It looks *bad* on the curves.
 
 
 - Work on speedrunning solver / improving "unique puzzles"
