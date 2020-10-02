@@ -517,6 +517,8 @@ function onElementClicked(event, x, y) {
     } else {
       puzzle.grid[x][y].end = undefined
       puzzle.grid[x][y].start = undefined
+      puzzle.grid[x][y].dot = undefined
+      puzzle.grid[x][y].gap = undefined
       if (puzzle.symmetry != undefined) {
         var sym = puzzle.getSymmetricalPos(x, y)
         puzzle.updateCell2(sym.x, sym.y, 'start', undefined)
