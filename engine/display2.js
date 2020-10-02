@@ -263,7 +263,7 @@ function drawSymbols(puzzle, svg, target) {
         else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = window.FOREGROUND
           // This makes the invisible dots visible, but only while we're in the editor.
-          if (window.activeParams != undefined) {
+          if (document.getElementById('metaButtons') != undefined) {
             params.stroke = 'black'
             params.strokeWidth = '2px'
           }
