@@ -953,34 +953,31 @@ function resizePuzzle(dx, dy, id) {
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
-      // We do not want to wrap around here! We only want to copy the cell if it existed on the old grid.
       var cell = undefined
-      if (oldPuzzle._safeCell(x - xOffset, y - yOffset)) {
-        cell = oldPuzzle.grid[x - xOffset][y - yOffset]
-      } else if (x%2 === 0 || y%2 === 0) {
-        // For edges, if the previous location was off the grid, then make a stand-in empty object.
+      // In case the source location was empty / off the grid, we start with a stand-in empty object.
+      if (x%2 === 0 || y%2 === 0) {
         cell = {'type': 'line'}
       }
 
       switch (shouldCopyCell(x, y)) {
       case PERSIST:
+        if (oldPuzzle._safeCell(x - xOffset, y - yOffset)) {
+          cell = oldPuzzle.grid[x - xOffset][y - yOffset]
+        }
         console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
         break
       case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
         var sym = puzzle.getSymmetricalPos(x, y)
-        var symCell = undefined
         if (oldPuzzle._safeCell(sym.x - xOffset, sym.y - yOffset)) {
           symCell = oldPuzzle.grid[sym.x - xOffset][sym.y - yOffset]
-        }
-        console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
-        if (symCell != undefined) {
           cell.end = puzzle.getSymmetricalDir(symCell.end)
           cell.start = symCell.start
         }
+        console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
         break
       case CLEAR:
-        cell.start = undefined
-        cell.end = undefined
+        cell = {'type': 'line'}
+        console.spam('At', x - xOffset, y - yOffset, 'clearing cell')
         break
       }
 
