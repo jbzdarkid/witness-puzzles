@@ -537,7 +537,12 @@ function onElementClicked(event, x, y) {
     }
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
-      puzzle.updateCell2(sym.x, sym.y, 'start', puzzle.grid[x][y].start)
+      if (sym.x === x && sym.y === y) {
+        // If the two startpoints would be in the same location, do nothing.
+        puzzle.grid[x][y].start = undefined
+      } else {
+        puzzle.updateCell2(sym.x, sym.y, 'start', puzzle.grid[x][y].start)
+      }
     }
   } else if (activeParams.type === 'end') {
     if (x%2 === 1 && y%2 === 1) return
@@ -552,8 +557,13 @@ function onElementClicked(event, x, y) {
     puzzle.grid[x][y].end = dir
     if (puzzle.symmetry != undefined) {
       var sym = puzzle.getSymmetricalPos(x, y)
-      var symmetricalDir = puzzle.getSymmetricalDir(dir)
-      puzzle.updateCell2(sym.x, sym.y, 'end', symmetricalDir)
+      if (sym.x === x && sym.y === y) {
+        // If the two endpoints would be in the same location, do nothing.
+        puzzle.grid[x][y].end = undefined
+      } else {
+        var symmetricalDir = puzzle.getSymmetricalDir(dir)
+        puzzle.updateCell2(sym.x, sym.y, 'end', symmetricalDir)
+      }
     }
   } else if (activeParams.type === 'dot') {
     if (x%2 === 1 && y%2 === 1) return
