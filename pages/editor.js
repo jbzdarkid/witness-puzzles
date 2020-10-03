@@ -919,7 +919,11 @@ function resizePuzzle(dx, dy, id) {
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
-      var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
+      // We do not want to wrap around here! We only want to copy the cell if it existed on the old grid.
+      var cell = undefined
+      if (oldPuzzle._safeCell(x - xOffset, y - yOffset)) {
+        cell = oldPuzzle.grid[x - xOffset][y - yOffset]
+      }
 
       switch (shouldCopyCell(x, y)) {
       case PERSIST:
@@ -928,7 +932,10 @@ function resizePuzzle(dx, dy, id) {
         break
       case COPY:
         var sym = puzzle.getSymmetricalPos(x, y)
-        var symCell = oldPuzzle.getCell(sym.x - xOffset, sym.y - yOffset)
+        var symCell = undefined
+        if (oldPuzzle._safeCell(sym.x - xOffset, sym.y - yOffset)) {
+          symCell = oldPuzzle.grid[sym.x - xOffset][sym.y - yOffset]
+        }
         console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
         if (symCell != undefined) {
           if (cell == undefined) cell = {'type': 'line'}
@@ -937,10 +944,9 @@ function resizePuzzle(dx, dy, id) {
         }
         break
       case CLEAR:
-        if (cell != undefined) {
-          cell.start = undefined
-          cell.end = undefined
-        }
+        if (cell == undefined) continue // No need to 'clear' an empty cell
+        cell.start = undefined
+        cell.end = undefined
         break
       }
 
@@ -1078,9 +1084,10 @@ function dragMove(event, elem) {
   }
 
   // Note: We only modify dragging when we reach a limit.
+  // Note: We use Math.round (rather than an absolute Math.sign) to account for pillar resizing
 
   while (Math.abs(dx) >= xLim) {
-    if (!resizePuzzle(2 * Math.sign(dx), 0, elem.id)) break
+    if (!resizePuzzle(2 * Math.round(dx/xLim), 0, elem.id)) break
     writePuzzle()
     reloadPuzzle()
     dx -= Math.sign(dx) * xLim
@@ -1088,7 +1095,7 @@ function dragMove(event, elem) {
   }
 
   while (Math.abs(dy) >= yLim) {
-    if (!resizePuzzle(0, 2 * Math.sign(dy), elem.id)) break
+    if (!resizePuzzle(0, 2 * Math.round(dy/yLim), elem.id)) break
     writePuzzle()
     reloadPuzzle()
     dy -= Math.sign(dy) * yLim
