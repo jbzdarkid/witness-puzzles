@@ -889,10 +889,18 @@ function resizePuzzle(dx, dy, id) {
 
   if (newWidth <= 0 || newHeight <= 0) return false
   if (newWidth > 21 || newHeight > 21) return false
-  if (puzzle.symmetry != undefined && puzzle.symmetry.x && newWidth <= 2) return false
-  if (puzzle.symmetry != undefined && puzzle.symmetry.y && newHeight <= 2) return false
+  if (puzzle.symmetry != undefined) {
+    if (puzzle.symmetry.x && newWidth <= 2) return false
+    if (puzzle.symmetry.y && newHeight <= 2) return false
+    if (puzzle.pillar && puzzle.symmetry.x && newWidth%4 !== 0) return false
+  }
 
-  var xOffset = (id.includes('left') ? dx : 0)
+  if (!puzzle.pillar) {
+    var xOffset = (id.includes('left') ? dx : 0)
+  } else {
+    // Pillar puzzles always expand horizontally in both directions.
+    var xOffset = dx / 2
+  }
   var yOffset = (id.includes('top') ? dy : 0)
 
   console.log('Shifting contents by', xOffset, yOffset)
@@ -906,7 +914,22 @@ function resizePuzzle(dx, dy, id) {
   var CLEAR = 2
   function shouldCopyCell(x, y) { // x, y are locations on the new grid
     if (puzzle.symmetry == undefined) return PERSIST
-    if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy elements
+    if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy cells
+
+    if (puzzle.pillar) {
+      if (puzzle.symmetry.x && !puzzle.symmetry.y) {
+        if (id.includes('right')) {
+          if (x <   newWidth*1/4) return COPY
+          if (x === newWidth*1/4) return CLEAR
+          if (x === newWidth*3/4) return CLEAR
+          if (x >=  newWidth*3/4) return COPY
+        }
+      }
+
+      // TODO: Other symmetry types (duh)
+
+      return PERSIST
+    }
 
     // Symmetry copies one half of the grid to the other, and selects the far side from
     // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
@@ -941,7 +964,7 @@ function resizePuzzle(dx, dy, id) {
         if (cell == undefined) continue // No need to 'persist' an empty cell
         console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
         break
-      case COPY:
+      case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
         var sym = puzzle.getSymmetricalPos(x, y)
         var symCell = undefined
         if (oldPuzzle._safeCell(sym.x - xOffset, sym.y - yOffset)) {
@@ -1083,9 +1106,10 @@ function dragMove(event, elem) {
   console.spam(dx, dy)
 
   var xLim = 40
+  var xScale = 2
   // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
   if (puzzle.symmetry != undefined && puzzle.pillar === true) {
-    xLim = 80
+    xScale = 4
   }
 
   var yLim = 40
@@ -1093,12 +1117,13 @@ function dragMove(event, elem) {
   if (puzzle.height >= 9) {
     var yLim = 60
   }
+  var yScale = 2
 
   // Note: We only modify dragging when we reach a limit.
-  // Note: We use Math.round (rather than an absolute Math.sign) to account for pillar resizing
+  // Note: We use Math.sign (rather than Math.round or Math.floor) since we only want to resize 1 unit at a time.
 
   while (Math.abs(dx) >= xLim) {
-    if (!resizePuzzle(2 * Math.round(dx/xLim), 0, elem.id)) break
+    if (!resizePuzzle(xScale * Math.sign(dx), 0, elem.id)) break
     writePuzzle()
     reloadPuzzle()
     dx -= Math.sign(dx) * xLim
@@ -1106,7 +1131,7 @@ function dragMove(event, elem) {
   }
 
   while (Math.abs(dy) >= yLim) {
-    if (!resizePuzzle(0, 2 * Math.round(dy/yLim), elem.id)) break
+    if (!resizePuzzle(0, yScale * Math.sign(dy), elem.id)) break
     writePuzzle()
     reloadPuzzle()
     dy -= Math.sign(dy) * yLim
