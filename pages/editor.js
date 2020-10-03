@@ -198,7 +198,7 @@ function reloadPuzzle() {
       puzzleStyle.value = 'Pillar (Two Lines)'
     }
   }
-  console.log('Computed puzzle style', puzzleStyle.value)
+  console.log('Puzzle style:', puzzleStyle.value)
 }
 
 //** Buttons which the user can click on
@@ -341,8 +341,10 @@ window.loadPuzzle = function() {
   }
 }
 
-window.importPuzzle = function() {
-  var serialized = prompt('Paste your puzzle here:')
+window.importPuzzle = function(serialized) {
+  if (!serialized) {
+    serialized = prompt('Paste your puzzle here:')
+  }
 
   console.log('Creating puzzle from serialized', serialized)
   try {
@@ -888,12 +890,12 @@ function resizePuzzle(dx, dy, id) {
 
   // Determine if the cell at x, y should be copied from the original.
   // For non-symmetrical puzzles, the answer is always 'no' -- all elements should be directly copied across.
-  // For non-pillar symmetry puzzles, we should persist all elements on the half the puzzle which is furthest from the dragged edge. This will keep the puzzle contents stable as we add a row. The exception to this rule is when we expand. We are creating one new row or column which has no source location. For example, for width=3 newWidth=5, the column at x=2 is appearing from nowhere -- it should not have endpoints/startpoints. This is especially apparent in rotational symmetry puzzles.
-  // x,y should be locations from the new grid
+  // For non-pillar symmetry puzzles, we should persist all elements on the half the puzzle which is furthest from the dragged edge. This will keep the puzzle contents stable as we add a row. The exception to this rule is when we expand: We are creating one new row or column which has no source location.
+  // For example, a horizontal puzzle with width=3 gets expanded to newWidth=5 (from the right edge), the column at x=2 is new -- it is not being copied nor persisted. This is especially apparent in rotational symmetry puzzles.
   var PERSIST = 0
   var COPY = 1
   var CLEAR = 2
-  function shouldCopyCell(x, y) {
+  function shouldCopyCell(x, y) { // x, y are locations on the new grid
     if (puzzle.symmetry == undefined) return PERSIST
     if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy elements
 
@@ -1069,7 +1071,7 @@ function dragMove(event, elem) {
     dy = newDragging.y - dragging.y
   }
 
-  console.log(dx, dy)
+  console.spam(dx, dy)
 
   var xLim = 40
   // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
