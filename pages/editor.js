@@ -969,22 +969,25 @@ function resizePuzzle(dx, dy, id) {
   var oldPuzzle = puzzle.clone()
   puzzle.newGrid(newWidth, newHeight)
 
+  var debugGrid = []
+  for (var y=0; y<puzzle.height; y++) debugGrid[y] = ''
+
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = undefined
       // In case the source location was empty / off the grid, we start with a stand-in empty object.
-      if (x%2 === 0 || y%2 === 0) {
-        cell = {'type': 'line'}
-      }
+      if (x%2 === 0 || y%2 === 0) cell = {'type': 'line'}
 
       switch (shouldCopyCell(x, y)) {
       case PERSIST:
+        debugGrid[y] += 'P'
         if (oldPuzzle._safeCell(x - xOffset, y - yOffset)) {
           cell = oldPuzzle.grid[x - xOffset][y - yOffset]
         }
         console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
         break
       case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
+        debugGrid[y] += 'O'
         var sym = puzzle.getSymmetricalPos(x, y)
         var symCell = undefined
         if (oldPuzzle._safeCell(sym.x - xOffset, sym.y - yOffset)) {
@@ -995,6 +998,7 @@ function resizePuzzle(dx, dy, id) {
         console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
         break
       case CLEAR:
+        debugGrid[y] += 'C'
         cell = {'type': 'line'}
         console.spam('At', x - xOffset, y - yOffset, 'clearing cell')
         break
@@ -1004,6 +1008,8 @@ function resizePuzzle(dx, dy, id) {
     }
   }
 
+  console.log('Resize grid actions:')
+  for (var row of debugGrid) console.log(row)
     }
   }
 
