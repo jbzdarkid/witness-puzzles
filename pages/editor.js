@@ -916,36 +916,11 @@ function resizePuzzle(dx, dy, id) {
     if (puzzle.symmetry == undefined) return PERSIST
     if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy cells
 
-    if (puzzle.pillar) {
-      if (puzzle.symmetry.x && !puzzle.symmetry.y) {
-        if (id.includes('right') || id.includes('left')) {
-          if (x <   newWidth*1/4) return COPY
-          if (x === newWidth*1/4) return CLEAR
-          if (x === newWidth*3/4) return CLEAR
-          if (x >=  newWidth*3/4) return COPY
-        }
-      }
-
-      if (!puzzle.symmetry.x && puzzle.symmetry.y) {
-        if (id.includes('right') && x >= newWidth/2) return COPY
-        if (id.includes('left')  && x <  newWidth/2) return COPY
-        if (id.includes('top')) {
-          if (y < (newHeight-1)/2) return COPY
-          if (y === (newHeight-1)/2 && x < newWidth/2) return COPY
-        }
-        if (id.includes('bottom')) {
-          if (y > (newHeight-1)/2) return COPY
-          if (y === (newHeight-1)/2 && x > newWidth/2) return COPY
-        }
-      }
-
-      // TODO: Other symmetry types (duh)
-
-      return PERSIST
-    } else {
-      // Symmetry copies one half of the grid to the other, and selects the far side from
-      // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
-      // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+    // Symmetry copies one half of the grid to the other, and selects the far side from
+    // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
+    // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+    if (!puzzle.pillar) {
+      // Normal symmetries
       if (puzzle.symmetry.x) {
         if (dx > 0 && x == (newWidth-1)/2) return CLEAR
         if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
@@ -955,6 +930,36 @@ function resizePuzzle(dx, dy, id) {
         if (dy > 0 && y == (newHeight-1)/2) return CLEAR
         if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
         if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
+      }
+    } else {
+      // Pillar symmetries
+      if (puzzle.symmetry.x && !puzzle.symmetry.y) {
+        if (dx !== 0) {
+          if (x <   newWidth*1/4) return COPY
+          if (x === newWidth*1/4) return CLEAR
+          if (x === newWidth*3/4) return CLEAR
+          if (x >=  newWidth*3/4) return COPY
+        }
+        // Vertical resizes just persist
+      }
+
+      if (!puzzle.symmetry.x && puzzle.symmetry.y) {
+        if (dx !== 0 && id.includes('right') && x >= newWidth/2) return COPY
+        if (dx !== 0 && id.includes('left')  && x <  newWidth/2) return COPY
+        if (dy !== 0 && id.includes('bottom')) {
+          if (y > (newHeight-1)/2) return COPY
+          if (y === (newHeight-1)/2 && x > newWidth/2) return COPY
+        }
+        if (dy !== 0 && id.includes('top')) {
+          if (y < (newHeight-1)/2) return COPY
+          if (y === (newHeight-1)/2 && x < newWidth/2) return COPY
+        }
+      }
+
+      if (puzzle.symmetry.x && puzzle.symmetry.y) {
+        // Horizontal resizes just persist (That's a lie)
+        if (dy !== 0 && id.includes('bottom') && y > (newHeight-1)/2) return COPY
+        if (dy !== 0 && id.includes('top')    && y < (newHeight-1)/2) return COPY
       }
     }
 
