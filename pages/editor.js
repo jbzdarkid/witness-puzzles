@@ -895,6 +895,7 @@ function resizePuzzle(dx, dy, id) {
   var CLEAR = 2
   function shouldCopyCell(x, y) {
     if (puzzle.symmetry == undefined) return PERSIST
+    if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy elements
 
     // Symmetry copies one half of the grid to the other, and selects the far side from
     // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
@@ -918,8 +919,6 @@ function resizePuzzle(dx, dy, id) {
 
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
-      if (x%2 === 1 && y%2 === 1) continue // Don't copy centers
-
       var cell = oldPuzzle.getCell(x - xOffset, y - yOffset)
 
       switch (shouldCopyCell(x, y)) {
