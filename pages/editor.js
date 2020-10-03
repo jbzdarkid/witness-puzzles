@@ -926,23 +926,36 @@ function resizePuzzle(dx, dy, id) {
         }
       }
 
+      if (!puzzle.symmetry.x && puzzle.symmetry.y) {
+        if (id.includes('right') && x >= newWidth/2) return COPY
+        if (id.includes('left')  && x <  newWidth/2) return COPY
+        if (id.includes('top')) {
+          if (y < (newHeight-1)/2) return COPY
+          if (y === (newHeight-1)/2 && x < newWidth/2) return COPY
+        }
+        if (id.includes('bottom')) {
+          if (y > (newHeight-1)/2) return COPY
+          if (y === (newHeight-1)/2 && x > newWidth/2) return COPY
+        }
+      }
+
       // TODO: Other symmetry types (duh)
 
       return PERSIST
-    }
-
-    // Symmetry copies one half of the grid to the other, and selects the far side from
-    // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
-    // internal elements, i.e. it feels like dragging away is just inserting a column/row.
-    if (puzzle.symmetry.x) {
-      if (dx > 0 && x == (newWidth-1)/2) return CLEAR
-      if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
-      if (id.includes('left')   && x <= (newWidth-1)/2) return COPY
-    }
-    if (puzzle.symmetry.y) {
-      if (dy > 0 && y == (newHeight-1)/2) return CLEAR
-      if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
-      if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
+    } else {
+      // Symmetry copies one half of the grid to the other, and selects the far side from
+      // the dragged edge to be the master copy. This is so that drags feel 'smooth' wrt
+      // internal elements, i.e. it feels like dragging away is just inserting a column/row.
+      if (puzzle.symmetry.x) {
+        if (dx > 0 && x == (newWidth-1)/2) return CLEAR
+        if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
+        if (id.includes('left')   && x <= (newWidth-1)/2) return COPY
+      }
+      if (puzzle.symmetry.y) {
+        if (dy > 0 && y == (newHeight-1)/2) return CLEAR
+        if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
+        if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
+      }
     }
 
     return PERSIST
@@ -968,6 +981,7 @@ function resizePuzzle(dx, dy, id) {
         break
       case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
         var sym = puzzle.getSymmetricalPos(x, y)
+        var symCell = undefined
         if (oldPuzzle._safeCell(sym.x - xOffset, sym.y - yOffset)) {
           symCell = oldPuzzle.grid[sym.x - xOffset][sym.y - yOffset]
           cell.end = puzzle.getSymmetricalDir(symCell.end)
