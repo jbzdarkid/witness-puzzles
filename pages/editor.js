@@ -26,7 +26,6 @@ function readPuzzle() {
   var puzzleList = readPuzzleList()
   if (puzzleList.length === 0) {
     console.log('No puzzles left, clearing storage and creating new one')
-    window.localStorage.clear()
     document.getElementById('loadButton').disabled = true
     document.getElementById('deleteButton').disabled = true
     createEmptyPuzzle()
