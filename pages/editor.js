@@ -1004,10 +1004,10 @@ function resizePuzzle(dx, dy, id) {
 
         if (validDirs.length === 0) {
           console.log('Endpoint at', x, y, 'no longer fits on the grid')
-          puzzle.updateCell2(x, y, 'end', undefined)
+          puzzle.grid[x][y].end = undefined
         } else {
           console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', validDirs[0])
-          puzzle.updateCell2(x, y, 'end', validDirs[0])
+          puzzle.grid[x][y].end = validDirs[0]
         }
       } else {
         var sym = puzzle.getSymmetricalPos(x, y)
@@ -1021,16 +1021,15 @@ function resizePuzzle(dx, dy, id) {
           symDir = puzzle.getSymmetricalDir(dir)
           if (validDirs.includes(dir) && validSymDirs.includes(symDir)) {
             console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', dir)
-            puzzle.updateCell2(x, y, 'end', dir)
-            puzzle.updateCell2(sym.x, sym.y, 'end', symDir)
+            puzzle.grid[x][y].end = dir
+            puzzle.grid[sym.x][sym.y].end = symDir
             break
           }
         }
         if (validDirs.length === 0 || validSymDirs.length === 0) {
           console.log('Endpoint at', x, y, 'no longer fits on the grid')
-          var cell = puzzle.getCell(x, y)
-          puzzle.updateCell2(x, y, 'end', undefined)
-          puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
+          puzzle.grid[x][y].end = undefined
+          puzzle.grid[sym.x][sym.y].end = undefined
         }
       }
     }
