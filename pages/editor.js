@@ -957,11 +957,13 @@ function resizePuzzle(dx, dy, id) {
       var cell = undefined
       if (oldPuzzle._safeCell(x - xOffset, y - yOffset)) {
         cell = oldPuzzle.grid[x - xOffset][y - yOffset]
+      } else if (x%2 === 0 || y%2 === 0) {
+        // For edges, if the previous location was off the grid, then make a stand-in empty object.
+        cell = {'type': 'line'}
       }
 
       switch (shouldCopyCell(x, y)) {
       case PERSIST:
-        if (cell == undefined) continue // No need to 'persist' an empty cell
         console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
         break
       case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
@@ -972,22 +974,20 @@ function resizePuzzle(dx, dy, id) {
         }
         console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
         if (symCell != undefined) {
-          if (cell == undefined) cell = {'type': 'line'}
           cell.end = puzzle.getSymmetricalDir(symCell.end)
           cell.start = symCell.start
         }
         break
       case CLEAR:
-        if (cell == undefined) continue // No need to 'clear' an empty cell
         cell.start = undefined
         cell.end = undefined
         break
       }
 
-      // Note that we are making a copy here because ... some bug with resizing.
-      if (cell != undefined) cell = JSON.parse(JSON.stringify(cell))
+      puzzle.grid[x][y] = cell
+    }
+  }
 
-      puzzle.setCell(x, y, cell)
     }
   }
 
