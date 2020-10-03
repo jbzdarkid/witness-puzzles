@@ -918,7 +918,7 @@ function resizePuzzle(dx, dy, id) {
 
     if (puzzle.pillar) {
       if (puzzle.symmetry.x && !puzzle.symmetry.y) {
-        if (id.includes('right')) {
+        if (id.includes('right') || id.includes('left')) {
           if (x <   newWidth*1/4) return COPY
           if (x === newWidth*1/4) return CLEAR
           if (x === newWidth*3/4) return CLEAR
