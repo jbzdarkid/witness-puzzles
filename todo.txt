@@ -4,7 +4,6 @@ Ship Blockers
 - Crayons look bad. Trying triangles for a bit.
 - Turn on crispedges only for horizontally traced segments. It looks *bad* on the curves.
 - Editor grid is off-center when smaller than 4x4 (again)
-- Resizing the puzzle is not counting as a modification
 - Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
 
 - Work on speedrunning solver / improving "unique puzzles"

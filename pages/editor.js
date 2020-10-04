@@ -1154,6 +1154,7 @@ function dragMove(event, elem) {
 
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(xScale * Math.sign(dx), 0, elem.id)) break
+    puzzleModified()
     writePuzzle()
     reloadPuzzle()
     dx -= Math.sign(dx) * xLim
@@ -1162,6 +1163,7 @@ function dragMove(event, elem) {
 
   while (Math.abs(dy) >= yLim) {
     if (!resizePuzzle(0, yScale * Math.sign(dy), elem.id)) break
+    puzzleModified()
     writePuzzle()
     reloadPuzzle()
     dy -= Math.sign(dy) * yLim
