@@ -967,7 +967,12 @@ function resizePuzzle(dx, dy, id) {
         if (dy !== 0 && id.includes('top')    && y < (newHeight-1)/2) return COPY
       }
 
-      // One more!
+      if (!puzzle.symmetry.x && !puzzle.symmetry.y) {
+        if (dx !== 0 && id.includes('right')  && x >= newWidth/2)      return COPY
+        if (dx !== 0 && id.includes('left')   && x <  newWidth/2)      return COPY
+        if (dy !== 0 && id.includes('bottom') && y >= (newHeight-1)/2) return COPY
+        if (dy !== 0 && id.includes('top')    && y <  (newHeight-1)/2) return COPY
+      }
     }
 
     return PERSIST
