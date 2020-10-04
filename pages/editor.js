@@ -774,7 +774,7 @@ function drawColorButtons() {
     drawColorButtons()
   }
   for (var button of colorTable.getElementsByTagName('button')) {
-    var params = {'width':146, 'height':45, 'border':2}
+    var params = {'width':140, 'height':45, 'border':2}
     params.text = button.id
     params.color = button.id
     if (activeParams.color === button.id) {
@@ -1021,8 +1021,6 @@ function resizePuzzle(dx, dy, id) {
 
   console.log('Resize grid actions:')
   for (var row of debugGrid) console.log(row)
-    }
-  }
 
   // Check to make sure that all endpoints are still pointing in valid directions.
   for (var x=0; x<puzzle.width; x++) {
