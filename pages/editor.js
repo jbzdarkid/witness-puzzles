@@ -957,15 +957,23 @@ function resizePuzzle(dx, dy, id) {
       }
 
       if (puzzle.symmetry.x && puzzle.symmetry.y) {
-        // Horizontal resizes just persist (That's a lie)
+        if (dx !== 0) {
+          if (x <   newWidth*1/4) return COPY
+          if (x === newWidth*1/4 && y < (newHeight-1)/2) return COPY
+          if (x === newWidth*3/4 && y > (newHeight-1)/2) return COPY
+          if (x >   newWidth*3/4) return COPY
+        }
         if (dy !== 0 && id.includes('bottom') && y > (newHeight-1)/2) return COPY
         if (dy !== 0 && id.includes('top')    && y < (newHeight-1)/2) return COPY
       }
+
+      // One more!
     }
 
     return PERSIST
   }
 
+  // We don't call new Puzzle here so that we can persist extended puzzle attributes (pillar, symmetry, etc)
   var oldPuzzle = puzzle.clone()
   puzzle.newGrid(newWidth, newHeight)
 
