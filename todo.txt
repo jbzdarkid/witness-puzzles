@@ -1,6 +1,10 @@
 Ship Blockers
 - Fix tracing on pillars (at least rounded edges, if not adding fading)
   Just take pillarCirc and symPillarCirc and make them... not circles!
+
+
+
+
 - Crayons look bad. Trying triangles for a bit.
 - Turn on crispedges only for horizontally traced segments. It looks *bad* on the curves.
 - Editor grid is off-center when smaller than 4x4 (again)
@@ -13,6 +17,7 @@ Ship Blockers
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 - Editor triangle button rmb should cycle backwards
+- Editor dot button should act like triangles
 
 Browse
 -- Sorting
