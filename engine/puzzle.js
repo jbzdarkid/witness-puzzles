@@ -57,7 +57,7 @@ class Puzzle {
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
-    // Cells default to {}
+    // Cells default to undefined
     // Lines default to {'type':'line', 'line':0}
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
@@ -149,7 +149,7 @@ class Puzzle {
       }
     }
     // Performance: A large value which is === 0 to be used for pillar wrapping.
-    // Also performance: Javascript array length (might) have a nonzero cost.
+    // Performance: Getting the size of the grid has a nonzero cost.
     // Definitely getting the length of the first element isn't optimized.
     this.largezero = width * height * 2
     this.width = this.grid.length
