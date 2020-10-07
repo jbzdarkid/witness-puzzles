@@ -210,7 +210,7 @@ function placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
   for (var y=0; y<puzzle.height; y++) {
     for (var x=0; x<puzzle.width; x++) {
-      var cell = puzzle.getCell(x, y)
+      var cell = puzzle.grid[x][y]
       if (cell > 0) {
         console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
         return false
@@ -233,7 +233,7 @@ function placePolys(polys, puzzle) {
   var openCells = []
   for (var y=1; y<puzzle.height; y+=2) {
     for (var x=1; x<puzzle.width; x+=2) {
-      if (puzzle.getCell(x, y) >= 0) continue
+      if (puzzle.grid[x][y] >= 0) continue
       openCells.push({'x':x, 'y':y})
       if (puzzle.pillar === false) break
     }
