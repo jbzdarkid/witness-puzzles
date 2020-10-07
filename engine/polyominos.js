@@ -168,13 +168,16 @@ window.polyFit = function(region, puzzle) {
 // If true, poly fits and grid is modified (with the placement)
 function tryPlacePolyshape(cells, x, y, puzzle, sign) {
   console.spam('Placing at', x, y, 'with sign', sign)
-  for (var i=0; i<cells.length; i++) {
-    var cell = puzzle.getCell(cells[i].x + x, cells[i].y + y)
-    if (cell == undefined) return false
-    cells[i].value = cell
+  var numCells = cells.length
+  for (var i=0; i<numCells; i++) {
+    var cell = cells[i]
+    var puzzleCell = puzzle.getCell(cell.x + x, cell.y + y)
+    if (puzzleCell == undefined) return false
+    cell.value = puzzleCell
   }
-  for (var i=0; i<cells.length; i++) {
-    puzzle.setCell(cells[i].x + x, cells[i].y + y, cells[i].value + sign)
+  for (var i=0; i<numCells; i++) {
+    var cell = cells[i]
+    puzzle.setCell(cell.x + x, cell.y + y, cell.value + sign)
   }
   return true
 }
