@@ -421,7 +421,6 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   var y = parseFloat(start.getAttribute('cy'))
 
   var cursor = createElement('circle')
-  svg.appendChild(cursor)
   cursor.setAttribute('r', 12)
   cursor.setAttribute('fill', window.CURSOR)
   cursor.setAttribute('stroke', 'black')
@@ -430,6 +429,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   cursor.setAttribute('class', 'cursor')
   cursor.setAttribute('cx', x)
   cursor.setAttribute('cy', y)
+  svg.insertBefore(cursor, svg.getElementById('cursorPos'))
 
   data.svg = svg
   data.cursor = cursor

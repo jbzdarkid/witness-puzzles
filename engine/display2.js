@@ -34,26 +34,79 @@ window.draw = function(puzzle, target='puzzle') {
   rect.setAttribute('width', pixelWidth - 10) // Removing border
   rect.setAttribute('height', pixelHeight - 10) // Removing border
 
+  drawCenters(puzzle, svg)
+  drawGrid(puzzle, svg)
+  drawStartAndEnd(puzzle, svg)
+  // Draw cell symbols after so they overlap the lines, if necessary
+  drawSymbols(puzzle, svg, target)
+
+  // For pillar puzzles, add faders for the left and right sides
+  if (puzzle.pillar === true) {
+    var defs = window.createElement('defs')
+    defs.id = 'cursorPos'
+    defs.innerHTML = '' +
+    '<linearGradient id="fadeInLeft">\n' +
+    '  <stop offset="0%"   stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '  <stop offset="100%" stop-opacity="0.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeOutRight">\n' +
+    '  <stop offset="0%"   stop-opacity="0.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '  <stop offset="100%" stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '</linearGradient>\n'
+    svg.appendChild(defs)
+
+    var leftBox = window.createElement('rect')
+    leftBox.setAttribute('x', 28)
+    leftBox.setAttribute('y', 10)
+    leftBox.setAttribute('width', 36)
+    leftBox.setAttribute('height', 41 * puzzle.height + 43)
+    leftBox.setAttribute('fill', 'url(#fadeInLeft)')
+    leftBox.setAttribute('style', 'pointer-events: none')
+    svg.appendChild(leftBox)
+
+    var rightBox = window.createElement('rect')
+    rightBox.setAttribute('x', 41 * puzzle.width + 16)
+    rightBox.setAttribute('y', 10)
+    rightBox.setAttribute('width', 36)
+    rightBox.setAttribute('height', 41 * puzzle.height + 43)
+    rightBox.setAttribute('fill', 'url(#fadeOutRight)')
+    rightBox.setAttribute('style', 'pointer-events: none')
+    svg.appendChild(rightBox)
+  }
+}
+
+function drawCenters(puzzle, svg) {
+  // @Hack that I am not fixing.
   var savedGrid = puzzle._switchToMaskedGrid()
+  if (puzzle.pillar === true) {
+    for (var y=1; y<puzzle.height; y += 2) {
+      if (puzzle.getCell(-1, y) == undefined) continue // Cell borders the outside
+
+      var rect = createElement('rect')
+      rect.setAttribute('x', 28)
+      rect.setAttribute('y', 41 * y + 11)
+      rect.setAttribute('width', 24)
+      rect.setAttribute('height', 82)
+      rect.setAttribute('fill', window.BACKGROUND)
+      svg.appendChild(rect)
+    }
+  }
+
   for (var x=1; x<puzzle.width; x += 2) {
     for (var y=1; y<puzzle.height; y += 2) {
       if (puzzle.grid[x][y] == undefined) continue // Cell borders the outside
 
       var rect = createElement('rect')
-      svg.appendChild(rect)
       rect.setAttribute('x', 41 * x + 11)
       rect.setAttribute('y', 41 * y + 11)
       rect.setAttribute('width', 82)
       rect.setAttribute('height', 82)
       rect.setAttribute('fill', window.BACKGROUND)
-      rect.setAttribute('shape-rendering', 'crispedges')
+      rect.setAttribute('shape-rendering', 'crispedges') // Otherwise they don't meet behind gaps
+      svg.appendChild(rect)
     }
   }
   puzzle.grid = savedGrid
-  drawGrid(puzzle, svg)
-  drawStartAndEnd(puzzle, svg)
-  // Draw cell symbols after so they overlap the lines, if necessary
-  drawSymbols(puzzle, svg, target)
 }
 
 function drawGrid(puzzle, svg) {
@@ -157,7 +210,7 @@ function drawSymbols(puzzle, svg, target) {
         else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = window.FOREGROUND
           // This makes the invisible dots visible, but only while we're in the editor.
-          if (window.activeParams != undefined) {
+          if (document.getElementById('metaButtons') != undefined) {
             params.stroke = 'black'
             params.strokeWidth = '2px'
           }
