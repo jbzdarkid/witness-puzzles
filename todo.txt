@@ -1,6 +1,4 @@
 Ship Blockers
-- Fix tracing on pillars (at least rounded edges, if not adding fading)
-  Just take pillarCirc and symPillarCirc and make them... not circles!
 - Resizing basic pillar is causing undefineds, which is breaking well everything.
   Do I allow cells to be undefined or no? Yes.
 
