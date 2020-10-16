@@ -96,7 +96,11 @@ window.draw = function(puzzle, target='puzzle') {
     '<linearGradient id="fadeOutHorizontal">\n' +
     '  <stop offset="75%"  stop-color="' + window.FOREGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
-    '</linearGradient>'
+    '</linearGradient>\n' +
+    '<linearGradient id="fadeOutLine">\n' +
+    '  <stop offset="75%"  stop-color="' + window.LINE_DEFAULT + '"></stop>\n' +
+    '  <stop offset="100%" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '</linearGradient>\n'
     svg.appendChild(defs)
   }
 

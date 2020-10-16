@@ -97,26 +97,39 @@ class PathSegment {
     this.poly1 = createElement('polygon')
     this.circ = createElement('circle')
     this.poly2 = createElement('polygon')
-    this.pillarCirc = createElement('circle')
+    this.pillarRect = createElement('rect')
     this.dir = dir
+    data.svg.insertBefore(this.pillarRect, data.cursor)
     data.svg.insertBefore(this.circ, data.cursor)
     data.svg.insertBefore(this.poly2, data.cursor)
-    data.svg.insertBefore(this.pillarCirc, data.cursor)
     this.circ.setAttribute('cx', data.bbox.middle.x)
     this.circ.setAttribute('cy', data.bbox.middle.y)
 
     if (data.puzzle.pillar === true) {
-      // cx/cy are updated in redraw(), since pillarCirc tracks the cursor
-      this.pillarCirc.setAttribute('cy', data.bbox.middle.y)
-      this.pillarCirc.setAttribute('r', 12)
-      if (data.pos.x === 0 && this.dir === 'right') {
-        this.pillarCirc.setAttribute('cx', data.bbox.x1)
-        this.pillarCirc.setAttribute('static', true)
-      } else if (data.pos.x === data.puzzle.width - 1 && this.dir === 'left') {
-        this.pillarCirc.setAttribute('cx', data.bbox.x2)
-        this.pillarCirc.setAttribute('static', true)
+      this.pillarRect.setAttribute('y', data.bbox.y1)
+      this.pillarRect.setAttribute('height', 24)
+      if (this.dir == 'right') {
+        if (data.pos.x === 0) {
+          // (?) Wrapped around right -> left
+          this.pillarRect.setAttribute('width', (data.x + 12 - data.bbox.x1))
+          this.pillarRect.setAttribute('x', data.bbox.x1 - 12)
+        } else if (data.pos.x === data.puzzle.width - 1) {
+
+        }
+      } else if (this.dir == 'left') {
+        if (data.pos.x === 0) {
+          // (left wraparound) Wrapped around left -> right
+          this.pillarRect.setAttribute('width', (data.x + 12 - data.bbox.x1))
+          this.pillarRect.setAttribute('x', data.x)
+        } else if (data.pos.x === data.puzzle.width - 1) {
+          // (right wraparound) Wrapped around left -> right
+          this.pillarRect.setAttribute('width', (data.bbox.x2 + 12 - data.x))
+          this.pillarRect.setAttribute('x', data.x)
+          // this.pillarRect.setAttribute('fill', 'url(#fadeOutLine)')
+        }
       } else {
-        this.pillarCirc.setAttribute('cx', data.bbox.middle.x)
+        // Didn't actually wrap around
+        this.pillarRect.style.display = 'none'
       }
     }
 
@@ -124,12 +137,12 @@ class PathSegment {
       this.poly1.setAttribute('class', 'line-1 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-1 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-1 ' + data.svg.id)
-      this.pillarCirc.setAttribute('class', 'line-1 ' + data.svg.id)
+      this.pillarRect.setAttribute('class', 'line-1 ' + data.svg.id)
     } else {
       this.poly1.setAttribute('class', 'line-2 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-2 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-2 ' + data.svg.id)
-      this.pillarCirc.setAttribute('class', 'line-2 ' + data.svg.id)
+//      this.pillarRect.setAttribute('class', 'line-2 ' + data.svg.id)
 
       this.symPoly1 = createElement('polygon')
       this.symCirc = createElement('circle')
@@ -147,16 +160,13 @@ class PathSegment {
       this.symCirc.setAttribute('cy', data.symbbox.middle.y)
 
       if (data.puzzle.pillar === true) {
-        // cx/cy are updated in redraw(), since symPillarCirc tracks the cursor
         this.symPillarCirc.setAttribute('cy', data.symbbox.middle.y)
         this.symPillarCirc.setAttribute('r', 12)
         var symmetricalDir = data.puzzle.getSymmetricalDir(this.dir)
         if (data.sym.x === 0 && symmetricalDir === 'right') {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x1)
-          this.symPillarCirc.setAttribute('static', true)
         } else if (data.sym.x === data.puzzle.width - 1 && symmetricalDir === 'left') {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x2)
-          this.symPillarCirc.setAttribute('static', true)
         } else {
           this.symPillarCirc.setAttribute('cx', data.symbbox.middle.x)
         }
@@ -172,10 +182,10 @@ class PathSegment {
       }
     } else {
       // Only insert poly1 in non-startpoints
-      data.svg.insertBefore(this.poly1, data.cursor)
+      data.svg.insertBefore(this.poly1, this.poly2)
       this.circ.setAttribute('r', 12)
       if (data.puzzle.symmetry != undefined) {
-        data.svg.insertBefore(this.symPoly1, data.cursor)
+        data.svg.insertBefore(this.symPoly1, this.symPoly2)
         this.symCirc.setAttribute('r', 12)
       }
     }
@@ -185,7 +195,7 @@ class PathSegment {
     data.svg.removeChild(this.poly1)
     data.svg.removeChild(this.circ)
     data.svg.removeChild(this.poly2)
-    data.svg.removeChild(this.pillarCirc)
+    data.svg.removeChild(this.pillarRect)
     if (data.puzzle.symmetry != undefined) {
       data.svg.removeChild(this.symPoly1)
       data.svg.removeChild(this.symCirc)
@@ -203,18 +213,6 @@ class PathSegment {
     if (data.puzzle.symmetry != undefined) {
       data.symcursor.setAttribute('cx', this._reflX(x))
       data.symcursor.setAttribute('cy', this._reflY(y))
-    }
-    if (data.puzzle.pillar === true) {
-      if (this.pillarCirc.getAttribute('static') == undefined) {
-        this.pillarCirc.setAttribute('cx', x)
-        this.pillarCirc.setAttribute('cy', y)
-      }
-      if (data.puzzle.symmetry != undefined) {
-        if (this.symPillarCirc.getAttribute('static') == undefined) {
-          this.symPillarCirc.setAttribute('cx', this._reflX(x))
-          this.symPillarCirc.setAttribute('cy', this._reflY(y))
-        }
-      }
     }
 
     // Draw the first-half box
@@ -328,8 +326,8 @@ class PathSegment {
     return (y - data.bbox.middle.y) + data.symbbox.middle.y
   }
 }
-
 var data = {}
+window.DEBUG_DATA = data
 
 function clearGrid(svg, puzzle) {
   if (data.bbox != undefined && data.bbox.debug != undefined) {
