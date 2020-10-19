@@ -255,7 +255,7 @@ function regionCheck(puzzle, region, quick) {
     }
 
     // Count color-based elements
-    if (coloredObjects[cell.color] == undefined) {
+    if (!coloredObjects.has(cell.color)) {
       coloredObjects[cell.color] = 1
     } else {
       coloredObjects[cell.color]++
