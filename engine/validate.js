@@ -256,24 +256,26 @@ function regionCheck(puzzle, region, quick) {
     }
 
     // Count color-based elements
-    var count = coloredObjects[cell.color]
-    if (count == undefined) {
-      count = 0
-    }
-    coloredObjects[cell.color] = count + 1
-
-    if (cell.type === 'square') {
-      squares.push(pos)
-      if (squareColor == undefined) {
-        squareColor = cell.color
-      } else if (squareColor != cell.color) {
-        squareColor = -1 // Signal value which indicates square color collision
+    if (cell.color != undefined) {
+      var count = coloredObjects[cell.color]
+      if (count == undefined) {
+        count = 0
       }
-    }
+      coloredObjects[cell.color] = count + 1
 
-    if (cell.type === 'star') {
-      pos.color = cell.color
-      stars.push(pos)
+      if (cell.type === 'square') {
+        squares.push(pos)
+        if (squareColor == undefined) {
+          squareColor = cell.color
+        } else if (squareColor != cell.color) {
+          squareColor = -1 // Signal value which indicates square color collision
+        }
+      }
+
+      if (cell.type === 'star') {
+        pos.color = cell.color
+        stars.push(pos)
+      }
     }
   }
 
