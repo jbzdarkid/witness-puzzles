@@ -104,11 +104,23 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false, precise=true) {
   return polyomino
 }
 
+// In some cases, polyominos and onimoylops will fully cancel each other out.
+// However, even if they are the same size, that doesn't guarantee that they fit together.
+// As an optimization, we save the results for known combinations of shapes, since there are likely many
+// fewer pairings of shapes than paths through the grid.
+var knownCancellations = {}
+
 // Attempt to fit polyominos in a region into the puzzle.
-// This function checks for early exits, and cleans up the grid to a numerical representation:
-// * 0 represents a square that does not need to be covered (outside the region)
-// * -1 represents a square that needs to be covered once (inside the region)
-// * 1 represents a square that has been double-covered (by two polyominos, e.g.)
+// This function checks for early exits, then simplifies the grid to a numerical representation:
+// * 1 represents a square that has been double-covered (by two polyominos)
+//   * Or, in the cancellation case, it represents a square that was covered by a polyomino and not by an onimoylop
+// * 0 represents a square that is satisfied, either because:
+//   * it is outside the region
+//   * (In the normal case) it was inside the region, and has been covered by a polyomino
+//   * (In the cancellation case) it was covered by an equal number of polyominos and onimoylops
+// * -1 represents a square that needs to be covered once (inside the region, or outside but covered by an onimoylop)
+// * -2 represents a square that needs to be covered twice (inside the region & covered by an onimoylop)
+// * And etc, for additional layers of polyominos/onimoylops.
 window.polyFit = function(region, puzzle) {
   var polys = []
   var ylops = []
@@ -135,13 +147,24 @@ window.polyFit = function(region, puzzle) {
     console.log('Combined size of polyominos and onimoylops', polyCount, 'does not match region size', regionSize)
     return false
   }
-  if (polyCount === 0 && puzzle.settings.SHAPELESS_ZERO_POLY) {
-    console.log('Combined size of polyominos and onimoylops is zero')
-    return true
-  }
   if (polyCount < 0) {
     console.log('Combined size of onimoylops is greater than polyominos by', -polyCount)
     return false
+  }
+  var key = undefined
+  if (polyCount === 0) {
+    if (puzzle.settings.SHAPELESS_ZERO_POLY) {
+      console.log('Combined size of polyominos and onimoylops is zero')
+      return true
+    }
+    // These will be ordered by the order of cells in the region, which isn't exactly consistent.
+    // In practice, it seems to be good enough.
+    key = ''
+    for (var ylop of ylops) key += ' ' + ylop.polyshape
+    key += '|'
+    for (var poly of polys) key += ' ' + poly.polyshape
+    var ret = knownCancellations[key]
+    if (ret != undefined) return ret
   }
 
   // For polyominos, we clear the grid to mark it up again:
@@ -160,6 +183,7 @@ window.polyFit = function(region, puzzle) {
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
   var ret = placeYlops(ylops.slice(), polys.slice(), puzzle)
+  if (polyCount == 0) knownCancellations[key] = ret
   puzzle.grid = savedGrid
   return ret
 }
@@ -203,7 +227,9 @@ function placeYlops(ylops, polys, puzzle) {
       }
     }
   }
+  console.log('Tried all ylop placements with no success.')
   ylops.push(ylop)
+  return false
 }
 
 // Returns whether or not a set of polyominos fit into a region.

@@ -282,12 +282,13 @@ function regionCheck(puzzle, region, quick) {
   }
 
   for (var star of stars) {
-    if (coloredObjects[star.color] === 1) {
+    var count = coloredObjects[star.color]
+    if (count === 1) {
       console.log('Found a', star.color, 'star in a region with 1', star.color, 'object')
       regionData.addVeryInvalid(star)
       if (quick) return regionData
-    } else if (coloredObjects[star.color] > 2) {
-      console.log('Found a', star.color, 'star in a region with', coloredObjects[star.color], star.color, 'objects')
+    } else if (count > 2) {
+      console.log('Found a', star.color, 'star in a region with', count, star.color, 'objects')
       regionData.addInvalid(star)
       if (quick) return regionData
     }

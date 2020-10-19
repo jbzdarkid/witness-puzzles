@@ -362,16 +362,16 @@ class Puzzle {
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with line=0.
     for (var x=0; x<this.width; x++) {
+      var savedRow = savedGrid[x]
       var row = []
       for (var y=0; y<this.height; y++) {
-        var cell = savedGrid[x][y]
-
         // Cells are always part of the region
         if (x%2 === 1 && y%2 === 1) {
           row.push(1)
           continue
         }
 
+        var cell = savedRow[y]
         if (cell.line > window.LINE_NONE) {
           if (x%2 !== y%2 && cell.end != undefined) {
             // Traced mid-segment endpoints should not separate the region
