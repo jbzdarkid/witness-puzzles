@@ -36,7 +36,6 @@ host_statically('pages/triangles.js')
 if application.debug:
   host_statically('pages/test.html')
   host_statically('pages/test.js')
-  host_statically('pages/testSolve.js')
   host_statically('pages/editor_test.html')
   host_statically('pages/editor_test.js')
 
@@ -45,6 +44,9 @@ if application.debug:
   host_statically('pages/_UTM2.js')
 
   host_statically('images')
+
+  host_redirect('/pages/verify_puzzles.html', '/verify_puzzles.html')
+  host_statically('pages/verify_puzzles.js')
 
 def page_not_found(error):
   return render_template('404_generic.html'), 404
@@ -114,6 +116,15 @@ def error():
   add_error(request.form['data'])
   return '', 200
 application.add_url_rule('/error', 'error', error, methods=['POST'])
+
+# Verifying that puzzles are valid
+if application.debug:
+  def verify_puzzles():
+    import csv
+    with open('puzzles.tsv', newline='') as csvfile:
+      puzzles = [row for row in csv.reader(csvfile, delimiter='\t')]
+      return render_template('verify_puzzles.html', puzzles=puzzles)
+  application.add_url_rule('/pages/verify_puzzles.html', 'verify_puzzles', verify_puzzles)
 
 if __name__ == '__main__':
   extra_files = []
