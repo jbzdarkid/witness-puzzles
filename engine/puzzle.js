@@ -66,11 +66,15 @@ class Puzzle {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
           else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
-          if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
-            // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
-            // rot=all is a holdover that was used to represent rotation polyominos.
-            puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
-            puzzle.grid[x][y].rot = undefined
+          if (cell.type === 'poly' || cell.type === 'ylop') {
+            if (cell.rot === 'all') {
+              // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
+              // rot=all is a holdover that was used to represent rotation polyominos.
+              puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
+              delete puzzle.grid[x][y].rot
+            }
+            // Fixup: Sometimes we have a polyshape which is empty. Just ignore these objects.
+            if (puzzle.grid[x][y].polyshape & ~window.ROTATION_BIT === 0) puzzle.grid[x][y] = null
           } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != undefined) {
             // Legacy: Lines used to use 'line' instead of 'color'
             cell.line = cell.color
