@@ -1,11 +1,3 @@
-Ship Blockers
-- Resizing basic pillar is causing undefineds, which is breaking well everything.
-  Do I allow cells to be undefined or no? Yes.
-
-
-
-- Crayons look bad. Trying triangles for a bit.
-- Turn on crispedges only for horizontally traced segments. It looks *bad* on the curves.
 - Editor grid is off-center when smaller than 4x4 (again)
 - Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
 

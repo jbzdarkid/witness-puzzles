@@ -895,11 +895,11 @@ function resizePuzzle(dx, dy, id) {
     if (puzzle.pillar && puzzle.symmetry.x && newWidth%4 !== 0) return false
   }
 
-  if (!puzzle.pillar) {
-    var xOffset = (id.includes('left') ? dx : 0)
-  } else {
-    // Pillar puzzles always expand horizontally in both directions.
+  if (puzzle.pillar && puzzle.symmetry != undefined) {
+    // Symmetry pillar puzzles always expand horizontally in both directions.
     var xOffset = dx / 2
+  } else {
+    var xOffset = (id.includes('left') ? dx : 0)
   }
   var yOffset = (id.includes('top') ? dy : 0)
 
@@ -912,7 +912,8 @@ function resizePuzzle(dx, dy, id) {
   var PERSIST = 0
   var COPY = 1
   var CLEAR = 2
-  function shouldCopyCell(x, y) { // x, y are locations on the new grid
+  // x, y are locations on the new grid and should thus be compared to newWidth and newHeight.
+  function shouldCopyCell(x, y) {
     if (puzzle.symmetry == undefined) return PERSIST
     if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy cells
 
@@ -930,7 +931,7 @@ function resizePuzzle(dx, dy, id) {
         if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
         if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
       }
-    } else {// Pillar symmetries
+    } else { // Pillar symmetries
       if (puzzle.symmetry.x && !puzzle.symmetry.y) { // Pillar Horizontal Symmetry
         if (dx !== 0) {
           if (x <   newWidth*1/4) return COPY
