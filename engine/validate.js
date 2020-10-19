@@ -42,7 +42,8 @@ window.validate = function(puzzle, quick) {
       if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != undefined) puzzleHasEnd = true
-        if (cell.dot > window.DOT_BLACK && cell.line > window.LINE_BLACK && cell.dot !== cell.line) {
+        if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
+            (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
           puzzle.valid = false
           if (quick) return
