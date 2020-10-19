@@ -239,13 +239,14 @@ function placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
   var allPolysPlaced = (polys.length === 0)
   for (var x=0; x<puzzle.width; x++) {
+    var row = puzzle.grid[x]
     for (var y=0; y<puzzle.height; y++) {
-      var cell = puzzle.grid[x][y]
+      var cell = row[y]
       if (cell > 0) {
         console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
         return false
       }
-      if (x%2 === 1 && y%2 === 1 && cell < 0 && allPolysPlaced) {
+      if (allPolysPlaced && cell < 0 && x%2 === 1 && y%2 === 1) {
         // Normal, center cell with a negative value & no polys remaining.
         console.log('All polys placed, but grid not full')
         return false
