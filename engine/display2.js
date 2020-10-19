@@ -65,9 +65,9 @@ window.draw = function(puzzle, target='puzzle') {
     svg.appendChild(leftBox)
 
     var rightBox = window.createElement('rect')
-    rightBox.setAttribute('x', 41 * puzzle.width + 16)
+    rightBox.setAttribute('x', 41 * puzzle.width + 22)
     rightBox.setAttribute('y', 10)
-    rightBox.setAttribute('width', 36)
+    rightBox.setAttribute('width', 30)
     rightBox.setAttribute('height', 41 * puzzle.height + 43)
     rightBox.setAttribute('fill', 'url(#fadeOutRight)')
     rightBox.setAttribute('style', 'pointer-events: none')
