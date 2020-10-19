@@ -35,7 +35,7 @@ window.draw = function(puzzle, target='puzzle') {
   rect.setAttribute('height', pixelHeight - 10) // Removing border
 
   drawCenters(puzzle, svg)
-  drawGrid(puzzle, svg)
+  drawGrid(puzzle, svg, target)
   drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
@@ -109,11 +109,25 @@ function drawCenters(puzzle, svg) {
   puzzle.grid = savedGrid
 }
 
-function drawGrid(puzzle, svg) {
+function drawGrid(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell != undefined && cell.gap === window.GAP_FULL) continue
+      if (cell != undefined && cell.gap === window.GAP_BREAK) {
+        var params = {
+          'width':58,
+          'height':58,
+          'x': x*41 + 23,
+          'y': y*41 + 23,
+          'class': target + '_' + x + '_' + y,
+          'type': 'gap',
+        }
+        if (x%2 === 0 && y%2 === 1) params.rot = 1
+        drawSymbolWithSvg(svg, params)
+        continue
+      }
+
       var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
@@ -216,9 +230,7 @@ function drawSymbols(puzzle, svg, target) {
         }
         drawSymbolWithSvg(svg, params)
       } else if (cell.gap === window.GAP_BREAK) {
-        params.type = 'gap'
-        if (x%2 === 0 && y%2 === 1) params.rot = 1
-        drawSymbolWithSvg(svg, params)
+        // Gaps were handled above, while drawing the grid.
       } else if (x%2 === 1 && y%2 === 1) {
         Object.assign(params, cell)
         window.drawSymbolWithSvg(svg, params)
