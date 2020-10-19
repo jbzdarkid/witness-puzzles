@@ -255,11 +255,11 @@ function regionCheck(puzzle, region, quick) {
     }
 
     // Count color-based elements
-    if (!coloredObjects.has(cell.color)) {
-      coloredObjects[cell.color] = 1
-    } else {
-      coloredObjects[cell.color]++
+    var count = coloredObjects[cell.color]
+    if (count == undefined) {
+      count = 0
     }
+    coloredObjects[cell.color] = count + 1
 
     if (cell.type === 'square') {
       squares.push(pos)
