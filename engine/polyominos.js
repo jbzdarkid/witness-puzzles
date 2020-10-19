@@ -182,7 +182,7 @@ window.polyFit = function(region, puzzle) {
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
-  var ret = placeYlops(ylops.slice(), polys.slice(), puzzle)
+  var ret = placeYlops(ylops, 0, polys.slice(), puzzle)
   if (polyCount == 0) knownCancellations[key] = ret
   puzzle.grid = savedGrid
   return ret
@@ -208,11 +208,11 @@ function tryPlacePolyshape(cells, x, y, puzzle, sign) {
 
 // Places the ylops such that they are inside of the grid, then checks if the polys
 // zero the region.
-function placeYlops(ylops, polys, puzzle) {
+function placeYlops(ylops, i, polys, puzzle) {
   // Base case: No more ylops to place, start placing polys
-  if (ylops.length === 0) return placePolys(polys, puzzle)
+  if (i === ylops.length) return placePolys(polys, puzzle)
 
-  var ylop = ylops.pop()
+  var ylop = ylops[i]
   var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
   for (var x=1; x<puzzle.width; x+=2) {
     for (var y=1; y<puzzle.height; y+=2) {
@@ -221,14 +221,13 @@ function placeYlops(ylops, polys, puzzle) {
         var cells = polyominoFromPolyshape(polyshape, true, puzzle.settings.PRECISE_POLYOMINOS)
         if (!tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
         console.group('')
-        if (placeYlops(ylops, polys, puzzle)) return true
+        if (placeYlops(ylops, i+1, polys, puzzle)) return true
         console.groupEnd('')
         if (!tryPlacePolyshape(cells, x, y, puzzle, +1)) continue
       }
     }
   }
   console.log('Tried all ylop placements with no success.')
-  ylops.push(ylop)
   return false
 }
 
