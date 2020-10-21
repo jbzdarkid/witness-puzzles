@@ -743,14 +743,22 @@ function drawSymbolButtons() {
         }
       }
     } else if (button.id === 'triangle') {
-      button.onclick = function() {
+      button.onclick = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
-          symbolData.triangle.count = symbolData.triangle.count % 4 + 1
-          activeParams.count = symbolData.triangle.count
+          var count = symbolData.triangle.count
+          count += (event.isRightClick() ? -1 : 1)
+          if (count <= 0) count = 4
+          if (count >= 5) count = 1
+          symbolData.triangle.count = count
+          activeParams.count = count
         }
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {
+        this.onclick(event)
+        event.preventDefault()
       }
     } else {
       button.onclick = function() {
