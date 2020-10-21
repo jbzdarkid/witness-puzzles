@@ -47,6 +47,7 @@ window.draw = function(puzzle, target='puzzle') {
     defs.innerHTML = '' +
     '<linearGradient id="fadeInLeft">\n' +
     '  <stop offset="0%"   stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '  <stop offset="25%"  stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '  <stop offset="100%" stop-opacity="0.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeOutRight">\n' +
@@ -56,9 +57,9 @@ window.draw = function(puzzle, target='puzzle') {
     svg.appendChild(defs)
 
     var leftBox = window.createElement('rect')
-    leftBox.setAttribute('x', 28)
+    leftBox.setAttribute('x', 16)
     leftBox.setAttribute('y', 10)
-    leftBox.setAttribute('width', 36)
+    leftBox.setAttribute('width', 48)
     leftBox.setAttribute('height', 41 * puzzle.height + 43)
     leftBox.setAttribute('fill', 'url(#fadeInLeft)')
     leftBox.setAttribute('style', 'pointer-events: none')
@@ -76,7 +77,8 @@ window.draw = function(puzzle, target='puzzle') {
 }
 
 function drawCenters(puzzle, svg) {
-  // @Hack that I am not fixing.
+  // @Hack that I am not fixing. This switches the puzzle's grid to a floodfilled grid
+  // where undefined represents cells which are part of the outside
   var savedGrid = puzzle._switchToMaskedGrid()
   if (puzzle.pillar === true) {
     for (var y=1; y<puzzle.height; y += 2) {
