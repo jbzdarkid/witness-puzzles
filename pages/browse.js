@@ -63,7 +63,7 @@ window.onscroll = function() {
 
   // Start loading content when we get close to the bottom
   var currentHeight = document.body.scrollTop + document.body.clientHeight
-  if (currentHeight > document.body.scrollHeight - 800) {
+  if (currentHeight / document.body.scrollHeight > 0.8) {
     loadPuzzles()
   }
 }
