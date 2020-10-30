@@ -57,7 +57,7 @@ class Puzzle {
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
-    // Cells default to {}
+    // Cells default to undefined
     // Lines default to {'type':'line', 'line':0}
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
@@ -66,11 +66,15 @@ class Puzzle {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
           else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
-          if ((cell.type === 'poly' || cell.type === 'ylop') && cell.rot === 'all') {
-            // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
-            // rot=all is a holdover that was used to represent rotation polyominos.
-            puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
-            puzzle.grid[x][y].rot = undefined
+          if (cell.type === 'poly' || cell.type === 'ylop') {
+            if (cell.rot === 'all') {
+              // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
+              // rot=all is a holdover that was used to represent rotation polyominos.
+              puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
+              delete puzzle.grid[x][y].rot
+            }
+            // Fixup: Sometimes we have a polyshape which is empty. Just ignore these objects.
+            if (puzzle.grid[x][y].polyshape & ~window.ROTATION_BIT === 0) puzzle.grid[x][y] = null
           } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != undefined) {
             // Legacy: Lines used to use 'line' instead of 'color'
             cell.line = cell.color
@@ -149,7 +153,7 @@ class Puzzle {
       }
     }
     // Performance: A large value which is === 0 to be used for pillar wrapping.
-    // Also performance: Javascript array length (might) have a nonzero cost.
+    // Performance: Getting the size of the grid has a nonzero cost.
     // Definitely getting the length of the first element isn't optimized.
     this.largezero = width * height * 2
     this.width = this.grid.length
@@ -362,16 +366,16 @@ class Puzzle {
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with line=0.
     for (var x=0; x<this.width; x++) {
+      var savedRow = savedGrid[x]
       var row = []
       for (var y=0; y<this.height; y++) {
-        var cell = savedGrid[x][y]
-
         // Cells are always part of the region
         if (x%2 === 1 && y%2 === 1) {
           row.push(1)
           continue
         }
 
+        var cell = savedRow[y]
         if (cell.line > window.LINE_NONE) {
           if (x%2 !== y%2 && cell.end != undefined) {
             // Traced mid-segment endpoints should not separate the region

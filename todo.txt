@@ -1,19 +1,20 @@
-Ship Blockers
-- Fix tracing on pillars (at least rounded edges, if not adding fading)
-  Just take pillarCirc and symPillarCirc and make them... not circles!
-- Crayons look bad. Trying triangles for a bit.
-- Turn on crispedges only for horizontally traced segments. It looks *bad* on the curves.
+- Test editor triangles button click on iOS (it's using onclick not onpointerdown?)
+- Do a test on the published zip on iOS
+
+Misc ideas (NOT SHIP BLOCKING)
+- Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
 - Editor grid is off-center when smaller than 4x4 (again)
 - Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
-
+- Some graphical indication that cancel actually fired?
+  Hard, because we don't have an easy differentation between 'we got results bc cancelled' and 'we got results bc finished'. I guess we could set a flag...
 - Work on speedrunning solver / improving "unique puzzles"
   Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.
   Or I could make a key for the puzzle as a whole? Regardless, not as easy as just hacking the cache key.
 - Perf TODOS:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-- Editor triangle button rmb should cycle backwards
-- Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
+- Editor dot button should act like triangles
+  Hard, requires changing when the style changes
 
 Browse
 -- Sorting

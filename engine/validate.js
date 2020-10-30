@@ -42,7 +42,8 @@ window.validate = function(puzzle, quick) {
       if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != undefined) puzzleHasEnd = true
-        if (cell.dot > window.DOT_BLACK && cell.line > window.LINE_BLACK && cell.dot !== cell.line) {
+        if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
+            (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
           puzzle.valid = false
           if (quick) return
@@ -255,24 +256,26 @@ function regionCheck(puzzle, region, quick) {
     }
 
     // Count color-based elements
-    if (coloredObjects[cell.color] == undefined) {
-      coloredObjects[cell.color] = 1
-    } else {
-      coloredObjects[cell.color]++
-    }
-
-    if (cell.type === 'square') {
-      squares.push(pos)
-      if (squareColor == undefined) {
-        squareColor = cell.color
-      } else if (squareColor != cell.color) {
-        squareColor = -1 // Signal value which indicates square color collision
+    if (cell.color != undefined) {
+      var count = coloredObjects[cell.color]
+      if (count == undefined) {
+        count = 0
       }
-    }
+      coloredObjects[cell.color] = count + 1
 
-    if (cell.type === 'star') {
-      pos.color = cell.color
-      stars.push(pos)
+      if (cell.type === 'square') {
+        squares.push(pos)
+        if (squareColor == undefined) {
+          squareColor = cell.color
+        } else if (squareColor != cell.color) {
+          squareColor = -1 // Signal value which indicates square color collision
+        }
+      }
+
+      if (cell.type === 'star') {
+        pos.color = cell.color
+        stars.push(pos)
+      }
     }
   }
 
@@ -282,12 +285,13 @@ function regionCheck(puzzle, region, quick) {
   }
 
   for (var star of stars) {
-    if (coloredObjects[star.color] === 1) {
+    var count = coloredObjects[star.color]
+    if (count === 1) {
       console.log('Found a', star.color, 'star in a region with 1', star.color, 'object')
       regionData.addVeryInvalid(star)
       if (quick) return regionData
-    } else if (coloredObjects[star.color] > 2) {
-      console.log('Found a', star.color, 'star in a region with', coloredObjects[star.color], star.color, 'objects')
+    } else if (count > 2) {
+      console.log('Found a', star.color, 'star in a region with', count, star.color, 'objects')
       regionData.addInvalid(star)
       if (quick) return regionData
     }

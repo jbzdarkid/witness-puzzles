@@ -16,7 +16,11 @@ function readPuzzleList() {
 
 function writePuzzleList(puzzleList) {
   if (puzzleList == undefined) throw 'Attempted to write puzzle list but none was provided'
-  window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
+  try {
+    window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
+  } catch (e) {
+    if (!(e instanceof QuotaExceededError)) throw e
+  }
 }
 
 // Read the first puzzle in the list, and try to load it.
@@ -74,7 +78,11 @@ function writePuzzle() {
   var puzzleList = readPuzzleList()
   // @Robustness: Some intelligence about showing day / month / etc depending on date age
   puzzleList[0] = puzzleToSave.name + ' on ' + (new Date()).toLocaleString()
-  window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
+  try {
+    window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
+  } catch (e) {
+    if (!(e instanceof QuotaExceededError)) throw e
+  }
   writePuzzleList(puzzleList)
 }
 
@@ -493,8 +501,8 @@ window.publishPuzzle = function() {
   request.open('POST', '/publish', true)
   request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-  var requestBody = 'title=' + puzzle.name
-  delete puzzle.name // Puzzle name should be sourced only from the title
+  var requestBody = 'title=' + puzzleCopy.name
+  delete puzzleCopy.name
   requestBody += '&solution=' + puzzleCopy.serialize()
   puzzleCopy.clearLines()
   requestBody += '&puzzle=' + puzzleCopy.serialize()
@@ -744,14 +752,22 @@ function drawSymbolButtons() {
         }
       }
     } else if (button.id === 'triangle') {
-      button.onclick = function() {
+      button.onclick = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
-          symbolData.triangle.count = symbolData.triangle.count % 4 + 1
-          activeParams.count = symbolData.triangle.count
+          var count = symbolData.triangle.count
+          count += (event.isRightClick() ? -1 : 1)
+          if (count <= 0) count = 4
+          if (count >= 5) count = 1
+          symbolData.triangle.count = count
+          activeParams.count = count
         }
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {
+        this.onclick(event)
+        event.preventDefault()
       }
     } else {
       button.onclick = function() {
@@ -904,11 +920,11 @@ function resizePuzzle(dx, dy, id) {
     if (puzzle.pillar && puzzle.symmetry.x && newWidth%4 !== 0) return false
   }
 
-  if (!puzzle.pillar) {
-    var xOffset = (id.includes('left') ? dx : 0)
-  } else {
-    // Pillar puzzles always expand horizontally in both directions.
+  if (puzzle.pillar && puzzle.symmetry != undefined) {
+    // Symmetry pillar puzzles always expand horizontally in both directions.
     var xOffset = dx / 2
+  } else {
+    var xOffset = (id.includes('left') ? dx : 0)
   }
   var yOffset = (id.includes('top') ? dy : 0)
 
@@ -921,7 +937,8 @@ function resizePuzzle(dx, dy, id) {
   var PERSIST = 0
   var COPY = 1
   var CLEAR = 2
-  function shouldCopyCell(x, y) { // x, y are locations on the new grid
+  // x, y are locations on the new grid and should thus be compared to newWidth and newHeight.
+  function shouldCopyCell(x, y) {
     if (puzzle.symmetry == undefined) return PERSIST
     if (x%2 === 1 && y%2 === 1) return PERSIST // Always copy cells
 
@@ -939,7 +956,7 @@ function resizePuzzle(dx, dy, id) {
         if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
         if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
       }
-    } else {// Pillar symmetries
+    } else { // Pillar symmetries
       if (puzzle.symmetry.x && !puzzle.symmetry.y) { // Pillar Horizontal Symmetry
         if (dx !== 0) {
           if (x <   newWidth*1/4) return COPY

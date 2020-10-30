@@ -367,29 +367,31 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
     var cell = puzzle.getCell(data.pos.x, data.pos.y)
     if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
       data.cursor.onpointerdown = null
-      window.validate(puzzle, false) // We want all invalid elements so we can show the user.
+      setTimeout(function() { // Run validation asynchronously so we can free the pointer immediately.
+        window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
-      for (var negation of puzzle.negations) {
-        console.debug('Rendering negation', negation)
-        data.animations.insertRule('.' + data.svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
-        data.animations.insertRule('.' + data.svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
-      }
+        for (var negation of puzzle.negations) {
+          console.debug('Rendering negation', negation)
+          data.animations.insertRule('.' + data.svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
+          data.animations.insertRule('.' + data.svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
+        }
 
-      if (puzzle.valid) {
-        window.PLAY_SOUND('success')
-        // !important to override the child animation
-        data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
-        if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
-      } else {
-        window.PLAY_SOUND('fail')
-        data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
-        // Get list of invalid elements
-        if (puzzle.settings.FLASH_FOR_ERRORS) {
-          for (var invalidElement of puzzle.invalidElements) {
-            data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
+        if (puzzle.valid) {
+          window.PLAY_SOUND('success')
+          // !important to override the child animation
+          data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
+          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
+        } else {
+          window.PLAY_SOUND('fail')
+          data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
+          // Get list of invalid elements
+          if (puzzle.settings.FLASH_FOR_ERRORS) {
+            for (var invalidElement of puzzle.invalidElements) {
+              data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
+            }
           }
         }
-      }
+      }, 1)
 
     // Right-clicked (or double-tapped) and not at the end: Clear puzzle
     } else if (event.isRightClick()) {
@@ -421,7 +423,6 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   var y = parseFloat(start.getAttribute('cy'))
 
   var cursor = createElement('circle')
-  svg.appendChild(cursor)
   cursor.setAttribute('r', 12)
   cursor.setAttribute('fill', window.CURSOR)
   cursor.setAttribute('stroke', 'black')
@@ -430,6 +431,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   cursor.setAttribute('class', 'cursor')
   cursor.setAttribute('cx', x)
   cursor.setAttribute('cy', y)
+  svg.insertBefore(cursor, svg.getElementById('cursorPos'))
 
   data.svg = svg
   data.cursor = cursor

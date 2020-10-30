@@ -209,14 +209,6 @@ function crayon(svg, params) {
   var points = [
     '0 ' + (height/2),
     (height/2) + ' 0',
-    width + ' 0',
-    width + ' ' + (height-border),
-    (width-border) + ' ' + (height-border),
-    (width-border) + ' ' + border,
-    (height/2+border) + ' ' + border,
-    (height/2+border) + ' ' + (height-border),
-    width + ' ' + (height-border),
-    width + ' ' + height,
     (height/2) + ' ' + height,
   ]
   poly.setAttribute('points', points.join(', '))

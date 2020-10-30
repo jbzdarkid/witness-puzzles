@@ -436,9 +436,9 @@ function solvePuzzle() {
   document.getElementById('progressBox').style.display = null
   document.getElementById('solveAuto').innerText = 'Cancel Solving'
   document.getElementById('solveAuto').onclick = function() {
-    window.cancelSolving()
     this.innerText = 'Cancelling...'
     this.onclick = null
+    window.setTimeout(window.cancelSolving, 0)
   }
 
   window.solve(window.puzzle, function(percent) {

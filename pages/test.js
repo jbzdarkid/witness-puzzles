@@ -361,6 +361,30 @@ var tests = {
     puzzle.grid[2][3].gap = 1
     puzzle.grid[3][2].gap = 1
     return [puzzle, 1]
+  }, 'dot-and-gap-test-2': function() {
+    var puzzle = new Puzzle(2, 2)
+    puzzle.grid[0][0].dot = 1
+    puzzle.grid[0][2].dot = 2
+    puzzle.grid[0][4].dot = 3
+    puzzle.grid[2][0].dot = 4
+    puzzle.grid[2][2].dot = 5
+    puzzle.grid[2][4].dot = 4
+    puzzle.grid[4][0].dot = 3
+    puzzle.grid[4][2].dot = 2
+    puzzle.grid[4][4].dot = 1
+    puzzle.grid[0][1].gap = 1
+    puzzle.grid[0][3].gap = 1
+    puzzle.grid[1][0].gap = 1
+    puzzle.grid[1][2].gap = 1
+    puzzle.grid[1][4].gap = 1
+    puzzle.grid[2][1].gap = 1
+    puzzle.grid[2][3].gap = 1
+    puzzle.grid[3][0].gap = 1
+    puzzle.grid[3][2].gap = 1
+    puzzle.grid[3][4].gap = 1
+    puzzle.grid[4][1].gap = 1
+    puzzle.grid[4][3].gap = 1
+    return [puzzle, 0]
   }, 'completely-cancel': function() {
     var puzzle = new Puzzle(2, 2)
     puzzle.grid[0][4].start = true

@@ -4,3 +4,4 @@
 venv/
 sourcemaps/
 *.zip
+puzzles.tsv

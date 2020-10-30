@@ -1,0 +1,23 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="/data/favicon.png">
+    <script type="text/javascript" src="/engine/utilities.js"></script>
+    <script type="text/javascript" src="/engine/polyominos.js"></script>
+    <script type="text/javascript" src="/engine/puzzle.js"></script>
+    <script type="text/javascript" src="/engine/validate.js"></script>
+    <script type="text/javascript" src="/engine/svg.js"></script>
+    <script type="text/javascript" src="/engine/display2.js"></script>
+    <script type="text/javascript" src="/engine/trace2.js"></script>
+    <script type="text/javascript" src="/pages/verify_puzzles.js"></script>
+  </head>
+  <body>
+    <script>window.puzzles = {{ puzzles|safe }}</script>
+    <script>loadHeader('Verifying...')</script>
+    <button onclick="deletePuzzle()">Delete puzzle</button>
+    <button onclick="findPuzzle()">Find puzzle</button>
+    <div style="display: flex; justify-content: center; align-items: center">
+      <svg id="puzzle" style="pointer-events: auto"></svg>
+    </div>
+  </body>
+</html>
