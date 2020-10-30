@@ -446,6 +446,7 @@ window.onload = function() {
 
   for (var resize of document.getElementsByClassName('resize')) {
     resize.onpointerdown = function(event) {
+      if (event.touches > 1) return // Don't attempt to drag during screen resize
       dragStart(event, this)
     }
     if (resize.id === 'resize-left' || resize.id === 'resize-right') {
