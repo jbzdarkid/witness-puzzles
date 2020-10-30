@@ -741,7 +741,7 @@ function drawSymbolButtons() {
       } else {
         button.params.polyshape &= ~window.ROTATION_BIT
       }
-      button.onclick = function() {
+      button.onpointerdown = function() {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
           activeParams = Object.assign(activeParams, this.params)
@@ -752,7 +752,7 @@ function drawSymbolButtons() {
         }
       }
     } else if (button.id === 'triangle') {
-      button.onclick = function(event) {
+      button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
           var count = symbolData.triangle.count
@@ -766,11 +766,11 @@ function drawSymbolButtons() {
         drawSymbolButtons()
       }
       button.oncontextmenu = function(event) {
-        this.onclick(event)
+        this.onpointerdown(event)
         event.preventDefault()
       }
     } else {
-      button.onclick = function() {
+      button.onpointerdown = function() {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()
