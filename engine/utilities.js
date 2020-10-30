@@ -532,17 +532,18 @@ window.addSolveButtons = function() {
     if (window.setSolveMode) window.setSolveMode(this.checked)
   }
 
-  var label = document.createElement('label')
-  parent.appendChild(label)
-  label.style.marginRight = '8px'
-  label.onpointerdown = function() {solveMode.onpointerdown()}
-  label.innerText = 'Solve (manually)'
+  var solveManual = document.createElement('label')
+  parent.appendChild(solveManual)
+  solveManual.onpointerdown = function() {solveMode.onpointerdown()}
+  solveManual.innerText = 'Solve (manually)'
+  solveManual.style = 'margin-right: 8px'
 
   var solveAuto = document.createElement('button')
   parent.appendChild(solveAuto)
   solveAuto.id = 'solveAuto'
   solveAuto.innerText = 'Solve (automatically)'
   solveAuto.onclick = solvePuzzle
+  solveAuto.style = 'margin-right: 8px'
 
   var div = document.createElement('div')
   parent.appendChild(div)
@@ -551,23 +552,23 @@ window.addSolveButtons = function() {
   var progressBox = document.createElement('div')
   div.appendChild(progressBox)
   progressBox.id = 'progressBox'
-  progressBox.style = 'position: absolute; display:none; width: 220px; padding: 2px'
+  progressBox.style = 'display: none; width: 220px; border: 1px solid black; margin-top: 2px'
 
   var progressPercent = document.createElement('label')
   progressBox.appendChild(progressPercent)
   progressPercent.id = 'progressPercent'
-  progressPercent.style = 'float: left'
+  progressPercent.style = 'float: left; margin-left: 4px'
   progressPercent.innerText = '0%'
 
   var progress = document.createElement('div')
   progressBox.appendChild(progress)
   progress.id = 'progress'
-  progress.style = 'position: absolute; z-index: -1; height: 100%; width: 0%; background-color: #339900'
+  progress.style = 'z-index: -1; height: 38px; width: 0%; background-color: #390'
 
   var solutionViewer = document.createElement('div')
   div.appendChild(solutionViewer)
   solutionViewer.id = 'solutionViewer'
-  solutionViewer.style = 'position: absolute; display:none'
+  solutionViewer.style = 'display: none'
 
   var previousSolution = document.createElement('button')
   solutionViewer.appendChild(previousSolution)
@@ -577,6 +578,7 @@ window.addSolveButtons = function() {
   var solutionCount = document.createElement('label')
   solutionViewer.appendChild(solutionCount)
   solutionCount.id = 'solutionCount'
+  solutionCount.style = 'padding: 6px'
 
   var nextSolution = document.createElement('button')
   solutionViewer.appendChild(nextSolution)
