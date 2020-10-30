@@ -13,6 +13,7 @@ Ship Blockers
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 - Editor triangle button rmb should cycle backwards
+- Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
 
 Browse
 -- Sorting

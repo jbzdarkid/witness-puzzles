@@ -386,6 +386,15 @@ window.onload = function() {
   puzzleStyle.style.color = window.TEXT_COLOR
 
   var puzzleName = document.getElementById('puzzleName')
+
+  puzzleName.onfocus = function(event) {
+    // On initial focus, select all text within the box
+    range = document.createRange()
+    range.selectNodeContents(this)
+    window.getSelection().removeAllRanges()
+    window.getSelection().addRange(range)
+  }
+
   // Both oninput and onkeypress fire for every text modification.
 
   // Use onkeypress when you need to prevent an action
