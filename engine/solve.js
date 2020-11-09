@@ -12,7 +12,7 @@ var asyncTimer = 0
 var task = undefined
 var puzzle = undefined
 var path = []
-window.SOLVE_SYNC = false // For testing purposes
+window.SOLVE_SYNC = false
 var SYNC_THRESHOLD = 9 // Depth at which we switch to a synchronous solver (for perf)
 
 var percentages = []
@@ -30,7 +30,7 @@ function countNodes(x, y, depth) {
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
     // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
-    if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
+    if (puzzle._mod(x) === sym.x && y === sym.y) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
     if (symCell.gap > window.GAP_NONE) return
@@ -91,7 +91,7 @@ window.solve = function(p, partialCallback, finalCallback) {
   solutionPaths = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
-  if (window.MAX_SOLUTIONS == 0) window.MAX_SOLUTIONS = 10000
+  if (window.MAX_SOLUTIONS === 0) window.MAX_SOLUTIONS = 10000
 
   task = {
     'code': function() {
@@ -187,7 +187,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
     // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
-    if (puzzle._mod(x) == sym.x && y == sym.y) return // Would collide with our reflection
+    if (puzzle._mod(x) === sym.x && y === sym.y) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
     if (symCell.gap > window.GAP_NONE) return
@@ -355,7 +355,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
 
     var dx = 0
     var dy = 0
-    if (path[i] == PATH_NONE) { // Reached an endpoint, move into it
+    if (path[i] === PATH_NONE) { // Reached an endpoint, move into it
       console.log('Reached endpoint')
       if (cell.end === 'left') {
         window.onMove(-24, 0)
@@ -411,6 +411,50 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     }
     console.info(output)
   }
+}
+
+window.getSolutionIndex = function(pathList, solution) {
+  for (var i=0; i<pathList.length; i++) {
+    var path = pathList[i]
+    var x = path[0].x
+    var y = path[0].y
+    if (solution.grid[path[0].x][path[0].y].line === 0) continue
+
+    var match = true
+    for (var j=1; j<path.length; j++) {
+      var cell = solution.grid[x][y]
+      if (path[j] === PATH_NONE && cell.end != undefined) {
+        match = false
+        break
+      } else if (path[j] === PATH_LEFT) {
+        if (cell.dir != 'left') {
+          match = false
+          break
+        }
+        x--
+      } else if (path[j] === PATH_RIGHT) {
+        if (cell.dir != 'right') {
+          match = false
+          break
+        }
+        x++
+      } else if (path[j] === PATH_TOP) {
+        if (cell.dir != 'top') {
+          match = false
+          break
+        }
+        y--
+      } else if (path[j] === PATH_BOTTOM) {
+        if (cell.dir != 'bottom') {
+          match = false
+          break
+        }
+        y++
+      }
+    }
+    if (match) return i
+  }
+  return -1
 }
 
 })
