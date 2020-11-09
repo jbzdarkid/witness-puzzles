@@ -339,8 +339,9 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     }
   }
 
-  window.deleteElementsByClassName(document, 'line-1')
-  window.deleteElementsByClassName(document, 'cursor')
+  var puzzleElem = document.getElementById(target)
+  window.deleteElementsByClassName(puzzleElem, 'line-1')
+  window.deleteElementsByClassName(puzzleElem, 'cursor')
 
   // Extract the start data from the first path element
   var x = path[0].x

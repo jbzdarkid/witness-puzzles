@@ -105,7 +105,7 @@ function showSolution(puzzle, paths, num, side) {
   }
 }
 
-function newTriangles(maxSolutions) {
+window.newTriangles = function(maxSolutions) {
   var triangle6 = randomTriangle(6, maxSolutions)
   var triangle8 = randomTriangle(8, maxSolutions)
   window.draw(triangle6.puzzle, 'left')
