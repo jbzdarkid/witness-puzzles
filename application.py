@@ -48,6 +48,11 @@ if application.debug:
   host_redirect('/pages/verify_puzzles.html', '/verify_puzzles.html')
   host_statically('pages/verify_puzzles.js')
 
+  host_statically('pages/triple.html')
+  host_statically('pages/triple.js')
+  host_redirect('/pages/triple.html', '/triple.html')
+  host_redirect('/pages/triple.js', '/triple.js')
+
 def page_not_found(error):
   return render_template('404_generic.html'), 404
 application.register_error_handler(404, page_not_found)
