@@ -1,4 +1,3 @@
-- Sounds for manual tracing on ios are busted
 - Do a test on the published zip on iOS
 
 Misc ideas (NOT SHIP BLOCKING)
