@@ -1,0 +1,6 @@
+-r common.txt
+chromedriver-py==83.*
+docutils==0.15.2
+mysqlclient==1.4.6
+SQLAlchemy-Utils==0.36.3
+
