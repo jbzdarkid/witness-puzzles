@@ -105,7 +105,7 @@ def upload_image(img_bytes, display_hash):
     except FileExistsError:
       pass
     Image.open(img_bytes).save(f'images/{name}')
-    return f'images/{name}'
+    return f'/images/{name}'
   else:
     boto3.client(
       's3',
