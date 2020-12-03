@@ -261,7 +261,7 @@ window.loadHeader = function(titleText) {
   } else if (window.location.href.includes('/play/')) {
     link.innerText = 'Back to all puzzles'
     link.onclick = function() {window.location = '/browse.html'}
-  } else /* if (window.location.href.endsWith('editor.html')) */ {
+  } else /* Editor, tests, triangles, etc */ {
     link.innerText = 'View all puzzles'
     link.onclick = function() {window.location = '/browse.html'}
   }
