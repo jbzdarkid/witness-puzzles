@@ -1,7 +1,4 @@
 - Do a test on the published zip on iOS
-- Make the header not stick on mobile editor (we need all the screen space we can get)
-  - Maybe just on *all* editors? It's way less important here than on browse, or play.
-  - ^ Actually, maybe it's only important on browse?
 - Make buttons on iOS react to onpressed rather than onclick?
   - git g onclick engine/
 

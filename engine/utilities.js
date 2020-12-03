@@ -221,7 +221,7 @@ window.loadHeader = function(titleText) {
   var navbar = document.createElement('div')
   document.body.appendChild(navbar)
   navbar.className = 'navbar'
-  navbar.style = 'min-width: 700px; position: fixed; top: 0; width: 100%; z-index: 1'
+  navbar.style = 'min-width: 700px; position: absolute; top: 0; width: 100%; z-index: 1'
   navbar.style.borderBottom = '2px solid ' + window.BORDER
   navbar.style.background = window.PAGE_BACKGROUND
 
@@ -245,6 +245,8 @@ window.loadHeader = function(titleText) {
   link.className = 'navbar-content'
 
   if (window.location.href.endsWith('browse.html')) {
+    navbar.style.position = 'fixed' // When browsing, pin the navbar to the top so that it's visible during infinite scroll.
+
     link.innerText = 'Create a puzzle'
     link.onclick = function() {window.location = '/editor.html'}
 
