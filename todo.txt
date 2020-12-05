@@ -1,8 +1,8 @@
 - Do a test on the published zip on iOS
-- Make buttons on iOS react to onpressed rather than onclick?
-  - git g onclick engine/
 
 Misc ideas (NOT SHIP BLOCKING)
+- Make buttons on iOS react to onpressed rather than onclick?
+  - git g onclick engine/
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
 - Editor grid is off-center when smaller than 4x4 (again)
 - Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
