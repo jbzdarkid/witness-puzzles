@@ -1,6 +1,6 @@
 namespace(function() {
 
-// 1. In MySQL Workbench, select all rows
+// 1. In MySQL Workbench, run "select * from puzzle" and select all rows
 // 2. Right click -> Copy row (tab separated)
 // 3. Paste into a new file, save as puzzles.tsv
 // 4. Go to http://127.0.0.1:5000/pages/verify_puzzles.html

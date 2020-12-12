@@ -1,6 +1,4 @@
-- Do a test on the published zip on iOS
-
-Misc ideas (NOT SHIP BLOCKING)
+- Retake all images (due to new background style)
 - Make buttons on iOS react to onpressed rather than onclick?
   - git g onclick engine/
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
