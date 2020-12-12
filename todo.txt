@@ -16,6 +16,7 @@ Misc ideas (NOT SHIP BLOCKING)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 - Editor dot button should act like triangles
   Hard, requires changing when the style changes
+- No need for "Mouse Speed 2D" on mobile.
 
 Browse
 -- Sorting
