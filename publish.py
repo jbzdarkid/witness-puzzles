@@ -16,6 +16,7 @@ paths = [
   Path('engine'),
   Path('pages'),
   Path('requirements.txt'),
+  Path('requirements'),
   Path('.ebextensions/https-instance.config'),
   Path('install-google-chrome.sh'),
 ]
