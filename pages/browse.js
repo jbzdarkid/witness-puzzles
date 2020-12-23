@@ -73,7 +73,7 @@ function loadPuzzles() {
           cell.appendChild(del)
 
           var ref = document.createElement('span')
-          ref.innerText = '🔄'
+          ref.innerHTML = '&#128260;'
           ref.onclick = function(event) {
             var sure = prompt('Are you sure you want to refresh puzzle ' + puzzle.display_hash + '?')
             if (sure != 'yes' && sure != 'y') return

@@ -11,6 +11,7 @@ version = sys.argv[1]
 paths = [
   Path('application.py'),
   Path('application_database.py'),
+  Path('application_login.py'),
   Path('application_utils.py'),
   Path('data'),
   Path('engine'),

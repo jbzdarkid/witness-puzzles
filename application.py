@@ -34,9 +34,6 @@ host_statically('pages/validate.html')
 host_statically('pages/triangles.html')
 host_statically('pages/triangles.js')
 
-# Admin console
-host_redirect('/pages/browse_admin.html', '/browse_admin.html')
-
 if application.debug:
   host_statically('pages/test.html')
   host_statically('pages/test.js')
