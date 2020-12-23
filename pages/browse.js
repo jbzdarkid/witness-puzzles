@@ -56,6 +56,7 @@ function loadPuzzles() {
           del.innerText = 'X'
           del.style = 'background: black; color: red'
           del.onclick = function(event) {
+            event.preventDefault()
             var sure = prompt('Are you sure you want to delete puzzle ' + puzzle.display_hash + '?')
             if (sure != 'yes' && sure != 'y') return
             var request = new XMLHttpRequest()
@@ -68,13 +69,13 @@ function loadPuzzles() {
             request.open('POST', '/delete', true)
             request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             request.send('puzzle=' + puzzle.display_hash)
-            event.preventDefault()
           }
           cell.appendChild(del)
 
           var ref = document.createElement('span')
           ref.innerHTML = '&#128260;'
           ref.onclick = function(event) {
+            event.preventDefault()
             var sure = prompt('Are you sure you want to refresh puzzle ' + puzzle.display_hash + '?')
             if (sure != 'yes' && sure != 'y') return
             var request = new XMLHttpRequest()
@@ -87,7 +88,6 @@ function loadPuzzles() {
             request.open('POST', '/refresh', true)
             request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             request.send('puzzle=' + puzzle.display_hash)
-            event.preventDefault()
           }
           cell.appendChild(ref)
         }(puzzle, cell))
