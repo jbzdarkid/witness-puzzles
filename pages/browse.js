@@ -62,8 +62,12 @@ function loadPuzzles() {
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {
               if (this.readyState != XMLHttpRequest.DONE) return
-              cell.parentElement.removeChild(cell)
-              alert('Successfully deleted puzzle ' + puzzle.display_hash + '!')
+              if (this.status == 200) {
+                alert('Successfully deleted puzzle ' + puzzle.display_hash + '!')
+                cell.parentElement.removeChild(cell)
+              } else {
+                alert(this.responseText)
+              }
             }
             request.timeout = 120000 // 120,000 milliseconds = 2 minutes
             request.open('POST', '/delete', true)
@@ -81,8 +85,12 @@ function loadPuzzles() {
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {
               if (this.readyState != XMLHttpRequest.DONE) return
-              alert('Successfully refreshed puzzle ' + puzzle.display_hash + '!')
-              cell.removeChild(ref)
+              if (this.status == 200) {
+                alert('Successfully refreshed puzzle ' + puzzle.display_hash + '!')
+                cell.removeChild(ref)
+              } else {
+                alert(this.responseText)
+              }
             }
             request.timeout = 120000 // 120,000 milliseconds = 2 minutes
             request.open('POST', '/refresh', true)
