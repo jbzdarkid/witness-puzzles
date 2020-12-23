@@ -5,6 +5,7 @@ from traceback import format_exc
 
 from application_database import *
 from application_utils import *
+from application_login import *
 
 # Home page
 host_redirect('/pages/browse.html', '/')
@@ -32,6 +33,9 @@ host_statically('pages/editor.js')
 host_statically('pages/validate.html')
 host_statically('pages/triangles.html')
 host_statically('pages/triangles.js')
+
+# Admin console
+host_redirect('/pages/browse_admin.html', '/browse_admin.html')
 
 if application.debug:
   host_statically('pages/test.html')

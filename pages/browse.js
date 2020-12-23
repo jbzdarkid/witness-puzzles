@@ -47,6 +47,51 @@ function loadPuzzles() {
       link.innerText = puzzle.title
       link.style.cursor = 'pointer'
       link.style.color = window.TEXT_COLOR
+
+      if (window.location.href.endsWith('browse_admin.html')) {
+        // ;(function(a){}(a))
+        // This syntax is used to forcibly copy all of the arguments
+        ;(function(puzzle, cell) {
+          var del = document.createElement('button')
+          del.innerText = 'X'
+          del.style = 'background: black; color: red'
+          del.onclick = function(event) {
+            var sure = prompt('Are you sure you want to delete puzzle ' + puzzle.display_hash + '?')
+            if (sure != 'yes' && sure != 'y') return
+            var request = new XMLHttpRequest()
+            request.onreadystatechange = function() {
+              if (this.readyState != XMLHttpRequest.DONE) return
+              cell.parentElement.removeChild(cell)
+              alert('Successfully deleted puzzle ' + puzzle.display_hash + '!')
+            }
+            request.timeout = 120000 // 120,000 milliseconds = 2 minutes
+            request.open('POST', '/delete', true)
+            request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.send('puzzle=' + puzzle.display_hash)
+            event.preventDefault()
+          }
+          cell.appendChild(del)
+
+          var ref = document.createElement('span')
+          ref.innerText = '🔄'
+          ref.onclick = function(event) {
+            var sure = prompt('Are you sure you want to refresh puzzle ' + puzzle.display_hash + '?')
+            if (sure != 'yes' && sure != 'y') return
+            var request = new XMLHttpRequest()
+            request.onreadystatechange = function() {
+              if (this.readyState != XMLHttpRequest.DONE) return
+              alert('Successfully refreshed puzzle ' + puzzle.display_hash + '!')
+              cell.removeChild(ref)
+            }
+            request.timeout = 120000 // 120,000 milliseconds = 2 minutes
+            request.open('POST', '/refresh', true)
+            request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.send('puzzle=' + puzzle.display_hash)
+            event.preventDefault()
+          }
+          cell.appendChild(ref)
+        }(puzzle, cell))
+      }
     }
     console.log('Loaded puzzles')
     currentLoadRequest = null
