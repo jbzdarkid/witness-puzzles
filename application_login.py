@@ -49,7 +49,15 @@ def delete():
 application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 
 def refresh():
-  if current_user.get_id() == ADMIN_USERNAME:
-    print(f'Authenticated as {current_user.id}; refreshing image for puzzle {request.form["puzzle"]})
+  if current_user.get_id() != ADMIN_USERNAME:
+    return '', 200
+  print(f'Authenticated as {current_user.id}; refreshing image for puzzle {request.form["puzzle"]}')
+
+  puzzle = get_puzzle(request.form["puzzle"])
+  valid, data = validate_and_capture_image(puzzle.puzzle_json, puzzle.solution_json)
+  if not valid:
+    return data, 400
+
+  upload_image(data, display_hash)
   return '', 200
 application.add_url_rule('/refresh', 'refresh', refresh, methods=['POST'])
