@@ -331,17 +331,13 @@ window.cancelSolving = function() {
 // Uses trace2 to draw the path on the grid, logs a graphical representation of the solution,
 // and also modifies the puzzle to contain the solution path.
 window.drawPath = function(puzzle, path, target='puzzle') {
-  // Clear out the grid before drawing another solution
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      puzzle.updateCell2(x, y, 'dir', undefined)
-      puzzle.updateCell2(x, y, 'line', undefined)
-    }
-  }
-
+  // @Duplicated with trace2.clearGrid
   var puzzleElem = document.getElementById(target)
-  window.deleteElementsByClassName(puzzleElem, 'line-1')
   window.deleteElementsByClassName(puzzleElem, 'cursor')
+  window.deleteElementsByClassName(puzzleElem, 'line-1')
+  window.deleteElementsByClassName(puzzleElem, 'line-2')
+  window.deleteElementsByClassName(puzzleElem, 'line-3')
+  puzzle.clearLines()
 
   // Extract the start data from the first path element
   var x = path[0].x
