@@ -90,9 +90,9 @@ db.create_all()
 if application.debug:
   for i in range(1234):
     db.session.add(Puzzle(
-      display_hash = str(i),
-      puzzle_json = '{}',
-      solution_json = '{}',
+      display_hash = '267BCA' + str(i),
+      puzzle_json = '{"grid":[[{"type":"line","start":true}],[{"type":"line"}],[{"type":"line","end":"right"}]],"largezero":6,"width":3,"height":1,"pillar":false,"startPoint":{"x":2,"y":0}}',
+      solution_json = '{"grid":[[{"type":"line","line":1,"start":true}],[{"type":"line","line":1}],[{"type":"line","line":1,"end":"right"}]],"largezero":6,"width":3,"height":1,"pillar":false,"startPoint":{"x":2,"y":0}}',
       date = datetime(2001, 1, 1),
       url = '/images/26/267BCA24.png',
       title = 'Puzzle ' + str(i),
