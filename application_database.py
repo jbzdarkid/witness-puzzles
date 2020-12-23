@@ -59,6 +59,7 @@ def get_puzzles(sort_type, order, offset, limit):
 
 def delete_puzzle(display_hash):
   db.session.query(Puzzle).filter(Puzzle.display_hash == display_hash).delete()
+  db.session.commit()
 
 class Feedback(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)

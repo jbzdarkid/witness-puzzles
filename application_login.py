@@ -51,9 +51,12 @@ application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 def refresh():
   if current_user.get_id() != ADMIN_USERNAME:
     return '', 200
-  print(f'Authenticated as {current_user.id}; refreshing image for puzzle {request.form["puzzle"]}')
+  display_hash = request.form["puzzle"]
+  print(f'Authenticated as {current_user.id}; refreshing image for puzzle {display_hash}')
 
-  puzzle = get_puzzle(request.form["puzzle"])
+  puzzle = get_puzzle(display_hash)
+  if not puzzle:
+    return f'Puzzle {display_hash} not found', 400
   valid, data = validate_and_capture_image(puzzle.puzzle_json, puzzle.solution_json)
   if not valid:
     return data, 400
