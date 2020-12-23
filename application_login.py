@@ -2,8 +2,9 @@ from flask import render_template, request
 from flask_login import current_user, login_required, login_user, UserMixin, LoginManager
 import os
 from application_utils import *
+from application_database import *
 
-if application.debug:
+if 'RDS_DB_NAME' in os.environ: # Running on AWS
   ADMIN_USERNAME = os.environ['RDS_USERNAME']
   ADMIN_PASSWORD = os.environ['RDS_PASSWORD']
 else:
@@ -39,8 +40,11 @@ def browse_admin():
 application.add_url_rule('/pages/browse_admin.html', 'browse_admin', browse_admin)
 
 def delete():
-  if current_user.get_id() == ADMIN_USERNAME:
-    print(f'Authenticated as {current_user.id}; deleting puzzle {request.form["puzzle"]})
+  if current_user.get_id() != ADMIN_USERNAME:
+    return '', 200
+  print(f'Authenticated as {current_user.id}; deleting puzzle {request.form["puzzle"]}')
+
+  delete_puzzle(request.form["puzzle"])
   return '', 200
 application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 
