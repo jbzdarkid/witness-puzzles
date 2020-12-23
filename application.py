@@ -26,7 +26,6 @@ host_statically('engine')
 host_statically('sourcemaps')
 
 # Actual page sources
-host_statically('pages/browse.html')
 host_statically('pages/browse.js')
 host_statically('pages/editor.html')
 host_statically('pages/editor.js')

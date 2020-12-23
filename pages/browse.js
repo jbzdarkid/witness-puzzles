@@ -48,10 +48,10 @@ function loadPuzzles() {
       link.style.cursor = 'pointer'
       link.style.color = window.TEXT_COLOR
 
-      if (window.location.href.endsWith('browse_admin.html')) {
+      if (window.logged_in) {
         // ;(function(a){}(a))
         // This syntax is used to forcibly copy all of the arguments
-        ;(function(puzzle, cell) {
+        ;(function(puzzle, cell, img) {
           var del = document.createElement('button')
           del.innerText = 'X'
           del.style = 'background: black; color: red'
@@ -63,7 +63,6 @@ function loadPuzzles() {
             request.onreadystatechange = function() {
               if (this.readyState != XMLHttpRequest.DONE) return
               if (this.status == 200) {
-                alert('Successfully deleted puzzle ' + puzzle.display_hash + '!')
                 cell.parentElement.removeChild(cell)
               } else {
                 alert(this.responseText)
@@ -80,13 +79,11 @@ function loadPuzzles() {
           ref.innerHTML = '&#128260;'
           ref.onclick = function(event) {
             event.preventDefault()
-            var sure = prompt('Are you sure you want to refresh puzzle ' + puzzle.display_hash + '?')
-            if (sure != 'yes' && sure != 'y') return
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {
               if (this.readyState != XMLHttpRequest.DONE) return
               if (this.status == 200) {
-                alert('Successfully refreshed puzzle ' + puzzle.display_hash + '!')
+                img.src = this.responseText
                 cell.removeChild(ref)
               } else {
                 alert(this.responseText)
@@ -98,7 +95,7 @@ function loadPuzzles() {
             request.send('puzzle=' + puzzle.display_hash)
           }
           cell.appendChild(ref)
-        }(puzzle, cell))
+        }(puzzle, cell, img))
       }
     }
     console.log('Loaded puzzles')
@@ -112,7 +109,7 @@ function loadPuzzles() {
 window.onscroll = function() {
   // Show 'scroll to top' if we're scrolled down sufficiently
   var scrollToTop = document.getElementById('scrollToTop')
-  scrollToTop.style.display = (document.body.scrollTop > 800 ? null : 'none')
+  if (scrollToTop) scrollToTop.style.display = (document.body.scrollTop > 800 ? null : 'none')
 
   // Start loading content when we get close to the bottom
   var currentHeight = document.body.scrollTop + document.body.clientHeight

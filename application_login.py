@@ -18,33 +18,32 @@ def load_user(user_id):
   user.id = user_id
   return user
 
-host_redirect('/pages/login_admin.html', '/login_admin.html')
-def login_admin():
+host_redirect('/pages/login.html', '/login.html')
+def login():
   if request.method == 'GET':
-    return render_template('login_admin.html')
+    return render_template('login.html')
 
   if request.form['username'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
     user = UserMixin()
     user.id = request.form['username']
     login_user(user)
     print(f'Logged in as {user.id}')
-    return redirect('/browse_admin.html')
-  return render_template('login_admin.html')
-application.add_url_rule('/pages/login_admin.html', 'login_admin', login_admin, methods=['GET', 'POST'])
+    return redirect('/browse.html')
+  return render_template('login.html')
+application.add_url_rule('/pages/login.html', 'login', login, methods=['GET', 'POST'])
 
-host_redirect('/pages/browse_admin.html', '/browse_admin.html')
-def browse_admin():
-  if current_user.get_id() != ADMIN_USERNAME:
-    return render_template('404_generic.html')
-  return render_template('browse_admin.html')
-application.add_url_rule('/pages/browse_admin.html', 'browse_admin', browse_admin)
+def browse_page():
+  logged_in = 'true' if current_user.get_id() == ADMIN_USERNAME else 'false'
+  return render_template('browse.html', logged_in=logged_in)
+application.add_url_rule('/pages/browse.html', 'browse_page', browse_page)
 
 def delete():
   if current_user.get_id() != ADMIN_USERNAME:
     return '', 200
-  print(f'Authenticated as {current_user.id}; deleting puzzle {request.form["puzzle"]}')
+  display_hash = request.form["puzzle"]
+  print(f'Authenticated as {current_user.id}; deleting puzzle {display_hash}')
 
-  delete_puzzle(request.form["puzzle"])
+  delete_puzzle(display_hash)
   return '', 200
 application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 
@@ -58,9 +57,12 @@ def refresh():
   if not puzzle:
     return f'Puzzle {display_hash} not found', 400
   valid, data = validate_and_capture_image(puzzle.puzzle_json, puzzle.solution_json)
+  print(f'Re-validated puzzle {display_hash}; valid: {valid}')
   if not valid:
     return data, 400
 
-  upload_image(data, display_hash)
-  return '', 200
+  new_url = upload_image(data, display_hash)
+  print(f'Re-uploaded image for puzzle {display_hash}, at url {new_url} (old url: {puzzle.url})')
+
+  return new_url, 200
 application.add_url_rule('/refresh', 'refresh', refresh, methods=['POST'])
