@@ -1,7 +1,9 @@
+import os
 from flask import render_template, request
 from json import dumps as to_json_string
-import os
 from traceback import format_exc
+
+from flask_wtf.csrf import CSRFError
 
 from application_database import *
 from application_utils import *
@@ -56,6 +58,7 @@ if application.debug:
 def page_not_found(error):
   return render_template('404_generic.html'), 404
 application.register_error_handler(404, page_not_found)
+application.register_error_handler(CSRFError, page_not_found)
 
 def handle_exception(exc):
   message = f'Caught a {type(exc).__name__}: {format_exc()}'

@@ -2,6 +2,13 @@ namespace(function() {
 
 window.onload = function() {
   loadPuzzles()
+
+  if (window.loggedIn) {
+    var logout = document.createElement('a')
+    logout.href = '/logout?next=browse.html'
+    logout.innerText = 'Logout'
+    document.body.insertBefore(logout, document.getElementById('puzzleTable'))
+  }
 }
 
 var offset = 0
@@ -48,7 +55,7 @@ function loadPuzzles() {
       link.style.cursor = 'pointer'
       link.style.color = window.TEXT_COLOR
 
-      if (window.logged_in) {
+      if (window.loggedIn) {
         // ;(function(a){}(a))
         // This syntax is used to forcibly copy all of the arguments
         ;(function(puzzle, cell, img) {
@@ -71,6 +78,7 @@ function loadPuzzles() {
             request.timeout = 120000 // 120,000 milliseconds = 2 minutes
             request.open('POST', '/delete', true)
             request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.setRequestHeader('X-CSRFToken', window.csrfToken)
             request.send('puzzle=' + puzzle.display_hash)
           }
           cell.appendChild(del)
@@ -92,6 +100,7 @@ function loadPuzzles() {
             request.timeout = 120000 // 120,000 milliseconds = 2 minutes
             request.open('POST', '/refresh', true)
             request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.setRequestHeader('X-CSRFToken', window.csrfToken)
             request.send('puzzle=' + puzzle.display_hash)
           }
           cell.appendChild(ref)

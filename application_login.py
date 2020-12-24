@@ -1,6 +1,6 @@
 import os
 from flask import render_template, request
-from flask_login import current_user, login_required, login_user, UserMixin, LoginManager
+from flask_login import current_user, login_required, login_user, logout_user, UserMixin, LoginManager
 from flask_wtf import CSRFProtect
 
 from application_utils import *
@@ -36,6 +36,14 @@ def login():
     return redirect('/browse.html')
   return render_template('login.html')
 application.add_url_rule('/pages/login.html', 'login', login, methods=['GET', 'POST'])
+
+def logout():
+  print(current_user.get_id())
+  if current_user.get_id() != None:
+    logout_user()
+  print(request.args)
+  return redirect(request.args.get('next') or '/browse.html')
+application.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 
 def browse_page():
   logged_in = 'true' if current_user.get_id() == ADMIN_USERNAME else 'false'
