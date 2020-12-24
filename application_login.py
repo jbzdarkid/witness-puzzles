@@ -14,7 +14,7 @@ else:
   ADMIN_PASSWORD = 'bar'
 
 csrf = CSRFProtect()
-csrf.init_app(app)
+csrf.init_app(application)
 
 application.login_manager = LoginManager()
 @application.login_manager.user_loader
