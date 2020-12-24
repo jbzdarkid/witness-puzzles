@@ -1,6 +1,8 @@
+import os
 from flask import render_template, request
 from flask_login import current_user, login_required, login_user, UserMixin, LoginManager
-import os
+from flask_wtf import CSRFProtect
+
 from application_utils import *
 from application_database import *
 
@@ -10,6 +12,9 @@ if 'RDS_DB_NAME' in os.environ: # Running on AWS
 else:
   ADMIN_USERNAME = 'foo'
   ADMIN_PASSWORD = 'bar'
+
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 application.login_manager = LoginManager()
 @application.login_manager.user_loader

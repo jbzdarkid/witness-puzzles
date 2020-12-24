@@ -16,6 +16,7 @@
       <label for="password">Password:</label>
       <input id="password" name="password" type="password">
       <br>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="submit" value="Submit">
     </form>
   </body>
