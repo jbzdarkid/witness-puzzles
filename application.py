@@ -67,6 +67,7 @@ def handle_exception(exc):
 application.register_error_handler(Exception, handle_exception)
 
 # Publishing puzzles
+@csrf.exempt
 def publish():
   puzzle_json = request.form['puzzle']
   solution_json = request.form['solution']
