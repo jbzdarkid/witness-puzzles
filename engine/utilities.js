@@ -261,8 +261,8 @@ window.loadHeader = function(titleText) {
   } else if (window.location.href.includes('/play/')) {
     link.innerText = 'Back to all puzzles'
     link.onclick = function() {window.location = '/browse.html'}
-  } else /* Editor, tests, triangles, etc */ {
-    link.innerText = 'View all puzzles'
+  } else /* All other pages */ {
+    link.innerText = 'Browse all puzzles'
     link.onclick = function() {window.location = '/browse.html'}
   }
 
@@ -392,7 +392,7 @@ window.loadHeader = function(titleText) {
 }
 
 // Automatically solve the puzzle
-function solvePuzzle() {
+window.solvePuzzle = function() {
   if (window.setSolveMode) window.setSolveMode(false)
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
@@ -496,6 +496,7 @@ window.addSolveButtons = function() {
 
   var solveManual = document.createElement('label')
   parent.appendChild(solveManual)
+  solveManual.id = 'solveManual'
   solveManual.onpointerdown = function() {solveMode.onpointerdown()}
   solveManual.innerText = 'Solve (manually)'
   solveManual.style = 'margin-right: 8px'

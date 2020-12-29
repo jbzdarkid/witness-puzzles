@@ -34,6 +34,8 @@ host_statically('pages/editor.js')
 host_statically('pages/validate.html')
 host_statically('pages/triangles.html')
 host_statically('pages/triangles.js')
+host_statically('pages/webcrow.html')
+host_statically('pages/webcrow.js')
 
 if application.debug:
   host_statically('pages/test.html')
