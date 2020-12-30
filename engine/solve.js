@@ -157,7 +157,7 @@ function taskLoop(partialCallback, finalCallback) {
   // Asynchronizing is expensive. As such, we don't want to do it too often.
   // However, we would like 'cancel solving' to be responsive. So, we call setTimeout every so often.
   var doAsync = false
-  if (!window.SOLVE_SYNC) {
+  if (!SOLVE_SYNC) {
     doAsync = (asyncTimer++ % 100 === 0)
     while (nodes >= percentages[0]) {
       if (partialCallback) partialCallback(100 - percentages.length)
@@ -277,7 +277,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
   }
 
-  if (window.SOLVE_SYNC || depth > SYNC_THRESHOLD) {
+  if (SOLVE_SYNC || depth > SYNC_THRESHOLD) {
     path.push(PATH_NONE)
 
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
