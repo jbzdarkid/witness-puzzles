@@ -46,7 +46,6 @@ function randomTriangle(numTriangles, maxSolutions) {
       puzzle.grid[pos.x][pos.y] = {'type':'triangle', 'color':'orange', 'count':count}
     }
 
-    window.SOLVE_SYNC = true
     var paths = window.solve(puzzle)
     console.info('Puzzle', puzzle, 'has', paths.length, 'solutions: ')
     if (paths.length < 1) console.info('Too hard')

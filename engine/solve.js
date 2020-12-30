@@ -12,7 +12,7 @@ var asyncTimer = 0
 var task = undefined
 var puzzle = undefined
 var path = []
-window.SOLVE_SYNC = false
+var SOLVE_SYNC = false
 var SYNC_THRESHOLD = 9 // Depth at which we switch to a synchronous solver (for perf)
 
 var percentages = []
@@ -78,6 +78,22 @@ window.solve = function(p, partialCallback, finalCallback) {
     }
   }
 
+  // Puzzles which are small enough should be solved synchronously, since the cost of asynchronizing
+  // is greater than the cost of the puzzle.
+  SOLVE_SYNC = false
+  if (puzzle.symmetry != undefined) { // 5x5 is the max for symmetry puzzles
+    if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
+  } else if (puzzle.pillar === true) { // 4x5 is the max for non-symmetry, pillar puzzles
+    if (puzzle.width * puzzle.height <= 108) SOLVE_SYNC = true
+  } else { // 5x5 is the max for non-symmetry, non-pillar puzzles
+    if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
+  }
+  console.log('Puzzle is a', puzzle.width, 'by', puzzle.height, 'solving ' + (SOLVE_SYNC ? 'sync' : 'async'))
+
+  // We pre-traverse the grid (only considering obvious failure states like going out of bounds),
+  // and compute a total number of nodes that are reachable within some NODE_DEPTH steps.
+  // Then, during actual traversal, we can compare the number of nodes reached to the precomputed count
+  // to get a (fairly accurate) progress bar.
   for (var pos of startPoints) {
     countNodes(pos.x, pos.y, 0)
   }
