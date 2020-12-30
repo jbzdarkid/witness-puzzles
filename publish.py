@@ -20,6 +20,7 @@ paths = [
   Path('requirements'),
   Path('.ebextensions/https-instance.config'),
   Path('install-google-chrome.sh'),
+  Path('robots.txt'),
 ]
 
 all_paths = []
