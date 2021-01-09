@@ -441,7 +441,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
   data.sym = puzzle.getSymmetricalPos(pos.x, pos.y)
   data.puzzle = puzzle
   data.path = []
-  puzzle.startPoint = pos
+  puzzle.startPoint = {'x': pos.x, 'y': pos.y}
 
   if (pos.x % 2 === 1) { // Start point is on a horizontal segment
     data.bbox = new BoundingBox(x - 29, x + 29, y - 12, y + 12)
