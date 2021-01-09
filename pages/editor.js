@@ -532,7 +532,7 @@ function onElementClicked(event, x, y) {
   if (event.isRightClick()) {
     // Clear the associated cell
     if (x%2 === 1 && y%2 === 1) {
-      puzzle.grid[x][y] = {}
+      puzzle.grid[x][y] = undefined
     } else {
       puzzle.grid[x][y].end = undefined
       puzzle.grid[x][y].start = undefined
