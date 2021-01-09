@@ -61,18 +61,19 @@ window.onload = function() {
 
 window.findPuzzle = function() {
   var search = prompt('Enter search term')
+  var found = false
   for (row of window.puzzles) {
     var hash = row[0]
     var puzzle_json = row[2]
     var title = row[5]
-    if (!search.includes(title)) continue
-
-    var puzzle = Puzzle.deserialize(puzzle_json)
-    window.draw(puzzle)
-
-
-
+    if (search == hash || title.includes(search)) {
+      var puzzle = Puzzle.deserialize(puzzle_json)
+      window.draw(puzzle)
+      found = true
+      break
+    }
   }
+  if (!found) alert('No such puzzle: ' + search)
 }
 
 })
