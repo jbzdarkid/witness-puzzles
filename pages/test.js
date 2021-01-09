@@ -1050,14 +1050,6 @@ var tests = {
     puzzle.grid[0][0].end = 'top'
     puzzle.grid[1][5] = {'type': 'poly', 'color': 'yellow', 'polyshape': 38505}
     return [puzzle, 41]
-  }, 'Seren-broken-stars': function() {
-    var puzzle = new Puzzle(1, 2)
-    puzzle.grid[2][0].end = 'top'
-    puzzle.grid[1][1] = {'type': 'star', 'color': 'orange'}
-    puzzle.grid[1][2].start = true
-    puzzle.grid[1][3] = {'type': 'triangle', 'color': 'orange', 'count': 3}
-    puzzle.grid[0][4].start = true
-    return [puzzle, 0]
   }, 'pillar-graphics-startpoint': function() {
     var puzzle = new Puzzle(1, 3, true)
     puzzle.grid[0][0].start = true
@@ -1097,5 +1089,35 @@ var tests = {
     puzzle.grid[1][8].gap = 2
     puzzle.grid[3][8].gap = 2
     return [puzzle, 0]
+  }, 'Seren-broken-stars': function() {
+    var puzzle = new Puzzle(1, 2)
+    puzzle.grid[2][0].end = 'top'
+    puzzle.grid[1][1] = {'type': 'star', 'color': 'orange'}
+    puzzle.grid[1][2].start = true
+    puzzle.grid[1][3] = {'type': 'triangle', 'color': 'orange', 'count': 3}
+    puzzle.grid[0][4].start = true
+    return [puzzle, 0]
+  }, 'Seren-broken-stars-fat': function() {
+    var puzzle = new Puzzle(1, 2)
+    puzzle.settings.FAT_STARTPOINTS = true
+    puzzle.grid[2][0].end = 'top'
+    puzzle.grid[1][1] = {'type': 'star', 'color': 'orange'}
+    puzzle.grid[1][2].start = true
+    puzzle.grid[1][3] = {'type': 'triangle', 'color': 'orange', 'count': 3}
+    puzzle.grid[0][4].start = true
+    return [puzzle, 0]
+  }, 'startpoint-poly': function() {
+    var puzzle = new Puzzle(4, 1)
+    puzzle.grid[2][1].start = true
+    puzzle.grid[3][1] = {'type': 'poly', 'color': 'yellow', 'polyshape': 273}
+    puzzle.grid[8][1].end = 'right'
+    return [puzzle, 0]
+  }, 'startpoint-poly-fat': function() {
+    var puzzle = new Puzzle(4, 1)
+    puzzle.settings.FAT_STARTPOINTS = true
+    puzzle.grid[2][1].start = true
+    puzzle.grid[3][1] = {'type': 'poly', 'color': 'yellow', 'polyshape': 273}
+    puzzle.grid[8][1].end = 'right'
+    return [puzzle, 2]
   }
 }

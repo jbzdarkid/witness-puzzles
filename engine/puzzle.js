@@ -44,6 +44,8 @@ class Puzzle {
       PRECISE_POLYOMINOS: true,
       // If false, incorrect elements will not flash when failing the puzzle.
       FLASH_FOR_ERRORS: true,
+      // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
+      FAT_STARTPOINTS: false,
     }
   }
 
@@ -395,9 +397,13 @@ class Puzzle {
       this.grid[x] = row
     }
 
-    // Starting at a mid-segment startpoint should not separate the region
+    // Starting at a mid-segment startpoint
     if (this.startPoint != undefined && this.startPoint.x%2 !== this.startPoint.y%2) {
-      this.grid[this.startPoint.x][this.startPoint.y] = 0
+      if (this.settings.FAT_STARTPOINTS) { // This segment is not in any region (acts as a barrier)
+        this.grid[this.startPoint.x][this.startPoint.y] = undefined
+      } else { // This segment is part of this region (acts as an empty cell)
+        this.grid[this.startPoint.x][this.startPoint.y] = 0
+      }
     }
 
     // Mark all outside cells as 'not in any region' (aka undefined)
