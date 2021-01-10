@@ -18,6 +18,12 @@
 - Editor dot button should act like triangles
   Hard, requires changing when the style changes
 - No need for "Mouse Speed 2D" on mobile.
+- Work on making a stable (github pages) version of WP
+  Database needs to be checked in (can be fetched via XMLHttpRequest)
+  Layout probably needs to change
+  Validation & database additions can be done via github issues + github actions (or some other public forum...)
+    Hopefully this can do validation & pictures too.
+    images need to be checked in
 
 Browse
 -- Sorting
