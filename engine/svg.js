@@ -4,31 +4,35 @@ window.createElement = function(type) {
   return document.createElementNS('http://www.w3.org/2000/svg', type)
 }
 
-window.drawSymbol = function(params) {
+window.drawSymbol = function(params, customMechanics) {
   var svg = createElement('svg')
   svg.setAttribute('viewBox', '0 0 ' + params.width + ' ' + params.height)
   if (!params.x) params.x = 0
   if (!params.y) params.y = 0
-  drawSymbolWithSvg(svg, params)
+  drawSymbolWithSvg(svg, params, customMechanics)
   return svg
 }
 
-window.drawSymbolWithSvg = function(svg, params) {
-  if (params.type === 'square') square(svg, params)
-  else if (params.type === 'dot') dot(svg, params)
-  else if (params.type === 'gap') gap(svg, params)
-  else if (params.type === 'star') star(svg, params)
-  else if (params.type === 'poly') poly(svg, params)
-  else if (params.type === 'ylop') ylop(svg, params)
-  else if (params.type === 'nega') nega(svg, params)
-  else if (params.type === 'nonce') { /* Do nothing */ }
-  else if (params.type === 'triangle') triangle(svg, params)
-  else if (params.type === 'crayon') crayon(svg, params)
-  else if (params.type === 'start') start(svg, params)
-  else if (params.type === 'end') end(svg, params)
-  else if (params.type === 'drag') drag(svg, params)
-  else if (params.type === 'plus') plus(svg, params)
-  else if (params.type === 'minus') minus(svg, params)
+window.drawSymbolWithSvg = function(svg, params, customMechanics) {
+  if (params.type == 'square')        square(svg, params)
+  else if (params.type == 'dot')      dot(svg, params)
+  else if (params.type == 'gap')      gap(svg, params)
+  else if (params.type == 'star')     star(svg, params)
+  else if (params.type == 'poly')     poly(svg, params)
+  else if (params.type == 'ylop')     ylop(svg, params)
+  else if (params.type == 'nega')     nega(svg, params)
+  else if (params.type == 'nonce')    { /* Do nothing */ }
+  else if (params.type == 'triangle') triangle(svg, params)
+  else if (params.type == 'crayon')   crayon(svg, params)
+  else if (params.type == 'start')    start(svg, params)
+  else if (params.type == 'end')      end(svg, params)
+  else if (params.type == 'drag')     drag(svg, params)
+  else if (params.type == 'plus')     plus(svg, params)
+  else if (params.type == 'minus')    minus(svg, params)
+  else if (params.type == 'bridge' && customMechanics) bridge(svg, params)
+  else if (params.type == 'arrow'  && customMechanics) arrow(svg, params)
+  else if (params.type == 'sizer'  && customMechanics) sizer(svg, params)
+  else {console.error('Cannot draw unknown SVG type: ' + params.type)}
 }
 
 function square(svg, params) {
@@ -341,6 +345,81 @@ function minus(svg, params) {
   horiz.setAttribute('width', params.width - 6)
   horiz.setAttribute('height', 2)
   horiz.setAttribute('fill', window.TEXT_COLOR)
+}
+
+function bridge(svg, params) {
+  var poly = createElement('polygon')
+  svg.appendChild(poly)
+  var points = [
+    '-10.58 14.56',
+    '-17.12 -5.56',
+    '0 -18',
+    '17.12 -5.56',
+    '10.58 14.56',
+    '5.29 7.28',
+    '8.56 -2.78',
+    '0 -9',
+    '-8.56 -2.78',
+    '-5.29 7.28',
+  ]
+  poly.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
+  poly.setAttribute('points', points.join(', '))
+  poly.setAttribute('fill', params.color)
+  poly.setAttribute('class', params.class)
+}
+
+function arrow(svg, params) {
+  var rect = createElement('rect')
+  var centerX = params.height/2 + params.x
+  var centerY = params.width/2 + params.y
+  var rotate = function(degrees) {return 'rotate(' + degrees + ', ' + centerX + ', ' + centerY + ')'}
+
+  var rect = createElement('rect')
+  svg.appendChild(rect)
+  rect.setAttribute('width', 8)
+  rect.setAttribute('height', 44)
+  rect.setAttribute('fill', params.color)
+  rect.setAttribute('class', params.class)
+  rect.setAttribute('transform', rotate(90 * params.rot))
+  rect.setAttribute('x', centerX - 4)
+  rect.setAttribute('y', centerY - 22)
+
+  for (var i=0; i<params.count; i++) {
+    var arrowhead = createElement('polygon')
+    svg.appendChild(arrowhead)
+    var points = [
+      '-24 16',
+      '-21.4 9.6',
+      '0 20',
+      '21.4 9.6',
+      '24 16',
+      '0 28',
+    ]
+    var transform = 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y - i*12) + ')'
+    if (params.rot != 0) {
+      transform = rotate(90 * params.rot) + transform
+    }
+    arrowhead.setAttribute('transform', transform)
+    arrowhead.setAttribute('points', points.join(', '))
+    arrowhead.setAttribute('fill', params.color)
+    arrowhead.setAttribute('class', params.class)
+  }
+}
+
+function sizer(svg, params) {
+  var path = createElement('path')
+  svg.appendChild(path)
+  path.setAttribute('d',
+    'M -24 0 ' +
+    'a 24 24 0 0 0  24 -24 ' +
+    'a 24 24 0 0 0  24  24 ' +
+    'a 24 24 0 0 0 -24  24 ' +
+    'a 24 24 0 0 0 -24 -24 ' +
+    'z'
+  )
+  path.setAttribute('fill', params.color)
+  path.setAttribute('class', params.class)
+  path.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
 }
 
 })
