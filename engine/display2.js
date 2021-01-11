@@ -234,8 +234,9 @@ function drawSymbols(puzzle, svg, target) {
       } else if (cell.gap === window.GAP_BREAK) {
         // Gaps were handled above, while drawing the grid.
       } else if (x%2 === 1 && y%2 === 1) {
+        // Generic draw for all other elements
         Object.assign(params, cell)
-        window.drawSymbolWithSvg(svg, params)
+        window.drawSymbolWithSvg(svg, params, puzzle.settings.CUSTOM_MECHANICS)
       }
     }
   }

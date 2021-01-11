@@ -38,14 +38,21 @@ class Puzzle {
     this.settings = {
       // If true, negation symbols are allowed to cancel other negation symbols.
       NEGATIONS_CANCEL_NEGATIONS: true,
+
       // If true, and the count of polyominos and onimoylops is zero, they cancel regardless of shape.
       SHAPELESS_ZERO_POLY: false,
+
       // If true, the traced line cannot go through the placement of a polyomino.
       PRECISE_POLYOMINOS: true,
+
       // If false, incorrect elements will not flash when failing the puzzle.
       FLASH_FOR_ERRORS: true,
+
       // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
       FAT_STARTPOINTS: false,
+
+      // If true, custom mechanics are displayed (and validated) in this puzzle.
+      CUSTOM_MECHANICS: false,
     }
   }
 
