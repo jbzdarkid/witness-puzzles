@@ -369,7 +369,8 @@ function bridge(svg, params) {
 }
 
 function arrow(svg, params) {
-  var rect = createElement('rect')
+  if (!params.rot) params.rot = 0
+
   var centerX = params.height/2 + params.x
   var centerY = params.width/2 + params.y
   var rotate = function(degrees) {return 'rotate(' + degrees + ', ' + centerX + ', ' + centerY + ')'}
@@ -395,7 +396,7 @@ function arrow(svg, params) {
       '24 16',
       '0 28',
     ]
-    var transform = 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y - i*12) + ')'
+    var transform = 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y - i*12) + ') '
     if (params.rot != 0) {
       transform = rotate(90 * params.rot) + transform
     }
