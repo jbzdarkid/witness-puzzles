@@ -413,7 +413,7 @@ window.onload = function() {
     }
 
     // Allow using the enter key to confirm the puzzle name
-    if (event.key === 'Enter') {
+    if (event.key == 'Enter') {
       event.preventDefault()
       this.blur()
     }
@@ -449,7 +449,7 @@ window.onload = function() {
       if (event.touches > 1) return // Don't attempt to drag during screen resize
       dragStart(event, this)
     }
-    if (resize.id === 'resize-left' || resize.id === 'resize-right') {
+    if (resize.id == 'resize-left' || resize.id == 'resize-right') {
       var svg = drawSymbol({'type': 'drag', 'rot':1, 'width':6, 'height':22})
       svg.style.width = '6px'
       svg.style.height = '22px'
@@ -457,7 +457,7 @@ window.onload = function() {
 
       resize.style.display = 'flex'
       svg.style.margin = 'auto'
-    } else if (resize.id === 'resize-top' || resize.id === 'resize-bottom') {
+    } else if (resize.id == 'resize-top' || resize.id == 'resize-bottom') {
       var svg = drawSymbol({'type': 'drag', 'rot':0, 'width':22, 'height':6})
       svg.style.width = '22px'
       svg.style.height = '6px'
@@ -544,7 +544,7 @@ function onElementClicked(event, x, y) {
         puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
       }
     }
-  } else if (activeParams.type === 'start') {
+  } else if (activeParams.type == 'start') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
 
@@ -562,7 +562,7 @@ function onElementClicked(event, x, y) {
         puzzle.updateCell2(sym.x, sym.y, 'start', puzzle.grid[x][y].start)
       }
     }
-  } else if (activeParams.type === 'end') {
+  } else if (activeParams.type == 'end') {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
 
@@ -583,7 +583,7 @@ function onElementClicked(event, x, y) {
         puzzle.updateCell2(sym.x, sym.y, 'end', symmetricalDir)
       }
     }
-  } else if (activeParams.type === 'dot') {
+  } else if (activeParams.type == 'dot') {
     if (x%2 === 1 && y%2 === 1) return
     var dotColors = [undefined, 1]
     if (puzzle.symmetry != undefined) {
@@ -593,7 +593,7 @@ function onElementClicked(event, x, y) {
     dotColors.push(4)
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
     puzzle.grid[x][y].gap = undefined
-  } else if (activeParams.type === 'gap') {
+  } else if (activeParams.type == 'gap') {
     if (x%2 === y%2) return
     puzzle.grid[x][y].gap = getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
     puzzle.grid[x][y].dot = undefined
@@ -630,7 +630,8 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega'].includes(activeParams.type)) {
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer'].includes(activeParams.type)) {
+    if (['bridge', 'sizer'].includes(activeParams.type) && localStorage.customMechanics != 'true') return
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != undefined
@@ -658,7 +659,7 @@ function onElementClicked(event, x, y) {
         'polyshape': activeParams.polyshape,
       }
     }
-  } else if (activeParams.type === 'triangle') {
+  } else if (activeParams.type == 'triangle') {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match
     if (puzzle.grid[x][y] != undefined
@@ -674,6 +675,24 @@ function onElementClicked(event, x, y) {
         'type':activeParams.type,
         'color':activeParams.color,
         'count':activeParams.count
+      }
+    }
+  } else if (activeParams.type == 'arrow') {
+    if (x%2 !== 1 || y%2 !== 1) return
+    if (puzzle.grid[x][y] != undefined
+     && puzzle.grid[x][y].type === activeParams.type
+     && puzzle.grid[x][y].color === activeParams.color
+     && puzzle.grid[x][y].rot === activeParams.rot) {
+      puzzle.grid[x][y].count++
+      if (puzzle.grid[x][y].count >= 4) {
+        puzzle.grid[x][y] = undefined
+      }
+    } else {
+      puzzle.grid[x][y] = {
+        'type':activeParams.type,
+        'color':activeParams.color,
+        'count':activeParams.count,
+        'rot':activeParams.rot,
       }
     }
   } else {
@@ -696,6 +715,18 @@ function onElementClicked(event, x, y) {
       }
     }
   }
+
+  // Ensure that the puzzle's CUSTOM_MECHANICS setting matches the presence/absence of custom mechanics
+  puzzle.settings.CUSTOM_MECHANICS = false
+  for (var x=1; x<puzzle.width; x+=2) {
+    for (var y=1; y<puzzle.height; y+=2) {
+      var cell = puzzle.grid[x][y]
+      if (cell != undefined && ['bridge', 'arrow', 'sizer'].includes(cell.type)) {
+        puzzle.settings.CUSTOM_MECHANICS = true
+      }
+    }
+  }
+
   puzzleModified()
   writePuzzle()
   reloadPuzzle()
@@ -714,6 +745,9 @@ var symbolData = {
   'rpoly': {'type':'poly', 'title':'Rotatable polyomino'},
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
   'rylop': {'type':'ylop', 'title':'Rotatable negation polyomino'},
+  'bridge': {'type':'bridge', 'title':'Bridge'},
+  'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Arrow'},
+  'sizer': {'type':'sizer', 'title':'Sizer'},
 }
 function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -752,7 +786,7 @@ function drawSymbolButtons() {
           drawSymbolButtons()
         }
       }
-    } else if (button.id === 'triangle') {
+    } else if (button.id == 'triangle') {
       button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
@@ -767,8 +801,35 @@ function drawSymbolButtons() {
         drawSymbolButtons()
       }
       button.oncontextmenu = function(event) {event.preventDefault()}
+    } else if (button.id == 'arrow') {
+      if (localStorage.customMechanics != 'true') {
+        button.style.display = 'none'
+        continue
       }
+      button.style.display = null
+
+      button.onpointerdown = function(event) {
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        if (activeParams.id === this.id) {
+          var rot = symbolData.arrow.rot
+          if (rot == undefined) rot = 0
+          rot += (event.isRightClick() ? -1 : 1)
+          if (rot < 0) rot = 3
+          if (rot > 3) rot = 0
+          symbolData.arrow.rot = rot
+          activeParams.rot = rot
+        }
+        activeParams = Object.assign(activeParams, this.params)
+        drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {event.preventDefault()}
     } else {
+      if (['bridge', 'sizer'].includes(button.id) && localStorage.customMechanics != 'true') {
+        button.style.display = 'none'
+        continue
+      }
+      button.style.display = null
+
       button.onpointerdown = function() {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         activeParams = Object.assign(activeParams, this.params)
@@ -776,7 +837,7 @@ function drawSymbolButtons() {
       }
     }
     while (button.firstChild) button.removeChild(button.firstChild)
-    var svg = window.drawSymbol(params)
+    var svg = window.drawSymbol(params, localStorage.customMechanics == 'true')
     button.appendChild(svg)
 
     if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
@@ -798,9 +859,14 @@ function drawColorButtons() {
     drawColorButtons()
   }
   for (var button of colorTable.getElementsByTagName('button')) {
-    var params = {'width':140, 'height':45, 'border':2}
-    params.text = button.id
-    params.color = button.id
+    var params = {
+      'width':140,
+      'height':45,
+      'border':2,
+      'type':'crayon',
+      'text': button.id,
+      'color': button.id,
+    }
     if (activeParams.color === button.id) {
       button.parentElement.style.background = window.BORDER
     } else {
@@ -810,10 +876,58 @@ function drawColorButtons() {
     button.style.border = params.border
     button.style.height = params.height + 2*params.border
     button.style.width = params.width + 2*params.border
-    button.onclick = changeActiveColor
+    button.onpointerdown = changeActiveColor
     while (button.firstChild) button.removeChild(button.firstChild)
-    params.type = 'crayon'
-    button.appendChild(window.drawSymbol(params))
+    var crayon = window.drawSymbol(params)
+    button.appendChild(crayon)
+
+    if (button.id == 'custom') {
+      if (localStorage.customMechanics != 'true') {
+        button.style.display = 'none'
+        continue
+      }
+
+      button.style.display = null
+      var input = document.createElement('input')
+      input.style = 'position: absolute; margin-left: 30px; margin-top: 3px; width: 110px'
+      button.insertBefore(input, crayon)
+
+      button.onpointerdown = function(event) {
+        for (var button of colorTable.getElementsByTagName('button')) {
+          button.parentElement.style.background = null
+        }
+
+        this.parentElement.style.background = window.BORDER
+        input.focus()
+        event.preventDefault()
+      }
+      input.onkeypress = function(event) {
+        // If the user tries to type past 6 characters
+        if (this.innerText.length >= 6) {
+          event.preventDefault()
+        }
+
+        // Allow using the enter key to confirm the color
+        if (event.key == 'Enter') {
+          event.preventDefault()
+          this.blur()
+        }
+
+        if ('0123456789ABCDEFabcdef'.includes(event.key)) {
+          // Allowed characters
+        } else {
+          // Block all other chars
+          event.preventDefault()
+        }
+      }
+      input.onblur = function() {
+        params.color = '#' + this.value
+        activeParams.color = '#' + this.value
+        this.parentElement.removeChild(crayon)
+        crayon = window.drawSymbol(params)
+        this.parentElement.appendChild(crayon)
+      }
+    }
   }
 }
 
@@ -888,7 +1002,7 @@ function shapeChooserClick(event, cell) {
     return
   }
   // Clicks inside the green box are non-closing
-  if (cell.id === 'chooserTable') {
+  if (cell.id == 'chooserTable') {
     event.stopPropagation()
     return
   }
