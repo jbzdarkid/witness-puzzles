@@ -5,7 +5,7 @@ BUGS
   Also, I should take images in dark theme, and have some way to show the appropriate ones.
   Some complaints about background color being too close to line color? Make background brighter. Just a bit.
   Ok, I think it's time for a script to finish this.
-- Make buttons on iOS react to onpressed rather than onclick?
+- Make buttons on iOS react to onpointerdown rather than onclick?
   - git g onclick engine/
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
 - Editor grid is off-center when smaller than 4x4 (again)
