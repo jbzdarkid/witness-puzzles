@@ -1,6 +1,6 @@
 SHIP BLOCKERS
-- Volume slider does nothing
 
+BUGS
 - Retake all images (due to new background style) [WIP]
   Also, I should take images in dark theme, and have some way to show the appropriate ones.
   Some complaints about background color being too close to line color? Make background brighter. Just a bit.
