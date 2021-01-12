@@ -766,9 +766,7 @@ function drawSymbolButtons() {
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()
       }
-      button.oncontextmenu = function(event) {
-        this.onpointerdown(event)
-        event.preventDefault()
+      button.oncontextmenu = function(event) {event.preventDefault()}
       }
     } else {
       button.onpointerdown = function() {

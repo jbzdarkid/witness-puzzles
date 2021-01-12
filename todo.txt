@@ -1,5 +1,4 @@
 SHIP BLOCKERS
-- Right click on triangle is doubling (mouse down & mouse up) -- ditto arrows
 - Volume slider does nothing
 
 - Retake all images (due to new background style) [WIP]
