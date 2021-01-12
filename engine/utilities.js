@@ -301,11 +301,12 @@ window.loadHeader = function(titleText) {
     this.style.display = 'none'
     var expandedSettings = document.getElementById('expandedSettings')
     expandedSettings.style.display = null
+    localStorage.expandedSettings = 'true'
   }
 
   var expandedSettings = document.createElement('div')
   navbar.appendChild(expandedSettings)
-  expandedSettings.style = 'width: 250px; position: absolute; left: 0; display: none; padding: 10px'
+  expandedSettings.style = 'width: 300px; position: absolute; left: 0; display: none; padding: 10px'
   expandedSettings.style.border = '2px solid ' + window.BORDER
   expandedSettings.style.background = window.PAGE_BACKGROUND
   expandedSettings.id = 'expandedSettings'
@@ -317,6 +318,11 @@ window.loadHeader = function(titleText) {
     this.parentElement.style.display = 'none'
     var collapsedSettings = document.getElementById('collapsedSettings')
     collapsedSettings.style.display = null
+    localStorage.expandedSettings = 'false'
+  }
+
+  if (localStorage.expandedSettings == 'true') {
+    collapsedSettings.onclick()
   }
 
   // Now, for the contents of the settings
@@ -390,6 +396,30 @@ window.loadHeader = function(titleText) {
     localStorage.volume = this.value
   }
   volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
+
+  expandedSettings.appendChild(document.createElement('br'))
+
+  // Custom mechanics
+  var customMechanics = createCheckbox()
+  expandedSettings.appendChild(customMechanics)
+  customMechanics.id = 'customMechanics'
+  if (localStorage.customMechanics == 'true') {
+    customMechanics.style.background = window.BORDER
+    customMechanics.checked = true
+  }
+
+  customMechanics.onpointerdown = function() {
+    this.checked = !this.checked
+    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
+    localStorage.customMechanics = this.checked
+    window.location.reload()
+  }
+
+  var mechLabel = document.createElement('label')
+  expandedSettings.appendChild(mechLabel)
+  mechLabel.style.marginLeft = '6px'
+  mechLabel.htmlFor = 'customMechanics'
+  mechLabel.innerText = 'Custom mechanics'
 }
 
 // Automatically solve the puzzle
@@ -467,6 +497,22 @@ function showSolution(puzzle, paths, num) {
   }
 }
 
+function createCheckbox() {
+  var checkbox = document.createElement('div')
+  checkbox.style.width = '22px'
+  checkbox.style.height = '22px'
+  checkbox.style.borderRadius = '6px'
+  checkbox.style.display = 'inline-block'
+  checkbox.style.verticalAlign = 'text-bottom'
+  checkbox.style.marginRight = '6px'
+  checkbox.style.borderWidth = '1.5px'
+  checkbox.style.borderStyle = 'solid'
+  checkbox.style.borderColor = window.BORDER
+  checkbox.style.background = window.PAGE_BACKGROUND
+  checkbox.style.color = window.TEXT_COLOR
+  return checkbox
+}
+
 // Required global variables/functions:
 // window.puzzle
 // window.onSolvedPuzzle()
@@ -474,20 +520,9 @@ function showSolution(puzzle, paths, num) {
 window.addSolveButtons = function() {
   var parent = document.currentScript.parentElement
 
-  var solveMode = document.createElement('div')
-  parent.appendChild(solveMode)
+  var solveMode = createCheckbox()
   solveMode.id = 'solveMode'
-  solveMode.style.width = '22px'
-  solveMode.style.height = '22px'
-  solveMode.style.borderRadius = '6px'
-  solveMode.style.display = 'inline-block'
-  solveMode.style.verticalAlign = 'text-bottom'
-  solveMode.style.marginRight = '6px'
-  solveMode.style.borderWidth = '1.5px'
-  solveMode.style.borderStyle = 'solid'
-  solveMode.style.borderColor = window.BORDER
-  solveMode.style.background = window.PAGE_BACKGROUND
-  solveMode.style.color = window.TEXT_COLOR
+  parent.appendChild(solveMode)
 
   solveMode.onpointerdown = function() {
     this.checked = !this.checked
