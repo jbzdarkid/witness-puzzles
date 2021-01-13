@@ -890,6 +890,7 @@ function drawColorButtons() {
       button.style.display = null
       var input = document.createElement('input')
       input.style = 'position: absolute; margin-left: 30px; margin-top: 3px; width: 110px'
+      input.placeholder = 'hex'
       button.insertBefore(input, crayon)
 
       button.onpointerdown = function(event) {

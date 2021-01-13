@@ -151,14 +151,16 @@ window.validateArrows = function(puzzle, region, regionData) {
     var count = 0
     var x = pos.x + dir.x
     var y = pos.y + dir.y
-    while (true) {
+    for (var i=0; i<100; i++) { // 100 is arbitrary, it's just here to avoid infinite loops.
       var line = puzzle.getLine(x, y)
-      if (line == undefined) break
+      console.spam('Testing', x, y, 'for arrow at', pos.x, pos.y, 'found', line)
+      if (line == undefined && (x%2 !== 1 || y%2 !== 1)) break
       if (line > window.LINE_NONE) count++
       if (count > cell.count) break
       x += dir.x * 2
       y += dir.y * 2
-      if (x === pos.x + dir.x && y === pos.y + dir.y) break // Backup pillar exit condition
+      // @Hack.
+      if (puzzle._mod(x) === pos.x + dir.x && y === pos.y + dir.y) break // Pillar exit condition (in case of looping)
     }
     if (count !== cell.count) {
       console.log('Arrow at', pos.x, pos.y, 'crosses', count, 'lines, but should cross', cell.count)
