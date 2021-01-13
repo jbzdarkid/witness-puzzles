@@ -98,7 +98,7 @@ function showSolution(puzzle, paths, num, side) {
       }
     }
   }
-  if (paths[num] != undefined) {
+  if (paths[num] != null) {
     // Draws the given path, and also updates the puzzle to have path annotations on it.
     window.drawPath(puzzle, paths[num], side)
   }

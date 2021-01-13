@@ -21,7 +21,7 @@ function exportToWindmill() {
         // var index = x + puzzle.grid.length*y
         // this.entities[index] = new Entity(Type.START)
         // End point
-        // new Entity(Type.END, undefined, new Orientation(1, 0))
+        // new Entity(Type.END, null, new Orientation(1, 0))
       }
     }
   }

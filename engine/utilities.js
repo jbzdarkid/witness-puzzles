@@ -30,7 +30,7 @@ document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLo
 window_onerror = window.onerror
 window.onerror = function(message, url, line) {
   FEEDBACK(message + ' on line ' + line)
-  if (window_onerror == undefined) {
+  if (window_onerror == null) {
     console.error('Parse error in file ' + url + ' on line ' + line)
   } else {
     window_onerror(message, url, line)
@@ -361,7 +361,7 @@ window.loadHeader = function(titleText) {
   sensLabel.htmlFor = 'sens'
   sensLabel.innerText = 'Mouse Speed 2D'
 
-  if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
+  if (localStorage.sensitivity == null) localStorage.sensitivity = 0.7
   var sens = document.createElement('input')
   expandedSettings.appendChild(sens)
   sens.type = 'range'
@@ -381,7 +381,7 @@ window.loadHeader = function(titleText) {
   volumeLabel.htmlFor = 'volume'
   volumeLabel.innerText = 'Volume'
 
-  if (localStorage.volume == undefined || localStorage.volume < 0 || localStorage.volume > 0.24) {
+  if (localStorage.volume == null || localStorage.volume < 0 || localStorage.volume > 0.24) {
     localStorage.volume = 0.12
   }
   var volume = document.createElement('input')
@@ -491,7 +491,7 @@ function showSolution(puzzle, paths, num) {
       }
     }
   }
-  if (paths[num] != undefined) {
+  if (paths[num] != null) {
     // Draws the given path, and also updates the puzzle to have path annotations on it.
     window.drawPath(puzzle, paths[num])
   }
@@ -706,7 +706,7 @@ function loadSettings(parent) {
   sensLabel.htmlFor = 'sens'
   sensLabel.innerText = 'Mouse Speed 2D'
 
-  if (localStorage.sensitivity == undefined) localStorage.sensitivity = 0.7
+  if (localStorage.sensitivity == null) localStorage.sensitivity = 0.7
   var sens = document.createElement('input')
   settings.appendChild(sens)
   sens.style.width = '100%'
@@ -726,7 +726,7 @@ function loadSettings(parent) {
   volumeLabel.htmlFor = 'volume'
   volumeLabel.innerText = 'Volume'
 
-  if (localStorage.volume == undefined || localStorage.volume < 0 || localStorage.volume > 0.24) {
+  if (localStorage.volume == null || localStorage.volume < 0 || localStorage.volume > 0.24) {
     localStorage.volume = 0.12
   }
   var volume = document.createElement('input')

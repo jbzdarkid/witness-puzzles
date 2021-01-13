@@ -408,23 +408,23 @@ function loadTests() {
     try {
       var solutions = []
       var puzzle = tests[i]()
-      if (puzzle['start'] == undefined) {
+      if (puzzle['start'] == null) {
         puzzle['start'] = {'x':puzzle.grid.length-1, 'y':0}
       }
-      if (puzzle['end'] == undefined) {
+      if (puzzle['end'] == null) {
         puzzle['end'] = {'x':0, 'y':puzzle.grid[0].length-1}
       }
-      if (puzzle['dots'] == undefined) {
+      if (puzzle['dots'] == null) {
         puzzle['dots'] = []
       }
-      if (puzzle['gaps'] == undefined) {
+      if (puzzle['gaps'] == null) {
         puzzle['gaps'] = []
       }
       solve(puzzle, puzzle.start.x, puzzle.start.y, solutions)
       console.log('Solved', puzzle)
       var minEdges = 999999
       var minCorners = 999999
-      var minSolution = undefined
+      var minSolution = null
       for (var solution of solutions) {
         var edges = 0
         var corners = 0
@@ -434,21 +434,21 @@ function loadTests() {
               if (x%2 == 0 && y%2 == 0) {
                 // At a corner
                 if ((
-                    solution.grid[x-1] == undefined ||
-                    solution.grid[x-1][y] == undefined ||
+                    solution.grid[x-1] == null ||
+                    solution.grid[x-1][y] == null ||
                     solution.grid[x-1][y] == true
                   ) && (
-                    solution.grid[x+1] == undefined ||
-                    solution.grid[x+1][y] == undefined ||
+                    solution.grid[x+1] == null ||
+                    solution.grid[x+1][y] == null ||
                     solution.grid[x+1][y] == true
                   )) continue
                 if ((
-                    solution.grid[x] == undefined ||
-                    solution.grid[x][y-1] == undefined ||
+                    solution.grid[x] == null ||
+                    solution.grid[x][y-1] == null ||
                     solution.grid[x][y-1] == true
                   ) && (
-                    solution.grid[x] == undefined ||
-                    solution.grid[x][y+1] == undefined ||
+                    solution.grid[x] == null ||
+                    solution.grid[x][y+1] == null ||
                     solution.grid[x][y+1] == true
                   )) continue
                 corners++
@@ -466,7 +466,7 @@ function loadTests() {
         }
       }
       console.log('Minimum solution out of', solutions.length, 'has', minEdges, 'edges and', minCorners, 'corners:', minSolution)
-      if (minSolution != undefined) {
+      if (minSolution != null) {
         minSolution.start = puzzle.start
         draw(minSolution, 'test'+i) // TODO: This prevents tracing on the puzzle
       } else {

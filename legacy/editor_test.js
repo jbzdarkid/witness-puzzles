@@ -30,7 +30,7 @@ function ASSERT_ALL_START(/* x1, y1, x2, y2, ... */) {
   var startpoints = 0
   for (var x=0; x<grid.length; x++) {
     for (var y=0; y<grid[0].length; y++) {
-      if (grid[x][y] != undefined && grid[x][y].start === true) startpoints++
+      if (grid[x][y] != null && grid[x][y].start === true) startpoints++
     }
   }
   ASSERT_EQ(arguments.length/2, startpoints, arguments.length/2, '#startpoints ('+startpoints+')')
@@ -48,7 +48,7 @@ function ASSERT_ALL_END(/* x1, y1, dir1, x2, y2, dir2, ... */) {
   var endpoints = 0
   for (var x=0; x<grid.length; x++) {
     for (var y=0; y<grid[0].length; y++) {
-      if (grid[x][y] != undefined && grid[x][y].end != undefined) endpoints++
+      if (grid[x][y] != null && grid[x][y].end != null) endpoints++
     }
   }
   ASSERT_EQ(arguments.length/3, endpoints, arguments.length/3, '#endpoints ('+endpoints+')')

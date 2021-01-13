@@ -111,7 +111,7 @@ window.onload = function() {
 
   draw(puzzleData.puzzle)
   puzzleData.solution = puzzleData.solutions[_randint(puzzleData.solutions.length)]
-  if (puzzleData.solution != undefined) {
+  if (puzzleData.solution != null) {
     document.getElementById('soln').disabled = false
     document.getElementById('hint').disabled = false
     puzzleData.solution.loadHints()
@@ -120,7 +120,7 @@ window.onload = function() {
 
 function showHint() {
   var hint = puzzleData.solution.showHint()
-  if (hint == undefined) {
+  if (hint == null) {
     document.getElementById('hint').disabled = true
     return
   }

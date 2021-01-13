@@ -1,7 +1,7 @@
 namespace(function() {
 
 window.draw = function(puzzle, target='puzzle') {
-  if (puzzle == undefined) return
+  if (puzzle == null) return
   var svg = document.getElementById(target)
   console.info('Drawing', puzzle, 'into', svg)
   while (svg.firstChild) svg.removeChild(svg.firstChild)
@@ -78,11 +78,11 @@ window.draw = function(puzzle, target='puzzle') {
 
 function drawCenters(puzzle, svg) {
   // @Hack that I am not fixing. This switches the puzzle's grid to a floodfilled grid
-  // where undefined represents cells which are part of the outside
+  // where null represents cells which are part of the outside
   var savedGrid = puzzle._switchToMaskedGrid()
   if (puzzle.pillar === true) {
     for (var y=1; y<puzzle.height; y += 2) {
-      if (puzzle.getCell(-1, y) == undefined) continue // Cell borders the outside
+      if (puzzle.getCell(-1, y) == null) continue // Cell borders the outside
 
       var rect = createElement('rect')
       rect.setAttribute('x', 28)
@@ -96,7 +96,7 @@ function drawCenters(puzzle, svg) {
 
   for (var x=1; x<puzzle.width; x += 2) {
     for (var y=1; y<puzzle.height; y += 2) {
-      if (puzzle.grid[x][y] == undefined) continue // Cell borders the outside
+      if (puzzle.grid[x][y] == null) continue // Cell borders the outside
 
       var rect = createElement('rect')
       rect.setAttribute('x', 41 * x + 11)
@@ -115,8 +115,8 @@ function drawGrid(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell != undefined && cell.gap === window.GAP_FULL) continue
-      if (cell != undefined && cell.gap === window.GAP_BREAK) {
+      if (cell != null && cell.gap === window.GAP_FULL) continue
+      if (cell != null && cell.gap === window.GAP_BREAK) {
         var params = {
           'width':58,
           'height':58,
@@ -155,15 +155,15 @@ function drawGrid(puzzle, svg, target) {
         svg.appendChild(line)
       } else if (x%2 === 0 && y%2 === 0) { // Intersection
         var surroundingLines = 0
-        if (cell.end != undefined) surroundingLines++
+        if (cell.end != null) surroundingLines++
         var leftCell = puzzle.getCell(x - 1, y)
-        if (leftCell != undefined && leftCell.gap !== window.GAP_FULL) surroundingLines++
+        if (leftCell != null && leftCell.gap !== window.GAP_FULL) surroundingLines++
         var rightCell = puzzle.getCell(x + 1, y)
-        if (rightCell != undefined && rightCell.gap !== window.GAP_FULL) surroundingLines++
+        if (rightCell != null && rightCell.gap !== window.GAP_FULL) surroundingLines++
         var topCell = puzzle.getCell(x, y - 1)
-        if (topCell != undefined && topCell.gap !== window.GAP_FULL) surroundingLines++
+        if (topCell != null && topCell.gap !== window.GAP_FULL) surroundingLines++
         var bottomCell = puzzle.getCell(x, y + 1)
-        if (bottomCell != undefined && bottomCell.gap !== window.GAP_FULL) surroundingLines++
+        if (bottomCell != null && bottomCell.gap !== window.GAP_FULL) surroundingLines++
 
         if (surroundingLines === 1) {
           // Add square caps for dead ends which are non-endpoints
@@ -191,7 +191,7 @@ function drawGrid(puzzle, svg, target) {
     var x = 0;
     for (var y=0; y<puzzle.height; y+=2) {
       var cell = puzzle.getCell(x-1, y)
-      if (cell == undefined || cell.gap === window.GAP_FULL) continue
+      if (cell == null || cell.gap === window.GAP_FULL) continue
       var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
@@ -209,7 +209,7 @@ function drawSymbols(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == undefined) continue
+      if (cell == null) continue
       var params = {
         'width':58,
         'height':58,
@@ -225,7 +225,7 @@ function drawSymbols(puzzle, svg, target) {
         else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = window.FOREGROUND
           // This makes the invisible dots visible, but only while we're in the editor.
-          if (document.getElementById('metaButtons') != undefined) {
+          if (document.getElementById('metaButtons') != null) {
             params.stroke = 'black'
             params.strokeWidth = '2px'
           }
@@ -246,12 +246,12 @@ function drawStartAndEnd(puzzle, svg) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == undefined) continue
-      if (cell.end != undefined) {
-        if (puzzle.symmetry != undefined) {
+      if (cell == null) continue
+      if (cell.end != null) {
+        if (puzzle.symmetry != null) {
           var sym = puzzle.getSymmetricalPos(x, y)
           var symCell = puzzle.getCell(sym.x, sym.y)
-          if (symCell.end == undefined) {
+          if (symCell.end == null) {
             console.error('Found an endpoint at', x, y, 'but there was no symmetrical endpoint at', sym.x, sym.y)
           }
         }
@@ -267,8 +267,8 @@ function drawStartAndEnd(puzzle, svg) {
       }
 
       if (cell.start === true) {
-        var symStart = undefined
-        if (puzzle.symmetry != undefined) {
+        var symStart = null
+        if (puzzle.symmetry != null) {
           var sym = puzzle.getSymmetricalPos(x, y)
           var symCell = puzzle.getCell(sym.x, sym.y)
           if (symCell.start !== true) {

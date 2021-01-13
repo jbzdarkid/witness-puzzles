@@ -9,8 +9,8 @@ var PATH_BOTTOM = 4
 window.MAX_SOLUTIONS = 0
 var solutionPaths = []
 var asyncTimer = 0
-var task = undefined
-var puzzle = undefined
+var task = null
+var puzzle = null
 var path = []
 var SOLVE_SYNC = false
 var SYNC_THRESHOLD = 9 // Depth at which we switch to a synchronous solver (for perf)
@@ -21,11 +21,11 @@ var nodes = 0
 function countNodes(x, y, depth) {
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
-  if (cell == undefined) return
+  if (cell == null) return
   if (cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
 
-  if (puzzle.symmetry == undefined) {
+  if (puzzle.symmetry == null) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
@@ -68,11 +68,11 @@ window.solve = function(p, partialCallback, finalCallback) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == undefined) continue
+      if (cell == null) continue
       if (cell.start === true) {
         startPoints.push({'x': x, 'y': y})
       }
-      if (cell.end != undefined) numEndpoints++
+      if (cell.end != null) numEndpoints++
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
     }
@@ -81,7 +81,7 @@ window.solve = function(p, partialCallback, finalCallback) {
   // Puzzles which are small enough should be solved synchronously, since the cost of asynchronizing
   // is greater than the cost of the puzzle.
   SOLVE_SYNC = false
-  if (puzzle.symmetry != undefined) { // 5x5 is the max for symmetry puzzles
+  if (puzzle.symmetry != null) { // 5x5 is the max for symmetry puzzles
     if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
   } else if (puzzle.pillar === true) { // 4x5 is the max for non-symmetry, pillar puzzles
     if (puzzle.width * puzzle.height <= 108) SOLVE_SYNC = true
@@ -137,14 +137,14 @@ window.solve = function(p, partialCallback, finalCallback) {
 }
 
 function taskLoop(partialCallback, finalCallback) {
-  if (task == undefined) {
+  if (task == null) {
     finalCallback()
     return
   }
 
   var newTasks = task.code()
   task = task.nextTask
-  if (newTasks != undefined && newTasks.length > 0) {
+  if (newTasks != null && newTasks.length > 0) {
     // Tasks are pushed in order. To do DFS, we need to enqueue them in reverse order.
     for (var i=newTasks.length - 1; i >= 0; i--) {
       task = {
@@ -178,7 +178,7 @@ function taskLoop(partialCallback, finalCallback) {
 function tailRecurse(x, y) {
   // Tail recursion: Back out of this cell
   puzzle.updateCell2(x, y, 'line', window.LINE_NONE)
-  if (puzzle.symmetry != undefined) {
+  if (puzzle.symmetry != null) {
     var sym = puzzle.getSymmetricalPos(x, y)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_NONE)
   }
@@ -194,11 +194,11 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
-  if (cell == undefined) return
+  if (cell == null) return
   if (cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
 
-  if (puzzle.symmetry == undefined) {
+  if (puzzle.symmetry == null) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
@@ -214,7 +214,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 
   if (depth < NODE_DEPTH) nodes++
 
-  if (cell.end != undefined) {
+  if (cell.end != null) {
     path.push(PATH_NONE)
     window.validate(puzzle, true)
     if (puzzle.valid) solutionPaths.push(path.slice())
@@ -259,7 +259,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
       var floodX = earlyExitData[2].x + (earlyExitData[1].x - x)
       var floodY = earlyExitData[2].y + (earlyExitData[1].y - y)
       var region = puzzle.getRegion(floodX, floodY)
-      if (region != undefined) {
+      if (region != null) {
         var regionData = window.validateRegion(puzzle, region, true)
         if (!regionData.valid()) return tailRecurse(x, y)
 
@@ -267,7 +267,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
         // If so, we should decrement the number of remaining endpoints (and possibly tail recurse).
         for (var pos of region.cells) {
           var endCell = puzzle.getCell(pos.x, pos.y)
-          if (endCell != undefined && endCell.end != undefined) numEndpoints--
+          if (endCell != null && endCell.end != null) numEndpoints--
         }
 
         if (numEndpoints === 0) return tailRecurse(x, y)
@@ -401,7 +401,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     // Unflag the cell, move into it, and reflag it
     cell.line = window.LINE_NONE
     window.onMove(41 * dx, 41 * dy)
-    if (puzzle.symmetry == undefined) {
+    if (puzzle.symmetry == null) {
       cell.line = window.LINE_BLACK
     } else {
       cell.line = window.LINE_BLUE
@@ -419,7 +419,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     var output = ('' + y).padEnd(3, ' ') + '|'
     for (var x=0; x<puzzle.width; x++) {
       var cell = puzzle.grid[x][y]
-      var dir = (cell != undefined && cell.dir != undefined ? cell.dir : '')
+      var dir = (cell != null && cell.dir != null ? cell.dir : '')
       output += dir.padEnd(5, ' ') + '|'
     }
     console.info(output)
@@ -436,7 +436,7 @@ window.getSolutionIndex = function(pathList, solution) {
     var match = true
     for (var j=1; j<path.length; j++) {
       var cell = solution.grid[x][y]
-      if (path[j] === PATH_NONE && cell.end != undefined) {
+      if (path[j] === PATH_NONE && cell.end != null) {
         match = false
         break
       } else if (path[j] === PATH_LEFT) {

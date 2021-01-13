@@ -216,16 +216,16 @@ function loadTests() {
     try {
       var solutions = []
       var puzzle = tests[i]()
-      if (puzzle['start'] == undefined) {
+      if (puzzle['start'] == null) {
         puzzle['start'] = {'x':puzzle.grid.length-1, 'y':0}
       }
-      if (puzzle['end'] == undefined) {
+      if (puzzle['end'] == null) {
         puzzle['end'] = {'x':0, 'y':puzzle.grid[0].length-1}
       }
-      if (puzzle['dots'] == undefined) {
+      if (puzzle['dots'] == null) {
         puzzle['dots'] = []
       }
-      if (puzzle['gaps'] == undefined) {
+      if (puzzle['gaps'] == null) {
         puzzle['gaps'] = []
       }
       solve(puzzle, puzzle.start.x, puzzle.start.y, solutions)

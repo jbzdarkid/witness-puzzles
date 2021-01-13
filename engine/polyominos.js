@@ -66,9 +66,9 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false, precise=true) {
         break
       }
     }
-    if (topLeft != undefined) break
+    if (topLeft != null) break
   }
-  if (topLeft == undefined) return [] // Empty polyomino
+  if (topLeft == null) return [] // Empty polyomino
 
   var polyomino = []
   for (var x=0; x<4; x++) {
@@ -129,7 +129,7 @@ window.polyFit = function(region, puzzle) {
   for (var pos of region.cells) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
+    if (cell == null) continue
     if (cell.polyshape === 0) continue
     if (cell.type === 'poly') {
       polys.push(cell)
@@ -151,7 +151,7 @@ window.polyFit = function(region, puzzle) {
     console.log('Combined size of onimoylops is greater than polyominos by', -polyCount)
     return false
   }
-  var key = undefined
+  var key = null
   if (polyCount === 0) {
     if (puzzle.settings.SHAPELESS_ZERO_POLY) {
       console.log('Combined size of polyominos and onimoylops is zero')
@@ -164,7 +164,7 @@ window.polyFit = function(region, puzzle) {
     key += '|'
     for (var poly of polys) key += ' ' + poly.polyshape
     var ret = knownCancellations[key]
-    if (ret != undefined) return ret
+    if (ret != null) return ret
   }
 
   // For polyominos, we clear the grid to mark it up again:
@@ -196,7 +196,7 @@ function tryPlacePolyshape(cells, x, y, puzzle, sign) {
   for (var i=0; i<numCells; i++) {
     var cell = cells[i]
     var puzzleCell = puzzle.getCell(cell.x + x, cell.y + y)
-    if (puzzleCell == undefined) return false
+    if (puzzleCell == null) return false
     cell.value = puzzleCell
   }
   for (var i=0; i<numCells; i++) {

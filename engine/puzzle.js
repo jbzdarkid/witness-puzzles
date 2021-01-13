@@ -66,13 +66,13 @@ class Puzzle {
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
-    // Cells default to undefined
+    // Cells default to null
     // Lines default to {'type':'line', 'line':0}
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
         var cell = puzzle.grid[x][y]
-        if (cell === false || cell == undefined || cell.type == undefined) {
-          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = undefined
+        if (cell === false || cell == null || cell.type == null) {
+          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = null
           else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
           if (cell.type === 'poly' || cell.type === 'ylop') {
@@ -84,12 +84,12 @@ class Puzzle {
             }
             // Fixup: Sometimes we have a polyshape which is empty. Just ignore these objects.
             if (puzzle.grid[x][y].polyshape & ~window.ROTATION_BIT === 0) puzzle.grid[x][y] = null
-          } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != undefined) {
+          } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != null) {
             // Legacy: Lines used to use 'line' instead of 'color'
             cell.line = cell.color
             delete cell.color
           } else if (cell.gap === true) {
-            // Legacy: Gaps used to be undefined/true, are now undefined/1/2
+            // Legacy: Gaps used to be null/true, are now null/1/2
             puzzle.grid[x][y].gap = window.GAP_BREAK
           }
         }
@@ -149,7 +149,7 @@ class Puzzle {
   // This is explicitly *not* just clearing the grid, so that external references
   // to the grid are not also cleared.
   newGrid(width, height) {
-    if (width == undefined) { // Called by someone who just wants to clear the grid.
+    if (width == null) { // Called by someone who just wants to clear the grid.
       width = this.width
       height = this.height
     }
@@ -157,7 +157,7 @@ class Puzzle {
     for (var x=0; x<width; x++) {
       this.grid[x] = []
       for (var y=0; y<height; y++) {
-        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = undefined
+        if (x%2 === 1 && y%2 === 1) this.grid[x][y] = null
         else this.grid[x][y] = {'type':'line', 'line':LINE_NONE}
       }
     }
@@ -185,7 +185,7 @@ class Puzzle {
 
   getCell(x, y) {
     x = this._mod(x)
-    if (!this._safeCell(x, y)) return undefined
+    if (!this._safeCell(x, y)) return null
     return this.grid[x][y]
   }
 
@@ -196,7 +196,7 @@ class Puzzle {
   }
 
   getSymmetricalDir(dir) {
-    if (this.symmetry != undefined) {
+    if (this.symmetry != null) {
       if (this.symmetry.x === true) {
         if (dir === 'left') return 'right'
         if (dir === 'right') return 'left'
@@ -210,7 +210,7 @@ class Puzzle {
   }
 
   getSymmetricalPos(x, y) {
-    if (this.symmetry != undefined) {
+    if (this.symmetry != null) {
       if (this.pillar === true) {
         x += this.width/2
         if (this.symmetry.x === true) {
@@ -237,8 +237,8 @@ class Puzzle {
   // and treats objects as being out-of-bounds
   getLine(x, y) {
     var cell = this.getCell(x, y)
-    if (cell == undefined) return undefined
-    if (cell.type !== 'line') return undefined
+    if (cell == null) return null
+    if (cell.type !== 'line') return null
     return cell.line
   }
 
@@ -246,7 +246,7 @@ class Puzzle {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
     var cell = this.grid[x][y]
-    if (cell == undefined) return
+    if (cell == null) return
     cell[key] = value
   }
 
@@ -256,13 +256,13 @@ class Puzzle {
 
     var dirs = []
     var leftCell = this.getCell(x - 1, y)
-    if (leftCell == undefined || leftCell.gap === window.GAP_FULL) dirs.push('left')
+    if (leftCell == null || leftCell.gap === window.GAP_FULL) dirs.push('left')
     var topCell = this.getCell(x, y - 1)
-    if (topCell == undefined || topCell.gap === window.GAP_FULL) dirs.push('top')
+    if (topCell == null || topCell.gap === window.GAP_FULL) dirs.push('top')
     var rightCell = this.getCell(x + 1, y)
-    if (rightCell == undefined || rightCell.gap === window.GAP_FULL) dirs.push('right')
+    if (rightCell == null || rightCell.gap === window.GAP_FULL) dirs.push('right')
     var bottomCell = this.getCell(x, y + 1)
-    if (bottomCell == undefined || bottomCell.gap === window.GAP_FULL) dirs.push('bottom')
+    if (bottomCell == null || bottomCell.gap === window.GAP_FULL) dirs.push('bottom')
     return dirs
   }
 
@@ -284,7 +284,7 @@ class Puzzle {
   // prioritizing breaking current lines on the grid.
   // Returns the shown hint.
   showHint(hint) {
-    if (hint != undefined) {
+    if (hint != null) {
       this.grid[hint.x][hint.y].gap = window.GAP_BREAK
       return
     }
@@ -316,16 +316,16 @@ class Puzzle {
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
         this.updateCell2(x, y, 'line', 0)
-        this.updateCell2(x, y, 'dir', undefined)
+        this.updateCell2(x, y, 'dir', null)
       }
     }
   }
 
   // The grid contains 5 colors:
-  // undefined: Out of bounds or already processed
+  // null: Out of bounds or already processed
   // 0: In bounds, awaiting processing, but should not be part of the final region.
   // 1: In bounds, awaiting processing
-  // 2: Gap-2. After _floodFillOutside, this means "treat normally" (it will be undefined if oob)
+  // 2: Gap-2. After _floodFillOutside, this means "treat normally" (it will be null if oob)
   // 3: Dot (of any kind), otherwise identical to 1.
   _floodFill(x, y, region) {
     // Inlined safety checks so we can get the col, which is slightly more performant.
@@ -334,11 +334,11 @@ class Puzzle {
 
     var col = this.grid[x]
     var cell = col[y]
-    if (cell === undefined) return
+    if (cell === null) return
     if (cell !== 0) {
       region.setCell(x, y)
     }
-    col[y] = undefined
+    col[y] = null
 
     this._floodFill(x, y + 1, region)
     this._floodFill(x + 1, y, region)
@@ -354,10 +354,10 @@ class Puzzle {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
     var cell = this.grid[x][y]
-    if (cell === undefined) return
+    if (cell === null) return
     if (x%2 !== y%2 && cell !== 2) return // Only flood-fill through gap-2
     if (x%2 === 0 && y%2 === 0 && cell === 3) return // Don't flood-fill through dots
-    this.grid[x][y] = undefined
+    this.grid[x][y] = null
 
     if (x%2 === 0 && y%2 === 0) return // Don't flood fill through corners
 
@@ -386,12 +386,12 @@ class Puzzle {
 
         var cell = savedRow[y]
         if (cell.line > window.LINE_NONE) {
-          if (x%2 !== y%2 && cell.end != undefined) {
+          if (x%2 !== y%2 && cell.end != null) {
             // Traced mid-segment endpoints should not separate the region
             row.push(0)
           } else {
             // Traced lines should not be a part of the region
-            row.push(undefined)
+            row.push(null)
           }
         } else if (cell.gap === window.GAP_FULL) {
           row.push(2)
@@ -405,15 +405,15 @@ class Puzzle {
     }
 
     // Starting at a mid-segment startpoint
-    if (this.startPoint != undefined && this.startPoint.x%2 !== this.startPoint.y%2) {
+    if (this.startPoint != null && this.startPoint.x%2 !== this.startPoint.y%2) {
       if (this.settings.FAT_STARTPOINTS) { // This segment is not in any region (acts as a barrier)
-        this.grid[this.startPoint.x][this.startPoint.y] = undefined
+        this.grid[this.startPoint.x][this.startPoint.y] = null
       } else { // This segment is part of this region (acts as an empty cell)
         this.grid[this.startPoint.x][this.startPoint.y] = 0
       }
     }
 
-    // Mark all outside cells as 'not in any region' (aka undefined)
+    // Mark all outside cells as 'not in any region' (aka null)
 
     if (this.pillar === false) {
       // Left and right edges (only applies to non-pillars)
@@ -438,7 +438,7 @@ class Puzzle {
 
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
-        if (this.grid[x][y] == undefined) continue
+        if (this.grid[x][y] == null) continue
 
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.
@@ -456,7 +456,7 @@ class Puzzle {
     if (!this._safeCell(x, y)) return
 
     var savedGrid = this._switchToMaskedGrid()
-    if (this.grid[x][y] == undefined) {
+    if (this.grid[x][y] == null) {
       this.grid = savedGrid
       return null
     }
@@ -475,7 +475,7 @@ class Puzzle {
     for (var y=0; y<this.height; y++) {
       for (var x=0; x<this.width; x++) {
         var cell = this.getCell(x, y)
-        if (cell == undefined) output += ' '
+        if (cell == null) output += ' '
         else if (typeof(cell) == 'number') output += cell
         else if (cell.start === true) output += 'S'
         else if (cell.end != null) output += 'E'

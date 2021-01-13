@@ -716,7 +716,7 @@ var tests = {
     puzzle.grid[6][2].dot = 4
     return [puzzle, 56]
   }, 'invisible-dots': function() {
-    window.activeParams = undefined
+    window.activeParams = null
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true
     puzzle.grid[6][0].end = 'right'

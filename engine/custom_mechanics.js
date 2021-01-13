@@ -3,7 +3,7 @@ namespace(function() {
 function isCellBridgePathFriendly(puzzle, color, pos) {
   if (pos.x%2 === 0 && pos.y%2 === 0) return false
   var cell = puzzle.getCell(pos.x, pos.y)
-  return cell == undefined || cell.color == undefined || cell.color === color
+  return cell == null || cell.color == null || cell.color === color
 }
 
 function makeMinimalTree(graph, root, required) {
@@ -28,16 +28,16 @@ function isTreeUnique(graph, isInTree) {
   var seen = isInTree.slice()
   function dfs(node) {
     seen[node] = true
-    var reachableTreeNode = undefined
+    var reachableTreeNode = null
     for (var child of graph[node]) {
-      var candidate = undefined
+      var candidate = null
       if (isInTree[child]) {
         candidate = child
       } else if (!seen[child]) {
         candidate = dfs(child)
       }
-      if (candidate != undefined && candidate !== reachableTreeNode) {
-        if (reachableTreeNode == undefined) {
+      if (candidate != null && candidate !== reachableTreeNode) {
+        if (reachableTreeNode == null) {
           reachableTreeNode = candidate
         } else {
           return -1
@@ -85,12 +85,12 @@ window.validateBridges = function(puzzle, region, regionData) {
   var bridges = {}
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
+    if (cell == null) continue
 
     // Count color-based elements
-    if (cell.color != undefined) {
+    if (cell.color != null) {
       if (cell.type === 'bridge') {
-        if (bridges[cell.color] == undefined) {
+        if (bridges[cell.color] == null) {
           bridges[cell.color] = []
         }
         bridges[cell.color].push(pos)
@@ -104,7 +104,7 @@ window.validateBridges = function(puzzle, region, regionData) {
     for (var x=1; x < puzzle.width; x+=2) {
       for (var y=1; y < puzzle.height; y+=2) {
         var cell = puzzle.getCell(x, y)
-        if (cell != undefined) {
+        if (cell != null) {
           if (cell.type === 'bridge' && cell.color === color) total++
           if (cell.type === 'nega') discardable++
         }
@@ -144,7 +144,7 @@ var DIRECTIONS = [
 window.validateArrows = function(puzzle, region, regionData) {
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
+    if (cell == null) continue
     if (cell.type != 'arrow') continue
     dir = DIRECTIONS[cell.rot]
 
@@ -154,7 +154,7 @@ window.validateArrows = function(puzzle, region, regionData) {
     for (var i=0; i<100; i++) { // 100 is arbitrary, it's just here to avoid infinite loops.
       var line = puzzle.getLine(x, y)
       console.spam('Testing', x, y, 'for arrow at', pos.x, pos.y, 'found', line)
-      if (line == undefined && (x%2 !== 1 || y%2 !== 1)) break
+      if (line == null && (x%2 !== 1 || y%2 !== 1)) break
       if (line > window.LINE_NONE) count++
       if (count > cell.count) break
       x += dir.x * 2
@@ -175,7 +175,7 @@ window.validateSizers = function(puzzle, region, regionData) {
   for (var pos of region.cells) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++ // Only count cells for the region
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
+    if (cell == null) continue
     if (cell.type == 'sizer') sizers.push(pos)
   }
   console.debug('Found', sizers.length, 'sizers')
@@ -190,7 +190,7 @@ window.validateSizers = function(puzzle, region, regionData) {
     return
   }
 
-  if (puzzle.sizerCount == undefined) puzzle.sizerCount = sizerCount // No other sizes have been defined
+  if (puzzle.sizerCount == null) puzzle.sizerCount = sizerCount // No other sizes have been defined
   if (puzzle.sizerCount != sizerCount) {
     console.log('sizerCount', sizerCount, 'does not match puzzle sizerCount', puzzle.sizerCount)
     for (var sizer of sizers) {

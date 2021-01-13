@@ -15,7 +15,7 @@ class BoundingBox {
       data.svg.appendChild(this.debug)
       this.debug.setAttribute('opacity', 0.5)
       this.debug.setAttribute('style', 'pointer-events: none;')
-      if (data.puzzle.symmetry == undefined) {
+      if (data.puzzle.symmetry == null) {
         this.debug.setAttribute('fill', 'white')
       } else {
         if (this.sym !== true) {
@@ -83,7 +83,7 @@ class BoundingBox {
       'y':(this.raw.y1 + this.raw.y2)/2
     }
 
-    if (this.debug != undefined) {
+    if (this.debug != null) {
       this.debug.setAttribute('x', this.x1)
       this.debug.setAttribute('y', this.y1)
       this.debug.setAttribute('width', this.x2 - this.x1)
@@ -120,7 +120,7 @@ class PathSegment {
       }
     }
 
-    if (data.puzzle.symmetry == undefined) {
+    if (data.puzzle.symmetry == null) {
       this.poly1.setAttribute('class', 'line-1 ' + data.svg.id)
       this.circ.setAttribute('class', 'line-1 ' + data.svg.id)
       this.poly2.setAttribute('class', 'line-1 ' + data.svg.id)
@@ -166,7 +166,7 @@ class PathSegment {
     if (this.dir === 'none') { // Start point
       this.circ.setAttribute('r', 24)
       this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
-      if (data.puzzle.symmetry != undefined) {
+      if (data.puzzle.symmetry != null) {
         this.symCirc.setAttribute('r', 24)
         this.symCirc.setAttribute('class', this.symCirc.getAttribute('class') + ' start')
       }
@@ -174,7 +174,7 @@ class PathSegment {
       // Only insert poly1 in non-startpoints
       data.svg.insertBefore(this.poly1, data.cursor)
       this.circ.setAttribute('r', 12)
-      if (data.puzzle.symmetry != undefined) {
+      if (data.puzzle.symmetry != null) {
         data.svg.insertBefore(this.symPoly1, data.cursor)
         this.symCirc.setAttribute('r', 12)
       }
@@ -186,7 +186,7 @@ class PathSegment {
     data.svg.removeChild(this.circ)
     data.svg.removeChild(this.poly2)
     data.svg.removeChild(this.pillarCirc)
-    if (data.puzzle.symmetry != undefined) {
+    if (data.puzzle.symmetry != null) {
       data.svg.removeChild(this.symPoly1)
       data.svg.removeChild(this.symCirc)
       data.svg.removeChild(this.symPoly2)
@@ -200,17 +200,17 @@ class PathSegment {
     var y = clamp(data.y, data.bbox.y1, data.bbox.y2)
     data.cursor.setAttribute('cx', x)
     data.cursor.setAttribute('cy', y)
-    if (data.puzzle.symmetry != undefined) {
+    if (data.puzzle.symmetry != null) {
       data.symcursor.setAttribute('cx', this._reflX(x))
       data.symcursor.setAttribute('cy', this._reflY(y))
     }
     if (data.puzzle.pillar === true) {
-      if (this.pillarCirc.getAttribute('static') == undefined) {
+      if (this.pillarCirc.getAttribute('static') == null) {
         this.pillarCirc.setAttribute('cx', x)
         this.pillarCirc.setAttribute('cy', y)
       }
-      if (data.puzzle.symmetry != undefined) {
-        if (this.symPillarCirc.getAttribute('static') == undefined) {
+      if (data.puzzle.symmetry != null) {
+        if (this.symPillarCirc.getAttribute('static') == null) {
           this.symPillarCirc.setAttribute('cx', this._reflX(x))
           this.symPillarCirc.setAttribute('cy', this._reflY(y))
         }
@@ -236,7 +236,7 @@ class PathSegment {
     )
 
     var firstHalf = false
-    var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != undefined)
+    var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != null)
     // The second half of the line uses the raw so that it can enter the endpoint properly.
     var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
@@ -288,7 +288,7 @@ class PathSegment {
     }
 
     // Draw the symmetrical path based on the original one
-    if (data.puzzle.symmetry != undefined) {
+    if (data.puzzle.symmetry != null) {
       this.symPoly1.setAttribute('points',
         this._reflX(points1.x2) + ' ' + this._reflY(points1.y2) + ',' +
         this._reflX(points1.x2) + ' ' + this._reflY(points1.y1) + ',' +
@@ -309,7 +309,7 @@ class PathSegment {
   }
 
   _reflX(x) {
-    if (data.puzzle.symmetry == undefined) return x
+    if (data.puzzle.symmetry == null) return x
     if (data.puzzle.symmetry.x === true) {
       // Mirror position inside the bounding box
       return (data.bbox.middle.x - x) + data.symbbox.middle.x
@@ -319,7 +319,7 @@ class PathSegment {
   }
 
   _reflY(y) {
-    if (data.puzzle.symmetry == undefined) return y
+    if (data.puzzle.symmetry == null) return y
     if (data.puzzle.symmetry.y === true) {
       // Mirror position inside the bounding box
       return (data.bbox.middle.y - y) + data.symbbox.middle.y
@@ -332,13 +332,13 @@ class PathSegment {
 var data = {}
 
 function clearGrid(svg, puzzle) {
-  if (data.bbox != undefined && data.bbox.debug != undefined) {
+  if (data.bbox != null && data.bbox.debug != null) {
     data.svg.removeChild(data.bbox.debug)
-    data.bbox = undefined
+    data.bbox = null
   }
-  if (data.symbbox != undefined && data.symbbox.debug != undefined) {
+  if (data.symbbox != null && data.symbbox.debug != null) {
     data.svg.removeChild(data.symbbox.debug)
-    data.symbbox = undefined
+    data.symbbox = null
   }
 
   window.deleteElementsByClassName(svg, 'cursor')
@@ -348,7 +348,7 @@ function clearGrid(svg, puzzle) {
   puzzle.clearLines()
 }
 
-window.trace = function(event, puzzle, pos, start, symStart=undefined) {
+window.trace = function(event, puzzle, pos, start, symStart=null) {
   if (document.pointerLockElement == null) { // Started tracing a solution
     var svg = start.parentElement
     data.tracing = true
@@ -365,7 +365,7 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
 
     // At endpoint and in main box
     var cell = puzzle.getCell(data.pos.x, data.pos.y)
-    if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
+    if (cell.end != null && data.bbox.inMain(data.x, data.y)) {
       data.cursor.onpointerdown = null
       setTimeout(function() { // Run validation asynchronously so we can free the pointer immediately.
         window.validate(puzzle, false) // We want all invalid elements so we can show the user.
@@ -409,16 +409,16 @@ window.trace = function(event, puzzle, pos, start, symStart=undefined) {
 }
 
 window.clearAnimations = function() {
-  if (data.animations == undefined) return
+  if (data.animations == null) return
   for (var i=0; i<data.animations.cssRules.length; i++) {
     var rule = data.animations.cssRules[i]
-    if (rule.selectorText != undefined && rule.selectorText.startsWith('.' + data.svg.id)) {
+    if (rule.selectorText != null && rule.selectorText.startsWith('.' + data.svg.id)) {
       data.animations.deleteRule(i--)
     }
   }
 }
 
-window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
+window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
   var x = parseFloat(start.getAttribute('cx'))
   var y = parseFloat(start.getAttribute('cy'))
 
@@ -460,7 +460,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=undefined) {
 
   clearAnimations()
 
-  if (puzzle.symmetry == undefined) {
+  if (puzzle.symmetry == null) {
     data.puzzle.updateCell2(data.pos.x, data.pos.y, 'type', 'line')
     data.puzzle.updateCell2(data.pos.x, data.pos.y, 'line', window.LINE_BLACK)
   } else {
@@ -498,7 +498,7 @@ try {
 } catch {}
 
 function isEventWithinPuzzle(event) {
-  for (var node = event.target; node != undefined; node = node.parentElement) {
+  for (var node = event.target; node != null; node = node.parentElement) {
     if (node == data.svg) return true
   }
   return false
@@ -522,7 +522,7 @@ document.onpointerlockchange = function() {
       // Working around a race condition where movement events fire after the handler is removed.
       if (data.tracing !== true) return
       // Prevent accidental fires on ios (which is handled via ontouchmove).
-      if (event.movementX == undefined) return
+      if (event.movementX == null) return
       onMove(sens * event.movementX, sens * event.movementY)
     }
     document.ontouchstart = function(event) {
@@ -544,7 +544,7 @@ document.onpointerlockchange = function() {
       data.lastTouchPos = null
       // Only call window.trace (to stop tracing) if we're really in an endpoint.
       var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-      if (cell.end != undefined && data.bbox.inMain(data.x, data.y)) {
+      if (cell.end != null && data.bbox.inMain(data.x, data.y)) {
         window.trace(event, data.puzzle, null, null, null)
       }
     }
@@ -576,7 +576,7 @@ window.onMove = function(dx, dy) {
                  || (moveDir === 'top' && lastDir === 'bottom')
                  || (moveDir === 'bottom' && lastDir === 'top'))
 
-    if (data.puzzle.symmetry != undefined) {
+    if (data.puzzle.symmetry != null) {
       var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
     }
 
@@ -584,21 +584,21 @@ window.onMove = function(dx, dy) {
     if (backedUp) {
       data.path.pop().destroy()
       data.puzzle.updateCell2(data.pos.x, data.pos.y, 'line', window.LINE_NONE)
-      if (data.puzzle.symmetry != undefined) {
+      if (data.puzzle.symmetry != null) {
         data.puzzle.updateCell2(data.sym.x, data.sym.y, 'line', window.LINE_NONE)
       }
     }
 
     // Move to the next cell
     changePos(data.bbox, data.pos, moveDir)
-    if (data.puzzle.symmetry != undefined) {
+    if (data.puzzle.symmetry != null) {
       changePos(data.symbbox, data.sym, symMoveDir)
     }
 
     // If we didn't back up, add a path segment and mark the new cell as visited
     if (!backedUp) {
       data.path.push(new PathSegment(moveDir))
-      if (data.puzzle.symmetry == undefined) {
+      if (data.puzzle.symmetry == null) {
         data.puzzle.updateCell2(data.pos.x, data.pos.y, 'line', window.LINE_BLACK)
       } else {
         data.puzzle.updateCell2(data.pos.x, data.pos.y, 'line', window.LINE_BLUE)
@@ -611,7 +611,7 @@ window.onMove = function(dx, dy) {
 // Helper function for pushCursor. Used to determine the direction and magnitude of redirection.
 function push(dx, dy, dir, targetDir) {
   // Fraction of movement to redirect in the other direction
-  var movementRatio = undefined
+  var movementRatio = null
   if (targetDir === 'left' || targetDir === 'top') {
     movementRatio = -3
   } else if (targetDir === 'right' || targetDir === 'bottom') {
@@ -661,33 +661,33 @@ function push(dx, dy, dir, targetDir) {
 function pushCursor(dx, dy) {
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-  if (cell == undefined) return
+  if (cell == null) return
 
   // Only consider non-endpoints or endpoints which are parallel
-  if ([undefined, 'top', 'bottom'].includes(cell.end)) {
+  if ([null, 'top', 'bottom'].includes(cell.end)) {
     var leftCell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
-    if (leftCell == undefined || leftCell.gap === window.GAP_FULL) {
+    if (leftCell == null || leftCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'left', 'top')) return 'left outer wall'
     }
     var rightCell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
-    if (rightCell == undefined || rightCell.gap === window.GAP_FULL) {
+    if (rightCell == null || rightCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'right', 'top')) return 'right outer wall'
     }
   }
   // Only consider non-endpoints or endpoints which are parallel
-  if ([undefined, 'left', 'right'].includes(cell.end)) {
+  if ([null, 'left', 'right'].includes(cell.end)) {
     var topCell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
-    if (topCell == undefined || topCell.gap === window.GAP_FULL) {
+    if (topCell == null || topCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'top', 'right')) return 'top outer wall'
     }
     var bottomCell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
-    if (bottomCell == undefined || bottomCell.gap === window.GAP_FULL) {
+    if (bottomCell == null || bottomCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'bottom', 'right')) return 'bottom outer wall'
     }
   }
 
   // Inner wall collision
-  if (cell.end == undefined) {
+  if (cell.end == null) {
     if (data.pos.x%2 === 1 && data.pos.y%2 === 0) { // Horizontal cell
       if (data.x < data.bbox.middle.x) {
         push(dx, dy, 'topbottom', 'left')
@@ -710,7 +710,7 @@ function pushCursor(dx, dy) {
   // Intersection & endpoint collision
   // Ratio of movement to be considered turning at an intersection
   var turnMod = 2
-  if ((data.pos.x%2 === 0 && data.pos.y%2 === 0) || cell.end != undefined) {
+  if ((data.pos.x%2 === 0 && data.pos.y%2 === 0) || cell.end != null) {
     if (data.x < data.bbox.middle.x) {
       push(dx, dy, 'topbottom', 'right')
       // Overshot the intersection and appears to be trying to turn
@@ -766,13 +766,13 @@ function pushCursor(dx, dy) {
 function gapAndSymmetryCollision() {
   var lastDir = data.path[data.path.length - 1].dir
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-  if (cell == undefined) return
+  if (cell == null) return
 
   var gapSize = 0
   if (cell.gap === window.GAP_BREAK) {
     console.spam('Collided with a gap')
     gapSize = 21
-  } else if (data.puzzle.symmetry != undefined) {
+  } else if (data.puzzle.symmetry != null) {
     if (data.sym.x === data.pos.x && data.sym.y === data.pos.y) {
       console.spam('Collided with our symmetrical line')
       gapSize = 13
@@ -802,15 +802,15 @@ function move() {
 
   if (data.x < data.bbox.x1 + 12) { // Moving left
     var cell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
+    if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x1 + 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'right') {
       console.spam('Collided with other line', cell.line)
       data.x = data.bbox.x1 + 12
-    } else if (data.puzzle.symmetry != undefined) {
+    } else if (data.puzzle.symmetry != null) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x - 1, data.pos.y)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
+      if (symCell == null || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.x = data.bbox.x1 + 12
       }
@@ -820,15 +820,15 @@ function move() {
     }
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
     var cell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
+    if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x2 - 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'left') {
       console.spam('Collided with other line', cell.line)
       data.x = data.bbox.x2 - 12
-    } else if (data.puzzle.symmetry != undefined) {
+    } else if (data.puzzle.symmetry != null) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x + 1, data.pos.y)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
+      if (symCell == null || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.x = data.bbox.x2 - 12
       }
@@ -838,15 +838,15 @@ function move() {
     }
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
+    if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.y = data.bbox.y1 + 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'bottom') {
       console.spam('Collided with other line', cell.line)
       data.y = data.bbox.y1 + 12
-    } else if (data.puzzle.symmetry != undefined) {
+    } else if (data.puzzle.symmetry != null) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x, data.pos.y - 1)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
+      if (symCell == null || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.y = data.bbox.y1 + 12
       }
@@ -856,15 +856,15 @@ function move() {
     }
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
-    if (cell == undefined || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
+    if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2')
       data.y = data.bbox.y2 - 12
     } else if (cell.line > window.LINE_NONE && lastDir !== 'top') {
       console.spam('Collided with other line', cell.line)
       data.y = data.bbox.y2 - 12
-    } else if (data.puzzle.symmetry != undefined) {
+    } else if (data.puzzle.symmetry != null) {
       var symCell = data.puzzle.getSymmetricalCell(data.pos.x, data.pos.y + 1)
-      if (symCell == undefined || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
+      if (symCell == null || symCell.type !== 'line' || symCell.gap === window.GAP_FULL) {
         console.spam('Collided with symmetrical outside / gap-2', cell)
         data.y = data.bbox.y2 - 12
       }

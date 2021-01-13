@@ -26,7 +26,7 @@ This contains the model of the system, it describes how the puzzles are stored.
 The internal grid contains the edges as well as the cells, so what is visually 2x2 is internally a 5x5.  
 Regions are collections of cells, and are created once the puzzle has been divided by a line. Regions do not include the drawn line, so the regions are disjoint.  
 Pillars are represented by cutting a column off the right-hand side, and any operations on the grid are simply done under modular arithmetic. This means that almost everything will call puzzle.getCell(x, y) instead of puzzle.grid[x][y], since x might be a value like -5, which needs to be "pillared".  
-All objects in the grid are JSON objects, with a 'type' parameter. 'type=line' represents the lines around the cells -- these objects should never be undefined, since they also retain information about start, end, dots, and gaps. Types like 'square', 'star', 'triangle', 'negation' represent more conventional puzzle mechanics.  
+All objects in the grid are JSON objects, with a 'type' parameter. 'type=line' represents the lines around the cells -- these objects should never be null, since they also retain information about start, end, dots, and gaps. Types like 'square', 'star', 'triangle', 'negation' represent more conventional puzzle mechanics.  
 Puzzle objects can sometimes be 'solution objects', which means they have a path traced on them. There is no guarantee made that this path is continuous, valid, or non-branching.
 
 ## display2.js

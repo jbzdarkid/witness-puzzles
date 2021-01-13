@@ -62,7 +62,7 @@ function drawPuzzle() {
 function puzzleHasElements() {
   for (var x=1; x<puzzle.width; x+=2) {
     for (var y=1; y<puzzle.height; y+=2) {
-      if (puzzle.grid[x][y] != undefined) return true
+      if (puzzle.grid[x][y] != null) return true
     }
   }
   return false
@@ -72,14 +72,14 @@ function onElementClicked(event, x, y) {
   if (x%2 !== 1 || y%2 !== 1) return
 
   var count = 0
-  if (puzzle.grid[x][y] != undefined && puzzle.grid[x][y].count != undefined) {
+  if (puzzle.grid[x][y] != null && puzzle.grid[x][y].count != null) {
     count = puzzle.grid[x][y].count
   }
   count += (event.isRightClick() ? -1 : 1)
   if (count < 0) count = 3
   if (count > 3) count = 0
   if (count == 0) {
-    puzzle.grid[x][y] = undefined
+    puzzle.grid[x][y] = null
   } else {
     puzzle.grid[x][y] = {
       'type': 'triangle',

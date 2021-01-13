@@ -32,17 +32,17 @@ window.validate = function(puzzle, quick) {
   var puzzleHasEnd = false
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
-  puzzle.sizerCount = undefined
+  puzzle.sizerCount = null
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == undefined) continue
+      if (cell == null) continue
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
       if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
-        if (cell.end != undefined) puzzleHasEnd = true
+        if (cell.end != null) puzzleHasEnd = true
         if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
             (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
@@ -88,7 +88,7 @@ window.validateRegion = function(puzzle, region, quick) {
   var negationSymbols = []
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell != undefined && cell.type === 'nega') {
+    if (cell != null && cell.type === 'nega') {
       pos.cell = cell
       negationSymbols.push(pos)
       puzzle.updateCell2(pos.x, pos.y, 'type', 'nonce')
@@ -229,11 +229,11 @@ function regionCheck(puzzle, region, quick) {
   var squares = []
   var stars = []
   var coloredObjects = {}
-  var squareColor = undefined
+  var squareColor = null
 
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == undefined) continue
+    if (cell == null) continue
 
     // Check for uncovered dots
     if (cell.dot > window.DOT_NONE) {
@@ -257,16 +257,16 @@ function regionCheck(puzzle, region, quick) {
     }
 
     // Count color-based elements
-    if (cell.color != undefined) {
+    if (cell.color != null) {
       var count = coloredObjects[cell.color]
-      if (count == undefined) {
+      if (count == null) {
         count = 0
       }
       coloredObjects[cell.color] = count + 1
 
       if (cell.type === 'square') {
         squares.push(pos)
-        if (squareColor == undefined) {
+        if (squareColor == null) {
           squareColor = cell.color
         } else if (squareColor != cell.color) {
           squareColor = -1 // Signal value which indicates square color collision
@@ -302,7 +302,7 @@ function regionCheck(puzzle, region, quick) {
     if (!window.polyFit(region, puzzle)) {
       for (var pos of region.cells) {
         var cell = puzzle.getCell(pos.x, pos.y)
-        if (cell == undefined) continue
+        if (cell == null) continue
         if (cell.type === 'poly' || cell.type === 'ylop') {
           regionData.addInvalid(pos)
           if (quick) return regionData
