@@ -32,6 +32,7 @@ window.validate = function(puzzle, quick) {
   var puzzleHasEnd = false
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
+  puzzle.sizerCount = undefined
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
@@ -308,6 +309,12 @@ function regionCheck(puzzle, region, quick) {
         }
       }
     }
+  }
+
+  if (puzzle.settings.CUSTOM_MECHANICS) {
+    window.validateBridges(puzzle, region, regionData)
+    window.validateArrows(puzzle, region, regionData)
+    window.validateSizers(puzzle, region, regionData)
   }
 
   console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')

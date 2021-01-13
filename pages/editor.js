@@ -814,8 +814,8 @@ function drawSymbolButtons() {
           var rot = symbolData.arrow.rot
           if (rot == undefined) rot = 0
           rot += (event.isRightClick() ? -1 : 1)
-          if (rot < 0) rot = 3
-          if (rot > 3) rot = 0
+          if (rot < 0) rot = 7
+          if (rot > 7) rot = 0
           symbolData.arrow.rot = rot
           activeParams.rot = rot
         }
