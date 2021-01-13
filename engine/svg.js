@@ -378,10 +378,10 @@ function arrow(svg, params) {
   var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('width', 8)
-  rect.setAttribute('height', 44)
+  rect.setAttribute('height', 46)
   rect.setAttribute('fill', params.color)
   rect.setAttribute('class', params.class)
-  rect.setAttribute('transform', rotate(90 * params.rot))
+  rect.setAttribute('transform', rotate(45 * params.rot))
   rect.setAttribute('x', centerX - 4)
   rect.setAttribute('y', centerY - 22)
 
@@ -389,17 +389,15 @@ function arrow(svg, params) {
     var arrowhead = createElement('polygon')
     svg.appendChild(arrowhead)
     var points = [
-      '-24 16',
-      '-21.4 9.6',
-      '0 20',
-      '21.4 9.6',
-      '24 16',
-      '0 28',
+      '-24 -15',
+      '-21.4 -8.6',
+      '0 -19',
+      '21.4 -8.6',
+      '24 -15',
+      '0 -27',
     ]
-    var transform = 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y - i*12) + ') '
-    if (params.rot != 0) {
-      transform = rotate(90 * params.rot) + transform
-    }
+    var transform = rotate(45 * params.rot)
+    transform += ' translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y + i*12) + ')'
     arrowhead.setAttribute('transform', transform)
     arrowhead.setAttribute('points', points.join(', '))
     arrowhead.setAttribute('fill', params.color)
