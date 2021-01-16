@@ -159,8 +159,7 @@ window.validateArrows = function(puzzle, region, regionData) {
       if (count > cell.count) break
       x += dir.x * 2
       y += dir.y * 2
-      // @Hack.
-      if (puzzle._mod(x) === pos.x + dir.x && y === pos.y + dir.y) break // Pillar exit condition (in case of looping)
+      if (puzzle.matchesSymmetricalPos(x, y, pos.x + dir.x, pos.y + dir.y)) break // Pillar exit condition (in case of looping)
     }
     if (count !== cell.count) {
       console.log('Arrow at', pos.x, pos.y, 'crosses', count, 'lines, but should cross', cell.count)

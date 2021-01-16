@@ -79,7 +79,7 @@ window.draw = function(puzzle, target='puzzle') {
 function drawCenters(puzzle, svg) {
   // @Hack that I am not fixing. This switches the puzzle's grid to a floodfilled grid
   // where null represents cells which are part of the outside
-  var savedGrid = puzzle._switchToMaskedGrid()
+  var savedGrid = puzzle.switchToMaskedGrid()
   if (puzzle.pillar === true) {
     for (var y=1; y<puzzle.height; y += 2) {
       if (puzzle.getCell(-1, y) == null) continue // Cell borders the outside

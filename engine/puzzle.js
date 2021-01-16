@@ -233,6 +233,10 @@ class Puzzle {
     return this.getCell(pos.x, pos.y)
   }
 
+  matchesSymmetricalPos(x1, y1, x2, y2) {
+    return (this._mod(x1) === x2 && y1 === y2)
+  }
+
   // A variant of getCell which specifically returns line values,
   // and treats objects as being out-of-bounds
   getLine(x, y) {
@@ -368,7 +372,7 @@ class Puzzle {
   }
 
   // Returns the original grid (pre-masking). You will need to switch back once you are done flood filling.
-  _switchToMaskedGrid() {
+  switchToMaskedGrid() {
     // Make a copy of the grid -- we will be overwriting it
     var savedGrid = this.grid
     this.grid = []
@@ -434,7 +438,7 @@ class Puzzle {
 
   getRegions() {
     var regions = []
-    var savedGrid = this._switchToMaskedGrid()
+    var savedGrid = this.switchToMaskedGrid()
 
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
@@ -455,7 +459,7 @@ class Puzzle {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
 
-    var savedGrid = this._switchToMaskedGrid()
+    var savedGrid = this.switchToMaskedGrid()
     if (this.grid[x][y] == null) {
       this.grid = savedGrid
       return null

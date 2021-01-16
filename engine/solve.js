@@ -29,8 +29,7 @@ function countNodes(x, y, depth) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
-    // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
-    if (puzzle._mod(x) === sym.x && y === sym.y) return // Would collide with our reflection
+    if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
     if (symCell.gap > window.GAP_NONE) return
@@ -202,8 +201,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
-    // @Hack, slightly. I can surface a `matchesSymmetricalPos` if I really want to keep this private.
-    if (puzzle._mod(x) === sym.x && y === sym.y) return // Would collide with our reflection
+    if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
     if (symCell.gap > window.GAP_NONE) return
