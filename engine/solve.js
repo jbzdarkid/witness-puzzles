@@ -29,7 +29,7 @@ function countNodes(x, y, depth) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
-    if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y) return // Would collide with our reflection
+    if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y)) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
     if (symCell.gap > window.GAP_NONE) return
@@ -201,7 +201,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     puzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
   } else {
     var sym = puzzle.getSymmetricalPos(x, y)
-    if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y) return // Would collide with our reflection
+    if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y)) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
     if (symCell.gap > window.GAP_NONE) return

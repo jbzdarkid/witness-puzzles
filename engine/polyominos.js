@@ -21,7 +21,7 @@ function isSet(polyshape, x, y) {
 }
 
 // This is 2^20, whereas all the other bits fall into 2^(0-15)
-ROTATION_BIT = mask(5, 0)
+var ROTATION_BIT = mask(5, 0)
 
 window.isRotated = function(polyshape) {
   return (polyshape & ROTATION_BIT) !== 0
