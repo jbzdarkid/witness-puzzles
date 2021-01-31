@@ -2,6 +2,10 @@ SHIP BLOCKERS
 - Tracing is currently broken against edges.
 
 BUGS
+- Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
+  Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
+- Symmetrical startpoint is drawn over the fade
+- Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Retake all images (due to new background style) [WIP]
   Also, I should take images in dark theme, and have some way to show the appropriate ones.
   Some complaints about background color being too close to line color? Make background brighter. Just a bit.
