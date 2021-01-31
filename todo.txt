@@ -1,4 +1,5 @@
 SHIP BLOCKERS
+- Tracing is currently broken against edges.
 
 BUGS
 - Retake all images (due to new background style) [WIP]
