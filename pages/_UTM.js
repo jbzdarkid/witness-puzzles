@@ -9,15 +9,15 @@ function loadPuzzleRegion(region) {
   while (areaPuzzles.getElementsByTagName('option').length > 0) {
     areaPuzzles.getElementsByTagName('option')[0].remove()
   }
-  // areaPuzzles.value = '' // Forces onchange to fire for any selection
+  areaPuzzles.value = '' // Forces onchange to fire for any selection
 
-  for (var puzzleInfo of window.ALL_PUZZLES) {
+  for (var puzzleInfo of window.getAllPuzzles()) {
     if (puzzleInfo['area'] != region) continue
     var option = document.createElement('option')
     try {
       option.value = Puzzle.deserialize(puzzleInfo.data).serialize()
     } catch {
-      option.value = puzzleInfo.data().serialize()
+      option.value = puzzleInfo.data.serialize()
     }
 
     option.innerText = puzzleInfo['name']
@@ -36,8 +36,154 @@ function isColored(grid, x, y) {
   return (cell != null && cell.line >= window.LINE_BLACK)
 }
 
+// @HACK
+var PATH_NONE   = 0
+var PATH_LEFT   = 1
+var PATH_RIGHT  = 2
+var PATH_TOP    = 3
+var PATH_BOTTOM = 4
+
+function pathToSolution(puzzle, path) {
+  var newPuzzle = puzzle.clone()
+  var start = path[0]
+  var x = start.x
+  var y = start.y
+  for (var i=1; i<path.length; i++) {
+    newPuzzle.updateCell2(x, y, 'dir', path[i])
+    if (puzzle.symmetry == undefined) {
+      newPuzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
+    } else {
+      newPuzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
+      var sym = puzzle.getSymmetricalPos(x, y)
+      newPuzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
+    }
+    if (path[i] == PATH_LEFT) x--
+    else if (path[i] == PATH_RIGHT) x++
+    else if (path[i] == PATH_TOP) y--
+    else if (path[i] == PATH_BOTTOM) y++
+  }
+  return newPuzzle
+}
+
+// No deduplication at all.
+function getPathKey0(puzzle, path) {
+  return []
+}
+
+// A little bit too aggressive about deduplication. Specifically, this key would consider "going clockwise" and "going counter-clockwise" to be the same.
+function getPathKey1(puzzle, path) {
+  var pathKey = []
+  var solution = pathToSolution(puzzle, path)
+  var regions = solution.getRegions()
+  for (var region of regions) {
+    var hasPolys = false
+    var hasSymbols = false
+    var regionKey = new Region(puzzle.width)
+    for (var pos of region.cells) {
+      if (pos.x%2 != 1 || pos.y%2 != 1) continue // TODO: Dots?
+      var cell = puzzle.getCell(pos.x, pos.y)
+      if (cell == undefined) continue
+      if (cell.type == 'poly') {
+        hasPolys = true
+        break
+      } else {
+        hasSymbols = true
+        regionKey.setCell(pos.x, pos.y)
+      }
+    }
+    if (hasPolys) {
+      pathKey.push(region.grid.toString()) // Polyominos require an exact region match
+    } else if (hasSymbols) {
+      pathKey.push(regionKey.grid.toString()) // Cache the locations of symbols which are in the region.
+    }
+  }
+  return pathKey.sort().join('-')
+}
+
+// NOTE: Doesn't handle polyominos!
+// Very happy to merge things. It does matter how many stones are in each region.
+function getPathKey2(puzzle, path) {
+  var leftKey = new Region(puzzle.width)
+  var rightKey = new Region(puzzle.width)
+
+  var solution = pathToSolution(puzzle, path)
+  var regions = solution.getRegions()
+  for (var region of regions) {
+    var isLeft = false
+    for (var pos of region.cells) {
+      if (pos.x === 0 || pos.y === 0) {
+        isLeft = true
+        break
+      }
+    }
+
+    for (var pos of region.cells) {
+      if (pos.x%2 != 1 || pos.y%2 != 1) continue // TODO: Dots?
+      var cell = puzzle.getCell(pos.x, pos.y)
+      if (cell == undefined) continue
+      if (isLeft) leftKey.setCell(pos.x, pos.y)
+      else       rightKey.setCell(pos.x, pos.y)
+    }
+  }
+  return leftKey.grid.toString() + '-' + rightKey.grid.toString()
+}
+
+function getPathKey3(puzzle, path) {
+  var pathKey = []
+  var solution = pathToSolution(puzzle, path)
+  var regions = solution.getRegions()
+  for (var region of regions) {
+    var hasPolys = false
+    var hasSymbols = false
+    var regionKey = new Region(puzzle.width)
+    var isLeft = false
+    for (var pos of region.cells) {
+      if (pos.x === 0 || pos.y === 0) {
+        isLeft = true
+        break
+      }
+    }
+
+    for (var pos of region.cells) {
+      if (pos.x%2 != 1 || pos.y%2 != 1) continue // TODO: Dots?
+      var cell = puzzle.getCell(pos.x, pos.y)
+      if (cell == undefined) continue
+      if (cell.type == 'poly') {
+        hasPolys = true
+        break
+      } else {
+        hasSymbols = true
+        regionKey.setCell(pos.x, pos.y)
+      }
+    }
+    var suffix = (isLeft ? 'L' : 'R')
+    if (hasPolys) {
+      pathKey.push(region.grid.toString() + suffix) // Polyominos require an exact region match
+    } else if (hasSymbols) {
+      pathKey.push(regionKey.grid.toString() + suffix) // Cache the locations of symbols which are in the region.
+    }
+  }
+  return pathKey.sort().join('|')
+}
+
+
 window.onSolvedPuzzle = function(paths) {
-  for (var i=0; i<paths.length; i++) {
+  function sortKey(pathA, pathB) {
+    return pathA.length - pathB.length
+  }
+  paths.sort(sortKey)
+
+  var uniquePaths = []
+  var uniquePathKeys = []
+  for (var path of paths) {
+    var pathKey = getPathKey3(puzzle, path)
+    if (!uniquePathKeys.includes(pathKey)) {
+      uniquePaths.push(path)
+      uniquePathKeys.push(pathKey)
+    }
+  }
+  paths = uniquePaths
+
     /*
     var solution = window.pathToSolution(puzzle, paths[i])
     var edges = 0
@@ -73,11 +219,5 @@ window.onSolvedPuzzle = function(paths) {
       }
     }
     */
-  }
-  function sortKey(pathA, pathB) {
-    return pathA.length - pathB.length
-  }
-
-  paths.sort(sortKey)
   return paths
 }
