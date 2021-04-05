@@ -39,7 +39,7 @@ function randomTriangle(numTriangles, maxSolutions) {
       var count = 0
       var rng = randInt(100)
       if (rng >=  0 && rng <= 50) count = 1 // 51%
-      if (rng >= 51 && rng <= 85) count = 2 // 25%
+      if (rng >= 51 && rng <= 85) count = 2 // 35%
       if (rng >= 86 && rng <= 99) count = 3 // 14%
 
       var pos = cells.splice(randInt(cells.length), 1)[0]
