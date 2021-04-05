@@ -80,7 +80,7 @@ window.onload = function() {
     var puzzleHasSymbols = false
     for (var x=1; x<puzzle.grid.length; x+=2) {
       for (var y=1; y<puzzle.grid[x].length; y+=2) {
-        if (puzzle.getCell(x, y) != false) puzzleHasSymbols = true
+        if (puzzle.getCell(x, y) !== false) puzzleHasSymbols = true
       }
     }
     if (!puzzleHasSymbols || puzzleData.puzzle.grid.length * puzzleData.puzzle.grid[0].length <= 121) {

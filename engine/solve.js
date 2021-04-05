@@ -245,7 +245,9 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
   // As such, we can start a flood fill from the cell to the right of A, computed by A+(C-B).
   //
   // Unfortunately, this optimization doesn't work for pillars, since the two regions are still connected.
-  if (puzzle.pillar === false) {
+  // Additionally, this optimization doesn't work when custom mechanics are active, as many custom mechanics
+  // depend on the path through the entire puzzle
+  if (puzzle.pillar === false && !puzzle.settings.CUSTOM_MECHANICS) {
     var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
     var newEarlyExitData = [
       earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?

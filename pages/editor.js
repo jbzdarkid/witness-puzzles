@@ -300,7 +300,7 @@ window.createEmptyPuzzle = function() {
   } else {
     newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
   }
-  if (document.getElementById('newButton').disabled == true) {
+  if (document.getElementById('newButton').disabled === true) {
     // Previous puzzle was unmodified, overwrite it
     puzzle = newPuzzle
     reloadPuzzle()
@@ -488,7 +488,7 @@ window.publishPuzzle = function() {
     if (this.readyState != XMLHttpRequest.DONE) return
 
     var publish = document.getElementById('publish')
-    if (this.status == 200) {
+    if (this.status === 200) {
       publish.innerText = 'Published, click here to play your puzzle!'
       var url = '/play/' + this.responseText
       publish.onclick = function() {
@@ -548,7 +548,7 @@ function onElementClicked(event, x, y) {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != null) return
 
-    if (puzzle.grid[x][y].start != true) {
+    if (puzzle.grid[x][y].start !== true) {
       puzzle.grid[x][y].start = true
     } else {
       puzzle.grid[x][y].start = null

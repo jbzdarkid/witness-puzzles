@@ -19,7 +19,7 @@ function loadPuzzles() {
   currentLoadRequest = new XMLHttpRequest()
   currentLoadRequest.onreadystatechange = function() {
     if (this.readyState != XMLHttpRequest.DONE) return
-    if (this.status != 200) {
+    if (this.status !== 200) {
       // Even when there are no more puzzles, we still get a 200, just with an empty body.
       // If we don't get a 200, we should try again later.
       window.setTimeout(function() {
@@ -69,7 +69,7 @@ function loadPuzzles() {
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {
               if (this.readyState != XMLHttpRequest.DONE) return
-              if (this.status == 200) {
+              if (this.status === 200) {
                 cell.parentElement.removeChild(cell)
               } else {
                 alert(this.responseText)

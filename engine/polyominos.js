@@ -183,7 +183,7 @@ window.polyFit = function(region, puzzle) {
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
   var ret = placeYlops(ylops, 0, polys.slice(), puzzle)
-  if (polyCount == 0) knownCancellations[key] = ret
+  if (polyCount === 0) knownCancellations[key] = ret
   puzzle.grid = savedGrid
   return ret
 }

@@ -64,14 +64,29 @@ window.validate = function(puzzle, quick) {
   console.log('Found', regions.length, 'regions')
   console.debug(regions)
 
-  for (var region of regions) {
-    regionData = validateRegion(puzzle, region, quick)
-    console.log('Region valid:', regionData.valid())
-    puzzle.negations = puzzle.negations.concat(regionData.negations)
-    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-    puzzle.valid = puzzle.valid && regionData.valid()
-    if (quick && !puzzle.valid) return
+  if (puzzle.settings.CUSTOM_MECHANICS) {
+    for (var region of regions) {
+      regionData = validateRegion(puzzle, region, quick)
+      puzzle.negations = puzzle.negations.concat(regionData.negations)
+      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
+      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
+    }
+    // When using custom mechanics, we have to handle negations slightly differently.
+    // Negations need to be applied after all regions are validated, so that we can evaluate negations for
+    // all regions simultaneously. This is because certain custom mechanics are cross-region.
+
+    // ...
+
+  } else {
+    for (var region of regions) {
+      regionData = validateRegion(puzzle, region, quick)
+      console.log('Region valid:', regionData.valid())
+      puzzle.negations = puzzle.negations.concat(regionData.negations)
+      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
+      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
+      puzzle.valid = puzzle.valid && regionData.valid()
+      if (quick && !puzzle.valid) return
+    }
   }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
 }

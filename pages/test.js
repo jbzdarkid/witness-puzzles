@@ -10,7 +10,7 @@ window.onload = function() {
     if (!testName.match(/^[_a-zA-Z]+[_a-zA-Z0-9-]*$/g)) {
       console.error('Test name is not a valid CSS selector: ' + testName)
       failures.push(testName)
-      return
+      return testNames.length
     }
 
     var cell = table.rows[table.rows.length - 1].insertCell()

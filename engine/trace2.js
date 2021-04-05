@@ -242,7 +242,7 @@ class PathSegment {
     if (data.x < data.bbox.middle.x && this.dir !== 'right') {
       points2.x1 = clamp(data.x, data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
-      if (isEnd && data.pos.x%2 == 0 && data.pos.y%2 == 1) {
+      if (isEnd && data.pos.x%2 === 0 && data.pos.y%2 === 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
@@ -661,7 +661,7 @@ function push(dx, dy, dir, targetDir) {
 function pushCursor(dx, dy) {
   // Outer wall collision
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-  if (cell == null) return
+  if (cell == null) return 'nothing'
 
   // Only consider non-endpoints or endpoints which are parallel
   if ([null, 'top', 'bottom'].includes(cell.end)) {

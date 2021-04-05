@@ -49,7 +49,7 @@ function drawPuzzle() {
       rect.setAttribute('fill', 'white')
       rect.setAttribute('opacity', 0)
       yPos += height
-      if (x%2 == 1 && y%2 == 1) {
+      if (x%2 === 1 && y%2 === 1) {
         addOnClick(rect, x, y)
         rect.onpointerenter = function() {this.setAttribute('opacity', 0.25)}
         rect.onpointerleave = function() {this.setAttribute('opacity', 0)}
@@ -78,7 +78,7 @@ function onElementClicked(event, x, y) {
   count += (event.isRightClick() ? -1 : 1)
   if (count < 0) count = 3
   if (count > 3) count = 0
-  if (count == 0) {
+  if (count === 0) {
     puzzle.grid[x][y] = null
   } else {
     puzzle.grid[x][y] = {

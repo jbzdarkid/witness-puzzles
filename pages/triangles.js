@@ -31,7 +31,7 @@ function randomTriangle(numTriangles, maxSolutions) {
     var cells = []
     for (var x=0; x < puzzle.width; x++) {
       for (var y=0; y < puzzle.height; y++) {
-        if (x%2 == 1 && y%2 == 1) cells.push({'x':x, 'y':y})
+        if (x%2 === 1 && y%2 === 1) cells.push({'x':x, 'y':y})
       }
     }
 
@@ -126,7 +126,7 @@ window.newTriangles = function(maxSolutions) {
     }
   }
 
-  if (maxSolutions == 1) {
+  if (maxSolutions === 1) {
     location.hash = 'unique' + triangle6['seed']
   } else {
     location.hash = triangle6['seed']
