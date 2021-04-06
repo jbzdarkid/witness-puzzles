@@ -50,7 +50,7 @@ function pathToSolution(puzzle, path) {
   var y = start.y
   for (var i=1; i<path.length; i++) {
     newPuzzle.updateCell2(x, y, 'dir', path[i])
-    if (puzzle.symmetry == undefined) {
+    if (puzzle.symmetry == null) {
       newPuzzle.updateCell2(x, y, 'line', window.LINE_BLACK)
     } else {
       newPuzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
@@ -80,9 +80,9 @@ function getPathKey1(puzzle, path) {
     var hasSymbols = false
     var regionKey = new Region(puzzle.width)
     for (var pos of region.cells) {
-      if (pos.x%2 != 1 || pos.y%2 != 1) continue // TODO: Dots?
+      if (pos.x%2 !== 1 || pos.y%2 !== 1) continue // TODO: Dots?
       var cell = puzzle.getCell(pos.x, pos.y)
-      if (cell == undefined) continue
+      if (cell == null) continue
       if (cell.type == 'poly') {
         hasPolys = true
         break

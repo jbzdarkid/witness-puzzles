@@ -495,7 +495,7 @@ try {
       passive = {passive: false}
     }
   }))
-} catch {}
+} catch {/* empty */}
 
 function isEventWithinPuzzle(event) {
   for (var node = event.target; node != null; node = node.parentElement) {

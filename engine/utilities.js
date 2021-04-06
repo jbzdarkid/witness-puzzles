@@ -110,7 +110,7 @@ window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
 
 var animations = ''
-function l(line) {animations += line + '\n'}
+var l = function(line) {animations += line + '\n'}
 // pointer-events: none; allows for onclick events to bubble up (so that editor hooks still work)
 l('.line-1 {')
 l('  fill: ' + window.LINE_DEFAULT + ';')

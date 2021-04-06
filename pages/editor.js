@@ -1215,7 +1215,7 @@ try {
       passive = {passive: false}
     }
   }))
-} catch {}
+} catch {/* empty */}
 
 document.addEventListener('touchmove', function(event) {
   if (dragging) event.preventDefault()

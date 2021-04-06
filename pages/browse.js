@@ -90,7 +90,7 @@ function loadPuzzles() {
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {
               if (this.readyState != XMLHttpRequest.DONE) return
-              if (this.status == 200) {
+              if (this.status === 200) {
                 img.src = this.responseText
                 cell.removeChild(ref)
               } else {
