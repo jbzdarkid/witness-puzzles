@@ -13,7 +13,7 @@ window.onload = function() {
 window.clearPuzzle = function() {
   puzzle = new Puzzle(4, 4)
   puzzle.grid[0][8].start = true
-  puzzle.grid[8][0].end = 'right'
+  puzzle.grid[8][0].end = 'top'
   drawPuzzle()
   document.getElementById('solutionViewer').style.display = 'none'
 }

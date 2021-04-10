@@ -26,7 +26,7 @@ function randomTriangle(numTriangles, maxSolutions) {
 
     var puzzle = new Puzzle(4, 4)
     puzzle.grid[0][8].start = true
-    puzzle.grid[8][0].end = 'right'
+    puzzle.grid[8][0].end = 'top'
 
     var cells = []
     for (var x=0; x < puzzle.width; x++) {
