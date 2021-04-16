@@ -505,8 +505,6 @@ window.publishPuzzle = function() {
   var requestBody = 'title=' + puzzleCopy.name
   delete puzzleCopy.name
   requestBody += '&solution=' + puzzleCopy.serialize()
-  puzzleCopy.clearLines()
-  requestBody += '&puzzle=' + puzzleCopy.serialize()
 
   request.send(requestBody)
   currentPublishRequest = request

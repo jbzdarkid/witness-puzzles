@@ -72,7 +72,7 @@ def host_statically(path, serverpath=None):
 def host_redirect(path, serverpath):
   application.add_url_rule(serverpath, f'redirect_{serverpath}', lambda:redirect(path))
 
-def validate_and_capture_image(puzzle_json, solution_json):
+def validate_and_capture_image(solution_json):
   options = webdriver.ChromeOptions()
   options.add_argument('headless')
   os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
@@ -80,22 +80,24 @@ def validate_and_capture_image(puzzle_json, solution_json):
   driver.get(f'{request.url_root}validate.html')
 
   valid = False
+  puzzle = ''
   try:
     # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-    driver.execute_script(f'validate_and_capture_image({to_json_string(puzzle_json)}, {to_json_string(solution_json)})')
+    driver.execute_script(f'validate_and_capture_image({to_json_string(solution_json)})')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
     if result.get_attribute('valid') == 'true':
       # [22:] to remove the "data:image/png;base64," prefix
       data = BytesIO(b64decode(result.get_attribute('screenshot')[22:]))
       valid = True
+      puzzle_json = result.get_attribute('puzzle_json')
     else:
       data = 'Validation failed.\n'
   except TimeoutException:
     data = 'Validation timed out.\n'
 
   driver.quit()
-  return valid, data
+  return valid, data, puzzle_json
 
 def upload_image(img_bytes, display_hash):
   name = display_hash[:2] + '/' + display_hash + '.png'

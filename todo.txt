@@ -1,6 +1,8 @@
 SHIP BLOCKERS
 - Tracing is currently broken against edges.
 - solution->puzzle is happening clientside, not serverside. Stop calling .clearLines() in editor.js and start calling it in publish.html
+  Done need testing
+- Disable custom elements code if not complete
 
 BUGS
 - Light and Night theme

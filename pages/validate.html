@@ -10,16 +10,18 @@
     <script type="text/javascript" src="/engine/display2.js"></script>
   </head>
   <script>
-    window.validate_and_capture_image = function(puzzle_json, solution_json) {
+    window.validate_and_capture_image = function(solution_json) {
       window.setLogLevel('error')
       var result = document.createElement('p')
       result.id = 'result'
       result.valid = false
+      result.puzzle_json = ''
       try {
         var solution = Puzzle.deserialize(solution_json)
-        var puzzle = Puzzle.deserialize(puzzle_json)
         validate(solution, true) // Quick validation, since we aren't actually *showing* this to anyone.
         result.valid = solution.valid
+        solution.clearLines()
+        result.puzzle_json = solution.serialize()
       } catch (exc) {
         console.error(exc.stack)
       }
@@ -29,7 +31,7 @@
       }
 
       // Solution was valid, continuing with drawing + capturing the image
-      draw(puzzle)
+      draw(solution)
       var svg = document.getElementById('puzzle')
       var xml = new XMLSerializer().serializeToString(svg)
       var img = document.getElementById('image')

@@ -75,7 +75,7 @@ def publish():
   solution_json = request.form['solution']
   title = request.form['title']
 
-  valid, data = validate_and_capture_image(puzzle_json, solution_json)
+  valid, data, puzzle_json = validate_and_capture_image(solution_json)
   if not valid:
     add_feedback(data)
     return '', 400
