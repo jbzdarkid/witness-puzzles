@@ -7,6 +7,7 @@ BUGS
 - Add maximum puzzle limit for WP (and remove QuotaExceededError)
 - Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
   Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
+- "Delete this puzzle" confirmation gives the puzzle hash not the puzzle name, which is rather unhelpful.
 - Symmetrical startpoint is drawn over the fade
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Retake all images (due to new background style) [WIP]
