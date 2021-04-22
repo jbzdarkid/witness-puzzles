@@ -5,6 +5,8 @@ SHIP BLOCKERS
 - Disable custom elements code if not complete
 
 BUGS
+- Mid-segment endpoints aren't handled properly if we pass by them, instead of ending at them.
+  Need to add the same sort of fixup that we had for mid-segment startpoints. Probably easier to get the actual endpoint location, though?
 - Light and Night theme
 - Add maximum puzzle limit for WP (and remove QuotaExceededError)
 - Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
