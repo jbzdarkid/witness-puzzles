@@ -81,6 +81,7 @@ def validate_and_capture_image(solution_json):
 
   valid = False
   puzzle = ''
+  puzzle_json = None
   try:
     # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
