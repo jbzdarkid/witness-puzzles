@@ -1219,6 +1219,12 @@ document.addEventListener('touchmove', function(event) {
   if (dragging) event.preventDefault()
 }, passive)
 
+// On Android, the touchmove event will fire exactly once, and then not again until you lift your finger.
+// http://uihacker.blogspot.com/2011/01/android-touchmove-event-bug.html
+document.addEventListener('touchstart', function(event) {
+  if (navigator.userAgent.match(/Android/i)) event.preventDefault()
+}, passive)
+
 function dragStart(event, elem) {
   dragging = {
     'x': event.pageX || event.clientX,
