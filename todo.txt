@@ -3,33 +3,47 @@ SHIP BLOCKERS
 - solution->puzzle is happening clientside, not serverside. Stop calling .clearLines() in editor.js and start calling it in publish.html
   Done need testing
 - Disable custom elements code if not complete
+- Verifying puzzles needs to protect a little more against maliciously-crafted data. Sigh.
+  Ensure that every line on the solution path is not a gap ("is connected")
+  Ensure that the solution is "sane" (one continuous line)?
 
 BUGS
-- Light and Night theme
-- Add maximum puzzle limit for WP (and remove QuotaExceededError)
-- Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
-  Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
+- Mid-segment endpoints aren't handled properly if we pass by them, instead of ending at them.
+  Need to add the same sort of fixup that we had for mid-segment startpoints. Probably easier to get the actual endpoint location, though?
 - "Delete this puzzle" confirmation gives the puzzle hash not the puzzle name, which is rather unhelpful.
 - Symmetrical startpoint is drawn over the fade
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
-- Retake all images (due to new background style) [WIP]
-  Also, I should take images in dark theme, and have some way to show the appropriate ones.
-  Some complaints about background color being too close to line color? Make background brighter. Just a bit.
-  Ok, I think it's time for a script to finish this.
 - Make buttons on iOS react to onpointerdown rather than onclick?
   - git g onclick engine/
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
 - Editor grid is off-center when smaller than 4x4 (again)
 - Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
+- Perf:
+  * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
+  * Find a way to make color counts cheaper, *especially* when there are no elements that care.
+  * Webcrow can be much faster if I just *skip regionchecking*. I guess I'll reinstate the skip logic I had before, but be smarter this time -- just denote "one large region" 
+
+FEATURES
+- Reduce puzzle serialization size?
+  Now that I'm entering a stable state (and I honestly could've done this earlier), create a puzzle.serialize2 method which serializes to a base64 (binary) stream. Grid lines should be saved as a bitmap, grid elements can be saved in an array (containing 0s for empty), colors should be saved as hex representations. Settings and symmetry can be saved as a bitfield as well. Include version, so I know if/when it resizes. Declare "v0" as the first version of *this*, don't worry about past backwards compat.
+  Deserialize can read the first character, should be a signal like _ or @ (that means nothing special in JS, but is visible). Ideally, should use the safe character space for URL encoding, so + would be a good choice.
+  Then, base64 encode the data as binary (padding unneeded). This is pretty simple, just add bytes to a data array as you go, then call btoa(String.fromCharCode.apply(null, data)). Actually, I should probably write a class for this. That way I can "add bytes" to it, and then "read bytes" from it. Then I can even have "writeInt" and "readInt" which can read multiple bytes at once, and deal with endianness/etc.  
+- Add OUT_OF_BOUNDS_POLY to puzzle.settings
+  "If true, polyominos may be placed partially off of the grid as an intermediate solution step."
+- Light and Night theme
+- Add maximum puzzle limit for WP (and remove QuotaExceededError)
+- Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
+  Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
+- Retake all images (due to new background style) [WIP]
+  Also, I should take images in dark theme, and have some way to show the appropriate ones.
+  Some complaints about background color being too close to line color? Make background brighter. Just a bit.
+  Ok, I think it's time for a script to finish this.
 - Some graphical indication that cancel actually fired?
   Hard, because we don't have an easy differentation between 'we got results bc cancelled' and 'we got results bc finished'. I guess we could set a flag...
 - Work on speedrunning solver / improving "unique puzzles"
   Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.
   Or I could make a key for the puzzle as a whole? Regardless, not as easy as just hacking the cache key.
-- Perf TODOS:
-  * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
-  * Find a way to make color counts cheaper, *especially* when there are no elements that care.
-  * Webcrow can be much faster if I just *skip regionchecking*. I guess I'll reinstate the skip logic I had before, but be smarter this time -- just denote "one large region" and move on.
+and move on.
 - Editor dot button should act like triangles
   Hard, requires changing when the style changes
 - No need for "Mouse Speed 2D" on mobile.
