@@ -80,7 +80,6 @@ def validate_and_capture_image(solution_json):
   driver.get(f'{request.url_root}validate.html')
 
   valid = False
-  puzzle = ''
   puzzle_json = None
   try:
     # Wait for page to load, then run the script and wait for a response.
