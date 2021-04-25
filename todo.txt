@@ -1,7 +1,5 @@
 SHIP BLOCKERS
 - Tracing is currently broken against edges.
-- solution->puzzle is happening clientside, not serverside. Stop calling .clearLines() in editor.js and start calling it in publish.html
-  Done need testing
 - Disable custom elements code if not complete
 - Verifying puzzles needs to protect a little more against maliciously-crafted data. Sigh.
   Ensure that every line on the solution path is not a gap ("is connected")
