@@ -69,7 +69,7 @@ def refresh():
   puzzle = get_puzzle(display_hash)
   if not puzzle:
     return f'Puzzle {display_hash} not found', 400
-  valid, data = validate_and_capture_image(puzzle.puzzle_json, puzzle.solution_json)
+  valid, data, puzzle_json = validate_and_capture_image(puzzle.solution_json)
   print(f'Re-validated puzzle {display_hash}; valid: {valid}')
   if not valid:
     return data, 400
