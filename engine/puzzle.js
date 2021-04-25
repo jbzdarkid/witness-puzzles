@@ -1,4 +1,6 @@
-class Region {
+namespace(function() {
+
+window.Region = class {
   constructor(length) {
     this.cells = []
     this.grid = []
@@ -27,7 +29,7 @@ class Region {
 //
 // Corners and edges will have a value of true if the line passes through them
 // Cells will contain an object if there is an element in them
-class Puzzle {
+window.Puzzle = class {
   constructor(width, height, pillar=false) {
     if (pillar === true) {
       this.newGrid(2 * width, 2 * height + 1)
@@ -496,3 +498,5 @@ class Puzzle {
     console.info(output)
   }
 }
+
+})
