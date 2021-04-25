@@ -664,7 +664,7 @@ function pushCursor(dx, dy) {
   if (cell == null) return 'nothing'
 
   // Only consider non-endpoints or endpoints which are parallel
-  if ([null, 'top', 'bottom'].includes(cell.end)) {
+  if ([undefined, 'top', 'bottom'].includes(cell.end)) {
     var leftCell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
     if (leftCell == null || leftCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'left', 'top')) return 'left outer wall'
@@ -675,7 +675,7 @@ function pushCursor(dx, dy) {
     }
   }
   // Only consider non-endpoints or endpoints which are parallel
-  if ([null, 'left', 'right'].includes(cell.end)) {
+  if ([undefined, 'left', 'right'].includes(cell.end)) {
     var topCell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
     if (topCell == null || topCell.gap === window.GAP_FULL) {
       if (push(dx, dy, 'top', 'right')) return 'top outer wall'
