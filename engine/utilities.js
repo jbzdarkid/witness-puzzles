@@ -399,7 +399,9 @@ window.loadHeader = function(titleText) {
 
   expandedSettings.appendChild(document.createElement('br'))
 
-  // Custom mechanics
+  // Custom mechanics -- disabled for now
+  localStorage.customMechanics = false
+  /*
   var customMechanics = createCheckbox()
   expandedSettings.appendChild(customMechanics)
   customMechanics.id = 'customMechanics'
@@ -420,6 +422,7 @@ window.loadHeader = function(titleText) {
   mechLabel.style.marginLeft = '6px'
   mechLabel.htmlFor = 'customMechanics'
   mechLabel.innerText = 'Custom mechanics'
+  */
 }
 
 // Automatically solve the puzzle

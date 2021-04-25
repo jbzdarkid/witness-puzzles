@@ -1,12 +1,11 @@
 SHIP BLOCKERS
-- Disable custom elements code if not complete
 - Verifying puzzles needs to protect a little more against maliciously-crafted data. Sigh.
   Ensure that every line on the solution path is not a gap ("is connected")
   Ensure that the solution is "sane" (one continuous line)?
-
-BUGS
 - Mid-segment endpoints aren't handled properly if we pass by them, instead of ending at them.
   Need to add the same sort of fixup that we had for mid-segment startpoints. Probably easier to get the actual endpoint location, though?
+
+BUGS
 - "Delete this puzzle" confirmation gives the puzzle hash not the puzzle name, which is rather unhelpful.
 - Symmetrical startpoint is drawn over the fade
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
@@ -47,6 +46,7 @@ and move on.
   Validation & database additions can be done via github issues + github actions (or some other public forum...)
     Hopefully this can do validation & pictures too.
     images need to be checked in
+- Custom mechanics
 
 Browse
 -- Sorting
