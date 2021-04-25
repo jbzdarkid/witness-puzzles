@@ -30,14 +30,18 @@ window.validate = function(puzzle, quick) {
 
   var puzzleHasStart = false
   var puzzleHasEnd = false
+  var needsRegions = false
+  var monoRegion = new Region(puzzle.width)
+  // These two are both used by validateRegion, so they are saved on the puzzle itself.
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
-  puzzle.sizerCount = null
+
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == null) continue
+      if (!needsRegions && cell.type != 'line' && cell.type != 'triangle') needsRegions = true
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
       if (cell.line > window.LINE_NONE) {
@@ -49,6 +53,8 @@ window.validate = function(puzzle, quick) {
           puzzle.valid = false
           if (quick) return
         }
+      } else {
+        monoRegion.setCell(x, y)
       }
     }
   }
@@ -60,7 +66,11 @@ window.validate = function(puzzle, quick) {
 
   puzzle.invalidElements = []
   puzzle.negations = []
-  var regions = puzzle.getRegions()
+  if (needsRegions) {
+    var regions = puzzle.getRegions()
+  } else {
+    var regions = [monoRegion]
+  }
   console.log('Found', regions.length, 'regions')
   console.debug(regions)
 
