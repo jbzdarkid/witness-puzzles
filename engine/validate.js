@@ -47,6 +47,11 @@ window.validate = function(puzzle, quick) {
       if (cell.line > window.LINE_NONE) {
         if (cell.start === true) puzzleHasStart = true
         if (cell.end != null) puzzleHasEnd = true
+        if (cell.gap > window.GAP_NONE) {
+          console.log('Solution line goes over a gap at', x, y)
+          puzzle.valid = false
+          if (quick) return
+        }
         if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
             (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)

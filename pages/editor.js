@@ -397,9 +397,9 @@ window.onload = function() {
 
   puzzleName.onfocus = function(event) {
     // On initial focus, select all text within the box
-    range = document.createRange()
-    range.selectNodeContents(this)
     window.getSelection().removeAllRanges()
+    var range = document.createRange()
+    range.selectNodeContents(this)
     window.getSelection().addRange(range)
   }
 
@@ -408,9 +408,7 @@ window.onload = function() {
   // Use onkeypress when you need to prevent an action
   puzzleName.onkeypress = function(event) {
     // If the user tries to type past 50 characters
-    if (this.innerText.length >= 50) {
-      event.preventDefault()
-    }
+    if (this.innerText.length >= 50) event.preventDefault()
 
     // Allow using the enter key to confirm the puzzle name
     if (event.key == 'Enter') {
@@ -427,7 +425,7 @@ window.onload = function() {
     if (this.innerText.includes('\n')) this.innerText = this.innerText.replace('\n', '')
     if (this.innerText.includes('\r')) this.innerText = this.innerText.replace('\r', '')
     // Prevent the input box from disappearing
-    if (this.innerText.length === 0) this.innerText = '\u200B'
+    if (this.innerText.length === 0) this.innerText = '\u200B' // Zero-width space
     // Prevent too-long titles
     if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
   }
@@ -437,6 +435,8 @@ window.onload = function() {
     // Remove leading/trailing whitespace
     this.innerText = this.innerText.trim()
     this.innerText = this.innerText.replace('\u200B', '')
+    // Cap the puzzle name length one last time
+    if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
     // Ensure that puzzle names are non-empty
     if (this.innerText.length === 0) this.innerText = 'Unnamed Puzzle'
     // Update the puzzle with the new name
