@@ -1,7 +1,7 @@
 SHIP BLOCKERS
-- Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 
 BUGS
+- Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - "Delete this puzzle" confirmation gives the puzzle hash not the puzzle name, which is rather unhelpful.
 - Symmetrical startpoint is drawn over the fade
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)

@@ -1,12 +1,20 @@
 from pathlib import Path
-import zipfile
-import sys
 import hashlib
+import subprocess
+import sys
+import zipfile
 
 if len(sys.argv) < 2:
   print('Please specify the release version as the first argument, e.g. ./publish.py 1.21')
   exit(-1)
 version = sys.argv[1]
+
+subprocess.run(['git', 'fetch', '--tags'], check=True)
+output = subprocess.run(['git', 'tag', version])
+if output.returncode != 0:
+  print(f'Tag {version} already exists. Please choose another one.')
+  exit(-2)
+subprocess.run(['git', 'push', 'origin', version], check=True)
 
 paths = [
   Path('application.py'),
@@ -55,4 +63,3 @@ for path in all_paths:
     z.write(arcname, path)
 
 z.close()
-
