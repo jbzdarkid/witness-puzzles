@@ -327,12 +327,6 @@ window.Puzzle = class {
     }
   }
 
-  // The grid contains 5 colors:
-  // null: Out of bounds or already processed
-  // 0: In bounds, awaiting processing, but should not be part of the final region.
-  // 1: In bounds, awaiting processing
-  // 2: Gap-2. After _floodFillOutside, this means "treat normally" (it will be null if oob)
-  // 3: Dot (of any kind), otherwise identical to 1.
   _floodFill(x, y, region) {
     // Inlined safety checks so we can get the col, which is slightly more performant.
     x = this._mod(x)
@@ -340,11 +334,11 @@ window.Puzzle = class {
 
     var col = this.grid[x]
     var cell = col[y]
-    if (cell === null) return
-    if (cell !== 0) {
+    if (cell === MASKED_PROCESSEDnull) return
+    if (cell !== MASKED_INB_NONCOUNT0) {
       region.setCell(x, y)
     }
-    col[y] = null
+    col[y] = MASKED_PROCESSEDnull
 
     this._floodFill(x, y + 1, region)
     this._floodFill(x + 1, y, region)
@@ -360,10 +354,10 @@ window.Puzzle = class {
     x = this._mod(x)
     if (!this._safeCell(x, y)) return
     var cell = this.grid[x][y]
-    if (cell === null) return
-    if (x%2 !== y%2 && cell !== 2) return // Only flood-fill through gap-2
-    if (x%2 === 0 && y%2 === 0 && cell === 3) return // Don't flood-fill through dots
-    this.grid[x][y] = null
+    if (cell === MASKED_PROCESSEDnull) return
+    if (x%2 !== y%2 && cell !== MASKED_GAP2) return // Only flood-fill through gap-2
+    if (x%2 === 0 && y%2 === 0 && cell === MASKED_DOT3) return // Don't flood-fill through dots
+    this.grid[x][y] = MASKED_PROCESSEDnull
 
     if (x%2 === 0 && y%2 === 0) return // Don't flood fill through corners
 
@@ -386,7 +380,7 @@ window.Puzzle = class {
       for (var y=0; y<this.height; y++) {
         // Cells are always part of the region
         if (x%2 === 1 && y%2 === 1) {
-          row.push(1)
+          row.push(MASKED_INB_COUNT1)
           continue
         }
 
@@ -394,17 +388,17 @@ window.Puzzle = class {
         if (cell.line > window.LINE_NONE) {
           if (x%2 !== y%2 && cell.end != null) {
             // Traced mid-segment endpoints should not separate the region
-            row.push(0)
+            row.push(MASKED_INB_NONCOUNT0)
           } else {
             // Traced lines should not be a part of the region
-            row.push(null)
+            row.push(MASKED_PROCESSEDnull)
           }
         } else if (cell.gap === window.GAP_FULL) {
-          row.push(2)
+          row.push(MASKED_GAP2)
         } else if (cell.dot > window.DOT_NONE) {
-          row.push(3)
+          row.push(MASKED_DOT3)
         } else {
-          row.push(1)
+          row.push(MASKED_INB_COUNT1)
         }
       }
       this.grid[x] = row
@@ -413,9 +407,9 @@ window.Puzzle = class {
     // Starting at a mid-segment startpoint
     if (this.startPoint != null && this.startPoint.x%2 !== this.startPoint.y%2) {
       if (this.settings.FAT_STARTPOINTS) { // This segment is not in any region (acts as a barrier)
-        this.grid[this.startPoint.x][this.startPoint.y] = null
+        this.grid[this.startPoint.x][this.startPoint.y] = MASKED_OOBnull
       } else { // This segment is part of this region (acts as an empty cell)
-        this.grid[this.startPoint.x][this.startPoint.y] = 0
+        this.grid[this.startPoint.x][this.startPoint.y] = MASKED_INB_NONCOUNT0
       }
     }
 
@@ -444,7 +438,7 @@ window.Puzzle = class {
 
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
-        if (this.grid[x][y] == null) continue
+        if (this.grid[x][y] == MASKED_PROCESSEDnull) continue
 
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.
@@ -462,7 +456,7 @@ window.Puzzle = class {
     if (!this._safeCell(x, y)) return
 
     var savedGrid = this.switchToMaskedGrid()
-    if (this.grid[x][y] == null) {
+    if (this.grid[x][y] == MASKED_PROCESSEDnull) {
       this.grid = savedGrid
       return null
     }
@@ -498,5 +492,18 @@ window.Puzzle = class {
     console.info(output)
   }
 }
+
+// The grid contains 5 colors:
+// null: Out of bounds or already processed
+var MASKED_OOBnull = null
+var MASKED_PROCESSEDnull = null
+// 0: In bounds, awaiting processing, but should not be part of the final region.
+var MASKED_INB_NONCOUNT0 = 0
+// 1: In bounds, awaiting processing
+var MASKED_INB_COUNT1 = 1
+// 2: Gap-2. After _floodFillOutside, this means "treat normally" (it will be null if oob)
+var MASKED_GAP2 = 2
+// 3: Dot (of any kind), otherwise identical to 1. Should not be flood-filled through (why the f do we need this)
+var MASKED_DOT3 = 3
 
 })
