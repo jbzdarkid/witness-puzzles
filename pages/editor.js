@@ -480,7 +480,6 @@ window.onSolvedPuzzle = function(paths) {
 var currentPublishRequest
 window.publishPuzzle = function() {
   // Clone the puzzle to ensure it's not modified while the request is being constructed
-  var puzzleCopy = puzzle.clone()
   var request = new XMLHttpRequest()
   request.onreadystatechange = function() {
     // Don't continue if the request was cancelled or another request was started in the meantime.
@@ -502,9 +501,10 @@ window.publishPuzzle = function() {
   request.open('POST', '/publish', true)
   request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-  var requestBody = 'title=' + puzzleCopy.name
-  delete puzzleCopy.name
-  requestBody += '&solution=' + puzzleCopy.serialize()
+  var requestBody = ''
+  requestBody += 'title=' + puzzle.name
+  delete puzzle.path
+  requestBody += '&solution=' + puzzle.serialize()
 
   request.send(requestBody)
   currentPublishRequest = request
