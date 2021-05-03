@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, send_from_directory
 import os
-from json import dumps as to_json_string
+import json
 from chromedriver_py import binary_path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -84,7 +84,7 @@ def validate_and_capture_image(solution_json):
   try:
     # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-    driver.execute_script(f'validate_and_capture_image({to_json_string(solution_json)})')
+    driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)}, {json.dumps(path_json)})')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
     if result.get_attribute('valid') == 'true':
       # [22:] to remove the "data:image/png;base64," prefix
