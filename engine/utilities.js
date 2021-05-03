@@ -46,6 +46,7 @@ var tracks = {
 var audio = new Audio(src='/data/panel_start_tracing.aac')
 
 window.PLAY_SOUND = function(name) {
+  audio.pause()
   audio.src = tracks[name]
   audio.volume = localStorage.volume
   audio.play()
