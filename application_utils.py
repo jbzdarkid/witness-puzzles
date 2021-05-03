@@ -79,25 +79,17 @@ def validate_and_capture_image(solution_json):
   driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
   driver.get(f'{request.url_root}validate.html')
 
-  valid = False
-  puzzle_json = None
   try:
     # Wait for page to load, then run the script and wait for a response.
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-    driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)}, {json.dumps(path_json)})')
+    driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)})')
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
-    if result.get_attribute('valid') == 'true':
-      # [22:] to remove the "data:image/png;base64," prefix
-      data = BytesIO(b64decode(result.get_attribute('screenshot')[22:]))
-      valid = True
-      puzzle_json = result.get_attribute('puzzle_json')
-    else:
-      data = 'Validation failed.\n'
+    data = json.loads(result.get_attribute('data'))
   except TimeoutException:
-    data = 'Validation timed out.\n'
+    data = {'error': 'Validation timed out'}
 
   driver.quit()
-  return valid, data, puzzle_json
+  return data
 
 def upload_image(img_bytes, display_hash):
   name = display_hash[:2] + '/' + display_hash + '.png'

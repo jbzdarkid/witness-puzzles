@@ -72,15 +72,17 @@ application.register_error_handler(Exception, handle_exception)
 @csrf.exempt
 def publish():
   solution_json = request.form['solution']
-  title = request.form['title']
 
-  valid, data, puzzle_json = validate_and_capture_image(solution_json)
-  if not valid:
-    add_feedback(data)
-    return '', 400
-  else:
-    display_hash = create_puzzle(title, puzzle_json, solution_json, data)
-    return display_hash, 200
+  data = validate_and_capture_image(solution_json)
+  if 'error' in data:
+    return data['error'], 400
+
+  title = data['title']
+  # [22:] to remove the "data:image/png;base64," prefix
+  image = BytesIO(b64decode(data['screenshot'][22:]))
+  puzzle_json = data['puzzle_json']
+  display_hash = create_puzzle(title, puzzle_json, solution_json, image)
+  return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
 
 # Playing published puzzles

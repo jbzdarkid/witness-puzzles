@@ -368,8 +368,9 @@ window.importPuzzle = function(serialized) {
 window.setSolveMode = function(value) {
   document.getElementById('solveMode').checked = value
   if (value === true) {
-    window.TRACE_COMPLETION_FUNC = function(solution) {
+    window.TRACE_COMPLETION_FUNC = function(solution, path) {
       puzzle = solution
+      puzzle.path = path
       document.getElementById('publish').disabled = false
     }
     // Redraw the puzzle, without interaction points. This is a bit of a @Hack, but it works.
@@ -501,12 +502,7 @@ window.publishPuzzle = function() {
   request.open('POST', '/publish', true)
   request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-  var requestBody = ''
-  requestBody += 'title=' + puzzle.name
-  delete puzzle.path
-  requestBody += '&solution=' + puzzle.serialize()
-
-  request.send(requestBody)
+  request.send('solution=' + puzzle.serialize())
   currentPublishRequest = request
 
   var publish = document.getElementById('publish')

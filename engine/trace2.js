@@ -380,7 +380,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           window.PLAY_SOUND('success')
           // !important to override the child animation
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
-          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle)
+          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle, data.path)
         } else {
           window.PLAY_SOUND('fail')
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')

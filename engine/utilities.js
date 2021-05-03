@@ -494,7 +494,10 @@ function showSolution(puzzle, paths, num) {
       }
     }
   }
+
   if (paths[num] != null) {
+    // Save the current path on the puzzle object (so that we can pass it along with publishing)
+    puzzle.path = paths[num]
     // Draws the given path, and also updates the puzzle to have path annotations on it.
     window.drawPath(puzzle, paths[num])
   }

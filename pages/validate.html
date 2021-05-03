@@ -8,30 +8,51 @@
     <script type="text/javascript" src="/engine/validate.js"></script>
     <script type="text/javascript" src="/engine/custom_mechanics.js"></script>
     <script type="text/javascript" src="/engine/display2.js"></script>
+    <script type="text/javascript" src="/engine/solve.js"></script>
+    <script type="text/javascript" src="/engine/trace2.js"></script>
   </head>
   <script>
     window.validate_and_capture_image = function(solution_json) {
       window.setLogLevel('error')
-      var result = document.createElement('p')
-      result.id = 'result'
-      result.valid = false
-      result.puzzle_json = ''
-      try {
-        var solution = Puzzle.deserialize(solution_json)
-        validate(solution, true) // Quick validation, since we aren't actually *showing* this to anyone.
-        result.valid = solution.valid
-        solution.clearLines()
-        result.puzzle_json = solution.serialize()
-      } catch (exc) {
-        console.error(exc.stack)
-      }
-      if (result.valid === false) {
+      var setData = function(data) {
+        var result = document.createElement('p')
+        result.id = 'result'
+        result.data = JSON.stringify(data)
         document.body.append(result)
-        return
       }
 
-      // Solution was valid, continuing with drawing + capturing the image
-      draw(solution)
+      var data = {}
+      try {
+        var puzzle = Puzzle.deserialize(solution_json)
+        var path = JSON.parse(solution_json)['path'] // Path is passed as an extra property on the solution_json
+
+        // Although we were passed a drawn solution object, we clear, redraw, and revalidate to make sure
+        // we weren't passed invalid or malformed data. This javascript is running serverside,
+        // so it's the only safe place to ensure that we don't publish invalid puzzles.
+        window.draw(puzzle)
+        puzzle.clearLines()
+        window.drawPath(puzzle, path)
+        window.validate(puzzle, true) // Quick validation, since we aren't actually *showing* this to anyone.
+      } catch (exc) {
+        data.error = exc.message
+        console.error(exc.stack)
+        return setData(data)
+      }
+      if (puzzle.valid !== true) {
+        data.error = 'Puzzle validation failed due to these elements: ' + JSON.stringify(puzzle.invalidElements)
+        return setData(data)
+      }
+
+      // Solution was valid, go ahead with puzzle creation.
+      // Extract additional properties, then clean the puzzle and redraw for image capture.
+      data.valid = puzzle.valid
+      data.title = puzzle.name
+      puzzle.clearLines()
+      data.puzzle_json = puzzle.serialize()
+      window.draw(puzzle)
+
+      // All of this is just to take a clean screenshot. Since these screenshots are publicly hosted,
+      // it's very important that they're not generated clientside.
       var svg = document.getElementById('puzzle')
       var xml = new XMLSerializer().serializeToString(svg)
       var img = document.getElementById('image')
@@ -43,8 +64,8 @@
         var ctx = canvas.getContext('2d')
         ctx.drawImage(img, 0, 0)
         // Base-64 encode the image, which python should just be able to read.
-        result.screenshot = canvas.toDataURL() // Defaults to PNG, 100%
-        document.body.append(result)
+        data.screenshot = canvas.toDataURL() // Defaults to PNG, 100%
+        return setData(data)
       }
     }
   </script>
