@@ -386,13 +386,7 @@ window.Puzzle = class {
 
         var cell = savedRow[y]
         if (cell.line > window.LINE_NONE) {
-          if (x%2 !== y%2 && cell.end != null) {
-            // Traced mid-segment endpoints should not separate the region
-            row.push(MASKED_INB_NONCOUNT)
-          } else {
-            // Traced lines should not be a part of the region
-            row.push(MASKED_PROCESSED)
-          }
+          row.push(MASKED_PROCESSED) // Traced lines should not be a part of the region
         } else if (cell.gap === window.GAP_FULL) {
           row.push(MASKED_GAP2)
         } else if (cell.dot > window.DOT_NONE) {
@@ -406,11 +400,19 @@ window.Puzzle = class {
 
     // Starting at a mid-segment startpoint
     if (this.startPoint != null && this.startPoint.x%2 !== this.startPoint.y%2) {
-      if (this.settings.FAT_STARTPOINTS) { // This segment is not in any region (acts as a barrier)
+      if (this.settings.FAT_STARTPOINTS) {
+        // This segment is not in any region (acts as a barrier)
         this.grid[this.startPoint.x][this.startPoint.y] = MASKED_OOB
-      } else { // This segment is part of this region (acts as an empty cell)
+      } else {
+        // This segment is part of this region (acts as an empty cell)
         this.grid[this.startPoint.x][this.startPoint.y] = MASKED_INB_NONCOUNT
       }
+    }
+
+    // Ending at a mid-segment endpoint
+    if (this.endPoint != null && this.endPoint.x%2 !== this.endPoint.y%2) {
+      // This segment is part of this region (acts as an empty cell)
+      this.grid[this.endPoint.x][this.endPoint.y] = MASKED_INB_NONCOUNT
     }
 
     // Mark all outside cells as 'not in any region' (aka null)

@@ -368,6 +368,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
     if (cell.end != null && data.bbox.inMain(data.x, data.y)) {
       data.cursor.onpointerdown = null
       setTimeout(function() { // Run validation asynchronously so we can free the pointer immediately.
+        puzzle.endPoint = data.pos
         window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
         for (var negation of puzzle.negations) {

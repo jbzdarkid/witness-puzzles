@@ -864,6 +864,14 @@ var tests = {
     puzzle.grid[5][1] = {'type':'star', 'color':'orange'}
     puzzle.grid[6][1].start = true
     return [puzzle, 4]
+  }, 'regions-with-mid-end2': function() {
+    var puzzle = new Puzzle(3, 1)
+    puzzle.grid[0][1].end = 'left'
+    puzzle.grid[1][1] = {'type':'star', 'color':'orange'}
+    puzzle.grid[2][1].end = 'right'
+    puzzle.grid[5][1] = {'type':'star', 'color':'orange'}
+    puzzle.grid[6][1].start = true
+    return [puzzle, 6]
   }, 'polyominos-with-mid-start': function() {
     var puzzle = new Puzzle(2, 1)
     puzzle.grid[1][1] = {'type':'poly', 'color':'yellow', 'polyshape':17}

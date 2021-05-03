@@ -1,6 +1,4 @@
 SHIP BLOCKERS
-- Mid-segment endpoints aren't handled properly if we pass by them, instead of ending at them.
-  Need to add the same sort of fixup that we had for mid-segment startpoints. Probably easier to get the actual endpoint location, though?
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 
 BUGS

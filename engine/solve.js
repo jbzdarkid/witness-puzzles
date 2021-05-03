@@ -214,6 +214,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 
   if (cell.end != null) {
     path.push(PATH_NONE)
+    puzzle.endPoint = {'x': x, 'y': y}
     window.validate(puzzle, true)
     if (puzzle.valid) solutionPaths.push(path.slice())
     path.pop()
