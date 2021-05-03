@@ -358,6 +358,10 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   // Extract the start data from the first path element
   var x = path[0].x
   var y = path[0].y
+  if (puzzle.getCell(x, y).start !== true) {
+    throw Error('Path does not begin with a startpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + puzzle.getCell(x, y))
+  }
+
   var start = document.getElementById('start_' + target + '_' + x + '_' + y)
   var symStart = document.getElementById('symStart_' + target + '_' + x + '_' + y)
   window.onTraceStart(puzzle, {'x':x, 'y':y}, document.getElementById(target), start, symStart)
@@ -408,6 +412,9 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       var sym = puzzle.getSymmetricalPos(x, y)
       puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
     }
+  }
+  if (puzzle.getCell(x, y).end == null) {
+    throw Error('Path does not end at an endpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + puzzle.getCell(x, y))
   }
 
   var rows = '   |'

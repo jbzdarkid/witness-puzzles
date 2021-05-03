@@ -28,8 +28,6 @@ window.validate = function(puzzle, quick) {
   console.log('Validating', puzzle)
   puzzle.valid = true // Assume valid until we find an invalid element
 
-  var puzzleHasStart = false
-  var puzzleHasEnd = false
   var needsRegions = false
   var monoRegion = new Region(puzzle.width)
   // These two are both used by validateRegion, so they are saved on the puzzle itself.
@@ -45,8 +43,6 @@ window.validate = function(puzzle, quick) {
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
       if (cell.line > window.LINE_NONE) {
-        if (cell.start === true) puzzleHasStart = true
-        if (cell.end != null) puzzleHasEnd = true
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
           puzzle.valid = false
@@ -63,11 +59,6 @@ window.validate = function(puzzle, quick) {
       }
     }
   }
-  if (!puzzleHasStart || !puzzleHasEnd) {
-    console.log('There is no covered start or endpoint')
-    puzzle.valid = false
-    if (quick) return
-  }
 
   puzzle.invalidElements = []
   puzzle.negations = []
@@ -76,7 +67,7 @@ window.validate = function(puzzle, quick) {
   } else {
     var regions = [monoRegion]
   }
-  console.log('Found', regions.length, 'regions')
+  console.log('Found', regions.length, 'region(s)')
   console.debug(regions)
 
   if (puzzle.settings.CUSTOM_MECHANICS) {
