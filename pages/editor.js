@@ -583,7 +583,7 @@ function onElementClicked(event, x, y) {
     }
   } else if (activeParams.type == 'dot') {
     if (x%2 === 1 && y%2 === 1) return
-    var dotColors = [null, 1]
+    var dotColors = [undefined, 1]
     if (puzzle.symmetry != null) {
       dotColors.push(2)
       dotColors.push(3)
@@ -593,7 +593,7 @@ function onElementClicked(event, x, y) {
     puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'gap') {
     if (x%2 === y%2) return
-    puzzle.grid[x][y].gap = getNextValue([null, 1, 2], puzzle.grid[x][y].gap)
+    puzzle.grid[x][y].gap = getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
     puzzle.grid[x][y].dot = null
     puzzle.grid[x][y].start = null
     puzzle.grid[x][y].end = null
