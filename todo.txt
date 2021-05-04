@@ -20,6 +20,7 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
 - RGB filters
 - Reduce puzzle serialization size? [WIP]
   This is the main play I have against people attacking my system -- make it harder to send bad data.
