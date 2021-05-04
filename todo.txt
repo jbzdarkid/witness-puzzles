@@ -1,7 +1,9 @@
 SHIP BLOCKERS
 - trace2.PathSegment needs to use solve's direction values (@Volatile? Make public?). This should fix being unable to publish in manual mode.
+- Cannot scroll the page on Android (revert previous "fix")
 
 BUGS
+- Android dragging is busted (resizing puzzles & manual solving)
 - Log (if not actually show on the button) the error from a failed validation.
 - Improve error message when path is invalid (in solve.js)
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
