@@ -20,6 +20,7 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Put the license *somewhere* into the header, so that if someone clones the repo they don't have to do it.
 - Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
 - RGB filters
 - Reduce puzzle serialization size? [WIP]
