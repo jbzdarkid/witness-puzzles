@@ -3,8 +3,6 @@ SHIP BLOCKERS
 
 BUGS
 - Android dragging is busted (resizing puzzles & manual solving)
-- Log (if not actually show on the button) the error from a failed validation.
-- Improve error message when path is invalid (in solve.js)
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - "Delete this puzzle" confirmation gives the puzzle hash not the puzzle name, which is rather unhelpful.
 - Symmetrical startpoint is drawn over the fade

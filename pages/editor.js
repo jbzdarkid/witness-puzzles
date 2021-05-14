@@ -496,6 +496,7 @@ window.publishPuzzle = function() {
       }
     } else {
       publish.innerText = 'Could not validate puzzle!'
+      console.error(this.responseText)
     }
   }
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
