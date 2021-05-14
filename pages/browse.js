@@ -64,7 +64,7 @@ function loadPuzzles() {
           del.style = 'background: black; color: red'
           del.onclick = function(event) {
             event.preventDefault()
-            var sure = prompt('Are you sure you want to delete puzzle ' + puzzle.display_hash + '?')
+            var sure = prompt('Are you sure you want to delete puzzle ' + puzzle.title + '?')
             if (sure != 'yes' && sure != 'y') return
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {
