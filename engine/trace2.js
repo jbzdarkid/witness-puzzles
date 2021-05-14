@@ -150,7 +150,7 @@ class PathSegment {
         // cx/cy are updated in redraw(), since symPillarCirc tracks the cursor
         this.symPillarCirc.setAttribute('cy', data.symbbox.middle.y)
         this.symPillarCirc.setAttribute('r', 12)
-        var symmetricalDir = data.puzzle.getSymmetricalDir(this.dir)
+        var symmetricalDir = getSymmetricalDir(data.puzzle, this.dir)
         if (data.sym.x === 0 && symmetricalDir === MOVE_RIGHT) {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x1)
           this.symPillarCirc.setAttribute('static', true)
@@ -346,6 +346,21 @@ function clearGrid(svg, puzzle) {
   window.deleteElementsByClassName(svg, 'line-2')
   window.deleteElementsByClassName(svg, 'line-3')
   puzzle.clearLines()
+}
+
+// This copy is an exact copy of puzzle.getSymmetricalDir, except that it deals with MOVE_* values instead of strings
+function getSymmetricalDir(puzzle, dir) {
+  if (puzzle.symmetry != null) {
+    if (puzzle.symmetry.x === true) {
+      if (dir === MOVE_LEFT) return MOVE_RIGHT
+      if (dir === MOVE_RIGHT) return MOVE_LEFT
+    }
+    if (puzzle.symmetry.y === true) {
+      if (dir === MOVE_TOP) return MOVE_BOTTOM
+      if (dir === MOVE_BOTTOM) return MOVE_TOP
+    }
+  }
+  return dir
 }
 
 window.trace = function(event, puzzle, pos, start, symStart=null) {
@@ -597,7 +612,7 @@ window.onMove = function(dx, dy) {
                  || (moveDir === MOVE_BOTTOM && lastDir === MOVE_TOP))
 
     if (data.puzzle.symmetry != null) {
-      var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
+      var symMoveDir = getSymmetricalDir(data.puzzle, moveDir)
     }
 
     // If we backed up, remove a path segment and mark the old cell as unvisited

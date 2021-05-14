@@ -1,7 +1,6 @@
 SHIP BLOCKERS
 - Cannot scroll the page on Android (revert previous "fix")
 - Crash when drawing on "gap1-gap2-symmetrical-tracing"
-- Broken tracing on symmetry-pillar-rotation
 
 BUGS
 - Android dragging is busted (resizing puzzles & manual solving)
