@@ -109,10 +109,10 @@ class PathSegment {
       // cx/cy are updated in redraw(), since pillarCirc tracks the cursor
       this.pillarCirc.setAttribute('cy', data.bbox.middle.y)
       this.pillarCirc.setAttribute('r', 12)
-      if (data.pos.x === 0 && this.dir === 'right') {
+      if (data.pos.x === 0 && this.dir === MOVE_RIGHT) {
         this.pillarCirc.setAttribute('cx', data.bbox.x1)
         this.pillarCirc.setAttribute('static', true)
-      } else if (data.pos.x === data.puzzle.width - 1 && this.dir === 'left') {
+      } else if (data.pos.x === data.puzzle.width - 1 && this.dir === MOVE_LEFT) {
         this.pillarCirc.setAttribute('cx', data.bbox.x2)
         this.pillarCirc.setAttribute('static', true)
       } else {
@@ -151,10 +151,10 @@ class PathSegment {
         this.symPillarCirc.setAttribute('cy', data.symbbox.middle.y)
         this.symPillarCirc.setAttribute('r', 12)
         var symmetricalDir = data.puzzle.getSymmetricalDir(this.dir)
-        if (data.sym.x === 0 && symmetricalDir === 'right') {
+        if (data.sym.x === 0 && symmetricalDir === MOVE_RIGHT) {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x1)
           this.symPillarCirc.setAttribute('static', true)
-        } else if (data.sym.x === data.puzzle.width - 1 && symmetricalDir === 'left') {
+        } else if (data.sym.x === data.puzzle.width - 1 && symmetricalDir === MOVE_LEFT) {
           this.symPillarCirc.setAttribute('cx', data.symbbox.x2)
           this.symPillarCirc.setAttribute('static', true)
         } else {
@@ -163,7 +163,7 @@ class PathSegment {
       }
     }
 
-    if (this.dir === 'none') { // Start point
+    if (this.dir === MOVE_NONE) { // Start point
       this.circ.setAttribute('r', 24)
       this.circ.setAttribute('class', this.circ.getAttribute('class') + ' start')
       if (data.puzzle.symmetry != null) {
@@ -219,13 +219,13 @@ class PathSegment {
 
     // Draw the first-half box
     var points1 = JSON.parse(JSON.stringify(data.bbox.raw))
-    if (this.dir === 'left') {
+    if (this.dir === MOVE_LEFT) {
       points1.x1 = clamp(data.x, data.bbox.middle.x, data.bbox.x2)
-    } else if (this.dir === 'right') {
+    } else if (this.dir === MOVE_RIGHT) {
       points1.x2 = clamp(data.x, data.bbox.x1, data.bbox.middle.x)
-    } else if (this.dir === 'top') {
+    } else if (this.dir === MOVE_TOP) {
       points1.y1 = clamp(data.y, data.bbox.middle.y, data.bbox.y2)
-    } else if (this.dir === 'bottom') {
+    } else if (this.dir === MOVE_BOTTOM) {
       points1.y2 = clamp(data.y, data.bbox.y1, data.bbox.middle.y)
     }
     this.poly1.setAttribute('points',
@@ -239,28 +239,28 @@ class PathSegment {
     var isEnd = (data.puzzle.grid[data.pos.x][data.pos.y].end != null)
     // The second half of the line uses the raw so that it can enter the endpoint properly.
     var points2 = JSON.parse(JSON.stringify(data.bbox.raw))
-    if (data.x < data.bbox.middle.x && this.dir !== 'right') {
+    if (data.x < data.bbox.middle.x && this.dir !== MOVE_RIGHT) {
       points2.x1 = clamp(data.x, data.bbox.x1, data.bbox.middle.x)
       points2.x2 = data.bbox.middle.x
       if (isEnd && data.pos.x%2 === 0 && data.pos.y%2 === 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
-    } else if (data.x > data.bbox.middle.x && this.dir !== 'left') {
+    } else if (data.x > data.bbox.middle.x && this.dir !== MOVE_LEFT) {
       points2.x1 = data.bbox.middle.x
       points2.x2 = clamp(data.x, data.bbox.middle.x, data.bbox.x2)
       if (isEnd && data.pos.x%2 === 0 && data.pos.y%2 === 1) {
         points2.y1 += 17
         points2.y2 -= 17
       }
-    } else if (data.y < data.bbox.middle.y && this.dir !== 'bottom') {
+    } else if (data.y < data.bbox.middle.y && this.dir !== MOVE_BOTTOM) {
       points2.y1 = clamp(data.y, data.bbox.y1, data.bbox.middle.y)
       points2.y2 = data.bbox.middle.y
       if (isEnd && data.pos.x%2 === 1 && data.pos.y%2 === 0) {
         points2.x1 += 17
         points2.x2 -= 17
       }
-    } else if (data.y > data.bbox.middle.y && this.dir !== 'top') {
+    } else if (data.y > data.bbox.middle.y && this.dir !== MOVE_TOP) {
       points2.y1 = data.bbox.middle.y
       points2.y2 = clamp(data.y, data.bbox.middle.y, data.bbox.y2)
       if (isEnd && data.pos.x%2 === 1 && data.pos.y%2 === 0) {
@@ -281,7 +281,7 @@ class PathSegment {
     // Show the second poly only in the second half of the cell
     this.poly2.setAttribute('opacity', (firstHalf ? 0 : 1))
     // Show the circle in the second half of the cell AND in the start
-    if (firstHalf && this.dir !== 'none') {
+    if (firstHalf && this.dir !== MOVE_NONE) {
       this.circ.setAttribute('opacity', 0)
     } else {
       this.circ.setAttribute('opacity', 1)
@@ -381,7 +381,13 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           window.PLAY_SOUND('success')
           // !important to override the child animation
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
-          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle, data.path)
+
+          // Convert the traced path into something suitable for solve.drawPath (for publishing purposes)
+          var rawPath = [puzzle.startPoint]
+          for (var i=1; i<data.path.length; i++) rawPath.push(data.path[i].dir)
+          rawPath.push(0)
+
+          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle, rawPath)
         } else {
           window.PLAY_SOUND('fail')
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
@@ -486,7 +492,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
     data.symcursor.setAttribute('cy', symStart.getAttribute('cy'))
     data.symcursor.setAttribute('r', 12)
   }
-  data.path.push(new PathSegment('none')) // Must be created after initializing data.symbbox
+  data.path.push(new PathSegment(MOVE_NONE)) // Must be created after initializing data.symbbox
 }
 
 var passive = false
@@ -558,6 +564,13 @@ document.onpointerlockchange = function() {
   }
 }
 
+// @Volatile -- must match order of PATH_* in solve
+var MOVE_NONE   = 0
+var MOVE_LEFT   = 1
+var MOVE_RIGHT  = 2
+var MOVE_TOP    = 3
+var MOVE_BOTTOM = 4
+
 window.onMove = function(dx, dy) {
   {
     // Also handles some collision
@@ -571,17 +584,17 @@ window.onMove = function(dx, dy) {
     // Potentially move the location to a new cell, and make absolute boundary checks
     var moveDir = move()
     data.path[data.path.length - 1].redraw()
-    if (moveDir === 'none') break
-    console.debug('Moved', moveDir)
+    if (moveDir === MOVE_NONE) break
+    console.debug('Moved', ['none', 'left', 'right', 'top', 'bottom'][moveDir])
 
     // Potentially adjust data.x/data.y if our position went around a pillar
     if (data.puzzle.pillar === true) pillarWrap(moveDir)
 
     var lastDir = data.path[data.path.length - 1].dir
-    var backedUp = ((moveDir === 'left' && lastDir === 'right')
-                 || (moveDir === 'right' && lastDir === 'left')
-                 || (moveDir === 'top' && lastDir === 'bottom')
-                 || (moveDir === 'bottom' && lastDir === 'top'))
+    var backedUp = ((moveDir === MOVE_LEFT && lastDir === MOVE_RIGHT)
+                 || (moveDir === MOVE_RIGHT && lastDir === MOVE_LEFT)
+                 || (moveDir === MOVE_TOP && lastDir === MOVE_BOTTOM)
+                 || (moveDir === MOVE_BOTTOM && lastDir === MOVE_TOP))
 
     if (data.puzzle.symmetry != null) {
       var symMoveDir = data.puzzle.getSymmetricalDir(moveDir)
@@ -790,19 +803,19 @@ function gapAndSymmetryCollision() {
   }
   if (gapSize === 0) return // Didn't collide with anything
 
-  if (lastDir === 'left') {
+  if (lastDir === MOVE_LEFT) {
     data.x = Math.max(data.bbox.middle.x + gapSize, data.x)
-  } else if (lastDir === 'right') {
+  } else if (lastDir === MOVE_RIGHT) {
     data.x = Math.min(data.x, data.bbox.middle.x - gapSize)
-  } else if (lastDir === 'top') {
+  } else if (lastDir === MOVE_TOP) {
     data.y = Math.max(data.bbox.middle.y + gapSize, data.y)
-  } else if (lastDir === 'bottom') {
+  } else if (lastDir === MOVE_BOTTOM) {
     data.y = Math.min(data.y, data.bbox.middle.y - gapSize)
   }
 }
 
 // Check to see if we've gone beyond the edge of puzzle cell, and if the next cell is safe,
-// i.e. not out of bounds. Reports the direction we are going to move (or 'none'),
+// i.e. not out of bounds. Reports the direction we are going to move (or none),
 // but does not actually change data.pos
 function move() {
   var lastDir = data.path[data.path.length - 1].dir
@@ -812,7 +825,7 @@ function move() {
     if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x1 + 12
-    } else if (cell.line > window.LINE_NONE && lastDir !== 'right') {
+    } else if (cell.line > window.LINE_NONE && lastDir !== MOVE_RIGHT) {
       console.spam('Collided with other line', cell.line)
       data.x = data.bbox.x1 + 12
     } else if (data.puzzle.symmetry != null) {
@@ -823,14 +836,14 @@ function move() {
       }
     }
     if (data.x < data.bbox.x1) {
-      return 'left'
+      return MOVE_LEFT
     }
   } else if (data.x > data.bbox.x2 - 12) { // Moving right
     var cell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
     if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.x = data.bbox.x2 - 12
-    } else if (cell.line > window.LINE_NONE && lastDir !== 'left') {
+    } else if (cell.line > window.LINE_NONE && lastDir !== MOVE_LEFT) {
       console.spam('Collided with other line', cell.line)
       data.x = data.bbox.x2 - 12
     } else if (data.puzzle.symmetry != null) {
@@ -841,14 +854,14 @@ function move() {
       }
     }
     if (data.x > data.bbox.x2) {
-      return 'right'
+      return MOVE_RIGHT
     }
   } else if (data.y < data.bbox.y1 + 12) { // Moving up
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
     if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2', cell)
       data.y = data.bbox.y1 + 12
-    } else if (cell.line > window.LINE_NONE && lastDir !== 'bottom') {
+    } else if (cell.line > window.LINE_NONE && lastDir !== MOVE_BOTTOM) {
       console.spam('Collided with other line', cell.line)
       data.y = data.bbox.y1 + 12
     } else if (data.puzzle.symmetry != null) {
@@ -859,14 +872,14 @@ function move() {
       }
     }
     if (data.y < data.bbox.y1) {
-      return 'top'
+      return MOVE_TOP
     }
   } else if (data.y > data.bbox.y2 - 12) { // Moving down
     var cell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
     if (cell == null || cell.type !== 'line' || cell.gap === window.GAP_FULL) {
       console.spam('Collided with outside / gap-2')
       data.y = data.bbox.y2 - 12
-    } else if (cell.line > window.LINE_NONE && lastDir !== 'top') {
+    } else if (cell.line > window.LINE_NONE && lastDir !== MOVE_TOP) {
       console.spam('Collided with other line', cell.line)
       data.y = data.bbox.y2 - 12
     } else if (data.puzzle.symmetry != null) {
@@ -877,20 +890,20 @@ function move() {
       }
     }
     if (data.y > data.bbox.y2) {
-      return 'bottom'
+      return MOVE_BOTTOM
     }
   }
-  return 'none'
+  return MOVE_NONE
 }
 
 // Check to see if you moved beyond the edge of a pillar.
 // If so, wrap the cursor x to preserve momentum.
 // Note that this still does not change the position.
 function pillarWrap(moveDir) {
-  if (moveDir === 'left' && data.pos.x === 0) {
+  if (moveDir === MOVE_LEFT && data.pos.x === 0) {
     data.x += data.puzzle.width * 41
   }
-  if (moveDir === 'right' && data.pos.x === data.puzzle.width - 1) {
+  if (moveDir === MOVE_RIGHT && data.pos.x === data.puzzle.width - 1) {
     data.x -= data.puzzle.width * 41
   }
 }
@@ -899,7 +912,7 @@ function pillarWrap(moveDir) {
 // Note that this doesn't zero the momentum, so that we can adjust appropriately on further loops.
 // This function also shifts the bounding box that we use to determine the bounds of the cell.
 function changePos(bbox, pos, moveDir) {
-  if (moveDir === 'left') {
+  if (moveDir === MOVE_LEFT) {
     pos.x--
     // Wrap around the left
     if (data.puzzle.pillar === true && pos.x < 0) {
@@ -909,7 +922,7 @@ function changePos(bbox, pos, moveDir) {
     } else {
       bbox.shift('left', (pos.x%2 === 0 ? 24 : 58))
     }
-  } else if (moveDir === 'right') {
+  } else if (moveDir === MOVE_RIGHT) {
     pos.x++
     // Wrap around to the right
     if (data.puzzle.pillar === true && pos.x >= data.puzzle.width) {
@@ -919,10 +932,10 @@ function changePos(bbox, pos, moveDir) {
     } else {
       bbox.shift('right', (pos.x%2 === 0 ? 24 : 58))
     }
-  } else if (moveDir === 'top') {
+  } else if (moveDir === MOVE_TOP) {
     pos.y--
     bbox.shift('top', (pos.y%2 === 0 ? 24 : 58))
-  } else if (moveDir === 'bottom') {
+  } else if (moveDir === MOVE_BOTTOM) {
     pos.y++
     bbox.shift('bottom', (pos.y%2 === 0 ? 24 : 58))
   }

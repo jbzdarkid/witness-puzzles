@@ -1,5 +1,6 @@
 namespace(function() {
 
+// @Volatile -- must match order of MOVE_* in trace2
 var PATH_NONE   = 0
 var PATH_LEFT   = 1
 var PATH_RIGHT  = 2
@@ -360,14 +361,14 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   var x = path[0].x
   var y = path[0].y
   if (puzzle.getCell(x, y).start !== true) {
-    throw Error('Path does not begin with a startpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + puzzle.getCell(x, y))
+    throw Error('Path does not begin with a startpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + JSON.stringify(puzzle.getCell(x, y)))
   }
 
   var start = document.getElementById('start_' + target + '_' + x + '_' + y)
   var symStart = document.getElementById('symStart_' + target + '_' + x + '_' + y)
   window.onTraceStart(puzzle, {'x':x, 'y':y}, document.getElementById(target), start, symStart)
 
-  console.info('Drawing solution')
+  console.info('Drawing solution of length', path.length)
   for (var i=1; i<path.length; i++) {
     var cell = puzzle.getCell(x, y)
 
@@ -415,7 +416,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     }
   }
   if (puzzle.getCell(x, y).end == null) {
-    throw Error('Path does not end at an endpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + puzzle.getCell(x, y))
+    throw Error('Path does not end at an endpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + JSON.stringify(puzzle.getCell(x, y)))
   }
 
   var rows = '   |'

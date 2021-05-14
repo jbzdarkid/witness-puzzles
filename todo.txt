@@ -1,5 +1,4 @@
 SHIP BLOCKERS
-- trace2.PathSegment needs to use solve's direction values (@Volatile? Make public?). This should fix being unable to publish in manual mode.
 - Cannot scroll the page on Android (revert previous "fix")
 
 BUGS
