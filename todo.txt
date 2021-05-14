@@ -1,11 +1,12 @@
 SHIP BLOCKERS
 - Cannot scroll the page on Android (revert previous "fix")
+- Crash when drawing on "gap1-gap2-symmetrical-tracing"
+- Broken tracing on symmetry-pillar-rotation
 
 BUGS
 - Android dragging is busted (resizing puzzles & manual solving)
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - "Delete this puzzle" confirmation gives the puzzle hash not the puzzle name, which is rather unhelpful.
-- Symmetrical startpoint is drawn over the fade
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Make buttons on iOS react to onpointerdown rather than onclick?
   - git g onclick engine/

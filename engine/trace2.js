@@ -486,7 +486,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
       sym = true)
 
     data.symcursor = createElement('circle')
-    svg.appendChild(data.symcursor)
+    svg.insertBefore(data.symcursor, data.cursor)
     data.symcursor.setAttribute('class', 'line-3 ' + data.svg.id)
     data.symcursor.setAttribute('cx', symStart.getAttribute('cx'))
     data.symcursor.setAttribute('cy', symStart.getAttribute('cy'))
