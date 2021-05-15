@@ -1216,16 +1216,10 @@ document.addEventListener('touchmove', function(event) {
   if (dragging) event.preventDefault()
 }, passive)
 
-// On Android, the touchmove event will fire exactly once, and then not again until you lift your finger.
-// https://uihacker.blogspot.com/2011/01/android-touchmove-event-bug.html
-document.addEventListener('touchstart', function(event) {
-  if (navigator.userAgent.match(/Android/i)) event.preventDefault()
-}, passive)
-
 function dragStart(event, elem) {
   dragging = {
-    'x': event.pageX || event.clientX,
-    'y': event.pageY || event.clientY,
+    'x': event.pageX || event.clientX || event.touches[0].pageX,
+    'y': event.pageY || event.clientY || event.touches[0].pageY,
   }
   console.log('Drag started at', dragging.x, dragging.y)
 
@@ -1255,8 +1249,8 @@ function dragEnd(event, elem) {
 
 function dragMove(event, elem) {
   var newDragging = {
-    'x': event.pageX || event.clientX,
-    'y': event.pageY || event.clientY,
+    'x': event.pageX || event.clientX || event.touches[0].pageX,
+    'y': event.pageY || event.clientY || event.touches[0].pageY,
   }
   console.spam(newDragging.x, newDragging.y)
   if (event.buttons === 0) return dragEnd(event, elem)

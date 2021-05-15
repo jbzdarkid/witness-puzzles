@@ -16,14 +16,6 @@ Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMove
 Event.prototype.isRightClick = function() {
   return this.which === 3 || (this.touches && this.touches.length > 1)
 }
-Element.prototype.requestPointerLock = Element.prototype.requestPointerLock || Element.prototype.mozRequestPointerLock || function() {
-  document.pointerLockElement = this
-  document.onpointerlockchange()
-}
-document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || function() {
-  document.pointerLockElement = null
-  document.onpointerlockchange()
-}
 /*** End cross-compatibility ***/
 
 // https://stackoverflow.com/q/12571650

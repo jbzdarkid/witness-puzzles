@@ -348,7 +348,7 @@ function clearGrid(svg, puzzle) {
   puzzle.clearLines()
 }
 
-// This copy is an exact copy of puzzle.getSymmetricalDir, except that it deals with MOVE_* values instead of strings
+// This copy is an exact copy of puzzle.getSymmetricalDir, except that it uses MOVE_* values instead of strings
 function getSymmetricalDir(puzzle, dir) {
   if (puzzle.symmetry != null) {
     if (puzzle.symmetry.x === true) {
@@ -364,7 +364,8 @@ function getSymmetricalDir(puzzle, dir) {
 }
 
 window.trace = function(event, puzzle, pos, start, symStart=null) {
-  if (document.pointerLockElement == null) { // Started tracing a solution
+  /*if (data.start == null) {*/
+  if (data.tracing !== true) { // could be undefined or false
     var svg = start.parentElement
     data.tracing = true
     window.PLAY_SOUND('start')
@@ -372,7 +373,8 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
     clearGrid(svg, puzzle)
     onTraceStart(puzzle, pos, svg, start, symStart)
     data.animations.insertRule('.' + svg.id + '.start {animation: 150ms 1 forwards start-grow}\n')
-    start.requestPointerLock()
+
+    hookMovementEvents(start)
   } else {
     event.stopPropagation()
     // Signal the onMouseMove to stop accepting input (race condition)
@@ -423,10 +425,11 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
       data.cursor.onpointerdown = function(event) {
         if (start.parentElement !== data.svg) return // Another puzzle is live, so data is gone
         data.tracing = true
-        start.requestPointerLock()
+        hookMovementEvents(start)
       }
     }
-    document.exitPointerLock()
+
+    unhookMovementEvents()
   }
 }
 
@@ -510,71 +513,72 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
   data.path.push(new PathSegment(MOVE_NONE)) // Must be created after initializing data.symbbox
 }
 
-var passive = false
-try {
-  window.addEventListener('test', null, Object.defineProperty({}, 'passive', {
-    get: function() {
-      passive = {passive: false}
-    }
-  }))
-} catch {/* empty */}
-
-function isEventWithinPuzzle(event) {
-  for (var node = event.target; node != null; node = node.parentElement) {
-    if (node == data.svg) return true
-  }
-  return false
+// In case the user exit the pointer lock via another means (clicking outside the window, hitting esc, etc)
+// we still need to disengage our tracing hooks.
+document.onpointerlockchange = function() {
+  if (document.pointerLockElement == null) unhookMovementEvents()
 }
 
-document.addEventListener('touchmove', function() {
-  if (data.tracing !== true) return
-  // Prevent scrolling if the touch event is within the puzzle.
-  if (isEventWithinPuzzle(event)) event.preventDefault()
-}, passive)
+function unhookMovementEvents() {
+  data.start = null
+  document.onmousemove = null
+  document.ontouchstart = null
+  document.ontouchmove = null
+  document.ontouchend = null
+  if (document.exitPointerLock != null) document.exitPointerLock()
+  if (document.mozExitPointerLock != null) document.mozExitPointerLock()
+}
 
-// On Android, the touchmove event will fire exactly once, and then not again until you lift your finger.
-// https://uihacker.blogspot.com/2011/01/android-touchmove-event-bug.html
-document.addEventListener('touchstart', function(event) {
-  if (navigator.userAgent.match(/Android/i)) event.preventDefault()
-}, passive)
+function hookMovementEvents(start) {
+  data.start = start
+  if (start.requestPointerLock != null) start.requestPointerLock()
+  if (start.mozRequestPointerLock != null) start.mozRequestPointerLock()
 
-document.onpointerlockchange = function() {
-  if (document.pointerLockElement == null) {
-    document.onmousemove = null
-    document.ontouchstart = null
-    document.ontouchmove = null
-    document.ontouchend = null
-  } else {
-    var sens = parseFloat(document.getElementById('sens').value)
-    document.onmousemove = function(event) {
-      // Working around a race condition where movement events fire after the handler is removed.
-      if (data.tracing !== true) return
-      // Prevent accidental fires on ios (which is handled via ontouchmove).
-      if (event.movementX == null) return
-      onMove(sens * event.movementX, sens * event.movementY)
+  var sens = parseFloat(document.getElementById('sens').value)
+  document.onmousemove = function(event) {
+    // Working around a race condition where movement events fire after the handler is removed.
+    if (data.tracing !== true) return
+    // Prevent accidental fires on mobile platforms (ios and android). They will be handled via ontouchmove instead.
+    if (event.movementX == null) return
+    onMove(sens * event.movementX, sens * event.movementY)
+  }
+  document.ontouchstart = function(event) {
+    if (event.touches.length > 1) {
+      // Stop tracing for two+ finger touches (the equivalent of a right click on desktop)
+      window.trace(event, data.puzzle, null, null, null)
+      return
     }
-    document.ontouchstart = function(event) {
-      if (event.touches.length > 1) {
-        // Stop tracing for two+ finger touches (the equivalent of a right click on desktop)
-        window.trace(event, data.puzzle, null, null, null)
-        return
+    data.lastTouchPos = {
+      'x': event.pageX || event.touches[0].pageX,
+      'y': event.pageY || event.touches[0].pageY,
+    }
+  }
+  document.ontouchmove = function(event) {
+    if (data.tracing !== true) return
+
+    var eventIsWithinPuzzle = false
+    for (var node = event.target; node != null; node = node.parentElement) {
+      if (node == data.svg) {
+        eventIsWithinPuzzle = true
+        break
       }
-      data.lastTouchPos = {'x': event.pageX, 'y': event.pageY}
     }
-    document.ontouchmove = function(event) {
-      if (data.tracing !== true) return
-      if (!isEventWithinPuzzle(event)) return
-      var newPos = {'x': event.pageX, 'y': event.pageY}
-      onMove(newPos.x - data.lastTouchPos.x, newPos.y - data.lastTouchPos.y)
-      data.lastTouchPos = newPos
+    if (!eventIsWithinPuzzle) return // Ignore drag events that aren't within the puzzle
+    event.preventDefault() // Prevent accidental scrolling if the touch event is within the puzzle.
+
+    var newPos = {
+      'x': event.pageX || event.touches[0].pageX,
+      'y': event.pageY || event.touches[0].pageY,
     }
-    document.ontouchend = function(event) {
-      data.lastTouchPos = null
-      // Only call window.trace (to stop tracing) if we're really in an endpoint.
-      var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
-      if (cell.end != null && data.bbox.inMain(data.x, data.y)) {
-        window.trace(event, data.puzzle, null, null, null)
-      }
+    onMove(newPos.x - data.lastTouchPos.x, newPos.y - data.lastTouchPos.y)
+    data.lastTouchPos = newPos
+  }
+  document.ontouchend = function(event) {
+    data.lastTouchPos = null
+    // Only call window.trace (to stop tracing) if we're really in an endpoint.
+    var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
+    if (cell.end != null && data.bbox.inMain(data.x, data.y)) {
+      window.trace(event, data.puzzle, null, null, null)
     }
   }
 }
