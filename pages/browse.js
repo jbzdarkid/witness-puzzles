@@ -62,7 +62,7 @@ function loadPuzzles() {
           var del = document.createElement('button')
           del.innerText = 'X'
           del.style = 'background: black; color: red'
-          del.onclick = function(event) {
+          del.onpointerdown = function(event) {
             event.preventDefault()
             var sure = prompt('Are you sure you want to delete puzzle ' + puzzle.title + '?')
             if (sure != 'yes' && sure != 'y') return
@@ -85,7 +85,7 @@ function loadPuzzles() {
 
           var ref = document.createElement('span')
           ref.innerHTML = '&#128260;'
-          ref.onclick = function(event) {
+          ref.onpointerdown = function(event) {
             event.preventDefault()
             var request = new XMLHttpRequest()
             request.onreadystatechange = function() {

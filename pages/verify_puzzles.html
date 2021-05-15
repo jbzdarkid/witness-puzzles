@@ -16,8 +16,8 @@
   <body>
     <script>window.puzzles = {{ puzzles|safe }}</script>
     <script>loadHeader('Verifying...')</script>
-    <button onclick="deletePuzzle()">Delete puzzle</button>
-    <button onclick="findPuzzle()">Find puzzle</button>
+    <button onpointerdown="deletePuzzle()">Delete puzzle</button>
+    <button onpointerdown="findPuzzle()">Find puzzle</button>
     <div style="display: flex; justify-content: center; align-items: center">
       <svg id="puzzle" style="pointer-events: auto"></svg>
     </div>

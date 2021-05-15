@@ -112,7 +112,7 @@ window.GAP_FULL      = 2
 
 var animations = ''
 var l = function(line) {animations += line + '\n'}
-// pointer-events: none; allows for onclick events to bubble up (so that editor hooks still work)
+// pointer-events: none; allows for events to bubble up (so that editor hooks still work)
 l('.line-1 {')
 l('  fill: ' + window.LINE_DEFAULT + ';')
 l('  pointer-events: none;')
@@ -250,7 +250,7 @@ window.loadHeader = function(titleText) {
     navbar.style.position = 'fixed' // When browsing, pin the navbar to the top so that it's visible during infinite scroll.
 
     link.innerText = 'Create a puzzle'
-    link.onclick = function() {window.location = '/editor.html'}
+    link.onpointerdown = function() {window.location = '/editor.html'}
 
     var link2 = document.createElement('label')
     navbar.appendChild(link2)
@@ -258,14 +258,14 @@ window.loadHeader = function(titleText) {
     link2.className = 'navbar-content'
     link2.innerText = 'Jump to top'
     link2.id = 'scrollToTop'
-    link2.onclick = function() {window.scrollTo(0, 0)}
+    link2.onpointerdown = function() {window.scrollTo(0, 0)}
 
   } else if (window.location.href.includes('/play/')) {
     link.innerText = 'Back to all puzzles'
-    link.onclick = function() {window.location = '/browse.html'}
+    link.onpointerdown = function() {window.location = '/browse.html'}
   } else /* All other pages */ {
     link.innerText = 'Browse all puzzles'
-    link.onclick = function() {window.location = '/browse.html'}
+    link.onpointerdown = function() {window.location = '/browse.html'}
   }
 
   var feedbackButton = document.createElement('label')
@@ -273,7 +273,7 @@ window.loadHeader = function(titleText) {
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
-  feedbackButton.onclick = function () {
+  feedbackButton.onpointerdown = function () {
     var feedback = prompt('Provide feedback:')
     if (feedback) {
       window.FEEDBACK(feedback)
@@ -291,14 +291,14 @@ window.loadHeader = function(titleText) {
   sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
   sourceLink.innerText = 'Source code'
   sourceLink.className = 'navbar-content'
-  sourceLink.onclick = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
+  sourceLink.onpointerdown = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
 
   var collapsedSettings = drawSymbol({'type': 'plus', 'width':20, 'height':20})
   navbar.appendChild(collapsedSettings)
   collapsedSettings.style = 'width: 20px; height: 20px; position: absolute; left: 0; cursor: pointer'
   collapsedSettings.style.border = '2px solid ' + window.BORDER
   collapsedSettings.id = 'collapsedSettings'
-  collapsedSettings.onclick = function() {
+  collapsedSettings.onpointerdown = function() {
     this.style.display = 'none'
     var expandedSettings = document.getElementById('expandedSettings')
     expandedSettings.style.display = null
@@ -315,7 +315,7 @@ window.loadHeader = function(titleText) {
   var minus = drawSymbol({'type':'minus', 'width':20, 'height':20})
   minus.style = 'width: 20px; height: 20px; cursor: pointer; position: absolute; top: 0; left: 0'
   expandedSettings.appendChild(minus)
-  minus.onclick = function() {
+  minus.onpointerdown = function() {
     this.parentElement.style.display = 'none'
     var collapsedSettings = document.getElementById('collapsedSettings')
     collapsedSettings.style.display = null
@@ -323,7 +323,7 @@ window.loadHeader = function(titleText) {
   }
 
   if (localStorage.expandedSettings == 'true') {
-    collapsedSettings.onclick()
+    collapsedSettings.onpointerdown()
   }
 
   // Now, for the contents of the settings
@@ -342,13 +342,13 @@ window.loadHeader = function(titleText) {
   expandedSettings.appendChild(themeButton)
   if (localStorage.theme === 'true') {
     themeButton.innerText = 'Dark theme'
-    themeButton.onclick = function() {
+    themeButton.onpointerdown = function() {
       localStorage.theme = 'false'
       location.reload()
     }
   } else {
     themeButton.innerText = 'Light theme'
-    themeButton.onclick = function() {
+    themeButton.onpointerdown = function() {
       localStorage.theme = 'true'
       location.reload()
     }
@@ -432,9 +432,9 @@ window.solvePuzzle = function() {
   document.getElementById('solutionViewer').style.display = 'none'
   document.getElementById('progressBox').style.display = null
   document.getElementById('solveAuto').innerText = 'Cancel Solving'
-  document.getElementById('solveAuto').onclick = function() {
+  document.getElementById('solveAuto').onpointerdown = function() {
     this.innerText = 'Cancelling...'
-    this.onclick = null
+    this.onpointerdown = null
     window.setTimeout(window.cancelSolving, 0)
   }
 
@@ -447,7 +447,7 @@ window.solvePuzzle = function() {
     document.getElementById('progressPercent').innerText = '0%'
     document.getElementById('progress').style.width = '0%'
     document.getElementById('solveAuto').innerText = 'Solve (automatically)'
-    document.getElementById('solveAuto').onclick = solvePuzzle
+    document.getElementById('solveAuto').onpointerdown = solvePuzzle
 
     window.puzzle.autoSolved = true
     paths = window.onSolvedPuzzle(paths)
@@ -480,14 +480,14 @@ function showSolution(puzzle, paths, num) {
     if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
-    previousSolution.onclick = function(event) {
+    previousSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
         showSolution(puzzle, paths, num - 10)
       } else {
         showSolution(puzzle, paths, num - 1)
       }
     }
-    nextSolution.onclick = function(event) {
+    nextSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
         showSolution(puzzle, paths, num + 10)
       } else {
@@ -548,7 +548,7 @@ window.addSolveButtons = function() {
   parent.appendChild(solveAuto)
   solveAuto.id = 'solveAuto'
   solveAuto.innerText = 'Solve (automatically)'
-  solveAuto.onclick = solvePuzzle
+  solveAuto.onpointerdown = solvePuzzle
   solveAuto.style = 'margin-right: 8px'
 
   var div = document.createElement('div')

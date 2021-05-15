@@ -83,14 +83,14 @@ function showSolution(puzzle, paths, num, side) {
     if (paths.length >= window.MAX_SOLUTIONS) solutionCount.innerText += '+'
     previousSolution.disabled = false
     nextSolution.disabled = false
-    previousSolution.onclick = function(event) {
+    previousSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
         showSolution(puzzle, paths, num - 10, side)
       } else {
         showSolution(puzzle, paths, num - 1, side)
       }
     }
-    nextSolution.onclick = function(event) {
+    nextSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
         showSolution(puzzle, paths, num + 10, side)
       } else {

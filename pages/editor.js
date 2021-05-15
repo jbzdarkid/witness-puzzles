@@ -178,7 +178,7 @@ function reloadPuzzle() {
   var publish = document.getElementById('publish')
   publish.disabled = true
   publish.innerText = 'Publish'
-  publish.onclick = publishPuzzle
+  publish.onpointerdown = publishPuzzle
   currentPublishRequest = null
 
   var puzzleStyle = document.getElementById('puzzleStyle')
@@ -491,7 +491,7 @@ window.publishPuzzle = function() {
     if (this.status === 200) {
       publish.innerText = 'Published, click here to play your puzzle!'
       var url = '/play/' + this.responseText
-      publish.onclick = function() {
+      publish.onpointerdown = function() {
         window.location = url
       }
     } else {
@@ -507,7 +507,7 @@ window.publishPuzzle = function() {
   currentPublishRequest = request
 
   var publish = document.getElementById('publish')
-  publish.onclick = null
+  publish.onpointerdown = null
   publish.innerText = 'Validating puzzle...'
 }
 

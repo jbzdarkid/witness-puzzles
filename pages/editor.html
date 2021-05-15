@@ -24,9 +24,9 @@
       <tr>
         <td style="text-align: center;">
           <div id="metaButtons" style="display:inline">
-            <button id="newButton" onclick="createEmptyPuzzle()">New</button>
-            <button id="loadButton" onclick="loadPuzzle()">Load</button>
-            <button id="deleteButton" onclick="deletePuzzle()">Delete</button>
+            <button id="newButton" onpointerdown="createEmptyPuzzle()">New</button>
+            <button id="loadButton" onpointerdown="loadPuzzle()">Load</button>
+            <button id="deleteButton" onpointerdown="deletePuzzle()">Delete</button>
           </div>
           <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
           <select id="puzzleStyle" onchange="createEmptyPuzzle()">
@@ -103,7 +103,7 @@
         </td>
       </tr><tr>
         <td style="text-align:center;">
-          <button id="publish" onclick="publishPuzzle()" disabled>Publish</button>
+          <button id="publish" onpointerdown="publishPuzzle()" disabled>Publish</button>
         </td>
       </tr>
     </table>

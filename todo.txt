@@ -5,8 +5,6 @@ BUGS
 - Android dragging is busted (resizing puzzles & manual solving)
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
-- Make buttons on iOS react to onpointerdown rather than onclick?
-  - git g onclick engine/
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
 - Editor grid is off-center when smaller than 4x4 (again)
 - Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
