@@ -1,7 +1,10 @@
-# Whenever you update the version, ssh in and
-sudo vim /etc/httpd/conf.d/wsgi.conf
+### Steps to update:
+# py update.py <version>
+# https://us-west-2.console.aws.amazon.com/elasticbeanstalk/home?region=us-west-2
+# ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@witnesspuzzles.com
+# sudo vim /etc/httpd/conf.d/wsgi.conf
 # Move the WsgiDaemonProcess outside of the </VirtualHost> section
-Restart the server from AWS
+# Restart the server from AWS
 
 Server setup:
 
