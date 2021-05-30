@@ -32,6 +32,8 @@ window.drawSymbolWithSvg = function(svg, params, customMechanics) {
   else if (params.type == 'bridge' && customMechanics) bridge(svg, params)
   else if (params.type == 'arrow'  && customMechanics) arrow(svg, params)
   else if (params.type == 'sizer'  && customMechanics) sizer(svg, params)
+  else if (params.type == 'cross'  && customMechanics) cross(svg, params)
+  else if (params.type == 'curve'  && customMechanics) curve(svg, params)
   else {console.error('Cannot draw unknown SVG type: ' + params.type)}
 }
 
@@ -422,3 +424,27 @@ function sizer(svg, params) {
 }
 
 })
+
+function cross(svg, params) {
+  var hex = createElement('polygon')
+  svg.appendChild(hex)
+  hex.setAttribute('points', '-12 -2.5,-12 2.5,-2.5 2.5,-2.5 12.5,2.5 12.5,2.5 2.5,12.5 2.5,12.5 -2.5,2.5 -2.5,2.5 -12.5,-2.5 -12.5,-2.5 -2.5')
+  hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
+  hex.setAttribute('fill', params.color)
+  hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
+  hex.setAttribute('style', 'pointer-events:none;')
+}
+
+function curve(svg, params) {
+  var hex = createElement('polygon')
+  svg.appendChild(hex)
+  hex.setAttribute('points', '-10 0,0 -10,10 0,0 10,0 5,-5 0,0 -5,5,0 0 5,0,10')
+  hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
+  hex.setAttribute('fill', params.color)
+  hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
+  hex.setAttribute('style', 'pointer-events:none;')
+}
