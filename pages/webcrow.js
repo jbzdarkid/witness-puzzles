@@ -75,9 +75,15 @@ function onElementClicked(event, x, y) {
   if (puzzle.grid[x][y] != null && puzzle.grid[x][y].count != null) {
     count = puzzle.grid[x][y].count
   }
-  count += (event.isRightClick() ? -1 : 1)
-  if (count < 0) count = 3
-  if (count > 3) count = 0
+  if (event.isRightClick()) {
+    count += 3
+  } else if (event.which === 2) {
+    count += 2
+  } else {
+    count += 1
+  }
+  count = count % 4
+
   if (count === 0) {
     puzzle.grid[x][y] = null
   } else {
