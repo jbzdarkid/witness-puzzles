@@ -477,6 +477,7 @@ function download(filename, text) {
 
 window.savePuzzle = function() {
   // instead of publish, we save this puzzle
+  puzzle.theme = document.getElementById('puzzleTheme').innerHTML
   download("puzzle.json", puzzle.serialize())
 }
 
