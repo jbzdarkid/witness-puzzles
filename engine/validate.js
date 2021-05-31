@@ -43,6 +43,10 @@ window.validate = function(puzzle, quick) {
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
       if (cell.line > window.LINE_NONE) {
+        if (cell.dot < window.DOT_NONE && puzzle.settings.CUSTOM_MECHANICS) { // custom: check for line go over
+          window.preValidateAltDots(puzzle, cell, {'x': x, 'y': y}, quick)
+          if (quick && !puzzle.valid) return
+        }
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
           puzzle.valid = false
@@ -255,7 +259,7 @@ function regionCheck(puzzle, region, quick) {
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
-
+    
     // Check for uncovered dots
     if (cell.dot > window.DOT_NONE) {
       console.log('Dot at', pos.x, pos.y, 'is not covered')
@@ -336,6 +340,7 @@ function regionCheck(puzzle, region, quick) {
     window.validateBridges(puzzle, region, regionData)
     window.validateArrows(puzzle, region, regionData)
     window.validateSizers(puzzle, region, regionData)
+    window.validateAltDots(puzzle, region, regionData, quick)
   }
 
   console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')

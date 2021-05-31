@@ -1,24 +1,25 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
   <head>
     <meta name="robots" content="nosnippet"/>
-    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
-    <link rel="icon" type="image/png" href="/data/favicon.png">
-    <script type="text/javascript" src="/engine/utilities.js"></script>
-    <script type="text/javascript" src="/engine/svg.js"></script>
-    <script async type="text/javascript" src="/engine/polyominos.js"></script>
-    <script async type="text/javascript" src="/engine/puzzle.js"></script>
-    <script async type="text/javascript" src="/engine/solve.js"></script>
-    <script async type="text/javascript" src="/engine/validate.js"></script>
-    <script async type="text/javascript" src="/engine/custom_mechanics.js"></script>
-    <script async type="text/javascript" src="/engine/display2.js"></script>
-    <script async type="text/javascript" src="/engine/trace2.js"></script>
+    <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./theme/0.css" id="theme">
+    <link rel="icon" type="image/png" href="./data/favicon.png">
+    <script type="text/javascript" src="./engine/utilities.js"></script>
+    <script type="text/javascript" src="./engine/svg.js"></script>
+    <script async type="text/javascript" src="./engine/polyominos.js"></script>
+    <script async type="text/javascript" src="./engine/puzzle.js"></script>
+    <script async type="text/javascript" src="./engine/solve.js"></script>
+    <script async type="text/javascript" src="./engine/validate.js"></script>
+    <script async type="text/javascript" src="./engine/custom_mechanics.js"></script>
+    <script async type="text/javascript" src="./engine/display2.js"></script>
+    <script async type="text/javascript" src="./engine/trace2.js"></script>
     <script async type="text/javascript" src="editor.js"></script>
     <title>Create a puzzle</title>
   </head>
   <body>
     <script>loadHeader('Creating puzzle')</script>
 
-    <label id="puzzleName" contentEditable=true style="font-size: 72"></label>
+    <label id="puzzleName" contentEditable=true style="font-size: 72; display: none;"></label>
 
     <table id="meta" class="noselect">
       <tr>
@@ -65,10 +66,8 @@
                 <td><button id="ylop"></button></td>
                 <td><button id="rylop"></button></td>
               </tr><tr>
-                <td><button id="bridge" style="display: none"></button></td>
-                <td><button id="arrow" style="display: none"></button></td>
-              </tr><tr>
-                <td><button id="sizer" style="display: none"></button></td>
+                <td><button id="cross"></button></td>
+                <td><button id="curve"></button></td>
               </tr>
             </table>
             <div style="display: flex; justify-content: center; min-width: 432px">
@@ -93,7 +92,6 @@
               <tr><td><button id="green"></button></td></tr>
               <tr><td><button id="blue"></button></td></tr>
               <tr><td><button id="purple"></button></td></tr>
-              <tr><td><button id="custom" style="display: none"></button></td></tr>
             </table>
           </div>
         </td>
@@ -103,7 +101,7 @@
         </td>
       </tr><tr>
         <td style="text-align:center;">
-          <button id="publish" onpointerdown="publishPuzzle()" disabled>Publish</button>
+          <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
         </td>
       </tr>
     </table>

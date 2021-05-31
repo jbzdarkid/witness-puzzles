@@ -1,0 +1,16 @@
+:root {
+    --background: #fff; /* used to be PAGE_BACKGROUND*/
+    --alt-background: #eee;
+    --active: #ddd;
+    --border: #000;
+    --outer: #113833; /* used to be OUTER_BACKGROUND*/
+    --line-undone: #344; /* used to be FOREGROUND*/
+    --inner: #0A8; /* used to be BACKGROUND*/
+    --line-default: #aaa;
+    --line-success: #fff;
+    --line-failure: #000;
+    --cursor: #fff;
+    --text: #000;
+    --line_primary: #8FF;
+    --line_secondary: #FF2;
+}

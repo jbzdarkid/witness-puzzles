@@ -198,4 +198,50 @@ window.validateSizers = function(puzzle, region, regionData) {
   }
 }
 
+function isOver(puzzle, pos, xoff, yoff) {
+  return (puzzle.getLine(pos.x + xoff, pos.y + yoff) > window.LINE_NONE)
+}
+
+window.preValidateAltDots = function(puzzle, cell, pos, quick) {
+  /* from where it called (validate.js), we assume:
+  - line is over cell
+  - cross or curve is on cell
+  - custom mechanic is on
+  */
+  // first, let's check colors
+  if ((cell.dot % 5 == -3 && cell.line === window.LINE_YELLOW) ||
+      (cell.dot % 5 == -4 && cell.line === window.LINE_BLUE)) {
+          console.log('Incorrectly covered alternative dot: Dot is', cell.dot, 'but line is', cell.line)
+          puzzle.valid = false
+          if (quick) return
+      }
+  if (cell.dot > window.CUSTOM_CURVE_WHITE) { // cross
+    if (!((isOver(puzzle, pos, 1, 0) && isOver(puzzle, pos, -1, 0)) ||
+      (isOver(puzzle, pos, 0, 1) && isOver(puzzle, pos, 0, -1)))) {
+        console.log('Solution line curves at a cross at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
+        puzzle.valid = false
+        if (quick) return
+    }
+  } else { // curve
+    if ((isOver(puzzle, pos, 1, 0) && isOver(puzzle, pos, -1, 0)) ||
+      (isOver(puzzle, pos, 0, 1) && isOver(puzzle, pos, 0, -1))) {
+        console.log('Solution line goes straight at a curve at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
+        puzzle.valid = false
+        if (quick) return
+    }
+  }
+}
+
+window.validateAltDots = function(puzzle, region, regionData, quick) {
+  // simple checks here, if it exists & not white or invisible, bonked (copied from dot)
+  for (var pos of region.cells) {
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue
+    if (cell.dot < window.DOT_NONE && cell.dot % 5 < -1) {
+      console.log('CUSTOM_PRODMOD: Non-white alternative dot at', pos.x, pos.y, 'is not covered')
+      regionData.addVeryInvalid(pos)
+      if (quick) return regionData
+    }
+  }
+}
 })

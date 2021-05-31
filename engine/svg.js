@@ -221,7 +221,7 @@ function crayon(svg, params) {
   poly.setAttribute('fill', params.color)
   var txt = createElement('text')
   svg.appendChild(txt)
-  txt.setAttribute('fill', window.TEXT_COLOR)
+  txt.setAttribute('fill', 'var(--text)')
   txt.setAttribute('transform', 'translate(' + (height/2 + 10) + ', ' + (height/2 + 6) + ')')
   txt.textContent = params.text
 }
@@ -230,7 +230,7 @@ function start(svg, params) {
   var circ = createElement('circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 24)
-  circ.setAttribute('fill', window.FOREGROUND)
+  circ.setAttribute('fill', 'var(--line-undone)')
   circ.setAttribute('cx', params.height/2 + params.x)
   circ.setAttribute('cy', params.width/2 + params.y)
 }
@@ -240,14 +240,14 @@ function end(svg, params) {
   svg.appendChild(rect)
   rect.setAttribute('width', 24)
   rect.setAttribute('height', 24)
-  rect.setAttribute('fill', window.FOREGROUND)
+  rect.setAttribute('fill', 'var(--line-undone)')
   rect.setAttribute('x', params.height/2 - 12 + params.x)
   rect.setAttribute('y', params.width/2 - 12 + params.y)
 
   var circ = createElement('circle')
   svg.appendChild(circ)
   circ.setAttribute('r', 12)
-  circ.setAttribute('fill', window.FOREGROUND)
+  circ.setAttribute('fill', 'var(--line-undone)')
   circ.setAttribute('cx', params.height/2 + params.x)
   circ.setAttribute('cy', params.width/2 + params.y)
 
@@ -290,7 +290,7 @@ function gap(svg, params) {
   svg.appendChild(rect)
   rect.setAttribute('width', 32)
   rect.setAttribute('height', 24)
-  rect.setAttribute('fill', window.FOREGROUND)
+  rect.setAttribute('fill', 'var(--line-undone)')
   rect.setAttribute('transform', rotate(90 * params.rot))
   rect.setAttribute('x', centerX - 40)
   rect.setAttribute('y', centerY - 12)
@@ -300,7 +300,7 @@ function gap(svg, params) {
   svg.appendChild(rect)
   rect.setAttribute('width', 32)
   rect.setAttribute('height', 24)
-  rect.setAttribute('fill', window.FOREGROUND)
+  rect.setAttribute('fill', 'var(--line-undone)')
   rect.setAttribute('transform', rotate(90 * params.rot))
   rect.setAttribute('x', centerX + 9)
   rect.setAttribute('y', centerY - 12)
@@ -323,7 +323,7 @@ function drag(svg, params) {
         rect.setAttribute('y', i*4)
         rect.setAttribute('x', j*4)
       }
-      rect.setAttribute('fill', window.PAGE_BACKGROUND)
+      rect.setAttribute('fill', 'var(--background)')
     }
   }
 }
@@ -335,7 +335,7 @@ function plus(svg, params) {
   verti.setAttribute('y', 3)
   verti.setAttribute('width', 2)
   verti.setAttribute('height', params.height - 6)
-  verti.setAttribute('fill', window.TEXT_COLOR)
+  verti.setAttribute('fill', 'var(--text)')
   minus(svg, params)
 }
 
@@ -346,7 +346,7 @@ function minus(svg, params) {
   horiz.setAttribute('y', params.height/2 - 1)
   horiz.setAttribute('width', params.width - 6)
   horiz.setAttribute('height', 2)
-  horiz.setAttribute('fill', window.TEXT_COLOR)
+  horiz.setAttribute('fill', 'var(--text)')
 }
 
 function bridge(svg, params) {
@@ -428,7 +428,7 @@ function sizer(svg, params) {
 function cross(svg, params) {
   var hex = createElement('polygon')
   svg.appendChild(hex)
-  hex.setAttribute('points', '-12 -2.5,-12 2.5,-2.5 2.5,-2.5 12.5,2.5 12.5,2.5 2.5,12.5 2.5,12.5 -2.5,2.5 -2.5,2.5 -12.5,-2.5 -12.5,-2.5 -2.5')
+  hex.setAttribute('points', '-10 -2.5,-10 2.5,-2.5 2.5,-2.5 10,2.5 10,2.5 2.5,10 2.5,10 -2.5,2.5 -2.5,2.5 -10,-2.5 -10,-2.5 -2.5')
   hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
   hex.setAttribute('fill', params.color)
   hex.setAttribute('class', params.class)
@@ -440,7 +440,7 @@ function cross(svg, params) {
 function curve(svg, params) {
   var hex = createElement('polygon')
   svg.appendChild(hex)
-  hex.setAttribute('points', '-10 0,0 -10,10 0,0 10,0 5,-5 0,0 -5,5,0 0 5,0,10')
+  hex.setAttribute('points', '10 0, 0 10, -10 0, 0 -10, 0 -5, -5 0, 0 5, 5 0, 0 -5, 0 -10')
   hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
   hex.setAttribute('fill', params.color)
   hex.setAttribute('class', params.class)

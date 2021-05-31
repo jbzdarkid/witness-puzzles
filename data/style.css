@@ -10,10 +10,34 @@ label, select, option, input, a, button {
   font-variant: small-caps;
   font-size: 28px;
 }
+
+* {
+  transition: all 0.5s ease-out;
+}
+
+line, circle, polygon {
+  transition: none;
+}
+
+.nav {
+  background-color: transparent;
+  border: 0px transparent;
+}
+
+.main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem;
+}
+
 a { text-decoration: none; }
 table { margin: auto; }
 .resize { position: absolute; }
-body { text-align: center; }
+body { 
+  text-align: center; 
+  background-color: var(--background);
+}
 
 @media only screen and (min-width: 1300px) {
   .navbar { height: 60px; }

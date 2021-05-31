@@ -26,8 +26,8 @@ window.draw = function(puzzle, target='puzzle') {
   var rect = createElement('rect')
   svg.appendChild(rect)
   rect.setAttribute('stroke-width', 10)
-  rect.setAttribute('stroke', window.BORDER)
-  rect.setAttribute('fill', window.OUTER_BACKGROUND)
+  rect.setAttribute('stroke', 'var(--border)')
+  rect.setAttribute('fill', 'var(--outer)')
   // Accounting for the border thickness
   rect.setAttribute('x', 5)
   rect.setAttribute('y', 5)
@@ -46,13 +46,13 @@ window.draw = function(puzzle, target='puzzle') {
     defs.id = 'cursorPos'
     defs.innerHTML = '' +
     '<linearGradient id="fadeInLeft">\n' +
-    '  <stop offset="0%"   stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
-    '  <stop offset="25%"  stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
-    '  <stop offset="100%" stop-opacity="0.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '  <stop offset="0%"   stop-opacity="1.0" stop-color="var(--outer)"></stop>\n' +
+    '  <stop offset="25%"  stop-opacity="1.0" stop-color="var(--outer)"></stop>\n' +
+    '  <stop offset="100%" stop-opacity="0.0" stop-color="var(--outer)"></stop>\n' +
     '</linearGradient>\n' +
     '<linearGradient id="fadeOutRight">\n' +
-    '  <stop offset="0%"   stop-opacity="0.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
-    '  <stop offset="100%" stop-opacity="1.0" stop-color="' + window.OUTER_BACKGROUND + '"></stop>\n' +
+    '  <stop offset="0%"   stop-opacity="0.0" stop-color="var(--outer)"></stop>\n' +
+    '  <stop offset="100%" stop-opacity="1.0" stop-color="var(--outer)"></stop>\n' +
     '</linearGradient>\n'
     svg.appendChild(defs)
 
@@ -89,7 +89,7 @@ function drawCenters(puzzle, svg) {
       rect.setAttribute('y', 41 * y + 11)
       rect.setAttribute('width', 24)
       rect.setAttribute('height', 82)
-      rect.setAttribute('fill', window.BACKGROUND)
+      rect.setAttribute('fill', 'var(--inner)')
       svg.appendChild(rect)
     }
   }
@@ -103,7 +103,7 @@ function drawCenters(puzzle, svg) {
       rect.setAttribute('y', 41 * y + 11)
       rect.setAttribute('width', 82)
       rect.setAttribute('height', 82)
-      rect.setAttribute('fill', window.BACKGROUND)
+      rect.setAttribute('fill', 'var(--inner)')
       rect.setAttribute('shape-rendering', 'crispedges') // Otherwise they don't meet behind gaps
       svg.appendChild(rect)
     }
@@ -133,7 +133,7 @@ function drawGrid(puzzle, svg, target) {
       var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
-      line.setAttribute('stroke', window.FOREGROUND)
+      line.setAttribute('stroke', 'var(--line-undone)')
       if (x%2 === 1 && y%2 === 0) { // Horizontal
         if (cell.gap === window.GAP_BREAK) continue
         line.setAttribute('x1', (x-1)*41 + 52)
@@ -172,7 +172,7 @@ function drawGrid(puzzle, svg, target) {
           rect.setAttribute('y', y*41 + 40)
           rect.setAttribute('width', 24)
           rect.setAttribute('height', 24)
-          rect.setAttribute('fill', window.FOREGROUND)
+          rect.setAttribute('fill', 'var(--line-undone)')
           svg.appendChild(rect)
         } else if (surroundingLines > 1) {
           // Add rounding for other intersections (handling gap-only corners)
@@ -180,7 +180,7 @@ function drawGrid(puzzle, svg, target) {
           circ.setAttribute('cx', x*41 + 52)
           circ.setAttribute('cy', y*41 + 52)
           circ.setAttribute('r', 12)
-          circ.setAttribute('fill', window.FOREGROUND)
+          circ.setAttribute('fill', 'var(--line-undone)')
           svg.appendChild(circ)
         }
       }
@@ -195,7 +195,7 @@ function drawGrid(puzzle, svg, target) {
       var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
-      line.setAttribute('stroke', window.FOREGROUND)
+      line.setAttribute('stroke', 'var(--line-undone)')
       line.setAttribute('x1', x*41 + 40)
       line.setAttribute('x2', x*41 + 52)
       line.setAttribute('y1', y*41 + 52)
@@ -220,23 +220,49 @@ function drawSymbols(puzzle, svg, target) {
       if (cell.dot > window.DOT_NONE) {
         params.type = 'dot'
         if (cell.dot === window.DOT_BLACK) params.color = 'black'
-        else if (cell.dot === window.DOT_BLUE) params.color = window.LINE_PRIMARY
-        else if (cell.dot === window.DOT_YELLOW) params.color = window.LINE_SECONDARY
+        else if (cell.dot === window.DOT_BLUE) params.color = 'var(--line_primary)'
+        else if (cell.dot === window.DOT_YELLOW) params.color = 'var(--line_secondary)'
         else if (cell.dot === window.DOT_INVISIBLE) {
-          params.color = window.FOREGROUND
+          params.color = 'var(--line-undone)'
           // This makes the invisible dots visible, but only while we're in the editor.
           if (document.getElementById('metaButtons') != null) {
             params.stroke = 'black'
             params.strokeWidth = '2px'
           }
         }
-        drawSymbolWithSvg(svg, params)
+        window.drawSymbolWithSvg(svg, params, true)
+      } else if (cell.dot < window.DOT_NONE) { // draw custom gimmicks
+        if (cell.dot < window.CUSTOM_CROSS_INVISIBLE) params.type = 'curve';
+        else params.type = 'cross';
+        switch (cell.dot % 5) {
+          case 0:
+            params.color = 'var(--line-undone)'
+            // This makes the invisible dots visible, but only while we're in the editor.
+            if (document.getElementById('metaButtons') != null) {
+              params.stroke = 'black';
+              params.strokeWidth = '2px';
+            }
+            break;
+          case -1:
+            params.color = 'white';
+            break;
+          case -2:
+            params.color = 'black';
+            break;
+          case -3:
+            params.color = 'var(--line_primary)';
+            break;
+          case -4:
+            params.color = 'var(--line_secondary)';
+            break;
+        }
+        window.drawSymbolWithSvg(svg, params, true)
       } else if (cell.gap === window.GAP_BREAK) {
         // Gaps were handled above, while drawing the grid.
       } else if (x%2 === 1 && y%2 === 1) {
         // Generic draw for all other elements
         Object.assign(params, cell)
-        window.drawSymbolWithSvg(svg, params, puzzle.settings.CUSTOM_MECHANICS)
+        window.drawSymbolWithSvg(svg, params, true)
       }
     }
   }

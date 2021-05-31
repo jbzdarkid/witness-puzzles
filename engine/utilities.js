@@ -30,12 +30,12 @@ window.onerror = function(message, url, line) {
 }
 
 var tracks = {
-  'start':   '/data/panel_start_tracing.aac',
-  'success': '/data/panel_success.aac',
-  'fail':    '/data/panel_failure.aac',
-  'abort':   '/data/panel_abort_tracing.aac',
+  'start':   './data/panel_start_tracing.aac',
+  'success': './data/panel_success.aac',
+  'fail':    './data/panel_failure.aac',
+  'abort':   './data/panel_abort_tracing.aac',
 }
-var audio = new Audio(src='/data/panel_start_tracing.aac')
+var audio = new Audio(src='./data/panel_start_tracing.aac')
 
 window.PLAY_SOUND = function(name) {
   audio.pause()
@@ -58,37 +58,6 @@ window.ERROR = function(message) {
   request.send('data=' + message)
 }
 
-window.LINE_PRIMARY = '#8FF'
-window.LINE_SECONDARY = '#FF2'
-
-if (localStorage.theme === 'true') { // Dark theme
-  window.BACKGROUND       = '#221'
-  window.OUTER_BACKGROUND = '#070704'
-  window.FOREGROUND       = '#751'
-  window.BORDER           = '#666'
-  window.LINE_DEFAULT     = '#888'
-  window.LINE_SUCCESS     = '#BBB'
-  window.LINE_FAIL        = '#000'
-  window.CURSOR           = '#FFF'
-  window.TEXT_COLOR       = '#AAA'
-  window.PAGE_BACKGROUND  = '#000'
-  window.ALT_BACKGROUND   = '#333' // An off-black. Good for mild contrast.
-  window.ACTIVE_COLOR     = '#555' // Color for 'while the element is being pressed'
-} else { // Light theme
-  window.BACKGROUND       = '#0A8'
-  window.OUTER_BACKGROUND = '#113833'
-  window.FOREGROUND       = '#344'
-  window.BORDER           = '#000'
-  window.LINE_DEFAULT     = '#AAA'
-  window.LINE_SUCCESS     = '#FFF'
-  window.LINE_FAIL        = '#000'
-  window.CURSOR           = '#FFF'
-  window.TEXT_COLOR       = '#000'
-  window.PAGE_BACKGROUND  = '#FFF'
-  window.ALT_BACKGROUND   = '#EEE' // An off-white. Good for mild contrast.
-  window.ACTIVE_COLOR     = '#DDD' // Color for 'while the element is being pressed'
-}
-
 window.LINE_NONE     = 0
 window.LINE_BLACK    = 1
 window.LINE_BLUE     = 2
@@ -98,6 +67,16 @@ window.DOT_BLACK     = 1
 window.DOT_BLUE      = 2
 window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
+window.CUSTOM_CROSS_WHITE     = -1
+window.CUSTOM_CROSS_BLACK     = -2
+window.CUSTOM_CROSS_BLUE      = -3
+window.CUSTOM_CROSS_YELLOW    = -4
+window.CUSTOM_CROSS_INVISIBLE = -5
+window.CUSTOM_CURVE_WHITE     = -6
+window.CUSTOM_CURVE_BLACK     = -7
+window.CUSTOM_CURVE_BLUE      = -8
+window.CUSTOM_CURVE_YELLOW    = -9
+window.CUSTOM_CURVE_INVISIBLE = -10
 window.GAP_NONE      = 0
 window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
@@ -106,28 +85,28 @@ var animations = ''
 var l = function(line) {animations += line + '\n'}
 // pointer-events: none; allows for events to bubble up (so that editor hooks still work)
 l('.line-1 {')
-l('  fill: ' + window.LINE_DEFAULT + ';')
+l('  fill: var(--line-default);')
 l('  pointer-events: none;')
 l('}')
 l('.line-2 {')
-l('  fill: ' + window.LINE_PRIMARY + ';')
+l('  fill: var(--line_primary);')
 l('  pointer-events: none;')
 l('}')
 l('.line-3 {')
-l('  fill: ' + window.LINE_SECONDARY + ';')
+l('  fill: var(--line_secondary);')
 l('  pointer-events: none;')
 l('}')
-l('@keyframes line-success {to {fill: ' + window.LINE_SUCCESS + ';}}')
-l('@keyframes line-fail {to {fill: ' + window.LINE_FAIL + ';}}')
+l('@keyframes line-success {to {fill: var(--line-success);}}')
+l('@keyframes line-fail {to {fill: var(--line-failure);}}')
 l('@keyframes error {to {fill: red;}}')
 l('@keyframes fade {to {opacity: 0.35;}}')
 l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
 // Neutral button style
 l('button {')
-l('  background-color: ' + window.ALT_BACKGROUND + ';')
-l('  border: 1px solid ' + window.BORDER + ';')
+l('  background-color: var(--alt-background);')
+l('  border: 1px solid var(--border);')
 l('  border-radius: 2px;')
-l('  color: ' + window.TEXT_COLOR + ';')
+l('  color: var(--text);')
 l('  display: inline-block;')
 l('  margin: 0px;')
 l('  outline: none;')
@@ -137,7 +116,7 @@ l('  -moz-appearance: none;')
 l('  -webkit-appearance: none;')
 l('}')
 // Active (while held down) button style
-l('button:active {background-color: ' + window.ACTIVE_COLOR + ';}')
+l('button:active {background-color: var(--active);}')
 // Disabled button style
 l('button:disabled {opacity: 0.5;}')
 // Selected button style (see https://stackoverflow.com/a/63108630)
@@ -215,80 +194,80 @@ window.loadHeader = function(titleText) {
   var navbar = document.createElement('div')
   document.body.appendChild(navbar)
   navbar.className = 'navbar'
-  navbar.style = 'min-width: 700px; position: absolute; top: 0; width: 100%; z-index: 1'
-  navbar.style.borderBottom = '2px solid ' + window.BORDER
-  navbar.style.background = window.PAGE_BACKGROUND
+  // navbar.style = 'min-width: 700px; position: absolute; top: 0; width: 100%; z-index: 1'
+  // navbar.style.borderBottom = '2px solid var(--border)'
+  // navbar.style.background = 'var(--background)'
 
-  var navbarPadding = document.createElement('div')
-  document.body.appendChild(navbarPadding)
-  navbarPadding.className = 'navbar-padding'
+  // var navbarPadding = document.createElement('div')
+  // document.body.appendChild(navbarPadding)
+  // navbarPadding.className = 'navbar-padding'
 
-  var titleDiv = document.createElement('div')
-  navbar.appendChild(titleDiv)
-  titleDiv.style = 'position: absolute; width: 100%; pointer-events: none'
+  // var titleDiv = document.createElement('div')
+  // navbar.appendChild(titleDiv)
+  // titleDiv.style = 'position: absolute; width: 100%; pointer-events: none'
 
-  var titleLabel = document.createElement('label')
-  titleDiv.appendChild(titleLabel)
-  titleLabel.style = 'font-size: 48; pointer-events: auto'
-  titleLabel.id = 'title'
-  titleLabel.innerText = titleText
+  // var titleLabel = document.createElement('label')
+  // titleDiv.appendChild(titleLabel)
+  // titleLabel.style = 'font-size: 48; pointer-events: auto'
+  // titleLabel.id = 'title'
+  // titleLabel.innerText = titleText
 
-  var link = document.createElement('label')
-  navbar.appendChild(link)
-  link.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
-  link.className = 'navbar-content'
+  // var link = document.createElement('label')
+  // navbar.appendChild(link)
+  // link.style = 'float: left; margin-left: 32px; cursor: pointer; line-height: 60px'
+  // link.className = 'navbar-content'
 
-  if (window.location.href.endsWith('browse.html')) {
-    navbar.style.position = 'fixed' // When browsing, pin the navbar to the top so that it's visible during infinite scroll.
+  // if (window.location.href.endsWith('browse.html')) {
+  //   navbar.style.position = 'fixed' // When browsing, pin the navbar to the top so that it's visible during infinite scroll.
 
-    link.innerText = 'Create a puzzle'
-    link.onpointerdown = function() {window.location = '/editor.html'}
+  //   link.innerText = 'Create a puzzle'
+  //   link.onpointerdown = function() {window.location = '/editor.html'}
 
-    var link2 = document.createElement('label')
-    navbar.appendChild(link2)
-    link2.style = 'float: left; margin-left: 20px; cursor: pointer; line-height: 60px; display: none'
-    link2.className = 'navbar-content'
-    link2.innerText = 'Jump to top'
-    link2.id = 'scrollToTop'
-    link2.onpointerdown = function() {window.scrollTo(0, 0)}
+  //   var link2 = document.createElement('label')
+  //   navbar.appendChild(link2)
+  //   link2.style = 'float: left; margin-left: 20px; cursor: pointer; line-height: 60px; display: none'
+  //   link2.className = 'navbar-content'
+  //   link2.innerText = 'Jump to top'
+  //   link2.id = 'scrollToTop'
+  //   link2.onpointerdown = function() {window.scrollTo(0, 0)}
 
-  } else if (window.location.href.includes('/play/')) {
-    link.innerText = 'Back to all puzzles'
-    link.onpointerdown = function() {window.location = '/browse.html'}
-  } else /* All other pages */ {
-    link.innerText = 'Browse all puzzles'
-    link.onpointerdown = function() {window.location = '/browse.html'}
-  }
+  // } else if (window.location.href.includes('/play/')) {
+  //   link.innerText = 'Back to all puzzles'
+  //   link.onpointerdown = function() {window.location = '/browse.html'}
+  // } else /* All other pages */ {
+  //   link.innerText = 'Browse all puzzles'
+  //   link.onpointerdown = function() {window.location = '/browse.html'}
+  // }
 
-  var feedbackButton = document.createElement('label')
-  navbar.appendChild(feedbackButton)
-  feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
-  feedbackButton.innerText = 'Send feedback'
-  feedbackButton.className = 'navbar-content'
-  feedbackButton.onpointerdown = function () {
-    var feedback = prompt('Provide feedback:')
-    if (feedback) {
-      window.FEEDBACK(feedback)
-    }
-  }
+  // var feedbackButton = document.createElement('label')
+  // navbar.appendChild(feedbackButton)
+  // feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
+  // feedbackButton.innerText = 'Send feedback'
+  // feedbackButton.className = 'navbar-content'
+  // feedbackButton.onpointerdown = function () {
+  //   var feedback = prompt('Provide feedback:')
+  //   if (feedback) {
+  //     window.FEEDBACK(feedback)
+  //   }
+  // }
 
-  var separator = document.createElement('label')
-  navbar.appendChild(separator)
-  separator.style = 'float: right; line-height: 60px; padding-left: 6px; padding-right: 6px'
-  separator.className = 'navbar-content'
-  separator.innerText = '|'
+  // var separator = document.createElement('label')
+  // navbar.appendChild(separator)
+  // separator.style = 'float: right; line-height: 60px; padding-left: 6px; padding-right: 6px'
+  // separator.className = 'navbar-content'
+  // separator.innerText = '|'
 
-  var sourceLink = document.createElement('label')
-  navbar.appendChild(sourceLink)
-  sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
-  sourceLink.innerText = 'Source code'
-  sourceLink.className = 'navbar-content'
-  sourceLink.onpointerdown = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
+  // var sourceLink = document.createElement('label')
+  // navbar.appendChild(sourceLink)
+  // sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
+  // sourceLink.innerText = 'Source code'
+  // sourceLink.className = 'navbar-content'
+  // sourceLink.onpointerdown = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
 
   var collapsedSettings = drawSymbol({'type': 'plus', 'width':20, 'height':20})
   navbar.appendChild(collapsedSettings)
-  collapsedSettings.style = 'width: 20px; height: 20px; position: absolute; left: 0; cursor: pointer'
-  collapsedSettings.style.border = '2px solid ' + window.BORDER
+  collapsedSettings.style = 'width: 20px; height: 20px; position: absolute; top: 20px; left: calc(50% - 10px); cursor: pointer'
+  collapsedSettings.style.border = '2px solid var(--border)'
   collapsedSettings.id = 'collapsedSettings'
   collapsedSettings.onpointerdown = function() {
     this.style.display = 'none'
@@ -299,13 +278,13 @@ window.loadHeader = function(titleText) {
 
   var expandedSettings = document.createElement('div')
   navbar.appendChild(expandedSettings)
-  expandedSettings.style = 'width: 300px; position: absolute; left: 0; display: none; padding: 10px'
-  expandedSettings.style.border = '2px solid ' + window.BORDER
-  expandedSettings.style.background = window.PAGE_BACKGROUND
+  expandedSettings.style = 'width: 300px; position: absolute; top: 20px; left: calc(50% - 160px); display: none; padding: 10px'
+  expandedSettings.style.border = '2px solid var(--border)'
+  expandedSettings.style.background = 'var(--background)'
   expandedSettings.id = 'expandedSettings'
 
   var minus = drawSymbol({'type':'minus', 'width':20, 'height':20})
-  minus.style = 'width: 20px; height: 20px; cursor: pointer; position: absolute; top: 0; left: 0'
+  minus.style = 'width: 20px; height: 20px; cursor: pointer; position: absolute; top: 0; left: calc(50% - 10px);'
   expandedSettings.appendChild(minus)
   minus.onpointerdown = function() {
     this.parentElement.style.display = 'none'
@@ -319,32 +298,32 @@ window.loadHeader = function(titleText) {
   }
 
   // Now, for the contents of the settings
-  var settingsLabel = document.createElement('label')
-  expandedSettings.appendChild(settingsLabel)
-  settingsLabel.innerText = 'settings'
-  settingsLabel.style = 'line-height: 0px' // Attach to the top
+  // var settingsLabel = document.createElement('label')
+  // expandedSettings.appendChild(settingsLabel)
+  // settingsLabel.innerText = 'settings'
+  // settingsLabel.style = 'line-height: 0px' // Attach to the top
 
-  expandedSettings.appendChild(document.createElement('br'))
-  expandedSettings.appendChild(document.createElement('br'))
+  // expandedSettings.appendChild(document.createElement('br'))
+  // expandedSettings.appendChild(document.createElement('br'))
 
-  // Theme
-  document.body.style.color = window.TEXT_COLOR
-  document.body.style.background = window.PAGE_BACKGROUND
-  var themeButton = document.createElement('button')
-  expandedSettings.appendChild(themeButton)
-  if (localStorage.theme === 'true') {
-    themeButton.innerText = 'Dark theme'
-    themeButton.onpointerdown = function() {
-      localStorage.theme = 'false'
-      location.reload()
-    }
-  } else {
-    themeButton.innerText = 'Light theme'
-    themeButton.onpointerdown = function() {
-      localStorage.theme = 'true'
-      location.reload()
-    }
-  }
+  // // Theme
+  // document.body.style.color = 'var(--text)'
+  // document.body.style.background = 'var(--background)'
+  // var themeButton = document.createElement('button')
+  // expandedSettings.appendChild(themeButton)
+  // if (localStorage.theme === 'true') {
+  //   themeButton.innerText = 'Dark theme'
+  //   themeButton.onpointerdown = function() {
+  //     localStorage.theme = 'false'
+  //     location.reload()
+  //   }
+  // } else {
+  //   themeButton.innerText = 'Light theme'
+  //   themeButton.onpointerdown = function() {
+  //     localStorage.theme = 'true'
+  //     location.reload()
+  //   }
+  // }
 
   expandedSettings.appendChild(document.createElement('br'))
 
@@ -366,7 +345,7 @@ window.loadHeader = function(titleText) {
   sens.onchange = function() {
     localStorage.sensitivity = this.value
   }
-  sens.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
+  sens.style.backgroundImage = 'linear-gradient(to right, var(--alt-background), var(--active))'
 
   // Volume
   var volumeLabel = document.createElement('label')
@@ -388,7 +367,7 @@ window.loadHeader = function(titleText) {
   volume.onchange = function() {
     localStorage.volume = this.value
   }
-  volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
+  volume.style.backgroundImage = 'linear-gradient(to right, var(--alt-background), var(--active))'
 
   expandedSettings.appendChild(document.createElement('br'))
 
@@ -399,13 +378,13 @@ window.loadHeader = function(titleText) {
   expandedSettings.appendChild(customMechanics)
   customMechanics.id = 'customMechanics'
   if (localStorage.customMechanics == 'true') {
-    customMechanics.style.background = window.BORDER
+    customMechanics.style.background = 'var(--border)'
     customMechanics.checked = true
   }
 
   customMechanics.onpointerdown = function() {
     this.checked = !this.checked
-    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
+    this.style.background = (this.checked ? 'var(--border)' : 'var(--background)')
     localStorage.customMechanics = this.checked
     window.location.reload()
   }
@@ -506,9 +485,9 @@ function createCheckbox() {
   checkbox.style.marginRight = '6px'
   checkbox.style.borderWidth = '1.5px'
   checkbox.style.borderStyle = 'solid'
-  checkbox.style.borderColor = window.BORDER
-  checkbox.style.background = window.PAGE_BACKGROUND
-  checkbox.style.color = window.TEXT_COLOR
+  checkbox.style.borderColor = 'var(--border)'
+  checkbox.style.background = 'var(--background)'
+  checkbox.style.color = 'var(--text)'
   return checkbox
 }
 
@@ -525,7 +504,7 @@ window.addSolveButtons = function() {
 
   solveMode.onpointerdown = function() {
     this.checked = !this.checked
-    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
+    this.style.background = (this.checked ? 'var(--border)' : 'var(--background)')
     if (window.setSolveMode) window.setSolveMode(this.checked)
   }
 
@@ -652,8 +631,8 @@ function loadSettings(parent) {
   var parentDiv = document.createElement('div')
   parent.appendChild(parentDiv)
   parentDiv.style.position = 'absolute'
-  parentDiv.style.border = '2px solid ' + window.BORDER
-  parentDiv.style.background = window.PAGE_BACKGROUND
+  parentDiv.style.border = '2px solid var(--border)'
+  parentDiv.style.background = 'var(--background)'
 
   var toggle = document.createElement('label')
   parentDiv.appendChild(toggle)
@@ -688,8 +667,8 @@ function loadSettings(parent) {
   }
   themeBox.checked = (localStorage.theme === 'true')
   // This needs to happen now, since the document body hasn't yet loaded.
-  document.body.style.color = window.TEXT_COLOR
-  document.body.style.background = window.PAGE_BACKGROUND
+  document.body.style.color = 'var(--text)'
+  document.body.style.background = 'var(--background)'
 
   var themeLabel = document.createElement('label')
   settings.appendChild(themeLabel)

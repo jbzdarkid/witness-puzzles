@@ -396,6 +396,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
 
         if (puzzle.valid) {
           window.PLAY_SOUND('success')
+          window.onSolvedPuzzle(data.path)
           // !important to override the child animation
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
 
@@ -449,7 +450,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
 
   var cursor = createElement('circle')
   cursor.setAttribute('r', 12)
-  cursor.setAttribute('fill', window.CURSOR)
+  cursor.setAttribute('fill', 'var(--cursor)')
   cursor.setAttribute('stroke', 'black')
   cursor.setAttribute('stroke-width', '2px')
   cursor.setAttribute('stroke-opacity', '0.4')

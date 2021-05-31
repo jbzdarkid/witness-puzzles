@@ -175,11 +175,10 @@ function reloadPuzzle() {
     }
   }
 
-  var publish = document.getElementById('publish')
-  publish.disabled = true
-  publish.innerText = 'Publish'
-  publish.onpointerdown = publishPuzzle
-  currentPublishRequest = null
+  var save = document.getElementById('save')
+  save.disabled = true
+  save.innerText = 'Save'
+  save.onpointerdown = savePuzzle
 
   var puzzleStyle = document.getElementById('puzzleStyle')
   if (puzzle.pillar === false) {
@@ -292,14 +291,9 @@ window.createEmptyPuzzle = function() {
     newPuzzle.grid[2][0].end = 'top'
     newPuzzle.grid[8][0].end = 'top'
     break;
-
   }
+  newPuzzle.name = 'e'
 
-  if (style == 'Default') {
-    newPuzzle.name = 'Unnamed Puzzle'
-  } else {
-    newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
-  }
   if (document.getElementById('newButton').disabled === true) {
     // Previous puzzle was unmodified, overwrite it
     puzzle = newPuzzle
@@ -321,8 +315,8 @@ window.loadPuzzle = function() {
   loadList.style.width = buttons.offsetWidth
   buttons.style.display = 'none'
 
-  loadList.style.background = window.PAGE_BACKGROUND
-  loadList.style.color = window.TEXT_COLOR
+  loadList.style.background = 'var(--background)'
+  loadList.style.color = 'var(--text)'
 
   for (var puzzleName of puzzleList) {
     var option = document.createElement('option')
@@ -384,6 +378,7 @@ window.setSolveMode = function(value) {
 //** End of user interaction points
 
 window.onload = function() {
+  localStorage.customMechanics = true; // yes
   readPuzzle() // Will fall back to a new puzzle if needed.
 
   drawSymbolButtons()
@@ -391,8 +386,8 @@ window.onload = function() {
 
   // Add theme-appropriate coloring to the style dropdown
   var puzzleStyle = document.getElementById('puzzleStyle')
-  puzzleStyle.style.background = window.PAGE_BACKGROUND
-  puzzleStyle.style.color = window.TEXT_COLOR
+  puzzleStyle.style.background = 'var(--background)'
+  puzzleStyle.style.color = 'var(--text)'
 
   var puzzleName = document.getElementById('puzzleName')
 
@@ -471,44 +466,26 @@ window.onload = function() {
 }
 
 window.onSolvedPuzzle = function(paths) {
-  // Only enable the publish button if there was a valid path.
+  // Only enable the save button if there was a valid path.
   if (paths.length > 0) {
-    document.getElementById('publish').disabled = false
+    document.getElementById('save').disabled = false
   }
   return paths
 }
 
-var currentPublishRequest
-window.publishPuzzle = function() {
-  // Clone the puzzle to ensure it's not modified while the request is being constructed
-  var request = new XMLHttpRequest()
-  request.onreadystatechange = function() {
-    // Don't continue if the request was cancelled or another request was started in the meantime.
-    if (this !== currentPublishRequest) return
-    if (this.readyState != XMLHttpRequest.DONE) return
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
 
-    var publish = document.getElementById('publish')
-    if (this.status === 200) {
-      publish.innerText = 'Published, click here to play your puzzle!'
-      var url = '/play/' + this.responseText
-      publish.onpointerdown = function() {
-        window.location = url
-      }
-    } else {
-      publish.innerText = 'Could not validate puzzle!'
-      console.error(this.responseText)
-    }
-  }
-  request.timeout = 120000 // 120,000 milliseconds = 2 minutes
-  request.open('POST', '/publish', true)
-  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-  request.send('solution=' + puzzle.serialize())
-  currentPublishRequest = request
-
-  var publish = document.getElementById('publish')
-  publish.onpointerdown = null
-  publish.innerText = 'Validating puzzle...'
+window.savePuzzle = function() {
+  // instead of publish, we save this puzzle
+  download("puzzle.json", puzzle.serialize())
 }
 
 // Returns the next value in the list.
@@ -588,6 +565,24 @@ function onElementClicked(event, x, y) {
     dotColors.push(4)
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
     puzzle.grid[x][y].gap = null
+  } else if (activeParams.type == 'cross') {
+    if (x%2 !== 0 || y%2 !== 0) return
+    var dotColors = [undefined, -1, -2]
+    if (puzzle.symmetry != null) {
+      dotColors.push(-3)
+      dotColors.push(-4)
+    }
+    dotColors.push(-5)
+    puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
+  } else if (activeParams.type == 'curve') {
+    if (x%2 !== 0 || y%2 !== 0) return
+    var dotColors = [undefined, -6, -7]
+    if (puzzle.symmetry != null) {
+      dotColors.push(-8)
+      dotColors.push(-9)
+    }
+    dotColors.push(-10)
+    puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
   } else if (activeParams.type == 'gap') {
     if (x%2 === y%2) return
     puzzle.grid[x][y].gap = getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
@@ -711,17 +706,24 @@ function onElementClicked(event, x, y) {
     }
   }
 
-  // Ensure that the puzzle's CUSTOM_MECHANICS setting matches the presence/absence of custom mechanics
-  puzzle.settings.CUSTOM_MECHANICS = false
-  for (var x=1; x<puzzle.width; x+=2) {
-    for (var y=1; y<puzzle.height; y+=2) {
-      var cell = puzzle.grid[x][y]
-      if (cell != null && ['bridge', 'arrow', 'sizer'].includes(cell.type)) {
-        puzzle.settings.CUSTOM_MECHANICS = true
-      }
-    }
-  }
-
+  // puzzle.settings.CUSTOM_MECHANICS = false
+  // for (var x=1; x<puzzle.width; x+=2) {
+  //   for (var y=1; y<puzzle.height; y+=2) {
+  //     var cell = puzzle.grid[x][y]
+  //     if (cell != null && ['bridge', 'arrow', 'sizer'].includes(cell.type)) {
+  //       puzzle.settings.CUSTOM_MECHANICS = true
+  //     }
+  //   }
+  // }
+  // for (var x=0; x<puzzle.width; x+=2) {
+  //   for (var y=0; y<puzzle.height; y+=2) {
+  //     var cell = puzzle.grid[x][y]
+  //     if (['cross', 'curve'].includes(cell.type)) {
+  //       puzzle.settings.CUSTOM_MECHANICS = true
+  //     }
+  //   }
+  // }
+  puzzle.settings.CUSTOM_MECHANICS = true
   puzzleModified()
   writePuzzle()
   reloadPuzzle()
@@ -743,6 +745,8 @@ var symbolData = {
   'bridge': {'type':'bridge', 'title':'Bridge'},
   'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Arrow'},
   'sizer': {'type':'sizer', 'title':'Sizer'},
+  'cross': {'type':'cross', 'title':'Cross Dot'},
+  'curve': {'type':'curve', 'title':'Curve Dot'},
 }
 function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -754,7 +758,7 @@ function drawSymbolButtons() {
     params.width = 64
     params.border = 2
     if (activeParams.id === button.id) {
-      button.parentElement.style.background = BORDER
+      button.parentElement.style.background = 'var(--border)'
     } else {
       button.parentElement.style.background = null
     }
@@ -863,7 +867,7 @@ function drawColorButtons() {
       'color': button.id,
     }
     if (activeParams.color === button.id) {
-      button.parentElement.style.background = window.BORDER
+      button.parentElement.style.background = 'var(--border)'
     } else {
       button.parentElement.style.background = null
     }
@@ -893,7 +897,7 @@ function drawColorButtons() {
           button.parentElement.style.background = null
         }
 
-        this.parentElement.style.background = window.BORDER
+        this.parentElement.style.background = 'var(--border)'
         input.focus()
         event.preventDefault()
       }
@@ -958,8 +962,8 @@ function shapeChooser() {
   chooserTable.setAttribute('cellspacing', '24px')
   chooserTable.setAttribute('cellpadding', '0px')
   chooserTable.style.padding = 25
-  chooserTable.style.background = window.BACKGROUND
-  chooserTable.style.border = window.BORDER
+  chooserTable.style.background = 'var(--inner)'
+  chooserTable.style.border = 'var(--border)'
   chooserTable.onpointerdown = function(event) {shapeChooserClick(event, this)}
   for (var x=0; x<4; x++) {
     var row = chooserTable.insertRow(x)
@@ -974,7 +978,7 @@ function shapeChooser() {
         cell.style.background = 'black'
       } else {
         cell.clicked = false
-        cell.style.background = FOREGROUND
+        cell.style.background = 'var(--line-undone)'
       }
     }
   }
@@ -1007,7 +1011,7 @@ function shapeChooserClick(event, cell) {
   if (cell.clicked) {
     cell.style.background = 'black'
   } else {
-    cell.style.background = window.FOREGROUND
+    cell.style.background = 'var(--line-undone)'
   }
   drawSymbolButtons()
 }
