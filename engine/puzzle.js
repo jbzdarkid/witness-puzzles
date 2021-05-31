@@ -65,6 +65,7 @@ window.Puzzle = class {
     puzzle.name = parsed.name
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
+    puzzle.theme = parsed.theme
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:

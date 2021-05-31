@@ -96,9 +96,6 @@ window.deletePuzzle = function() {
   if (puzzleList.length === 1) {
     document.getElementById('loadButton').disabled = true
   }
-  var puzzleName = puzzleList.shift()
-  console.log('Removing puzzle', puzzleName)
-  window.localStorage.removeItem(puzzleName)
   writePuzzleList(puzzleList)
 
   // Try to read the next puzzle from the list.
@@ -154,7 +151,7 @@ function reloadPuzzle() {
   document.getElementById('solveMode').checked = true
   document.getElementById('solveMode').onpointerdown()
 
-  document.getElementById('puzzleName').innerText = puzzle.name
+  document.getElementById('puzzleTheme').innerText = puzzle.theme
   document.getElementById('solutionViewer').style.display = 'none'
 
   document.getElementById('solveAuto').disabled = false
@@ -318,12 +315,6 @@ window.loadPuzzle = function() {
   loadList.style.background = 'var(--background)'
   loadList.style.color = 'var(--text)'
 
-  for (var puzzleName of puzzleList) {
-    var option = document.createElement('option')
-    option.innerText = puzzleName
-    loadList.appendChild(option)
-  }
-
   loadList.value = '' // Forces onchange to fire for any selection
   loadList.onchange = function() {
     console.log('Loading puzzle', this.value)
@@ -389,9 +380,9 @@ window.onload = function() {
   puzzleStyle.style.background = 'var(--background)'
   puzzleStyle.style.color = 'var(--text)'
 
-  var puzzleName = document.getElementById('puzzleName')
+  var puzzleTheme = document.getElementById('puzzleTheme')
 
-  puzzleName.onfocus = function(event) {
+  puzzleTheme.onfocus = function(event) {
     // On initial focus, select all text within the box
     window.getSelection().removeAllRanges()
     var range = document.createRange()
@@ -402,7 +393,7 @@ window.onload = function() {
   // Both oninput and onkeypress fire for every text modification.
 
   // Use onkeypress when you need to prevent an action
-  puzzleName.onkeypress = function(event) {
+  puzzleTheme.onkeypress = function(event) {
     // If the user tries to type past 50 characters
     if (this.innerText.length >= 50) event.preventDefault()
 
@@ -416,7 +407,7 @@ window.onload = function() {
   // Use oninput for backup processing
   // You should always use a conditional here, because every time you modify the text,
   // the cursor resets to the start of the string.
-  puzzleName.oninput = function(event) {
+  puzzleTheme.oninput = function(event) {
     // Prevent newlines in titles
     if (this.innerText.includes('\n')) this.innerText = this.innerText.replace('\n', '')
     if (this.innerText.includes('\r')) this.innerText = this.innerText.replace('\r', '')
@@ -427,16 +418,17 @@ window.onload = function() {
   }
 
   // Use onblur for final name confirmation.
-  puzzleName.onblur = function(event) {
+  puzzleTheme.onblur = function(event) {
     // Remove leading/trailing whitespace
     this.innerText = this.innerText.trim()
     this.innerText = this.innerText.replace('\u200B', '')
     // Cap the puzzle name length one last time
     if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
     // Ensure that puzzle names are non-empty
-    if (this.innerText.length === 0) this.innerText = 'Unnamed Puzzle'
+    if (this.innerText.length === 0) this.innerText = '0'
     // Update the puzzle with the new name
-    puzzle.name = this.innerText
+    puzzle.theme = this.innerText
+    puzzle.name = "e"
     writePuzzle()
   }
 
