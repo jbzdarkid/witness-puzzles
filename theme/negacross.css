@@ -8,7 +8,7 @@
     --inner: rgb(202, 126, 212); /* used to be BACKGROUND*/
     --line-default: rgb(221, 109, 255);
     --line-success: rgb(255, 203, 248);
-    --line-failure: rgb(62, 55, 65);
+    --line-failure: rgba(62, 55, 65, 0)
     --cursor: rgb(254, 233, 255);
     --text: #000;
     --line_primary: #8FF;
