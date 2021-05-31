@@ -15,15 +15,15 @@ window.updatePuzzle = function() {
 }
 
 window.onSolvedPuzzle = function(paths) {
-    if (window.currentPanel == window.nowPanel && window.currentPanel != window.maxPanel) {
+    if (window.currentPanel >= window.nowPanel && window.currentPanel != window.maxPanel) {
         window.currentPanel++;
-        window.nowPanel++;
+        window.nowPanel = window.currentPanel;
         window.updatePuzzle()
     }
 }
 
 function getNext() {
-    if (window.currentPanel == window.nowPanel) return;
+    if (window.currentPanel == window.maxPanel) return;
     window.currentPanel++;
     window.updatePuzzle()
 }
