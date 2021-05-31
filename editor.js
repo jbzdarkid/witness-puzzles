@@ -690,11 +690,11 @@ var symbolData = {
   'rpoly': {'type':'poly', 'title':'Rotatable polyomino'},
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
   'rylop': {'type':'ylop', 'title':'Rotatable negation polyomino'},
-  'bridge': {'type':'bridge', 'title':'Bridge'},
-  'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Arrow'},
-  'sizer': {'type':'sizer', 'title':'Sizer'},
-  'cross': {'type':'cross', 'title':'Cross Dot'},
-  'curve': {'type':'curve', 'title':'Curve Dot'},
+  'bridge': {'type':'bridge', 'title':'Seren\'s Bridge: VALIDATION IS BUGGED'},
+  'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
+  'sizer': {'type':'sizer', 'title':'Sizer (who made this)'},
+  'cross': {'type':'cross', 'title':'Cross'},
+  'curve': {'type':'curve', 'title':'Diamond'},
 }
 function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
