@@ -88,18 +88,8 @@ function writePuzzle() {
 
 // Delete the active puzzle then read the next one.
 window.deletePuzzle = function() {
-  var puzzleList = readPuzzleList()
-  if (puzzleList.length === 0) {
-    document.getElementById('deleteButton').disabled = true
-    return
-  }
-  if (puzzleList.length === 1) {
-    document.getElementById('loadButton').disabled = true
-  }
-  writePuzzleList(puzzleList)
-
-  // Try to read the next puzzle from the list.
-  readPuzzle()
+  // since publish is gone, this is a reset button
+  createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))
 }
 
 // Clear animations from the puzzle, redraw it, and add editor hooks.
@@ -205,7 +195,7 @@ function reloadPuzzle() {
 }
 
 //** Buttons which the user can click on
-window.createEmptyPuzzle = function() {
+window.createEmptyPuzzle = function(x = 4, y = x) {
   var style = document.getElementById('puzzleStyle').value
   console.log('Creating new puzzle with style', style)
 
@@ -215,78 +205,59 @@ window.createEmptyPuzzle = function() {
     style = 'Default'
     // Intentional fall-through
   case 'Default':
-    var newPuzzle = new Puzzle(4, 4)
-    newPuzzle.grid[0][8].start = true
-    newPuzzle.grid[8][0].end = 'right'
+    console.warn(x, y)
+    var newPuzzle = new Puzzle(x, y)
     break;
 
   case 'Horizontal Symmetry':
-    var newPuzzle = new Puzzle(4, 4)
+    x = Math.max(1, x)
+    var newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':false}
-    newPuzzle.grid[0][8].start = true
-    newPuzzle.grid[8][8].start = true
-    newPuzzle.grid[0][0].end = 'left'
-    newPuzzle.grid[8][0].end = 'right'
     break;
 
   case 'Vertical Symmetry':
-    var newPuzzle = new Puzzle(4, 4)
+    y = Math.max(1, y)
+    var newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':false, 'y':true}
-    newPuzzle.grid[0][0].start = true
-    newPuzzle.grid[0][8].start = true
-    newPuzzle.grid[8][0].end = 'right'
-    newPuzzle.grid[8][8].end = 'right'
     break;
 
   case 'Rotational Symmetry':
-    var newPuzzle = new Puzzle(4, 4)
+    x = Math.max(1, x)
+    y = Math.max(1, y)
+    var newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':true}
-    newPuzzle.grid[0][0].start = true
-    newPuzzle.grid[8][8].start = true
-    newPuzzle.grid[8][0].end = 'right'
-    newPuzzle.grid[0][8].end = 'left'
     break;
 
   case 'Pillar':
-    var newPuzzle = new Puzzle(6, 5, true)
-    newPuzzle.grid[6][10].start = true
-    newPuzzle.grid[6][0].end = 'top'
+    x = Math.max(1, x)
+    var newPuzzle = new Puzzle(x, y, true)
     break;
 
   case 'Pillar (H Symmetry)':
-    var newPuzzle = new Puzzle(6, 6, true)
+    x = Math.max(2, x)
+    var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':false}
-    newPuzzle.grid[2][12].start = true
-    newPuzzle.grid[4][12].start = true
-    newPuzzle.grid[2][0].end = 'top'
-    newPuzzle.grid[4][0].end = 'top'
     break;
 
   case 'Pillar (V Symmetry)':
-    var newPuzzle = new Puzzle(6, 6, true)
+    x = Math.max(1, x)
+    y = Math.max(1, y)
+    var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':true}
-    newPuzzle.grid[2][12].start = true
-    newPuzzle.grid[8][0].start = true
-    newPuzzle.grid[2][0].end = 'top'
-    newPuzzle.grid[8][12].end = 'bottom'
     break;
 
   case 'Pillar (R Symmetry)':
-    var newPuzzle = new Puzzle(6, 6, true)
+    x = Math.max(2, x)
+    y = Math.max(1, y)
+    var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':true}
-    newPuzzle.grid[2][0].start = true
-    newPuzzle.grid[4][12].start = true
-    newPuzzle.grid[4][0].end = 'top'
-    newPuzzle.grid[2][12].end = 'bottom'
     break;
 
   case 'Pillar (Two Lines)':
-    var newPuzzle = new Puzzle(6, 6, true)
+    x = Math.max(2, x)
+    y = Math.max(1, y)
+    var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':false}
-    newPuzzle.grid[2][12].start = true
-    newPuzzle.grid[8][12].start = true
-    newPuzzle.grid[2][0].end = 'top'
-    newPuzzle.grid[8][0].end = 'top'
     break;
   }
   newPuzzle.name = 'e'

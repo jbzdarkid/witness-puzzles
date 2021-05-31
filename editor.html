@@ -34,12 +34,12 @@
           <tr>
             <td style="text-align: center;">
               <div id="metaButtons" style="display:inline">
-                <button id="newButton" onpointerdown="createEmptyPuzzle()">New</button>
+                <button id="newButton" onpointerdown="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">New</button>
                 <button id="loadButton" onpointerdown="loadPuzzle()">Load</button>
                 <button id="deleteButton" onpointerdown="deletePuzzle()">Delete</button>
               </div>
               <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
-              <select id="puzzleStyle" onchange="createEmptyPuzzle()">
+              <select id="puzzleStyle" onchange="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">
                 <option>Default</option>
                 <option>Horizontal Symmetry</option>
                 <option>Vertical Symmetry</option>
