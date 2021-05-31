@@ -89,7 +89,10 @@ function writePuzzle() {
 // Delete the active puzzle then read the next one.
 window.deletePuzzle = function() {
   // since publish is gone, this is a reset button
+  var theme = puzzle.theme
   createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))
+  puzzle.theme = theme
+  window.setTheme(theme)
 }
 
 // Clear animations from the puzzle, redraw it, and add editor hooks.
@@ -279,7 +282,7 @@ fileInput.addEventListener("change", function() {
     let fileData = reader.readAsText(file)
     reader.onload = function(res) {
       window.puzzle = Puzzle.deserialize(res.currentTarget.result) // Will throw for most invalid puzzles
-      document.getElementById('theme').href = './theme/' + window.puzzle.theme + '.css'
+      window.setTheme(puzzle.theme)
       puzzleModified()
       writePuzzle()
       reloadPuzzle()
@@ -382,7 +385,7 @@ window.onload = function() {
     if (this.innerText.length === 0) this.innerText = '(Insert Theme Name Here)'
     // Update the puzzle with the new name
     puzzle.theme = this.innerText
-    document.getElementById('theme').href = './theme/' + this.innerText + '.css'
+    window.setTheme(this.innerText)
     puzzle.name = "e"
     writePuzzle()
   }

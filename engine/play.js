@@ -5,7 +5,7 @@ window.updatePuzzle = function() {
     request.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             let puzzle = Puzzle.deserialize(this.responseText);
-            document.getElementById('theme').href = './theme/' + puzzle.theme + '.css'
+            window.setTheme(puzzle.theme)
             draw(puzzle)
         }
     }

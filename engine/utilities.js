@@ -178,6 +178,11 @@ window.setLogLevel = function(level) {
 }
 setLogLevel('info')
 
+window.setTheme = function(theme) {
+  document.getElementById('theme').href = './theme/' + theme + '.css'
+  document.getElementById('puzzleTheme').innerHTML = theme
+}
+
 window.deleteElementsByClassName = function(rootElem, className) {
   var elems = []
   while (true) {
