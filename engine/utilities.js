@@ -102,7 +102,7 @@ l('@keyframes error {to {fill: red;}}')
 l('@keyframes fade {to {opacity: 0.35;}}')
 l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
 // Neutral button style
-l('button {')
+l('.loadButtonWrapper, button {')
 l('  background-color: var(--alt-background);')
 l('  border: 1px solid var(--border);')
 l('  color: var(--text);')
@@ -115,11 +115,11 @@ l('  -moz-appearance: none;')
 l('  -webkit-appearance: none;')
 l('}')
 // Active (while held down) button style
-l('button:active {background-color: var(--active);}')
+l('.loadButtonWrapper:active, button:active {background-color: var(--active);}')
 // Disabled button style
-l('button:disabled {opacity: 0.5;}')
+l('.loadButtonWrapper:disabled, button:disabled {opacity: 0.5;}')
 // Selected button style (see https://stackoverflow.com/a/63108630)
-l('button:focus {outline: none;}')
+l('.loadButtonWrapper:focus, button:focus {outline: none;}')
 l = null
 
 var style = document.createElement('style')

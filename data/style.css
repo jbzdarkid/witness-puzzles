@@ -16,8 +16,11 @@ label, select, option, input, a, button {
   transition: all 0.5s ease-out;
 }
 
-p, label {
+.title, .title > label {
   font-size: 48px;
+}
+
+p, label {
   display: inline;
   color: var(--text);
 }
@@ -51,6 +54,9 @@ line, circle, polygon {
   justify-content: space-between;
   align-items: center;
   margin: 1rem;
+}
+
+.main-wrapper{
   flex: 1 0 auto;
   min-height: 75vh;
 }
@@ -70,6 +76,10 @@ table { margin: auto; }
 body { 
   text-align: center; 
   background-color: var(--background);
+}
+
+.loadButtonWrapper {
+  cursor: pointer;
 }
 
 @media only screen and (min-width: 1300px) {

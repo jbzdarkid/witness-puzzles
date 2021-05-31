@@ -140,7 +140,7 @@ function reloadPuzzle() {
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
   document.getElementById('solveMode').checked = true
   document.getElementById('solveMode').onpointerdown()
-
+  if (puzzle.theme === undefined) puzzle.theme = "(Insert Theme Name Here)"
   document.getElementById('puzzleTheme').innerText = puzzle.theme
   document.getElementById('solutionViewer').style.display = 'none'
 
@@ -205,7 +205,6 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     style = 'Default'
     // Intentional fall-through
   case 'Default':
-    console.warn(x, y)
     var newPuzzle = new Puzzle(x, y)
     break;
 
@@ -273,36 +272,22 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   }
 }
 
-window.loadPuzzle = function() {
-  var puzzleList = readPuzzleList()
-  if (puzzleList.length === 0) return
-
-  var buttons = document.getElementById('metaButtons')
-  var loadList = document.createElement('select')
-  buttons.parentElement.insertBefore(loadList, buttons)
-  loadList.style.width = buttons.offsetWidth
-  buttons.style.display = 'none'
-
-  loadList.style.background = 'var(--background)'
-  loadList.style.color = 'var(--text)'
-
-  loadList.value = '' // Forces onchange to fire for any selection
-  loadList.onchange = function() {
-    console.log('Loading puzzle', this.value)
-
-    // Re-order to the front of the list
-    var puzzleList = readPuzzleList()
-    var index = puzzleList.indexOf(this.value)
-    puzzleList.unshift(puzzleList.splice(index, 1)[0])
-    writePuzzleList(puzzleList)
-
-    // Then try reading the first puzzle
-    readPuzzle()
-
-    buttons.parentElement.removeChild(buttons.previousSibling)
-    document.getElementById('metaButtons').style.display = 'inline'
-  }
-}
+let reader = new FileReader()
+let fileInput = document.getElementById("loadButton");
+fileInput.addEventListener("change", function() {
+    let file = this.files[0]
+    let fileData = reader.readAsText(file)
+    reader.onload = function(res) {
+      window.puzzle = Puzzle.deserialize(res.currentTarget.result) // Will throw for most invalid puzzles
+      document.getElementById('theme').href = './theme/' + window.puzzle.theme + '.css'
+      puzzleModified()
+      writePuzzle()
+      reloadPuzzle()
+    }
+    reader.onerror = function() {
+      console.error(reader.error);
+    };
+}, false);
 
 window.importPuzzle = function(serialized) {
   if (!serialized) {
@@ -341,11 +326,9 @@ window.setSolveMode = function(value) {
 
 window.onload = function() {
   localStorage.customMechanics = true; // yes
-  readPuzzle() // Will fall back to a new puzzle if needed.
-
   drawSymbolButtons()
   drawColorButtons()
-
+  createEmptyPuzzle()
   // Add theme-appropriate coloring to the style dropdown
   var puzzleStyle = document.getElementById('puzzleStyle')
   puzzleStyle.style.background = 'var(--background)'
@@ -396,7 +379,7 @@ window.onload = function() {
     // Cap the puzzle name length one last time
     if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
     // Ensure that puzzle names are non-empty
-    if (this.innerText.length === 0) this.innerText = '0'
+    if (this.innerText.length === 0) this.innerText = '(Insert Theme Name Here)'
     // Update the puzzle with the new name
     puzzle.theme = this.innerText
     document.getElementById('theme').href = './theme/' + this.innerText + '.css'
@@ -1280,4 +1263,4 @@ function puzzleModified() {
   document.getElementById('deleteButton').disabled = false
 }
 
-})
+});
