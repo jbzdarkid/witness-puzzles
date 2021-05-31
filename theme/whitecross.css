@@ -1,14 +1,14 @@
 :root {
-    --background: rgb(255, 244, 184); /* used to be PAGE_BACKGROUND*/
+    --background: rgb(227, 255, 254); /* used to be PAGE_BACKGROUND*/
     --alt-background: #eee;
     --active: #ddd;
     --border: #000;
-    --outer: rgb(11, 64, 100); /* used to be OUTER_BACKGROUND*/
-    --line-undone: rgb(14, 12, 39); /* used to be FOREGROUND*/
-    --inner: rgb(34, 95, 110); /* used to be BACKGROUND*/
+    --outer: rgb(41, 67, 85); /* used to be OUTER_BACKGROUND*/
+    --line-undone: rgb(72, 70, 99); /* used to be FOREGROUND*/
+    --inner: rgb(91, 160, 177); /* used to be BACKGROUND*/
     --line-default: rgb(70, 144, 255);
     --line-success: rgb(161, 236, 255);
-    --line-failure: rgb(0, 0, 0);
+    --line-failure: rgb(59, 55, 65);
     --cursor: rgb(233, 252, 255);
     --text: #000;
     --line_primary: #8FF;
