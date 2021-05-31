@@ -4,13 +4,13 @@
     --active: rgb(101, 63, 119);
     --border: rgb(255, 255, 255);
     --outer: rgb(82, 58, 76); /* used to be OUTER_BACKGROUND*/
-    --line-undone: rgb(153, 131, 161); /* used to be FOREGROUND*/
-    --inner: rgb(202, 126, 212); /* used to be BACKGROUND*/
+    --line-undone: rgb(104, 90, 109); /* used to be FOREGROUND*/
+    --inner: rgb(149, 95, 156); /* used to be BACKGROUND*/
     --line-default: rgb(221, 109, 255);
     --line-success: rgb(255, 203, 248);
-    --line-failure: rgba(62, 55, 65, 0)
+    --line-failure: rgba(62, 55, 65, 0);
     --cursor: rgb(254, 233, 255);
-    --text: #000;
+    --text: rgb(255, 255, 255);
     --line_primary: #8FF;
     --line_secondary: #FF2;
 }

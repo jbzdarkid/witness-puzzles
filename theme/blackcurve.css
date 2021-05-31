@@ -8,9 +8,9 @@
     --inner: rgb(126, 212, 130); /* used to be BACKGROUND*/
     --line-default: rgb(109, 255, 145);
     --line-success: rgb(203, 255, 203);
-    --line-failure: rgba(55, 65, 56, 0)
+    --line-failure: rgba(55, 65, 56, 0);
     --cursor: rgb(234, 255, 233);
-    --text: #000;
+    --text: rgb(255, 255, 255);
     --line_primary: #8FF;
     --line_secondary: #FF2;
 }

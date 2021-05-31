@@ -428,6 +428,7 @@ window.onload = function() {
     if (this.innerText.length === 0) this.innerText = '0'
     // Update the puzzle with the new name
     puzzle.theme = this.innerText
+    document.getElementById('theme').href = './theme/' + this.innerText + '.css'
     puzzle.name = "e"
     writePuzzle()
   }

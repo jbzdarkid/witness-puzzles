@@ -105,7 +105,6 @@ l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
 l('button {')
 l('  background-color: var(--alt-background);')
 l('  border: 1px solid var(--border);')
-l('  border-radius: 2px;')
 l('  color: var(--text);')
 l('  display: inline-block;')
 l('  margin: 0px;')
@@ -479,7 +478,6 @@ function createCheckbox() {
   var checkbox = document.createElement('div')
   checkbox.style.width = '22px'
   checkbox.style.height = '22px'
-  checkbox.style.borderRadius = '6px'
   checkbox.style.display = 'inline-block'
   checkbox.style.verticalAlign = 'text-bottom'
   checkbox.style.marginRight = '6px'

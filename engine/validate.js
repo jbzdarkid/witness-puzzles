@@ -34,6 +34,8 @@ window.validate = function(puzzle, quick) {
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
 
+  puzzle.invalidElements = []
+
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
@@ -49,12 +51,14 @@ window.validate = function(puzzle, quick) {
         }
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
+          puzzle.invalidElements
           puzzle.valid = false
           if (quick) return
         }
         if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
             (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
+          puzzle.invalidElements.push({"x": x, "y": y})
           puzzle.valid = false
           if (quick) return
         }
@@ -64,7 +68,6 @@ window.validate = function(puzzle, quick) {
     }
   }
 
-  puzzle.invalidElements = []
   puzzle.negations = []
   if (needsRegions) {
     var regions = puzzle.getRegions()

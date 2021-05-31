@@ -9,7 +9,7 @@ window.updatePuzzle = function() {
             draw(puzzle)
         }
     }
-    request.open("GET", "./puzzles/" + window.currentPanel + '.json', true)
+    request.open("GET", "./" + window.puzzleSet + "/" + window.currentPanel + '.json', true)
     request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
     request.send()
 }

@@ -1,11 +1,11 @@
 :root {
-    --background: rgb(209, 255, 246); /* used to be PAGE_BACKGROUND*/
-    --alt-background: rgb(174, 255, 239);
-    --active: rgb(152, 255, 234);
+    --background: #fff; /* used to be PAGE_BACKGROUND*/
+    --alt-background: #eee;
+    --active: #ddd;
     --border: #000;
     --outer: #113833; /* used to be OUTER_BACKGROUND*/
     --line-undone: #344; /* used to be FOREGROUND*/
-    --inner: rgb(0, 170, 136); /* used to be BACKGROUND*/
+    --inner: #0A8; /* used to be BACKGROUND*/
     --line-default: #aaa;
     --line-success: #fff;
     --line-failure: rgba(0, 0, 0, 0);

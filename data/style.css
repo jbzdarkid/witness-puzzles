@@ -9,6 +9,7 @@ label, select, option, input, a, button {
   font-family: "Constantia-Bold";
   font-variant: small-caps;
   font-size: 28px;
+  border-radius: 0.5vw;
 }
 
 * {
@@ -18,6 +19,7 @@ label, select, option, input, a, button {
 p, label {
   font-size: 48px;
   display: inline;
+  color: var(--text);
 }
 
 line, circle, polygon {

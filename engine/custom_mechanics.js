@@ -213,6 +213,7 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
       (cell.dot % 5 == -4 && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered alternative dot: Dot is', cell.dot, 'but line is', cell.line)
           puzzle.valid = false
+          puzzle.invalidElements.push(pos)
           if (quick) return
       }
   if (cell.dot > window.CUSTOM_CURVE_WHITE) { // cross
@@ -220,6 +221,7 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
       (isOver(puzzle, pos, 0, 1) && isOver(puzzle, pos, 0, -1)))) {
         console.log('Solution line curves at a cross at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
         puzzle.valid = false
+        puzzle.invalidElements.push(pos)
         if (quick) return
     }
   } else { // curve
@@ -227,6 +229,7 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
       (isOver(puzzle, pos, 0, 1) && isOver(puzzle, pos, 0, -1))) {
         console.log('Solution line goes straight at a curve at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
         puzzle.valid = false
+        puzzle.invalidElements.push(pos)
         if (quick) return
     }
   }
