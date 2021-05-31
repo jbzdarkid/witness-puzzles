@@ -93,6 +93,7 @@ window.deletePuzzle = function() {
   createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))
   puzzle.theme = theme
   window.setTheme(theme)
+  document.getElementById('puzzleTheme').innerHTML = theme
 }
 
 // Clear animations from the puzzle, redraw it, and add editor hooks.
@@ -283,6 +284,7 @@ fileInput.addEventListener("change", function() {
     reader.onload = function(res) {
       window.puzzle = Puzzle.deserialize(res.currentTarget.result) // Will throw for most invalid puzzles
       window.setTheme(puzzle.theme)
+      document.getElementById('puzzleTheme').innerHTML = puzzle.theme
       puzzleModified()
       writePuzzle()
       reloadPuzzle()
@@ -386,6 +388,7 @@ window.onload = function() {
     // Update the puzzle with the new name
     puzzle.theme = this.innerText
     window.setTheme(this.innerText)
+    document.getElementById('puzzleTheme').innerHTML = this.innerText
     puzzle.name = "e"
     writePuzzle()
   }
