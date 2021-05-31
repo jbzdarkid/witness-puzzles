@@ -1,0 +1,16 @@
+:root {
+    --background: rgb(255, 244, 184); /* used to be PAGE_BACKGROUND*/
+    --alt-background: #eee;
+    --active: #ddd;
+    --border: #000;
+    --outer: rgb(11, 64, 100); /* used to be OUTER_BACKGROUND*/
+    --line-undone: rgb(14, 12, 39); /* used to be FOREGROUND*/
+    --inner: rgb(34, 95, 110); /* used to be BACKGROUND*/
+    --line-default: rgb(70, 144, 255);
+    --line-success: rgb(161, 236, 255);
+    --line-failure: rgb(0, 0, 0);
+    --cursor: rgb(233, 252, 255);
+    --text: #000;
+    --line_primary: #8FF;
+    --line_secondary: #FF2;
+}
