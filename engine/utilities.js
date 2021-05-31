@@ -192,7 +192,7 @@ window.loadHeader = function(titleText) {
   document.body.style.marginLeft = '0px'
 
   var navbar = document.createElement('div')
-  document.body.appendChild(navbar)
+  document.getElementById('header').appendChild(navbar)
   navbar.className = 'navbar'
   // navbar.style = 'min-width: 700px; position: absolute; top: 0; width: 100%; z-index: 1'
   // navbar.style.borderBottom = '2px solid var(--border)'

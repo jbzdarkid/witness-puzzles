@@ -29,11 +29,37 @@ line, circle, polygon {
   border: 0px transparent;
 }
 
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  justify-content: space-between;
+  position: relative;
+  align-items: stretch;
+  min-height: 100%;
+}
+
+.spacer {
+  -ms-flex: 999 1 auto !important;
+  flex: 999 0 auto !important;
+}
+
 .main {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 1rem;
+  flex: 1 0 auto;
+  min-height: 75vh;
+}
+
+footer {
+  background-color: var(--outer);
+  color: var(--inner);
+}
+
+footer i {
+  color: var(--inner);
 }
 
 a { text-decoration: none; }

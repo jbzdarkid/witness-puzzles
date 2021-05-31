@@ -17,94 +17,135 @@
     <title>Create a puzzle</title>
   </head>
   <body>
-    <script>loadHeader('Creating puzzle')</script>
-    <p>Theme: </p>
-    <label id="puzzleTheme" contentEditable=true></label>
-    <p>.css</p>
+    <div class="wrapper">
+      <header id="header"></header>
+      <script>loadHeader('Creating puzzle')</script>
+      <div class="main">
+        <p>Theme: </p>
+        <label id="puzzleTheme" contentEditable=true></label>
+        <p>.css</p>
 
-    <table id="meta" class="noselect">
-      <tr>
-        <td style="text-align: center;">
-          <div id="metaButtons" style="display:inline">
-            <button id="newButton" onpointerdown="createEmptyPuzzle()">New</button>
-            <button id="loadButton" onpointerdown="loadPuzzle()">Load</button>
-            <button id="deleteButton" onpointerdown="deletePuzzle()">Delete</button>
-          </div>
-          <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
-          <select id="puzzleStyle" onchange="createEmptyPuzzle()">
-            <option>Default</option>
-            <option>Horizontal Symmetry</option>
-            <option>Vertical Symmetry</option>
-            <option>Rotational Symmetry</option>
-            <option>Pillar</option>
-            <option>Pillar (H Symmetry)</option>
-            <option>Pillar (V Symmetry)</option>
-            <option>Pillar (R Symmetry)</option>
-            <option>Pillar (Two Lines)</option>
-          </select>
-        </td>
-      </tr><tr>
-        <td>
-          <div style="display: flex; justify-content: space-between; align-items: center">
-            <!-- This gets a margin-left because the buttons are a bit smaller than the crayons -->
-            <table id="symbolButtons" style="padding: 5px; margin-left: 6px; display:none" cellpadding="4" cellspacing="0">
-              <tr>
-                <td><button id="start"></button></td>
-                <td><button id="end"></button></td>
-              </tr><tr>
-                <td><button id="gap"></button></td>
-                <td><button id="dot"></button></td>
-              </tr><tr>
-                <td><button id="square"></button></td>
-                <td><button id="star"></button></td>
-              </tr><tr>
-                <td><button id="nega"></button></td>
-                <td><button id="triangle"></button></td>
-              </tr><tr>
-                <td><button id="poly"></button></td>
-                <td><button id="rpoly"></button></td>
-              </tr><tr>
-                <td><button id="ylop"></button></td>
-                <td><button id="rylop"></button></td>
-              </tr><tr>
-                <td><button id="cross"></button></td>
-                <td><button id="curve"></button></td>
-              </tr>
-            </table>
-            <div style="display: flex; justify-content: center; min-width: 432px">
-              <div id="puzzleBox" style="position: relative">
-                <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
-                <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
-                <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
-                <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
-                <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
-                <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
-                <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
-                <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
-                <svg id="puzzle" style="z-index: 10"></svg>
+        <table id="meta" class="noselect">
+          <tr>
+            <td style="text-align: center;">
+              <div id="metaButtons" style="display:inline">
+                <button id="newButton" onpointerdown="createEmptyPuzzle()">New</button>
+                <button id="loadButton" onpointerdown="loadPuzzle()">Load</button>
+                <button id="deleteButton" onpointerdown="deletePuzzle()">Delete</button>
               </div>
-            </div>
-            <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
-              <tr><td><button id="black"></button></td></tr>
-              <tr><td><button id="white"></button></td></tr>
-              <tr><td><button id="red"></button></td></tr>
-              <tr><td><button id="orange"></button></td></tr>
-              <tr><td><button id="yellow"></button></td></tr>
-              <tr><td><button id="green"></button></td></tr>
-              <tr><td><button id="blue"></button></td></tr>
-              <tr><td><button id="purple"></button></td></tr>
-            </table>
-          </div>
-        </td>
-      </tr><tr>
-        <td style="text-align:center;">
-          <script>addSolveButtons()</script>
-        </td>
-      </tr><tr>
-        <td style="text-align:center;">
-          <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
-        </td>
-      </tr>
-    </table>
+              <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
+              <select id="puzzleStyle" onchange="createEmptyPuzzle()">
+                <option>Default</option>
+                <option>Horizontal Symmetry</option>
+                <option>Vertical Symmetry</option>
+                <option>Rotational Symmetry</option>
+                <option>Pillar</option>
+                <option>Pillar (H Symmetry)</option>
+                <option>Pillar (V Symmetry)</option>
+                <option>Pillar (R Symmetry)</option>
+                <option>Pillar (Two Lines)</option>
+              </select>
+            </td>
+          </tr><tr>
+            <td>
+              <div style="display: flex; justify-content: space-between; align-items: center">
+                <!-- This gets a margin-left because the buttons are a bit smaller than the crayons -->
+                <table id="symbolButtons" style="padding: 5px; margin-left: 6px; display:none" cellpadding="4" cellspacing="0">
+                  <tr>
+                    <td><button id="start"></button></td>
+                    <td><button id="end"></button></td>
+                  </tr><tr>
+                    <td><button id="gap"></button></td>
+                    <td><button id="dot"></button></td>
+                  </tr><tr>
+                    <td><button id="square"></button></td>
+                    <td><button id="star"></button></td>
+                  </tr><tr>
+                    <td><button id="nega"></button></td>
+                    <td><button id="triangle"></button></td>
+                  </tr><tr>
+                    <td><button id="poly"></button></td>
+                    <td><button id="rpoly"></button></td>
+                  </tr><tr>
+                    <td><button id="ylop"></button></td>
+                    <td><button id="rylop"></button></td>
+                  </tr><tr>
+                    <td><button id="cross"></button></td>
+                    <td><button id="curve"></button></td>
+                  </tr>
+                </table>
+                <div style="display: flex; justify-content: center; min-width: 432px">
+                  <div id="puzzleBox" style="position: relative">
+                    <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
+                    <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
+                    <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
+                    <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
+                    <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
+                    <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
+                    <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
+                    <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
+                    <svg id="puzzle" style="z-index: 10"></svg>
+                  </div>
+                </div>
+                <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
+                  <tr><td><button id="black"></button></td></tr>
+                  <tr><td><button id="white"></button></td></tr>
+                  <tr><td><button id="red"></button></td></tr>
+                  <tr><td><button id="orange"></button></td></tr>
+                  <tr><td><button id="yellow"></button></td></tr>
+                  <tr><td><button id="green"></button></td></tr>
+                  <tr><td><button id="blue"></button></td></tr>
+                  <tr><td><button id="purple"></button></td></tr>
+                </table>
+              </div>
+            </td>
+          </tr><tr>
+            <td style="text-align:center;">
+              <script>addSolveButtons()</script>
+            </td>
+          </tr><tr>
+            <td style="text-align:center;">
+              <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="spacer"></div>
+      <footer>
+        <pre class="footer-text">Funny Looksy, prodzpod 2021</pre>
+        <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i class="xi-github"></i></a>
+        <pre>
+BSD 3-Clause License
+
+Copyright (c) 2017, jbzdarkid
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+        </pre>
+      </footer>
+    </div>
   </body>
 </html>
