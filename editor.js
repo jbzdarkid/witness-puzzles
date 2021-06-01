@@ -698,7 +698,7 @@ var symbolData = {
   'rylop': {'type':'ylop', 'title':'Rotatable negation polyomino'},
   'bridge': {'type':'bridge', 'title':'Seren\'s Bridge: VALIDATION IS BUGGED'},
   'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
-  'sizer': {'type':'sizer', 'title':'Sizer (who made this)'},
+  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
   'cross': {'type':'cross', 'title':'Cross'},
   'curve': {'type':'curve', 'title':'Diamond'},
 }
