@@ -33,7 +33,8 @@ window.validate = function(puzzle, quick) {
   // These two are both used by validateRegion, so they are saved on the puzzle itself.
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
-
+  puzzle.hasSizers = false
+  
   puzzle.invalidElements = []
 
   // Validate gap failures as an early exit.
@@ -44,6 +45,7 @@ window.validate = function(puzzle, quick) {
       if (!needsRegions && cell.type != 'line' && cell.type != 'triangle') needsRegions = true
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
+      if (cell.type == 'sizer') puzzle.hasSizers = true
       if (cell.line > window.LINE_NONE) {
         if (cell.dot < window.DOT_NONE && puzzle.settings.CUSTOM_MECHANICS) { // custom: check for line go over
           window.preValidateAltDots(puzzle, cell, {'x': x, 'y': y}, quick)
@@ -90,15 +92,16 @@ window.validate = function(puzzle, quick) {
   // } else {
 
   // actually we don't handle things differently because cross & curve isnt cross-region
-    for (var region of regions) {
-      regionData = validateRegion(puzzle, region, quick)
-      console.log('Region valid:', regionData.valid())
-      puzzle.negations = puzzle.negations.concat(regionData.negations)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-      puzzle.valid = puzzle.valid && regionData.valid()
-      if (quick && !puzzle.valid) return
-    }
+  if (puzzle.hasSizers) puzzle.sizerCount = null
+  for (var region of regions) {
+    regionData = validateRegion(puzzle, region, quick)
+    console.log('Region valid:', regionData.valid())
+    puzzle.negations = puzzle.negations.concat(regionData.negations)
+    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
+    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
+    puzzle.valid = puzzle.valid && regionData.valid()
+    if (quick && !puzzle.valid) return
+  }
   // }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
 }
