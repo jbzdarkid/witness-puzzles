@@ -209,8 +209,8 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
   - custom mechanic is on
   */
   // first, let's check colors
-  if (((cell.dot % 6 == -3 || cell.dot % 6 == -4) && cell.line === window.LINE_BLUE) ||
-      ((cell.dot % 6 == -5 || cell.dot % 6 == 0 ) && cell.line === window.LINE_YELLOW)) {
+  if (((cell.dot % 6 == -3 || cell.dot % 6 == -4) && cell.line === window.LINE_YELLOW) ||
+      ((cell.dot % 6 == -5 || cell.dot % 6 == 0 ) && cell.line === window.LINE_BLUE)) {
           console.log('CUSTOM_ALTDOTS: Incorrectly covered alternative dot: Dot is', cell.dot, 'but line is', cell.line)
           puzzle.valid = false
           puzzle.invalidElements.push(pos)
