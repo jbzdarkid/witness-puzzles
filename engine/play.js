@@ -16,9 +16,11 @@ window.updatePuzzle = function() {
 
 window.onSolvedPuzzle = function(paths) {
     if (window.currentPanel >= window.nowPanel && window.currentPanel != window.maxPanel) {
-        window.currentPanel++;
-        window.nowPanel = window.currentPanel;
-        window.updatePuzzle()
+        setTimeout(() => {
+            window.currentPanel++;
+            window.nowPanel = window.currentPanel;
+            window.updatePuzzle()
+        }, 1000);
     }
 }
 
