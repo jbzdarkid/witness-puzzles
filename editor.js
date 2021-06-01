@@ -317,7 +317,7 @@ window.setSolveMode = function(value) {
     window.TRACE_COMPLETION_FUNC = function(solution, path) {
       puzzle = solution
       puzzle.path = path
-      document.getElementById('publish').disabled = false
+      document.getElementById('save').disabled = false
     }
     // Redraw the puzzle, without interaction points. This is a bit of a @Hack, but it works.
     window.draw(puzzle)
@@ -525,17 +525,19 @@ function onElementClicked(event, x, y) {
     if (puzzle.symmetry != null) {
       dotColors.push(-3)
       dotColors.push(-4)
+      dotColors.push(-5)
+      dotColors.push(-6)
     }
-    dotColors.push(-5)
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
   } else if (activeParams.type == 'curve') {
     if (x%2 !== 0 || y%2 !== 0) return
-    var dotColors = [undefined, -6, -7]
+    var dotColors = [undefined, -7, -8]
     if (puzzle.symmetry != null) {
-      dotColors.push(-8)
       dotColors.push(-9)
+      dotColors.push(-10)
+      dotColors.push(-11)
+      dotColors.push(-12)
     }
-    dotColors.push(-10)
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
   } else if (activeParams.type == 'gap') {
     if (x%2 === y%2) return
@@ -574,8 +576,8 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer'].includes(activeParams.type)) {
-    if (['bridge', 'sizer'].includes(activeParams.type) && localStorage.customMechanics != 'true') return
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo'].includes(activeParams.type)) {
+    if (['bridge', 'sizer', 'twobytwo'].includes(activeParams.type) && localStorage.customMechanics != 'true') return
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -664,7 +666,7 @@ function onElementClicked(event, x, y) {
   // for (var x=1; x<puzzle.width; x+=2) {
   //   for (var y=1; y<puzzle.height; y+=2) {
   //     var cell = puzzle.grid[x][y]
-  //     if (cell != null && ['bridge', 'arrow', 'sizer'].includes(cell.type)) {
+  //     if (cell != null && ['bridge', 'arrow', 'sizer', 'twobytwo'].includes(cell.type)) {
   //       puzzle.settings.CUSTOM_MECHANICS = true
   //     }
   //   }
@@ -701,6 +703,9 @@ var symbolData = {
   'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
   'cross': {'type':'cross', 'title':'Cross'},
   'curve': {'type':'curve', 'title':'Diamond'},
+  'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
+  'curveFilled': {'type':'curveFilled', 'title':'Filled Diamond'},
+  'twobytwo': {'type':'twobytwo', 'title':'Two-By-Two'},
 }
 function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -777,7 +782,7 @@ function drawSymbolButtons() {
       }
       button.oncontextmenu = function(event) {event.preventDefault()}
     } else {
-      if (['bridge', 'sizer'].includes(button.id) && localStorage.customMechanics != 'true') {
+      if (['bridge', 'sizer', 'twobytwo'].includes(button.id) && localStorage.customMechanics != 'true') {
         button.style.display = 'none'
         continue
       }

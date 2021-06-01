@@ -343,6 +343,7 @@ function regionCheck(puzzle, region, quick) {
     window.validateArrows(puzzle, region, regionData)
     window.validateSizers(puzzle, region, regionData)
     window.validateAltDots(puzzle, region, regionData, quick)
+    window.validateTwoByTwos(puzzle, region, regionData, quick)
   }
 
   console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')

@@ -14,27 +14,80 @@ window.drawSymbol = function(params, customMechanics) {
 }
 
 window.drawSymbolWithSvg = function(svg, params, customMechanics) {
-  if (params.type == 'square')        square(svg, params)
-  else if (params.type == 'dot')      dot(svg, params)
-  else if (params.type == 'gap')      gap(svg, params)
-  else if (params.type == 'star')     star(svg, params)
-  else if (params.type == 'poly')     poly(svg, params)
-  else if (params.type == 'ylop')     ylop(svg, params)
-  else if (params.type == 'nega')     nega(svg, params)
-  else if (params.type == 'nonce')    { /* Do nothing */ }
-  else if (params.type == 'triangle') triangle(svg, params)
-  else if (params.type == 'crayon')   crayon(svg, params)
-  else if (params.type == 'start')    start(svg, params)
-  else if (params.type == 'end')      end(svg, params)
-  else if (params.type == 'drag')     drag(svg, params)
-  else if (params.type == 'plus')     plus(svg, params)
-  else if (params.type == 'minus')    minus(svg, params)
-  else if (params.type == 'bridge' && customMechanics) bridge(svg, params)
-  else if (params.type == 'arrow'  && customMechanics) arrow(svg, params)
-  else if (params.type == 'sizer'  && customMechanics) sizer(svg, params)
-  else if (params.type == 'cross'  && customMechanics) cross(svg, params)
-  else if (params.type == 'curve'  && customMechanics) curve(svg, params)
-  else {console.error('Cannot draw unknown SVG type: ' + params.type)}
+  switch (params.type) {
+    case 'square':
+      square(svg, params)
+      break;
+    case 'dot':
+      dot(svg, params)
+      break;
+    case 'gap':
+      gap(svg, params)
+      break;
+    case 'star':
+      star(svg, params)
+      break;
+    case 'poly':
+      poly(svg, params)
+      break;
+    case 'ylop':
+      ylop(svg, params)
+      break;
+    case 'nega':
+      nega(svg, params)
+      break;
+    case 'nonce':
+      /* Do nothing */
+      break;
+    case 'triangle':
+      triangle(svg, params)
+      break;
+    case 'crayon':
+      crayon(svg, params)
+      break;
+    case 'start':
+      start(svg, params)
+      break;
+    case 'end':
+      end(svg, params)
+      break;
+    case 'drag':
+      drag(svg, params)
+      break;
+    case 'plus':
+      plus(svg, params)
+      break;
+    case 'minus':
+      minus(svg, params)
+      break;
+    case 'bridge':
+      bridge(svg, params)
+      break;
+    case 'arrow':
+      arrow(svg, params)
+      break;
+    case 'sizer':
+      sizer(svg, params)
+      break;
+    case 'cross':
+      cross(svg, params)
+      break;
+    case 'curve':
+      curve(svg, params)
+      break;
+    case 'crossFilled':
+      crossFilled(svg, params)
+      break;
+    case 'curveFilled':
+      curveFilled(svg, params)
+      break;
+    case 'twobytwo':
+      twobytwo(svg, params)
+      break;
+    default:
+      console.error('Cannot draw unknown SVG type: ' + params.type)
+      break;
+  }
 }
 
 function square(svg, params) {
@@ -435,6 +488,24 @@ function cross(svg, params) {
   hex.setAttribute('stroke', params.stroke)
   hex.setAttribute('stroke-width', params.strokeWidth)
   hex.setAttribute('style', 'pointer-events:none;')
+  var hex2 = createElement('rect')
+  svg.appendChild(hex2)
+  hex2.setAttribute('fill', 'var(--line-undone)')
+  hex2.setAttribute('transform', 'translate(' + (params.width/2 + params.x - 2.5) + ', ' + (params.height/2 + params.y - 2.5) + ')')
+  hex2.setAttribute('width', '5')
+  hex2.setAttribute('height', '5')
+}
+
+function crossFilled(svg, params) {
+  var hex = createElement('polygon')
+  svg.appendChild(hex)
+  hex.setAttribute('points', '-10 -2.5,-10 2.5,-2.5 2.5,-2.5 10,2.5 10,2.5 2.5,10 2.5,10 -2.5,2.5 -2.5,2.5 -10,-2.5 -10,-2.5 -2.5')
+  hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
+  hex.setAttribute('fill', params.color)
+  hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
+  hex.setAttribute('style', 'pointer-events:none;')
 }
 
 function curve(svg, params) {
@@ -442,6 +513,49 @@ function curve(svg, params) {
   svg.appendChild(hex)
   hex.setAttribute('points', '10 0, 0 10, -10 0, 0 -10, 0 -5, -5 0, 0 5, 5 0, 0 -5, 0 -10')
   hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
+  hex.setAttribute('fill', params.color)
+  hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
+  hex.setAttribute('style', 'pointer-events:none;')
+}
+
+function curveFilled(svg, params) {
+  var hex = createElement('polygon')
+  svg.appendChild(hex)
+  hex.setAttribute('points', '10 0, 0 10, -10 0, 0 -10')
+  hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x) + ', ' + (params.height/2 + params.y) + ')')
+  hex.setAttribute('fill', params.color)
+  hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
+  hex.setAttribute('style', 'pointer-events:none;')
+}
+
+function twobytwo(svg, params) {
+  onebyone(svg, params, 9.71, 0)
+  onebyone(svg, params, -9.71, 0)
+  onebyone(svg, params, 0, 9.71)
+  enobyeno(svg, params, 0, -11)
+}
+
+function onebyone(svg, params, xoffset, yoffset) {
+  var hex = createElement('polygon')
+  svg.appendChild(hex)
+  hex.setAttribute('points', '7.07 0, 0 7.07, -7.07 0, 0 -7.07')
+  hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x + xoffset) + ', ' + (params.height/2 + params.y + yoffset) + ')')
+  hex.setAttribute('fill', params.color)
+  hex.setAttribute('class', params.class)
+  hex.setAttribute('stroke', params.stroke)
+  hex.setAttribute('stroke-width', params.strokeWidth)
+  hex.setAttribute('style', 'pointer-events:none;')
+}
+
+function enobyeno(svg, params, xoffset, yoffset) {
+  var hex = createElement('polygon')
+  svg.appendChild(hex)
+  hex.setAttribute('points', '8.49 0, 0 8.49, -8.49 0, 0 -8.49, 8.49 0, 4.24 0, 0 -4.24, -4.24 0, 0 4.24, 4.24 0')
+  hex.setAttribute('transform', 'translate(' + (params.width/2 + params.x + xoffset) + ', ' + (params.height/2 + params.y + yoffset) + ')')
   hex.setAttribute('fill', params.color)
   hex.setAttribute('class', params.class)
   hex.setAttribute('stroke', params.stroke)

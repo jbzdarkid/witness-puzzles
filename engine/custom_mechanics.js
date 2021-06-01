@@ -209,17 +209,17 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
   - custom mechanic is on
   */
   // first, let's check colors
-  if ((cell.dot % 5 == -3 && cell.line === window.LINE_YELLOW) ||
-      (cell.dot % 5 == -4 && cell.line === window.LINE_BLUE)) {
-          console.log('Incorrectly covered alternative dot: Dot is', cell.dot, 'but line is', cell.line)
+  if (((cell.dot % 6 == -3 || cell.dot % 6 == -4) && cell.line === window.LINE_BLUE) ||
+      ((cell.dot % 6 == -5 || cell.dot % 6 == 0 ) && cell.line === window.LINE_YELLOW)) {
+          console.log('CUSTOM_ALTDOTS: Incorrectly covered alternative dot: Dot is', cell.dot, 'but line is', cell.line)
           puzzle.valid = false
           puzzle.invalidElements.push(pos)
           if (quick) return
       }
-  if (cell.dot > window.CUSTOM_CURVE_WHITE) { // cross
+  if (cell.dot > window.CUSTOM_CURVE) { // cross
     if (!((isOver(puzzle, pos, 1, 0) && isOver(puzzle, pos, -1, 0)) ||
       (isOver(puzzle, pos, 0, 1) && isOver(puzzle, pos, 0, -1)))) {
-        console.log('Solution line curves at a cross at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
+        console.log('CUSTOM_ALTDOTS: Solution line curves at a cross at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
         puzzle.valid = false
         puzzle.invalidElements.push(pos)
         if (quick) return
@@ -227,7 +227,7 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
   } else { // curve
     if ((isOver(puzzle, pos, 1, 0) && isOver(puzzle, pos, -1, 0)) ||
       (isOver(puzzle, pos, 0, 1) && isOver(puzzle, pos, 0, -1))) {
-        console.log('Solution line goes straight at a curve at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
+        console.log('CUSTOM_ALTDOTS: Solution line goes straight at a curve at: ', pos.x, pos.y, ', Adjecency matrix (RDLU): ', isOver(puzzle, pos, 1, 0), isOver(puzzle, pos, 0, 1), isOver(puzzle, pos, -1, 0), isOver(puzzle, pos, 0, -1))
         puzzle.valid = false
         puzzle.invalidElements.push(pos)
         if (quick) return
@@ -240,11 +240,38 @@ window.validateAltDots = function(puzzle, region, regionData, quick) {
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
-    if (cell.dot < window.DOT_NONE && cell.dot % 5 < -1) {
-      console.log('CUSTOM_PRODMOD: Non-white alternative dot at', pos.x, pos.y, 'is not covered')
+    if (cell.dot < window.DOT_NONE && cell.dot % 2 == 0) {
+      console.log('CUSTOM_ALTDOTS: Non-white alternative dot at', pos.x, pos.y, 'is not covered')
       regionData.addVeryInvalid(pos)
       if (quick) return regionData
     }
   }
 }
+
+window.validateTwoByTwos = function(puzzle, region, regionData, quick) {
+  let regionMatrix = Array.from({ length: Math.floor(puzzle.height / 2) }, () => Array.from({ length: Math.floor(puzzle.width / 2) }, () => false));
+  let twobytwos = []
+  for (var pos of region.cells) {
+    if (pos.x % 2 === 0 || pos.y % 2 === 0) continue
+    let x = Math.floor(pos.x / 2)
+    let y = Math.floor(pos.y / 2)
+    regionMatrix[y][x] = true
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue
+    if (cell.type == "twobytwo") { // start detection
+      twobytwos.push({"x": x, "y": y})
+    }
+  }
+  for (tbt of twobytwos) {
+    if((regionMatrix[tbt.y+1] && regionMatrix[tbt.y+1][tbt.x+1] && regionMatrix[tbt.y+1][tbt.x] && regionMatrix[tbt.y][tbt.x+1])
+    || (regionMatrix[tbt.y+1] && regionMatrix[tbt.y+1][tbt.x-1] && regionMatrix[tbt.y+1][tbt.x] && regionMatrix[tbt.y][tbt.x-1])
+    || (regionMatrix[tbt.y-1] && regionMatrix[tbt.y-1][tbt.x+1] && regionMatrix[tbt.y-1][tbt.x] && regionMatrix[tbt.y][tbt.x+1])
+    || (regionMatrix[tbt.y-1] && regionMatrix[tbt.y-1][tbt.x-1] && regionMatrix[tbt.y-1][tbt.x] && regionMatrix[tbt.y][tbt.x-1])) {// thats a long if statement 
+      console.log('CUSTOM_TWOBYTWO: two by two detected at', tbt.x * 2 + 1, tbt.y * 2 + 1)
+      regionData.addInvalid({'x': tbt.x * 2 + 1, 'y': tbt.y * 2 + 1})
+      if (quick) return regionData
+    }
+  }
+}
+
 })

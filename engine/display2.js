@@ -232,17 +232,15 @@ function drawSymbols(puzzle, svg, target) {
         }
         window.drawSymbolWithSvg(svg, params, true)
       } else if (cell.dot < window.DOT_NONE) { // draw custom gimmicks
-        if (cell.dot < window.CUSTOM_CROSS_INVISIBLE) params.type = 'curve';
-        else params.type = 'cross';
-        switch (cell.dot % 5) {
-          case 0:
-            params.color = 'var(--line-undone)'
-            // This makes the invisible dots visible, but only while we're in the editor.
-            if (document.getElementById('metaButtons') != null) {
-              params.stroke = 'black';
-              params.strokeWidth = '2px';
-            }
-            break;
+        if (cell.dot > window.CUSTOM_CURVE) {
+          if (cell.dot % 2 == -1) params.type = 'cross';
+          else params.type = 'crossFilled';
+        }
+        else { 
+          if (cell.dot % 2 == -1) params.type = 'curve';
+          else params.type = 'curveFilled';
+        }
+        switch (cell.dot % 6) {
           case -1:
             params.color = 'white';
             break;
@@ -250,9 +248,11 @@ function drawSymbols(puzzle, svg, target) {
             params.color = 'black';
             break;
           case -3:
+          case -4:
             params.color = 'var(--line_primary)';
             break;
-          case -4:
+          case -5:
+          case 0:
             params.color = 'var(--line_secondary)';
             break;
         }
