@@ -535,7 +535,7 @@ function hookMovementEvents(start) {
   if (start.requestPointerLock != null) start.requestPointerLock()
   if (start.mozRequestPointerLock != null) start.mozRequestPointerLock()
 
-  var sens = parseFloat(document.getElementById('sens').value)
+  var sens = parseFloat(localStorage.sensitivity)
   document.onmousemove = function(event) {
     // Working around a race condition where movement events fire after the handler is removed.
     if (data.tracing !== true) return

@@ -188,6 +188,61 @@ window.polyFit = function(region, puzzle) {
   return ret
 }
 
+// turns out the poly function was also recursing and brute forcing like no tomorrow, lets go
+window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // best name
+  var polynts = []
+  var regionSize = 0
+  for (var pos of region.cells) {
+    if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue
+    if (cell.polyshape === 0) continue
+    if (cell.type === 'polynt') {
+      polynts.push(pos)
+    }
+  }
+  if (polynts.length === 0) {
+    console.log('No not polyominos inside the region, vacuously true')
+    return true
+  }
+  var ret = true // true until breaks are found
+  // console.warn(regionMatrix)
+  for (var polyntpos of polynts) {
+    var polynt = puzzle.getCell(polyntpos.x, polyntpos.y)
+    if (getPolySize(polynt.polyshape) > regionSize) {
+      console.log('polynt size is bigger than region, true')
+      return true
+    }
+    for (var polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
+      console.spam('Selected polyntshape', polyntshape)
+      let cells = polyominoFromPolyshape(polyntshape, false, false)
+      // console.warn('new cell', cells)
+      for (var pos of region.cells) {
+        if (!puzzle.pillar && (0 > pos.x || pos.x >= puzzle.width || 0 > pos.y || pos.y >= puzzle.height)) continue; // non-pillars
+        if ((pos.x & pos.y) % 2 != 1) continue;
+        var found = true
+        // console.warn('checking cells', cells, 'on', pos)
+        for (cell of cells) {
+          // console.warn(cell.x + pos.x, cell.y + pos.y, regionMatrix[cell.y + pos.y], regionMatrix[cell.y + pos.y] && regionMatrix[cell.y + pos.y][cell.x + pos.x])
+          if (regionMatrix[cell.y + pos.y] === undefined || regionMatrix[cell.y + pos.y][cell.x + pos.x] == null) {
+            found = false
+            break
+          }
+          // console.warn(found)
+        }
+        if (found) {
+          console.log('Antipolyomino at', polyntpos.x, polyntpos.y, 'can fit')
+          regionData.addInvalid(polyntpos)
+          ret = false 
+          break;
+        }
+      }
+      if (found) break;
+    }
+  }
+  return ret
+}
+
 // If false, poly doesn't fit and grid is unmodified
 // If true, poly fits and grid is modified (with the placement)
 function tryPlacePolyshape(cells, x, y, puzzle, sign) {

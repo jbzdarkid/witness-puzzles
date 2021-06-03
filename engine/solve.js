@@ -74,7 +74,7 @@ window.solve = function(p, partialCallback, finalCallback) {
       }
       if (cell.end != null) numEndpoints++
       if (cell.type == 'nega') puzzle.hasNegations = true
-      if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
+      if (cell.type == 'poly' || cell.type == 'ylop' || cell.type == 'polynt') puzzle.hasPolyominos = true
     }
   }
 

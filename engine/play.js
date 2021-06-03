@@ -18,20 +18,27 @@ window.onSolvedPuzzle = function(paths) {
     if (window.currentPanel >= window.nowPanel && window.currentPanel != window.maxPanel) {
         setTimeout(() => {
             window.currentPanel++;
+            window[window.puzzleSet]++;
             window.nowPanel = window.currentPanel;
             window.updatePuzzle()
         }, 1000);
     }
 }
 
+window.reloadSymbolTheme = function() {
+    draw(window.puzzle)
+}
+
 function getNext() {
     if (window.currentPanel == window.maxPanel) return;
     window.currentPanel++;
+    window[window.puzzleSet]++;
     window.updatePuzzle()
 }
 
 function getPrev() {
     if (window.currentPanel == 0) return;
     window.currentPanel--;
+    window[window.puzzleSet]--;
     window.updatePuzzle()
 }

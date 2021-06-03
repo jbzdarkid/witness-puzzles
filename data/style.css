@@ -5,7 +5,7 @@
        url("Constantia.ttf")   format("truetype"),
        url("Constantia.woff2") format("woff2");
 }
-label, select, option, input, a, button {
+label, select, option, input, a, button, #symboltheme {
   font-family: "Constantia-Bold";
   font-variant: small-caps;
   font-size: 28px;
@@ -32,6 +32,48 @@ line, circle, polygon {
 .nav {
   background-color: transparent;
   border: 0px transparent;
+}
+
+header {
+  border: 2px black solid;
+  border-radius: 5px;
+  align-self: center;
+  display: block;
+  margin: 1rem;
+}
+
+header i {
+  min-width: 50vw;
+}
+
+.header-slider {
+  width: calc(50% - 2rem);
+  margin: 0 1rem;
+}
+
+#symboltheme {
+  align-self: center;
+}
+
+#header-plus-button {
+  background-color: transparent;
+  border: 0px transparent;
+  margin-top: 0.5rem;
+}
+
+[class*=list] {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    align-items: stretch;
+}
+
+.vlist {
+    flex-direction: column;
+}
+
+.hlist > div, .vlist > div { /* for ie compat, used to be [class$=list] > div */
+    flex: 1 0 auto;
 }
 
 .wrapper {
@@ -78,7 +120,7 @@ body {
   background-color: var(--background);
 }
 
-.loadButtonWrapper {
+.loadButtonWrapper, #symboltheme {
   cursor: pointer;
 }
 

@@ -329,6 +329,11 @@ window.setSolveMode = function(value) {
 }
 //** End of user interaction points
 
+window.reloadSymbolTheme = function() {
+  drawSymbolButtons()
+  reloadPuzzle()
+}
+
 window.onload = function() {
   localStorage.customMechanics = true; // yes
   drawSymbolButtons()
@@ -590,7 +595,7 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
       }
     }
-  } else if (['poly', 'ylop'].includes(activeParams.type)) {
+  } else if (['poly', 'ylop', 'polynt'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -623,14 +628,14 @@ function onElementClicked(event, x, y) {
         'count':activeParams.count
       }
     }
-  } else if (activeParams.type == 'arrow') {
+  } else if (activeParams.type == 'arrow' || activeParams.type == 'dart') {
     if (x%2 !== 1 || y%2 !== 1) return
     if (puzzle.grid[x][y] != null
      && puzzle.grid[x][y].type === activeParams.type
      && puzzle.grid[x][y].color === activeParams.color
      && puzzle.grid[x][y].rot === activeParams.rot) {
       puzzle.grid[x][y].count++
-      if (puzzle.grid[x][y].count >= 4) {
+      if (puzzle.grid[x][y].count >= 5) {
         puzzle.grid[x][y] = null
       }
     } else {
@@ -706,6 +711,9 @@ var symbolData = {
   'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
   'curveFilled': {'type':'curveFilled', 'title':'Filled Diamond'},
   'twobytwo': {'type':'twobytwo', 'title':'Two-By-Two'},
+  'dart': {'type':'dart', 'count':1, 'rot':0, 'title':'Dart'},
+  'polynt': {'type':'polynt', 'title':'unsuspiciousperson\'s Antipolyomino'}, // i just really liked the idea lol oops
+  'rpolynt': {'type':'polynt', 'title':'Rotatable Antipolyomino'},
 }
 function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
@@ -727,7 +735,7 @@ function drawSymbolButtons() {
     button.style.width = params.width + 2*params.border
     button.title = params.title
     button.params = params
-    if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
+    if (['poly', 'rpoly', 'ylop', 'rylop', 'polynt', 'rpolynt'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape
       if (button.id[0] == 'r') {
         button.params.polyshape |= window.ROTATION_BIT
@@ -781,6 +789,28 @@ function drawSymbolButtons() {
         drawSymbolButtons()
       }
       button.oncontextmenu = function(event) {event.preventDefault()}
+    } else if (button.id == 'dart') {
+      if (localStorage.customMechanics != 'true') {
+        button.style.display = 'none'
+        continue
+      }
+      button.style.display = null
+
+      button.onpointerdown = function(event) {
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        if (activeParams.id === this.id) {
+          var rot = symbolData.dart.rot
+          if (rot == null) rot = 0
+          rot += (event.isRightClick() ? -1 : 1)
+          if (rot < 0) rot = 7
+          if (rot > 7) rot = 0
+          symbolData.dart.rot = rot
+          activeParams.rot = rot
+        }
+        activeParams = Object.assign(activeParams, this.params)
+        drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {event.preventDefault()}
     } else {
       if (['bridge', 'sizer', 'twobytwo'].includes(button.id) && localStorage.customMechanics != 'true') {
         button.style.display = 'none'
@@ -798,7 +828,7 @@ function drawSymbolButtons() {
     var svg = window.drawSymbol(params, localStorage.customMechanics == 'true')
     button.appendChild(svg)
 
-    if (['poly', 'rpoly', 'ylop', 'rylop'].includes(button.id)) {
+    if (['poly', 'rpoly', 'ylop', 'rylop', 'polynt', 'rpolynt'].includes(button.id)) {
       var is4Wide = (activeParams.polyshape & 15) && (activeParams.polyshape & 61440)
       var is4Tall = (activeParams.polyshape & 4369) && (activeParams.polyshape & 34952)
       if (is4Wide || is4Tall) {

@@ -130,6 +130,14 @@ window.validateBridges = function(puzzle, region, regionData) {
   }
 }
 
+const detectionMode = {
+  "both":   (pos) => { return true; },
+  "cell":   (pos) => { return (pos.x & pos.y) % 2 == 1; },
+  "line":   (pos) => { return (pos.x | pos.y) % 2 == 0; },
+  "corner": (pos) => { return (pos.x & pos.y) % 2 == 0; },
+  "edge":   (pos) => { return (pos.x ^ pos.y) % 2 == 1; }
+};
+
 var DIRECTIONS = [
   {'x': 0, 'y':-1},
   {'x': 1, 'y':-1},
@@ -238,8 +246,9 @@ window.preValidateAltDots = function(puzzle, cell, pos, quick) {
 window.validateAltDots = function(puzzle, region, regionData, quick) {
   // simple checks here, if it exists & not white or invisible, bonked (copied from dot)
   for (var pos of region.cells) {
+    if (!detectionMode.corner(pos)) continue;
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
+    if (cell == null) continue;
     if (cell.dot < window.DOT_NONE && cell.dot % 2 == 0) {
       console.log('CUSTOM_ALTDOTS: Non-white alternative dot at', pos.x, pos.y, 'is not covered')
       regionData.addVeryInvalid(pos)
@@ -248,30 +257,54 @@ window.validateAltDots = function(puzzle, region, regionData, quick) {
   }
 }
 
-window.validateTwoByTwos = function(puzzle, region, regionData, quick) {
-  let regionMatrix = Array.from({ length: Math.floor(puzzle.height / 2) }, () => Array.from({ length: Math.floor(puzzle.width / 2) }, () => false));
+window.validateTwoByTwos = function(puzzle, region, regionData, regionMatrix, quick) {
   let twobytwos = []
-  for (var pos of region.cells) {
-    if (pos.x % 2 === 0 || pos.y % 2 === 0) continue
-    let x = Math.floor(pos.x / 2)
-    let y = Math.floor(pos.y / 2)
-    regionMatrix[y][x] = true
+  for (let pos of region.cells) {
+    if (!detectionMode.cell(pos)) continue;
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
-    if (cell.type == "twobytwo") { // start detection
-      twobytwos.push({"x": x, "y": y})
-    }
+    if (cell.type == "twobytwo")
+      twobytwos.push(pos)
   }
-  for (tbt of twobytwos) {
-    if((regionMatrix[tbt.y+1] && regionMatrix[tbt.y+1][tbt.x+1] && regionMatrix[tbt.y+1][tbt.x] && regionMatrix[tbt.y][tbt.x+1])
-    || (regionMatrix[tbt.y+1] && regionMatrix[tbt.y+1][tbt.x-1] && regionMatrix[tbt.y+1][tbt.x] && regionMatrix[tbt.y][tbt.x-1])
-    || (regionMatrix[tbt.y-1] && regionMatrix[tbt.y-1][tbt.x+1] && regionMatrix[tbt.y-1][tbt.x] && regionMatrix[tbt.y][tbt.x+1])
-    || (regionMatrix[tbt.y-1] && regionMatrix[tbt.y-1][tbt.x-1] && regionMatrix[tbt.y-1][tbt.x] && regionMatrix[tbt.y][tbt.x-1])) {// thats a long if statement 
-      console.log('CUSTOM_TWOBYTWO: two by two detected at', tbt.x * 2 + 1, tbt.y * 2 + 1)
-      regionData.addInvalid({'x': tbt.x * 2 + 1, 'y': tbt.y * 2 + 1})
+  for (let pos of twobytwos) {
+    if((regionMatrix[pos.y+2] && regionMatrix[pos.y+2][pos.x+2] && regionMatrix[pos.y+2][pos.x] && regionMatrix[pos.y][pos.x+2])
+    || (regionMatrix[pos.y+2] && regionMatrix[pos.y+2][pos.x-2] && regionMatrix[pos.y+2][pos.x] && regionMatrix[pos.y][pos.x-2])
+    || (regionMatrix[pos.y-2] && regionMatrix[pos.y-2][pos.x+2] && regionMatrix[pos.y-2][pos.x] && regionMatrix[pos.y][pos.x+2])
+    || (regionMatrix[pos.y-2] && regionMatrix[pos.y-2][pos.x-2] && regionMatrix[pos.y-2][pos.x] && regionMatrix[pos.y][pos.x-2])) {// thats a long if statement 
+      console.log('CUSTOM_TWOBYTWO: two by two detected at', pos)
+      regionData.addInvalid(pos)
       if (quick) return regionData
     }
   }
+}
+
+window.validateDarts = function(puzzle, region, regionData, regionMatrix) {
+  for (var pos of region.cells) {
+    if (!detectionMode.cell(pos)) continue;
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue
+    if (cell.type != 'dart') continue
+    dir = DIRECTIONS[cell.rot]
+    var count = 0
+    var x = pos.x + (dir.x * 2)
+    var y = pos.y + (dir.y * 2)
+    for (var i=0; i<100; i++) { // lol infinite loops
+      if (!puzzle.pillar && (0 > x || x >= puzzle.width || 0 > y || y >= puzzle.height)) break; // non-pillars
+      if (regionMatrix[y] && regionMatrix[y][x]) count++;
+      if (count > cell.count) break
+      x += (dir.x * 2)
+      y += (dir.y * 2)
+      if (puzzle.matchesSymmetricalPos(x, y, pos.x + (dir.x * 2), pos.y + (dir.y * 2))) break // pillars
+    }
+    if (count !== cell.count) {
+      console.log('Dart at', pos.x, pos.y, 'detected', count, 'cells in region, but should contain', cell.count)
+      regionData.addInvalid(pos)
+    }
+  }
+}
+
+window.validateAntipolys = function(puzzle, region, regionData, regionMatrix) {
+  window.polyntFitnt(region, puzzle, regionData, regionMatrix)
 }
 
 })

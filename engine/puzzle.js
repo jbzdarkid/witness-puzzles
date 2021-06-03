@@ -78,7 +78,7 @@ window.Puzzle = class {
           if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = null
           else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
         } else {
-          if (cell.type === 'poly' || cell.type === 'ylop') {
+          if (cell.type === 'poly' || cell.type === 'ylop' || cell.type === 'polynt') {
             if (cell.rot === 'all') {
               // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
               // rot=all is a holdover that was used to represent rotation polyominos.

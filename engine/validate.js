@@ -42,9 +42,9 @@ window.validate = function(puzzle, quick) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == null) continue
-      if (!needsRegions && cell.type != 'line' && cell.type != 'triangle') needsRegions = true
+      if (!needsRegions && cell.type != 'line' && cell.type != 'triangle' && cell.type != 'arrow') needsRegions = true
       if (cell.type == 'nega') puzzle.hasNegations = true
-      if (cell.type == 'poly' || cell.type == 'ylop') puzzle.hasPolyominos = true
+      if (cell.type == 'poly' || cell.type == 'ylop' || cell.type == 'polynt') puzzle.hasPolyominos = true
       if (cell.type == 'sizer') puzzle.hasSizers = true
       if (cell.line > window.LINE_NONE) {
         if (cell.dot < window.DOT_NONE && puzzle.settings.CUSTOM_MECHANICS) { // custom: check for line go over
@@ -53,7 +53,7 @@ window.validate = function(puzzle, quick) {
         }
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
-          puzzle.invalidElements
+          puzzle.invalidElements.push({"x": x, "y": y})
           puzzle.valid = false
           if (quick) return
         }
@@ -342,13 +342,20 @@ function regionCheck(puzzle, region, quick) {
   }
 
   if (puzzle.settings.CUSTOM_MECHANICS) {
+    let regionMatrix = Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => null));
+    for (var pos of region.cells) {
+      let cell = puzzle.getCell(pos.x, pos.y);
+      if (cell && cell.line === 0 && cell.type === "line") cell = true 
+      regionMatrix[pos.y][pos.x] = cell || true
+    }
     window.validateBridges(puzzle, region, regionData)
     window.validateArrows(puzzle, region, regionData)
     window.validateSizers(puzzle, region, regionData)
     window.validateAltDots(puzzle, region, regionData, quick)
-    window.validateTwoByTwos(puzzle, region, regionData, quick)
+    window.validateTwoByTwos(puzzle, region, regionData, regionMatrix, quick)
+    window.validateDarts(puzzle, region, regionData, regionMatrix)
+    window.validateAntipolys(puzzle, region, regionData, regionMatrix)
   }
-
   console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')
   console.debug('Region has', regionData.invalidElements.length, 'invalid elements')
   return regionData
