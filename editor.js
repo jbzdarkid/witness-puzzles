@@ -67,7 +67,6 @@ function drawPuzzle() {
 }
 
 function reloadPuzzle() {
-  puzzle.settings.CUSTOM_MECHANICS = true
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
   document.getElementById('solveMode').checked = true
   document.getElementById('solveMode').onpointerdown()
@@ -265,7 +264,6 @@ window.reloadSymbolTheme = function() {
 }
 
 window.onload = function() {
-  localStorage.customMechanics = true; // yes
   drawSymbolButtons()
   drawColorButtons()
   if (localStorage.puzzle !== undefined) window.puzzle = Puzzle.deserialize(localStorage.puzzle);
@@ -376,6 +374,7 @@ function download(filename, text) {
 window.savePuzzle = function() {
   // instead of publish, we save this puzzle
   puzzle.theme = document.getElementById('puzzleTheme').innerHTML
+  puzzle.clearLines()
   download("puzzle.json", puzzle.serialize())
 }
 
@@ -497,15 +496,15 @@ function onElementClicked(event, x, y) {
     // This potentially isolated a start/endpoint, so ensure that they are removed.
     for (var i=x-1; i<x+2; i++) {
       for (var j=y-1; j<y+2; j++) {
-        if (i%2 !== 0 || j%2 !== 0) continue
+        if (i%2 !== 0 || j%2 !== 0) continue;
         var leftCell = puzzle.getCell(i - 1, j)
-        if (leftCell != null && leftCell.gap !== 2) continue
+        if (leftCell != null && leftCell.gap !== 2) continue;
         var rightCell = puzzle.getCell(i + 1, j)
-        if (rightCell != null && rightCell.gap !== 2) continue
+        if (rightCell != null && rightCell.gap !== 2) continue;
         var topCell = puzzle.getCell(i, j - 1)
-        if (topCell != null && topCell.gap !== 2) continue
+        if (topCell != null && topCell.gap !== 2) continue;
         var bottomCell = puzzle.getCell(i, j + 1)
-        if (bottomCell != null && bottomCell.gap !== 2) continue
+        if (bottomCell != null && bottomCell.gap !== 2) continue;
 
         // At this point, the cell has no defined or non-gap2 neighbors (isolated)
         puzzle.updateCell2(i, j, 'start', false)
@@ -599,7 +598,7 @@ function onElementClicked(event, x, y) {
   for (var i=x-1; i<x+2; i++) {
     for (var j=y-1; j<y+2; j++) {
       var cell = puzzle.getCell(i, j)
-      if (cell == null || cell.end == null) continue
+      if (cell == null || cell.end == null) continue;
       var validDirs = puzzle.getValidEndDirs(i, j)
       if (!validDirs.includes(cell.end)) {
         puzzle.grid[i][j].end = validDirs[0]
@@ -765,7 +764,7 @@ function drawSymbolButtons() {
       }
     }
     while (button.firstChild) button.removeChild(button.firstChild)
-    var svg = window.drawSymbol(params, true)
+    var svg = window.drawSymbol(params)
     if (button.id == 'x-lu') {
       var fakebutton = document.getElementById('x-fakesvg')
       while (fakebutton.firstChild) fakebutton.removeChild(fakebutton.firstChild)
@@ -831,11 +830,6 @@ function drawColorButtons() {
     button.appendChild(crayon)
 
     if (button.id == 'custom') {
-      if (localStorage.customMechanics != 'true') {
-        button.style.display = 'none'
-        continue
-      }
-
       button.style.display = null
       var input = document.createElement('input')
       input.style = 'position: absolute; margin-left: 30px; margin-top: 3px; width: 110px'
@@ -1086,7 +1080,7 @@ function resizePuzzle(dx, dy, id) {
           cell = oldPuzzle.grid[x - xOffset][y - yOffset]
         }
         console.spam('At', x - xOffset, y - yOffset, 'persisting', JSON.stringify(cell))
-        break
+        break;
       case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
         debugGrid[y] += 'O'
         var sym = puzzle.getSymmetricalPos(x, y)
@@ -1097,12 +1091,12 @@ function resizePuzzle(dx, dy, id) {
           cell.start = symCell.start
         }
         console.spam('At', x - xOffset, y - yOffset, 'copying', JSON.stringify(symCell), 'from', sym.x - xOffset, sym.y - yOffset)
-        break
+        break;
       case CLEAR:
         debugGrid[y] += 'C'
         cell = {'type': 'line'}
         console.spam('At', x - xOffset, y - yOffset, 'clearing cell')
-        break
+        break;
       }
 
       puzzle.grid[x][y] = cell
@@ -1116,12 +1110,12 @@ function resizePuzzle(dx, dy, id) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == null) continue
-      if (cell.end == null) continue
+      if (cell == null) continue;
+      if (cell.end == null) continue;
 
       if (puzzle.symmetry == null) {
         var validDirs = puzzle.getValidEndDirs(x, y)
-        if (validDirs.includes(cell.end)) continue
+        if (validDirs.includes(cell.end)) continue;
 
         if (validDirs.length === 0) {
           console.log('Endpoint at', x, y, 'no longer fits on the grid')
@@ -1135,7 +1129,7 @@ function resizePuzzle(dx, dy, id) {
         var symDir = puzzle.getSymmetricalDir(cell.end)
         var validDirs = puzzle.getValidEndDirs(x, y)
         var validSymDirs = puzzle.getValidEndDirs(sym.x, sym.y)
-        if (validDirs.includes(cell.end) && validSymDirs.includes(symDir)) continue
+        if (validDirs.includes(cell.end) && validSymDirs.includes(symDir)) continue;
 
         while (validDirs.length > 0) {
           var dir = validDirs.pop()
@@ -1144,7 +1138,7 @@ function resizePuzzle(dx, dy, id) {
             console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', dir)
             puzzle.grid[x][y].end = dir
             puzzle.grid[sym.x][sym.y].end = symDir
-            break
+            break;
           }
         }
         if (validDirs.length === 0 || validSymDirs.length === 0) {
@@ -1242,7 +1236,7 @@ function dragMove(event, elem) {
   // Note: We use Math.sign (rather than Math.round or Math.floor) since we only want to resize 1 unit at a time.
 
   while (Math.abs(dx) >= xLim) {
-    if (!resizePuzzle(xScale * Math.sign(dx), 0, elem.id)) break
+    if (!resizePuzzle(xScale * Math.sign(dx), 0, elem.id)) break;
     puzzleModified()
     writePuzzle()
     reloadPuzzle()
@@ -1251,7 +1245,7 @@ function dragMove(event, elem) {
   }
 
   while (Math.abs(dy) >= yLim) {
-    if (!resizePuzzle(0, yScale * Math.sign(dy), elem.id)) break
+    if (!resizePuzzle(0, yScale * Math.sign(dy), elem.id)) break;
     puzzleModified()
     writePuzzle()
     reloadPuzzle()

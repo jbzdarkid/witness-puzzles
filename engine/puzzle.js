@@ -52,9 +52,6 @@ window.Puzzle = class {
 
       // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
       FAT_STARTPOINTS: false,
-
-      // If true, custom mechanics are displayed (and validated) in this puzzle.
-      CUSTOM_MECHANICS: false,
     }
   }
 
@@ -264,14 +261,21 @@ window.Puzzle = class {
     if (!this._safeCell(x, y)) return []
 
     var dirs = []
-    let axisx = this.symmetry.x ? -1 : 1;
-    let axisy = this.symmetry.y ? -1 : 1;
-    let symx = this.symmetry.x ? puzzle.width  - 1 - x : x;
-    let symy = this.symmetry.y ? puzzle.height - 1 - y : y;
-    if (isEmpty(this.getCell(x - 1, y)) && isEmpty(this.getCell(symx - axisx, symy))) dirs.push('left')
-    if (isEmpty(this.getCell(x, y - 1)) && isEmpty(this.getCell(symx, symy - axisy))) dirs.push('top')
-    if (isEmpty(this.getCell(x + 1, y)) && isEmpty(this.getCell(symx + axisx, symy))) dirs.push('right')
-    if (isEmpty(this.getCell(x, y + 1)) && isEmpty(this.getCell(symx, symy + axisy))) dirs.push('bottom')
+    if (this.symmetry) {
+      let axisx = this.symmetry.x ? -1 : 1;
+      let axisy = this.symmetry.y ? -1 : 1;
+      let symx = this.symmetry.x ? puzzle.width  - 1 - x : x;
+      let symy = this.symmetry.y ? puzzle.height - 1 - y : y;
+      if (isEmpty(this.getCell(x - 1, y)) && isEmpty(this.getCell(symx - axisx, symy))) dirs.push('left')
+      if (isEmpty(this.getCell(x, y - 1)) && isEmpty(this.getCell(symx, symy - axisy))) dirs.push('top')
+      if (isEmpty(this.getCell(x + 1, y)) && isEmpty(this.getCell(symx + axisx, symy))) dirs.push('right')
+      if (isEmpty(this.getCell(x, y + 1)) && isEmpty(this.getCell(symx, symy + axisy))) dirs.push('bottom')
+    } else {
+      if (isEmpty(this.getCell(x - 1, y))) dirs.push('left')
+      if (isEmpty(this.getCell(x, y - 1))) dirs.push('top')
+      if (isEmpty(this.getCell(x + 1, y))) dirs.push('right')
+      if (isEmpty(this.getCell(x, y + 1))) dirs.push('bottom')
+    }
     return dirs
   }
 
@@ -384,7 +388,7 @@ window.Puzzle = class {
         // Cells are always part of the region
         if (x%2 === 1 && y%2 === 1) {
           row.push(MASKED_INB_COUNT)
-          continue
+          continue;
         }
 
         var cell = savedRow[y]
@@ -443,7 +447,7 @@ window.Puzzle = class {
 
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
-        if (this.grid[x][y] == MASKED_PROCESSED) continue
+        if (this.grid[x][y] == MASKED_PROCESSED) continue;
 
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.

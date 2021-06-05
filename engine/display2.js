@@ -82,7 +82,7 @@ function drawCenters(puzzle, svg) {
   var savedGrid = puzzle.switchToMaskedGrid()
   if (puzzle.pillar === true) {
     for (var y=1; y<puzzle.height; y += 2) {
-      if (puzzle.getCell(-1, y) == null) continue // Cell borders the outside
+      if (puzzle.getCell(-1, y) == null) continue; // Cell borders the outside
       var rect = createElement('rect')
       rect.setAttribute('x', 28)
       rect.setAttribute('y', 41 * y + 11)
@@ -95,7 +95,7 @@ function drawCenters(puzzle, svg) {
 
   for (var x=1; x<puzzle.width; x += 2) {
     for (var y=1; y<puzzle.height; y += 2) {
-      if (puzzle.grid[x][y] == null) continue // Cell borders the outside
+      if (puzzle.grid[x][y] == null) continue; // Cell borders the outside
       var rect = createElement('rect')
       rect.setAttribute('x', 41 * x + 11)
       rect.setAttribute('y', 41 * y + 11)
@@ -113,7 +113,7 @@ function drawGrid(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell != null && cell.gap === window.GAP_FULL) continue
+      if (cell != null && cell.gap === window.GAP_FULL) continue;
       if (cell != null && cell.gap === window.GAP_BREAK) {
         var params = {
           'width':58,
@@ -125,7 +125,7 @@ function drawGrid(puzzle, svg, target) {
         }
         if (x%2 === 0 && y%2 === 1) params.rot = 1
         drawSymbolWithSvg(svg, params)
-        continue
+        continue;
       }
 
       var line = createElement('line')
@@ -133,7 +133,7 @@ function drawGrid(puzzle, svg, target) {
       line.setAttribute('stroke-linecap', 'round')
       line.setAttribute('stroke', 'var(--line-undone)')
       if (x%2 === 1 && y%2 === 0) { // Horizontal
-        if (cell.gap === window.GAP_BREAK) continue
+        if (cell.gap === window.GAP_BREAK) continue;
         line.setAttribute('x1', (x-1)*41 + 52)
         // Adjust the length if it's a pillar -- the grid is not as wide!
         if (puzzle.pillar === true && x === puzzle.width - 1) {
@@ -145,7 +145,7 @@ function drawGrid(puzzle, svg, target) {
         line.setAttribute('y2', y*41 + 52)
         svg.appendChild(line)
       } else if (x%2 === 0 && y%2 === 1) { // Vertical
-        if (cell.gap === window.GAP_BREAK) continue
+        if (cell.gap === window.GAP_BREAK) continue;
         line.setAttribute('x1', x*41 + 52)
         line.setAttribute('x2', x*41 + 52)
         line.setAttribute('y1', (y-1)*41 + 52)
@@ -189,7 +189,7 @@ function drawGrid(puzzle, svg, target) {
     var x = 0;
     for (var y=0; y<puzzle.height; y+=2) {
       var cell = puzzle.getCell(x-1, y)
-      if (cell == null || cell.gap === window.GAP_FULL) continue
+      if (cell == null || cell.gap === window.GAP_FULL) continue;
       var line = createElement('line')
       line.setAttribute('stroke-width', 24)
       line.setAttribute('stroke-linecap', 'round')
@@ -207,7 +207,7 @@ function drawSymbols(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == null) continue
+      if (cell == null) continue;
       var params = {
         'width':58,
         'height':58,
@@ -228,7 +228,7 @@ function drawSymbols(puzzle, svg, target) {
             params.strokeWidth = '2px'
           }
         }
-        window.drawSymbolWithSvg(svg, params, true)
+        window.drawSymbolWithSvg(svg, params)
       } else if (cell.dot < window.DOT_NONE) { // draw custom gimmicks
         if (cell.dot > window.CUSTOM_CURVE) {
           if (cell.dot % 2 == -1) params.type = 'cross';
@@ -259,13 +259,13 @@ function drawSymbols(puzzle, svg, target) {
           params.spokes = window.dotToSpokes(cell.dot)
           params.color = '#f66';
         }
-        window.drawSymbolWithSvg(svg, params, true)
+        window.drawSymbolWithSvg(svg, params)
       } else if (cell.gap === window.GAP_BREAK) {
         // Gaps were handled above, while drawing the grid.
       } else if (x%2 === 1 && y%2 === 1) {
         // Generic draw for all other elements
         Object.assign(params, cell)
-        window.drawSymbolWithSvg(svg, params, true)
+        window.drawSymbolWithSvg(svg, params)
       }
     }
   }
@@ -275,7 +275,7 @@ function drawStartAndEnd(puzzle, svg) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == null) continue
+      if (cell == null) continue;
       if (cell.end != null) {
         if (puzzle.symmetry != null) {
           var sym = puzzle.getSymmetricalPos(x, y)

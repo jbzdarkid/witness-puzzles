@@ -30,7 +30,6 @@ window.serializePuzzle = function(puzzle) {
   if (puzzle.settings.PRECISE_POLYOMINOS)         settingsFlags |= SETTINGS_FLAG_PP
   if (puzzle.settings.FLASH_FOR_ERRORS)           settingsFlags |= SETTINGS_FLAG_FFE
   if (puzzle.settings.FAT_STARTPOINTS)            settingsFlags |= SETTINGS_FLAG_FS
-  if (puzzle.settings.CUSTOM_MECHANICS)           settingsFlags |= SETTINGS_FLAG_CM
   s.writeByte(settingsFlags)
 
   return s.str()
@@ -70,7 +69,6 @@ window.deserializePuzzle = function(data) {
     PRECISE_POLYOMINOS:         settingsFlags & SETTINGS_FLAG_PP,
     FLASH_FOR_ERRORS:           settingsFlags & SETTINGS_FLAG_FFE,
     FAT_STARTPOINTS:            settingsFlags & SETTINGS_FLAG_FS,
-    CUSTOM_MECHANICS:           settingsFlags & SETTINGS_FLAG_CM,
   }
 
   s.destroy()

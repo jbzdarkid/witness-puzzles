@@ -85,7 +85,7 @@ window.validateBridges = function(puzzle, region, regionData) {
   var bridges = {}
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
+    if (cell == null) continue;
 
     // Count color-based elements
     if (cell.color != null) {
@@ -152,8 +152,8 @@ var DIRECTIONS = [
 window.validateArrows = function(puzzle, region, regionData) {
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
-    if (cell.type != 'arrow') continue
+    if (cell == null) continue;
+    if (cell.type != 'arrow') continue;
     dir = DIRECTIONS[cell.rot]
 
     var count = 0
@@ -162,12 +162,12 @@ window.validateArrows = function(puzzle, region, regionData) {
     for (var i=0; i<100; i++) { // 100 is arbitrary, it's just here to avoid infinite loops.
       var line = puzzle.getLine(x, y)
       console.spam('Testing', x, y, 'for arrow at', pos.x, pos.y, 'found', line)
-      if (line == null && (x%2 !== 1 || y%2 !== 1)) break
+      if (line == null && (x%2 !== 1 || y%2 !== 1)) break;
       if (line > window.LINE_NONE) count++
-      if (count > cell.count) break
+      if (count > cell.count) break;
       x += dir.x * 2
       y += dir.y * 2
-      if (puzzle.matchesSymmetricalPos(x, y, pos.x + dir.x, pos.y + dir.y)) break // Pillar exit condition (in case of looping)
+      if (puzzle.matchesSymmetricalPos(x, y, pos.x + dir.x, pos.y + dir.y)) break; // Pillar exit condition (in case of looping)
     }
     if (count !== cell.count) {
       console.log('Arrow at', pos.x, pos.y, 'crosses', count, 'lines, but should cross', cell.count)
@@ -182,7 +182,7 @@ window.validateSizers = function(puzzle, region, regionData) {
   for (var pos of region.cells) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++ // Only count cells for the region
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
+    if (cell == null) continue;
     if (cell.type == 'sizer') sizers.push(pos)
   }
   console.debug('Found', sizers.length, 'sizers')
@@ -262,7 +262,7 @@ window.validateTwoByTwos = function(puzzle, region, regionData, regionMatrix, qu
   for (let pos of region.cells) {
     if (!detectionMode.cell(pos)) continue;
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
+    if (cell == null) continue;
     if (cell.type == "twobytwo")
       twobytwos.push(pos)
   }
@@ -282,8 +282,8 @@ window.validateDarts = function(puzzle, region, regionData, regionMatrix) {
   for (var pos of region.cells) {
     if (!detectionMode.cell(pos)) continue;
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
-    if (cell.type != 'dart') continue
+    if (cell == null) continue;
+    if (cell.type != 'dart') continue;
     dir = DIRECTIONS[cell.rot]
     var count = 0
     var x = pos.x + (dir.x * 2)
@@ -291,10 +291,10 @@ window.validateDarts = function(puzzle, region, regionData, regionMatrix) {
     for (var i=0; i<100; i++) { // lol infinite loops
       if (!puzzle.pillar && (0 > x || x >= puzzle.width || 0 > y || y >= puzzle.height)) break; // non-pillars
       if (regionMatrix[y] && regionMatrix[y][x]) count++;
-      if (count > cell.count) break
+      if (count > cell.count) break;
       x += (dir.x * 2)
       y += (dir.y * 2)
-      if (puzzle.matchesSymmetricalPos(x, y, pos.x, pos.y)) break // pillars
+      if (puzzle.matchesSymmetricalPos(x, y, pos.x, pos.y)) break; // pillars
     }
     if (count !== cell.count) {
       console.log('Dart at', pos.x, pos.y, 'detected', count, 'cells in region, but should contain', cell.count)
@@ -307,8 +307,68 @@ window.validateAntipolys = function(puzzle, region, regionData, regionMatrix) {
   window.polyntFitnt(region, puzzle, regionData, regionMatrix)
 }
 
-window.validateXs = function(puzzle, region, regionData) {
-  
+window.validatePentagons = function(puzzle, region, regionData, squareColor) {
+  let pentagons = [];
+  let pentagonColor = null;
+  for (var pos of region.cells) {
+    if (!detectionMode.cell(pos)) continue;
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue;
+    if (cell.type != 'pentagon') continue;
+    pentagons.push(pos);
+    if (pentagonColor == -1) continue; // no need to check whats already bonked
+    if (pentagonColor == null) pentagonColor = cell.color;
+    else if (pentagonColor != cell.color) pentagonColor = -1;
+    if (squareColor == pentagonColor) {
+      pentagonColor = -1;
+      squareColor = -1;
+    }
+  }
+  if (pentagonColor === -1) {
+    regionData.invalidElements = regionData.invalidElements.concat(pentagons)
+  }
+  return squareColor
+}
+
+let simpleXs = []
+let complexXs = []
+window.initializeXs = function() { 
+  simpleXs = []
+  complexXs = []
+}
+
+window.preValidateXs = function(puzzle, cell, pos, quick) {
+  let spokes = -13 - cell.dot // im currently on this line of code, pushing to fix bug rq
+  switch (spokes) {
+    case 0:
+      console.log('X with no spokes at', x, y)
+      puzzle.invalidElements.push({"x": x, "y": y})
+      puzzle.valid = false
+      if (quick) return
+    break
+    case 1:
+      simpleXs.push({'source': {'x': pos.x - 1, 'y': pos.y - 1}, 'target': pos});
+      break;
+    case 2:
+      simpleXs.push({'source': {'x': pos.x + 1, 'y': pos.y - 1}, 'target': pos});
+      break;
+    case 4:
+      simpleXs.push({'source': {'x': pos.x - 1, 'y': pos.y + 1}, 'target': pos});
+      break;
+    case 8:
+      simpleXs.push({'source': {'x': pos.x + 1, 'y': pos.y + 1}, 'target': pos});
+      break;
+    default:
+      complexXs.push(pos);
+      break;
+  }
+}
+
+window.validateXs = function(regionData, regionMatrix) {
+  for (pair of simpleXs) {
+    console.log(regionMatrix)
+    if (regionMatrix[pair.source.y][pair.source.x]) regionData.addVeryInvalid(pair.target)
+  }
 }
 
 let ttriangleColor = [null, null, null, null, null]; // 0, 1, 2, 3, 4
@@ -322,12 +382,12 @@ window.preValidateTTriangles = function(puzzle) {
   for (var x=1; x<puzzle.width; x+=2) {
     for (var y=1; y<puzzle.height; y+=2) {
       var cell = puzzle.grid[x][y]
-      if (cell == null) continue
-      if (cell.type != 'vtriangle') continue
+      if (cell == null) continue;
+      if (cell.type != 'vtriangle') continue;
       // detect colored dfjdsklf
       if (ttrianglepos[cell.color] === undefined) ttrianglepos[cell.color] = [{'x': x, 'y': y}]; 
       else ttrianglepos[cell.color].push({'x': x, 'y': y});
-      if (illegalColors.includes(cell.color)) continue // don't have to calc already bonked color
+      if (illegalColors.includes(cell.color)) continue; // don't have to calc already bonked color
       // count
       let count = 0
       if (puzzle.getLine(x - 1, y) > window.LINE_NONE) count++
@@ -365,7 +425,7 @@ window.validateCHexes = function(puzzle, region, regionData) {
   for (var pos of region.cells) {
     if (!detectionMode.cell(pos)) continue;
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
+    if (cell == null) continue;
     if (cell.type == 'poly' || cell.type == 'divdiamond') return; // true!!
     else if (cell.type == 'celledhex') celledhexes.push(pos);
     else if (cell.type == 'dart') darts.push(pos);
@@ -387,7 +447,7 @@ window.validateCHexes = function(puzzle, region, regionData) {
       if (celledhexes.length == 0) return;
       x += (dir.x * 2)
       y += (dir.y * 2)
-      if (puzzle.matchesSymmetricalPos(x, y, dart.x, dart.y)) break // pillars
+      if (puzzle.matchesSymmetricalPos(x, y, dart.x, dart.y)) break; // pillars
     }
   }
   if (celledhexes.length == 0) return;
@@ -402,10 +462,10 @@ window.validateDivDiamonds = function(puzzle, region, regionData, quick) {
   let divdiamonds = [];
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
-    if (nonSymbols.includes(cell.type)) continue
-    // if (cell.type == 'line' && (cell.dot === window.DOT_NONE || cell.dot !== undefined || cell.dot !== null)) continue
-    if (cell.type == 'line' && (!cell.dot)) continue
+    if (cell == null) continue;
+    if (nonSymbols.includes(cell.type)) continue;
+    // if (cell.type == 'line' && (cell.dot === window.DOT_NONE || cell.dot !== undefined || cell.dot !== null)) continue;
+    if (cell.type == 'line' && (!cell.dot)) continue;
     symbols++;
     if (cell.type == 'divdiamond') {
       if (quick) {

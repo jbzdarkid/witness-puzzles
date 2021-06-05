@@ -172,7 +172,7 @@ window.setLogLevel = function(level) {
   console.groupEnd = consoleGroupEnd
   if (level === 'spam') return
 }
-setLogLevel('info')
+setLogLevel('log')
 
 window.setTheme = function(theme) {
   document.getElementById('theme').href = './theme/' + theme + '.css'
@@ -182,7 +182,7 @@ window.deleteElementsByClassName = function(rootElem, className) {
   var elems = []
   while (true) {
     elems = rootElem.getElementsByClassName(className)
-    if (elems.length === 0) break
+    if (elems.length === 0) break;
     elems[0].remove()
   }
 }

@@ -68,7 +68,7 @@ window.solve = function(p, partialCallback, finalCallback) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == null) continue
+      if (cell == null) continue;
       if (cell.start === true) {
         startPoints.push({'x': x, 'y': y})
       }
@@ -226,58 +226,8 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     if (numEndpoints === 0) return tailRecurse(x, y)
   }
 
-  // Large optimization -- Attempt to early exit once we cut out a region.
-  // Inspired by https://github.com/Overv/TheWitnessSolver
-  // For non-pillar puzzles, every time we draw a line from one edge to another, we cut out two regions.
-  // We can detect this by asking if we've ever left an edge, and determining if we've just touched an edge.
-  // However, just touching the edge isn't sufficient, since we could still enter either region.
-  // As such, we wait one additional step, to see which half we have moved in to, then we evaluate
-  // whichever half you moved away from (since you can no longer re-enter it).
-  //
-  // Consider this pathway (tracing X-X-X-A-B-C).
-  // ....X....
-  // . . X . .
-  // ....X....
-  // . . A . .
-  // ...CB....
-  //
-  // Note that, once we have reached B, the puzzle is divided in half. However, we could go either
-  // left or right -- so we don't know which region is safe to validate.
-  // Once we reach C, however, the region to the right is closed off.
-  // As such, we can start a flood fill from the cell to the right of A, computed by A+(C-B).
-  //
-  // Unfortunately, this optimization doesn't work for pillars, since the two regions are still connected.
-  // Additionally, this optimization doesn't work when custom mechanics are active, as many custom mechanics
-  // depend on the path through the entire puzzle
-  if (puzzle.pillar === false && !puzzle.settings.CUSTOM_MECHANICS) {
-    var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
-    var newEarlyExitData = [
-      earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?
-      earlyExitData[2],                                         // The position before our current one
-      {'x':x, 'y':y, 'isEdge':isEdge}                           // Our current position.
-    ]
-    if (earlyExitData[0] && !earlyExitData[1].isEdge && earlyExitData[2].isEdge && isEdge) {
-      // See the above comment for an explanation of this math.
-      var floodX = earlyExitData[2].x + (earlyExitData[1].x - x)
-      var floodY = earlyExitData[2].y + (earlyExitData[1].y - y)
-      var region = puzzle.getRegion(floodX, floodY)
-      if (region != null) {
-        var regionData = window.validateRegion(puzzle, region, true)
-        if (!regionData.valid()) return tailRecurse(x, y)
-
-        // Additionally, we might have left an endpoint in the enclosed region.
-        // If so, we should decrement the number of remaining endpoints (and possibly tail recurse).
-        for (var pos of region.cells) {
-          var endCell = puzzle.getCell(pos.x, pos.y)
-          if (endCell != null && endCell.end != null) numEndpoints--
-        }
-
-        if (numEndpoints === 0) return tailRecurse(x, y)
-      }
-    }
-  } else {
-    var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
-  }
+  // If you're seeing this code on witnesspuzzles, there should be an optimization that isnt used here.
+  var newEarlyExitData = earlyExitData
 
   if (SOLVE_SYNC || depth > SYNC_THRESHOLD) {
     path.push(PATH_NONE)
@@ -385,7 +335,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       } else if (cell.end === 'bottom') {
         window.onMove(0, 24)
       }
-      break
+      break;
     } else if (path[i] === PATH_LEFT) {
       dx = -1
       cell.dir = 'left'
@@ -440,36 +390,36 @@ window.getSolutionIndex = function(pathList, solution) {
     var path = pathList[i]
     var x = path[0].x
     var y = path[0].y
-    if (solution.grid[path[0].x][path[0].y].line === 0) continue
+    if (solution.grid[path[0].x][path[0].y].line === 0) continue;
 
     var match = true
     for (var j=1; j<path.length; j++) {
       var cell = solution.grid[x][y]
       if (path[j] === PATH_NONE && cell.end != null) {
         match = false
-        break
+        break;
       } else if (path[j] === PATH_LEFT) {
         if (cell.dir != 'left') {
           match = false
-          break
+          break;
         }
         x--
       } else if (path[j] === PATH_RIGHT) {
         if (cell.dir != 'right') {
           match = false
-          break
+          break;
         }
         x++
       } else if (path[j] === PATH_TOP) {
         if (cell.dir != 'top') {
           match = false
-          break
+          break;
         }
         y--
       } else if (path[j] === PATH_BOTTOM) {
         if (cell.dir != 'bottom') {
           match = false
-          break
+          break;
         }
         y++
       }

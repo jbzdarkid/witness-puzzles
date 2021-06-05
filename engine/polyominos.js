@@ -63,17 +63,17 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false, precise=true) {
     for (var x=0; x<4; x++) {
       if (isSet(polyshape, x, y)) {
         var topLeft = {'x':x, 'y':y}
-        break
+        break;
       }
     }
-    if (topLeft != null) break
+    if (topLeft != null) break;
   }
   if (topLeft == null) return [] // Empty polyomino
 
   var polyomino = []
   for (var x=0; x<4; x++) {
     for (var y=0; y<4; y++) {
-      if (!isSet(polyshape, x, y)) continue
+      if (!isSet(polyshape, x, y)) continue;
       polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y)})
 
       // "Precise" polyominos adds cells in between the apparent squares in the polyomino.
@@ -129,8 +129,8 @@ window.polyFit = function(region, puzzle) {
   for (var pos of region.cells) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
-    if (cell.polyshape === 0) continue
+    if (cell == null) continue;
+    if (cell.polyshape === 0) continue;
     if (cell.type === 'poly') {
       polys.push(cell)
       polyCount += getPolySize(cell.polyshape)
@@ -195,8 +195,8 @@ window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // bes
   for (var pos of region.cells) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
-    if (cell.polyshape === 0) continue
+    if (cell == null) continue;
+    if (cell.polyshape === 0) continue;
     if (cell.type === 'polynt') {
       polynts.push(pos)
     }
@@ -222,7 +222,7 @@ window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // bes
         for (cell of cells) {
           if (regionMatrix[cell.y + pos.y] === undefined || regionMatrix[cell.y + pos.y][cell.x + pos.x] == null) {
             found = false
-            break
+            break;
           }
         }
         if (found) {
@@ -269,11 +269,11 @@ function placeYlops(ylops, i, polys, puzzle) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
         var cells = polyominoFromPolyshape(polyshape, true, puzzle.settings.PRECISE_POLYOMINOS)
-        if (!tryPlacePolyshape(cells, x, y, puzzle, -1)) continue
+        if (!tryPlacePolyshape(cells, x, y, puzzle, -1)) continue;
         console.group('')
         if (placeYlops(ylops, i+1, polys, puzzle)) return true
         console.groupEnd('')
-        if (!tryPlacePolyshape(cells, x, y, puzzle, +1)) continue
+        if (!tryPlacePolyshape(cells, x, y, puzzle, +1)) continue;
       }
     }
   }
@@ -313,11 +313,11 @@ function placePolys(polys, puzzle) {
   var openCells = []
   for (var y=1; y<puzzle.height; y+=2) {
     for (var x=1; x<puzzle.width; x+=2) {
-      if (puzzle.grid[x][y] >= 0) continue
+      if (puzzle.grid[x][y] >= 0) continue;
       openCells.push({'x':x, 'y':y})
-      if (puzzle.pillar === false) break
+      if (puzzle.pillar === false) break;
     }
-    if (openCells.length > 0) break
+    if (openCells.length > 0) break;
   }
 
   if (openCells.length === 0) {
@@ -332,7 +332,7 @@ function placePolys(polys, puzzle) {
       console.spam('Selected poly', poly)
       if (attemptedPolyshapes.includes(poly.polyshape)) {
         console.spam('Polyshape', poly.polyshape, 'has already been attempted')
-        continue
+        continue;
       }
       attemptedPolyshapes.push(poly.polyshape)
       polys.splice(i, 1)
@@ -341,7 +341,7 @@ function placePolys(polys, puzzle) {
         var cells = polyominoFromPolyshape(polyshape, false, puzzle.settings.PRECISE_POLYOMINOS)
         if (!tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
           console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
-          continue
+          continue;
         }
         console.group('')
         if (placePolys(polys, puzzle)) return true

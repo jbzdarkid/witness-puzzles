@@ -4,12 +4,12 @@ window.createElement = function(type) {
   return document.createElementNS('http://www.w3.org/2000/svg', type)
 }
 
-window.drawSymbol = function(params, customMechanics) {
+window.drawSymbol = function(params) {
   let svg = createElement('svg')
   svg.setAttribute('viewBox', '0 0 ' + params.width + ' ' + params.height)
   if (!params.x) params.x = 0
   if (!params.y) params.y = 0
-  drawSymbolWithSvg(svg, params, customMechanics)
+  drawSymbolWithSvg(svg, params)
   return svg
 }
 
@@ -82,7 +82,7 @@ function drawPolyomino(svg, params, size, space, yoffset, path) {
 
   for (var i=0; i<polyomino.length; i++) {
     let pos = polyomino[i]
-    if (pos.x % 2 !== 0 || pos.y % 2 !== 0) continue
+    if (pos.x % 2 !== 0 || pos.y % 2 !== 0) continue;
     let poly = createElement('polygon')
     svg.appendChild(poly)
     poly.setAttribute('points', path)

@@ -40,13 +40,13 @@ window.validate = function(puzzle, quick) {
   puzzle.hasSizers = false
   
   puzzle.invalidElements = []
-  puzzle.invalidFromXs = {}
+  initializeXs()
 
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell == null) continue
+      if (cell == null) continue;
       if (!needsRegions && cell.type != 'line' && cell.type != 'triangle' && cell.type != 'vtriangle' && cell.type != 'arrow') needsRegions = true
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop' || cell.type == 'polynt') puzzle.hasPolyominos = true
@@ -55,15 +55,8 @@ window.validate = function(puzzle, quick) {
         if (window.CUSTOM_X < cell.dot && cell.dot < window.DOT_NONE) { // custom: check for line go over
           window.preValidateAltDots(puzzle, cell, {'x': x, 'y': y}, quick)
           if (quick && !puzzle.valid) return
-        } else if (cell.dot <= window.CUSTOM_X) {
-          let spokes = -13 - cell.dot // im currently on this line of code, pushing to fix bug rq
-          if (spokes == 0) {
-            console.log('X with no spokes at', x, y)
-            puzzle.invalidElements.push({"x": x, "y": y})
-            puzzle.valid = false
-            if (quick) return
-          }
-        }
+        } else if (cell.dot <= window.CUSTOM_X)
+          window.preValidateXs(puzzle, cell, {'x': x, 'y': y}, quick)
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
           puzzle.invalidElements.push({"x": x, "y": y})
@@ -240,7 +233,7 @@ function regionCheckNegations2(puzzle, region, negationSymbols, invalidElements,
     }
     if (regionData.valid()) {
       regionData.negations.push({'source':source, 'target':target})
-      break
+      break;
     }
   }
 
@@ -259,15 +252,13 @@ function regionCheck(puzzle, region, quick) {
   var regionData = new RegionData()
 
   let squares = []
-  let square2s = []
   let stars = []
   let coloredObjects = {}
   let squareColor = null
-  let square2Color = null
 
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue
+    if (cell == null) continue;
     
     // Check for uncovered dots
     if (cell.dot > window.DOT_NONE) {
@@ -300,21 +291,10 @@ function regionCheck(puzzle, region, quick) {
 
       if (cell.type === 'square') {
         squares.push(pos)
-        if (squareColor == null) {
+        if (squareColor == null)
           squareColor = cell.color
-        } else if (squareColor != cell.color) {
+        else if (squareColor != cell.color)
           squareColor = -1 // Signal value which indicates square color collision
-        }
-      } else if (cell.type === 'pentagon') {
-        square2s.push(pos)
-        if (square2Color == null)
-          square2Color = cell.color
-        else if (square2Color != cell.color)
-          square2Color = -1 // Signal value which indicates pentagon color collision
-        if (squareColor == square2Color) {
-          squareColor = -1
-          square2Color = -1 // signal which hrfjklshgjk
-        }
       }
 
       if (cell.type === 'star') {
@@ -322,16 +302,6 @@ function regionCheck(puzzle, region, quick) {
         stars.push(pos)
       }
     }
-  }
-
-  if (squareColor === -1) {
-    regionData.invalidElements = regionData.invalidElements.concat(squares)
-    if (quick) return regionData
-  }
-
-  if (square2Color === -1) {
-    regionData.invalidElements = regionData.invalidElements.concat(square2s)
-    if (quick) return regionData
   }
 
   for (var star of stars) {
@@ -351,7 +321,7 @@ function regionCheck(puzzle, region, quick) {
     if (!window.polyFit(region, puzzle)) {
       for (var pos of region.cells) {
         var cell = puzzle.getCell(pos.x, pos.y)
-        if (cell == null) continue
+        if (cell == null) continue;
         if (cell.type === 'poly' || cell.type === 'ylop') {
           regionData.addInvalid(pos)
           if (quick) return regionData
@@ -360,30 +330,35 @@ function regionCheck(puzzle, region, quick) {
     }
   }
 
-  if (puzzle.settings.CUSTOM_MECHANICS) {
-    let regionMatrix = Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => null));
-    for (var pos of region.cells) {
-      let cell = puzzle.getCell(pos.x, pos.y);
-      if (cell && cell.line === 0 && cell.type === "line") cell = true 
-      regionMatrix[pos.y][pos.x] = cell || true
-    } // oh boy
-    window.validateAltDots(puzzle, region, regionData, quick)
-    window.validateXs(puzzle, region, regionData)
-    // window.validatePentagons(puzzle, region, regionData)
-    window.validateArrows(puzzle, region, regionData)
-    window.validateDarts(puzzle, region, regionData, regionMatrix)
-    window.validateTTriangles(puzzle, region, regionData, regionMatrix)
-    // window.validateCopiers(puzzle, region, regionData)
-    window.validateSizers(puzzle, region, regionData)
-    // window.validateScalers(puzzle, region, regionData)
-    window.validateBridges(puzzle, region, regionData)
-    window.validateDivDiamonds(puzzle, region, regionData)
-    window.validateCHexes(puzzle, region, regionData)
-    window.validateAntipolys(puzzle, region, regionData, regionMatrix)
-    window.validateTwoByTwos(puzzle, region, regionData, regionMatrix, quick)
+  // customs: why else would you use this website
+  let regionMatrix = Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => null));
+  for (var pos of region.cells) {
+    let cell = puzzle.getCell(pos.x, pos.y);
+    if (cell && cell.line === 0 && cell.type === "line") cell = true 
+    regionMatrix[pos.y][pos.x] = cell || true
+  } // oh boy
+  window.validateAltDots(puzzle, region, regionData, quick)
+  window.validateXs(regionData, regionMatrix)
+  squareColor = window.validatePentagons(puzzle, region, regionData, squareColor)
+  window.validateArrows(puzzle, region, regionData)
+  window.validateDarts(puzzle, region, regionData, regionMatrix)
+  window.validateTTriangles(puzzle, region, regionData, regionMatrix)
+  // window.validateCopiers(puzzle, region, regionData)
+  window.validateSizers(puzzle, region, regionData)
+  // window.validateScalers(puzzle, region, regionData)
+  window.validateBridges(puzzle, region, regionData)
+  window.validateDivDiamonds(puzzle, region, regionData)
+  window.validateCHexes(puzzle, region, regionData)
+  window.validateAntipolys(puzzle, region, regionData, regionMatrix)
+  window.validateTwoByTwos(puzzle, region, regionData, regionMatrix, quick)
+
+  if (squareColor === -1) {
+    regionData.invalidElements = regionData.invalidElements.concat(squares)
+    if (quick) return regionData
   }
-  console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')
-  console.debug('Region has', regionData.invalidElements.length, 'invalid elements')
+
+  console.log('Region has', regionData.veryInvalidElements.length, 'very invalid elements')
+  console.log('Region has', regionData.invalidElements.length, 'invalid elements')
   return regionData
 }
 })
