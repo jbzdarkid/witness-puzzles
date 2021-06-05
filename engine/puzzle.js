@@ -257,19 +257,21 @@ window.Puzzle = class {
     cell[key] = value
   }
 
+
   getValidEndDirs(x, y) {
+    let isEmpty = function(cell) { return (cell == null || cell.gap == window.GAP_FULL) }
     x = this._mod(x)
     if (!this._safeCell(x, y)) return []
 
     var dirs = []
-    var leftCell = this.getCell(x - 1, y)
-    if (leftCell == null || leftCell.gap === window.GAP_FULL) dirs.push('left')
-    var topCell = this.getCell(x, y - 1)
-    if (topCell == null || topCell.gap === window.GAP_FULL) dirs.push('top')
-    var rightCell = this.getCell(x + 1, y)
-    if (rightCell == null || rightCell.gap === window.GAP_FULL) dirs.push('right')
-    var bottomCell = this.getCell(x, y + 1)
-    if (bottomCell == null || bottomCell.gap === window.GAP_FULL) dirs.push('bottom')
+    let axisx = this.symmetry.x ? -1 : 1;
+    let axisy = this.symmetry.y ? -1 : 1;
+    let symx = this.symmetry.x ? puzzle.width  - 1 - x : x;
+    let symy = this.symmetry.y ? puzzle.height - 1 - y : y;
+    if (isEmpty(this.getCell(x - 1, y)) && isEmpty(this.getCell(symx - axisx, symy))) dirs.push('left')
+    if (isEmpty(this.getCell(x, y - 1)) && isEmpty(this.getCell(symx, symy - axisy))) dirs.push('top')
+    if (isEmpty(this.getCell(x + 1, y)) && isEmpty(this.getCell(symx + axisx, symy))) dirs.push('right')
+    if (isEmpty(this.getCell(x, y + 1)) && isEmpty(this.getCell(symx, symy + axisy))) dirs.push('bottom')
     return dirs
   }
 

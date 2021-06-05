@@ -1,18 +1,19 @@
 let sens = document.getElementById('sens')
 let volume = document.getElementById('volume')
 let symboltheme = document.getElementById('symboltheme')
-if (localStorage.sensitivity !== undefined)
-    sens.value = localStorage.sensitivity
+if (localStorage.sensitivity === undefined) localStorage.sensitivity = 0.7
+sens.value = localStorage.sensitivity
 sens.onchange = function() {
     localStorage.sensitivity = this.value
 }
-if (localStorage.value !== undefined)
-    volume.value = localStorage.volume
+if (localStorage.volume === undefined) localStorage.volume = 0.12
+volume.value = localStorage.volume
 volume.onchange = function() {
     localStorage.volume = this.value
 }
 if (localStorage.symbolTheme !== undefined)
     symboltheme.value = localStorage.symbolTheme
+else localStorage.symbolTheme = 'Canonical'
 function changeTheme() {
     if (localStorage.symbolTheme == 'Canonical') localStorage.symbolTheme = 'Simplified'
     else localStorage.symbolTheme = 'Canonical'

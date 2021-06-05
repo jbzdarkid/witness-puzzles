@@ -206,7 +206,6 @@ window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // bes
     return true
   }
   var ret = true // true until breaks are found
-  // console.warn(regionMatrix)
   for (var polyntpos of polynts) {
     var polynt = puzzle.getCell(polyntpos.x, polyntpos.y)
     if (getPolySize(polynt.polyshape) > regionSize) {
@@ -216,19 +215,15 @@ window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // bes
     for (var polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
       console.spam('Selected polyntshape', polyntshape)
       let cells = polyominoFromPolyshape(polyntshape, false, false)
-      // console.warn('new cell', cells)
       for (var pos of region.cells) {
         if (!puzzle.pillar && (0 > pos.x || pos.x >= puzzle.width || 0 > pos.y || pos.y >= puzzle.height)) continue; // non-pillars
         if ((pos.x & pos.y) % 2 != 1) continue;
         var found = true
-        // console.warn('checking cells', cells, 'on', pos)
         for (cell of cells) {
-          // console.warn(cell.x + pos.x, cell.y + pos.y, regionMatrix[cell.y + pos.y], regionMatrix[cell.y + pos.y] && regionMatrix[cell.y + pos.y][cell.x + pos.x])
           if (regionMatrix[cell.y + pos.y] === undefined || regionMatrix[cell.y + pos.y][cell.x + pos.x] == null) {
             found = false
             break
           }
-          // console.warn(found)
         }
         if (found) {
           console.log('Antipolyomino at', polyntpos.x, polyntpos.y, 'can fit')

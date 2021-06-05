@@ -21,12 +21,7 @@ Event.prototype.isRightClick = function() {
 // https://stackoverflow.com/q/12571650
 window_onerror = window.onerror
 window.onerror = function(message, url, line) {
-  FEEDBACK(message + ' on line ' + line)
-  if (window_onerror == null) {
-    console.error('Parse error in file ' + url + ' on line ' + line)
-  } else {
-    window_onerror(message, url, line)
-  }
+  console.error(message, url, line)
 }
 
 var tracks = {
@@ -42,13 +37,6 @@ window.PLAY_SOUND = function(name) {
   audio.src = tracks[name]
   audio.volume = localStorage.volume
   audio.play()
-}
-
-window.FEEDBACK = function(message) {
-  var request = new XMLHttpRequest()
-  request.open('POST', '/feedback', true) // Fire and forget
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  request.send('data=' + message)
 }
 
 window.ERROR = function(message) {
@@ -79,9 +67,15 @@ window.CUSTOM_CURVE_BLUE          = -9
 window.CUSTOM_CURVE_BLUE_FILLED   = -10
 window.CUSTOM_CURVE_YELLOW        = -11
 window.CUSTOM_CURVE_YELLOW_FILLED = -12
+window.CUSTOM_X = -13
 window.GAP_NONE      = 0
 window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
+
+window.dotToSpokes = function(dot) {
+  if (dot >= -12) return 0;
+  else return (dot * -1) - 12
+}
 
 var animations = ''
 var l = function(line) {animations += line + '\n'}
@@ -91,11 +85,11 @@ l('  fill: var(--line-default);')
 l('  pointer-events: none;')
 l('}')
 l('.line-2 {')
-l('  fill: var(--line_primary);')
+l('  fill: var(--line-primary);')
 l('  pointer-events: none;')
 l('}')
 l('.line-3 {')
-l('  fill: var(--line_secondary);')
+l('  fill: var(--line-secondary);')
 l('  pointer-events: none;')
 l('}')
 l('@keyframes line-success {to {fill: var(--line-success);}}')

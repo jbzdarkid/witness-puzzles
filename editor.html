@@ -4,6 +4,7 @@
     <meta name="description" content="The Witness - Alternative Dots Extension Pack, extended by prod">
     <meta name="author" content="prod">
     <meta name="robots" content="nosnippet"/>
+    <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
     <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
     <link rel="stylesheet" type="text/css" href="./theme/introduction.css" id="theme">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
@@ -51,127 +52,135 @@
           <p>.css</p>
         </span>
         <div class="main">
-          <table id="meta" class="noselect">
-            <tr>
-              <td style="text-align: center;">
-                <div id="metaButtons" style="display:inline">
-                  <button id="newButton" onpointerdown="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">New</button>
-                  <label class="loadButtonWrapper" for="loadButton">Load</label>
-                  <input id="loadButton" type="file" style="visibility: hidden; max-width: 0; max-height: 0;"></input>
-                  <button id="deleteButton" onpointerdown="deletePuzzle()">Delete</button>
-                </div>
-                <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
-                <select id="puzzleStyle" onchange="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">
-                  <option>Default</option>
-                  <option>Horizontal Symmetry</option>
-                  <option>Vertical Symmetry</option>
-                  <option>Rotational Symmetry</option>
-                  <option>Pillar</option>
-                  <option>Pillar (H Symmetry)</option>
-                  <option>Pillar (V Symmetry)</option>
-                  <option>Pillar (R Symmetry)</option>
-                  <option>Pillar (Two Lines)</option>
-                </select>
-              </td>
-            </tr><tr>
-              <td>
-                <div style="display: flex; justify-content: space-between; align-items: center">
-                  <!-- This gets a margin-left because the buttons are a bit smaller than the crayons -->
-                  <table id="symbolButtons" style="padding: 5px; margin-left: 6px; display:none" cellpadding="4" cellspacing="0">
-                    <tr>
-                      <td><button id="start"></button></td>
-                      <td><button id="end"></button></td>
-                      <td><button id="gap"></button></td>
-                    </tr><tr>
-                      <td><button id="dot"></button></td>
-                      <td><button id="cross"></button></td>
-                      <td><button id="curve"></button></td>
-                    </tr><tr>
-                      <td><button id="square"></button></td>
-                      <td><button id="star"></button></td>
-                      <td><button id="bridge" disabled></button></td>
-                      <td><button id="twobytwo"></button></td>
-                    </tr><tr>
-                      <td><button id="nega"></button></td>
-                      <td><button id="triangle"></button></td>
-                      <td><button id="arrow"></button></td>
-                      <td><button id="dart"></button></td>
-                    </tr><tr>
-                      <td><button id="poly"></button></td>
-                      <td><button id="rpoly"></button></td>
-                      <td><button id="polynt"></button></td>
-                      <td><button id="rpolynt"></button></td>
-                    </tr><tr>
-                      <td><button id="ylop"></button></td>
-                      <td><button id="rylop"></button></td>
-                      <td><button id="sizer"></button></td>
-                    </tr><tr>
-                    </tr>
-                  </table>
-                  <div style="display: flex; justify-content: center; min-width: 432px">
-                    <div id="puzzleBox" style="position: relative">
-                      <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
-                      <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
-                      <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
-                      <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
-                      <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
-                      <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
-                      <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
-                      <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
-                      <svg id="puzzle" style="z-index: 10"></svg>
+          <div class="vlist" id="meta" class="noselect">
+            <div class="hlist metaButton-wrapper">
+              <div id="metaButtons" style="display:inline">
+                <button id="deleteButton" onpointerdown="deletePuzzle()">New</button>
+                <label class="loadButtonWrapper" for="loadButton">Load</label>
+                <input id="loadButton" type="file" style="visibility: hidden; max-width: 0; max-height: 0;"></input>
+              </div>
+              <div class="spacer"></div>
+              <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
+              <select id="puzzleStyle" onchange="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">
+                <option>Default</option>
+                <option>Horizontal Symmetry</option>
+                <option>Vertical Symmetry</option>
+                <option>Rotational Symmetry</option>
+                <option>Pillar</option>
+                <option>Pillar (H Symmetry)</option>
+                <option>Pillar (V Symmetry)</option>
+                <option>Pillar (R Symmetry)</option>
+                <option>Pillar (Two Lines)</option>
+              </select>
+            </div>
+            <div class="hlist editor-screen">
+              <table id="symbolButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
+                <tr>
+                  <td><button id="start"></button></td>
+                  <td><button id="end"></button></td>
+                  <td><button id="gap"></button></td>
+                  <!-- <td><button id="diagonal"></button></td> -->
+                </tr><tr>
+                  <td><button id="dot"></button></td>
+                  <td><button id="cross"></button></td>
+                  <td><button id="curve"></button></td>
+                  <!-- <td id="x-fakebutton">
+                    <div id="x-fakewrapper">
+                      <div id="x-fakesvg"></div>
+                      <table>
+                        <tr>
+                          <td><button id="x-lu"></button></td>
+                          <td><button id="x-ru"></button></td>
+                        </tr><tr>
+                          <td><button id="x-ld"></button></td>
+                          <td><button id="x-rd"></button></td>
+                        </tr>
+                      </table>
                     </div>
-                  </div>
-                  <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
-                    <tr>
-                      <td><button id="black"></button></td>
-                      <td><button id="#cccccc"></button></td>
-                      <td><button id="rgba(0, 0, 0, 0.5)"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="white"></button></td>
-                      <td><button id="#80ffff"></button></td>
-                      <td><button id="rgba(1, 1, 1, 0.5)"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="red"></button></td>
-                      <td><button id="#ffff80"></button></td>
-                      <td><button id="rgba(0, 0, 0, 0)"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="orange"></button></td>
-                      <td><button id="#ff07ff"></button></td>
-                      <td><button id="#800000"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="yellow"></button></td>
-                      <td><button id="#ff66b3"></button></td>
-                      <td><button id="#b0ffb0"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="green"></button></td>
-                      <td><button id="#3cd4d9"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="blue"></button></td>
-                      <td><button id="#6867fd"></button></td>
-                    </tr>
-                    <tr>
-                      <td><button id="purple"></button></td>
-                      <td><button id="#8101ff"></button></td>
-                    </tr>
-                  </table>
+                  </td> -->
+                </tr><tr>
+                  <td><button id="square"></button></td>
+                  <td><button id="star"></button></td>
+                  <td><button id="pentagon"></button></td>
+                </tr><tr>
+                  <td><button id="triangle"></button></td>
+                  <td><button id="arrow"></button></td>
+                  <td><button id="dart"></button></td>
+                  <td><button id="vtriangle"></button></td>
+                </tr><tr>
+                  <td><button id="nega"></button></td>
+                  <!-- <td><button id="copier" disabled></button></td> -->
+                  <td><button id="celledhex"></button></td>
+                </tr><tr>
+                  <td><button id="sizer"></button></td>
+                  <!-- <td><button id="scaler" disabled></button></td> -->
+                  <!-- <td><button id="bridge" disabled></button></td> -->
+                  <td><button id="divdiamond"></button></td>
+                </tr><tr>
+                  <td><button id="poly"></button></td>
+                  <td><button id="ylop"></button></td>
+                  <td><button id="polynt"></button></td>
+                  <td><button id="twobytwo"></button></td>
+                </tr>
+              </table>
+              <div class="hlist editor-puzzlebox">
+                <div id="puzzleBox" style="position: relative">
+                  <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
+                  <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
+                  <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
+                  <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
+                  <svg id="puzzle" style="z-index: 10"></svg>
                 </div>
-              </td>
-            </tr><tr>
-              <td style="text-align:center;">
-                <script>addSolveButtons()</script>
-              </td>
-            </tr><tr>
-              <td style="text-align:center;">
-                <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
-              </td>
-            </tr>
-          </table>
+              </div>
+              <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
+                <tr>
+                  <td><button id="black"></button></td>
+                  <td><button id="#cccccc"></button></td>
+                  <td><button id="rgba(0, 0, 0, 0.5)"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="white"></button></td>
+                  <td><button id="#80ffff"></button></td>
+                  <td><button id="rgba(255, 255, 255, 0.5)"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="red"></button></td>
+                  <td><button id="#ffff80"></button></td>
+                  <td><button id="rgba(0, 0, 0, 0)"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="orange"></button></td>
+                  <td><button id="#ff07ff"></button></td>
+                  <td><button id="#800000"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="yellow"></button></td>
+                  <td><button id="#ff66b3"></button></td>
+                  <td><button id="#b0ffb0"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="green"></button></td>
+                  <td><button id="#3cd4d9"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="blue"></button></td>
+                  <td><button id="#6867fd"></button></td>
+                </tr>
+                <tr>
+                  <td><button id="purple"></button></td>
+                  <td><button id="#8101ff"></button></td>
+                </tr>
+              </table>
+            </div>
+            <div>
+              <script>addSolveButtons()</script>
+              <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="spacer"></div>

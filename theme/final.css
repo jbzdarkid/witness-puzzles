@@ -11,6 +11,6 @@
     --line-failure: rgba(0, 0, 0, 0);
     --cursor: rgb(255, 233, 233);
     --text: #fff;
-    --line_primary: #8FF;
-    --line_secondary: #FF2;
+    --line-primary: #8FF;
+    --line-secondary: #FF2;
 }

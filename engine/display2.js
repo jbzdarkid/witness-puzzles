@@ -83,7 +83,6 @@ function drawCenters(puzzle, svg) {
   if (puzzle.pillar === true) {
     for (var y=1; y<puzzle.height; y += 2) {
       if (puzzle.getCell(-1, y) == null) continue // Cell borders the outside
-
       var rect = createElement('rect')
       rect.setAttribute('x', 28)
       rect.setAttribute('y', 41 * y + 11)
@@ -97,7 +96,6 @@ function drawCenters(puzzle, svg) {
   for (var x=1; x<puzzle.width; x += 2) {
     for (var y=1; y<puzzle.height; y += 2) {
       if (puzzle.grid[x][y] == null) continue // Cell borders the outside
-
       var rect = createElement('rect')
       rect.setAttribute('x', 41 * x + 11)
       rect.setAttribute('y', 41 * y + 11)
@@ -220,8 +218,8 @@ function drawSymbols(puzzle, svg, target) {
       if (cell.dot > window.DOT_NONE) {
         params.type = 'dot'
         if (cell.dot === window.DOT_BLACK) params.color = 'black'
-        else if (cell.dot === window.DOT_BLUE) params.color = 'var(--line_primary)'
-        else if (cell.dot === window.DOT_YELLOW) params.color = 'var(--line_secondary)'
+        else if (cell.dot === window.DOT_BLUE) params.color = 'var(--line-primary)'
+        else if (cell.dot === window.DOT_YELLOW) params.color = 'var(--line-secondary)'
         else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = 'var(--line-undone)'
           // This makes the invisible dots visible, but only while we're in the editor.
@@ -249,12 +247,17 @@ function drawSymbols(puzzle, svg, target) {
             break;
           case -3:
           case -4:
-            params.color = 'var(--line_primary)';
+            params.color = 'var(--line-primary)';
             break;
           case -5:
           case 0:
-            params.color = 'var(--line_secondary)';
+            params.color = 'var(--line-secondary)';
             break;
+        }
+        if (cell.dot <= window.CUSTOM_X) {
+          params.type = 'x';
+          params.spokes = window.dotToSpokes(cell.dot)
+          params.color = '#f66';
         }
         window.drawSymbolWithSvg(svg, params, true)
       } else if (cell.gap === window.GAP_BREAK) {

@@ -4,86 +4,12 @@ var activeParams = {'id':'', 'color':'black', 'polyshape':71}
 window.puzzle = null
 var dragging = null
 
-function readPuzzleList() {
-  try {
-    var puzzleList = JSON.parse(window.localStorage.getItem('puzzleList'))
-    if (puzzleList == null || !Array.isArray(puzzleList)) return []
-    return puzzleList
-  } catch {
-    return []
-  }
-}
-
-function writePuzzleList(puzzleList) {
-  if (puzzleList == null) throw 'Attempted to write puzzle list but none was provided'
-  try {
-    window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
-  } catch (e) {
-    if (!(e instanceof QuotaExceededError)) throw e
-  }
-}
-
-// Read the first puzzle in the list, and try to load it.
-// Recurses until success or the list is exhausted, in which case we make an empty puzzle.
-function readPuzzle() {
-  console.log('Trying to read first puzzle')
-  var puzzleList = readPuzzleList()
-  if (puzzleList.length === 0) {
-    console.log('No puzzles left, clearing storage and creating new one')
-    document.getElementById('loadButton').disabled = true
-    document.getElementById('deleteButton').disabled = true
-    createEmptyPuzzle()
-    return
-  } else if (puzzleList.length === 1) {
-    document.getElementById('loadButton').disabled = true
-  }
-
-  try {
-    console.log('Reading puzzle', puzzleList[0])
-    var serialized = window.localStorage.getItem(puzzleList[0])
-    puzzle = Puzzle.deserialize(serialized)
-    puzzleModified()
-    reloadPuzzle()
-  } catch (e) {
-    console.log(e)
-    console.log('Could not parse puzzle, deleting')
-    deletePuzzle() // Will call readPuzzle() again
-  }
-}
-
-// Write a new puzzle to the puzzle list.
-// We add a new empty puzzle to the list, modify the global puzzle,
-// and then call the "current puzzle out of date" function.
-function writeNewPuzzle(newPuzzle) {
-  var puzzleList = readPuzzleList()
-  puzzleList.unshift(null)
-  writePuzzleList(puzzleList)
-
-  if (puzzleList.length > 1) {
-    document.getElementById('loadButton').disabled = false
-  }
-
-  puzzle = newPuzzle
-  writePuzzle()
-  reloadPuzzle()
-}
-
-// The current puzzle (element 0 in the puzzle list) is out of date.
-// Clean it up, and reserialize it.
+// write a singular puzzle for reload purposes
 function writePuzzle() {
   console.log('Writing puzzle', puzzle)
   var puzzleToSave = puzzle.clone()
   puzzleToSave.clearLines()
-
-  var puzzleList = readPuzzleList()
-  // @Robustness: Some intelligence about showing day / month / etc depending on date age
-  puzzleList[0] = puzzleToSave.name + ' on ' + (new Date()).toLocaleString()
-  try {
-    window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
-  } catch (e) {
-    if (!(e instanceof QuotaExceededError)) throw e
-  }
-  writePuzzleList(puzzleList)
+  localStorage.puzzle = puzzleToSave.serialize();
 }
 
 // Delete the active puzzle then read the next one.
@@ -141,6 +67,7 @@ function drawPuzzle() {
 }
 
 function reloadPuzzle() {
+  puzzle.settings.CUSTOM_MECHANICS = true
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
   document.getElementById('solveMode').checked = true
   document.getElementById('solveMode').onpointerdown()
@@ -265,15 +192,16 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   }
   newPuzzle.name = 'e'
 
-  if (document.getElementById('newButton').disabled === true) {
+  if (document.getElementById('deleteButton').disabled === true) {
     // Previous puzzle was unmodified, overwrite it
     puzzle = newPuzzle
-    reloadPuzzle()
   } else {
     // Previous puzzle had modifications
-    document.getElementById('newButton').disabled = true
-    writeNewPuzzle(newPuzzle)
+    document.getElementById('deleteButton').disabled = true
+    window.puzzle = newPuzzle
+    writePuzzle()
   }
+  reloadPuzzle()
 }
 
 let reader = new FileReader()
@@ -302,7 +230,9 @@ window.importPuzzle = function(serialized) {
   console.log('Creating puzzle from serialized', serialized)
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
-    writeNewPuzzle(newPuzzle)
+    window.puzzle = newPuzzle
+    writePuzzle()
+    reloadPuzzle()
   } catch (e) {
     console.error('Failed to load serialized puzzle', e)
 
@@ -338,7 +268,9 @@ window.onload = function() {
   localStorage.customMechanics = true; // yes
   drawSymbolButtons()
   drawColorButtons()
-  createEmptyPuzzle()
+  if (localStorage.puzzle !== undefined) window.puzzle = Puzzle.deserialize(localStorage.puzzle);
+  else createEmptyPuzzle()
+  reloadPuzzle()
   // Add theme-appropriate coloring to the style dropdown
   var puzzleStyle = document.getElementById('puzzleStyle')
   puzzleStyle.style.background = 'var(--background)'
@@ -524,26 +456,31 @@ function onElementClicked(event, x, y) {
     dotColors.push(4)
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
     puzzle.grid[x][y].gap = null
-  } else if (activeParams.type == 'cross') {
+  } else if (activeParams.type == 'cross' || activeParams.type == 'curve') {
+    let offset = 0;
+    if (activeParams.type == 'curve') offset = -6;
     if (x%2 !== 0 || y%2 !== 0) return
-    var dotColors = [undefined, -1, -2]
+    var dotColors = [undefined, -1 + offset, -2 + offset]
     if (puzzle.symmetry != null) {
-      dotColors.push(-3)
-      dotColors.push(-4)
-      dotColors.push(-5)
-      dotColors.push(-6)
+      dotColors.push(-3 + offset)
+      dotColors.push(-4 + offset)
+      dotColors.push(-5 + offset)
+      dotColors.push(-6 + offset)
     }
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
-  } else if (activeParams.type == 'curve') {
+    puzzle.grid[x][y].gap = null
+  } else if (activeParams.type == 'x') {
     if (x%2 !== 0 || y%2 !== 0) return
-    var dotColors = [undefined, -7, -8]
-    if (puzzle.symmetry != null) {
-      dotColors.push(-9)
-      dotColors.push(-10)
-      dotColors.push(-11)
-      dotColors.push(-12)
-    }
-    puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
+    let spokes = activeParams.spokes - 1;
+    var savedGrid = puzzle.switchToMaskedGrid() 
+    if (!(puzzle.grid[x - 1] && puzzle.grid[x - 1][y - 1])) spokes &= ~1
+    if (!(puzzle.grid[x + 1] && puzzle.grid[x + 1][y - 1])) spokes &= ~2
+    if (!(puzzle.grid[x - 1] && puzzle.grid[x - 1][y + 1])) spokes &= ~4
+    if (!(puzzle.grid[x + 1] && puzzle.grid[x + 1][y + 1])) spokes &= ~8
+    puzzle.grid = savedGrid
+    if (puzzle.grid[x][y].dot == -13 - spokes) delete puzzle.grid[x][y].dot
+    else puzzle.grid[x][y].dot = -13 - spokes;
+    puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'gap') {
     if (x%2 === y%2) return
     puzzle.grid[x][y].gap = getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
@@ -581,8 +518,7 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo'].includes(activeParams.type)) {
-    if (['bridge', 'sizer', 'twobytwo'].includes(activeParams.type) && localStorage.customMechanics != 'true') return
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'scaler'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -598,34 +534,42 @@ function onElementClicked(event, x, y) {
   } else if (['poly', 'ylop', 'polynt'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
+    console.log(puzzle.grid[x][y], activeParams)
     if (puzzle.grid[x][y] != null
-     && puzzle.grid[x][y].type === activeParams.type
-     && puzzle.grid[x][y].color === activeParams.color
-     && puzzle.grid[x][y].polyshape === activeParams.polyshape) {
-      puzzle.grid[x][y] = null
-    } else {
+      && puzzle.grid[x][y].type === activeParams.type
+      && puzzle.grid[x][y].color === activeParams.color
+      && puzzle.grid[x][y].polyshape === activeParams.polyshape)
+      puzzle.grid[x][y].polyshape = activeParams.polyshape | window.ROTATION_BIT;
+    else if (puzzle.grid[x][y] != null
+      && puzzle.grid[x][y].type === activeParams.type
+      && puzzle.grid[x][y].color === activeParams.color
+      && puzzle.grid[x][y].polyshape === activeParams.polyshape | window.ROTATION_BIT)
+        puzzle.grid[x][y] = null
+    else
       puzzle.grid[x][y] = {
         'type': activeParams.type,
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
       }
-    }
-  } else if (activeParams.type == 'triangle') {
+  } else if (activeParams.type == 'triangle' || activeParams.type == 'divdiamond') {
+    let cycle;
+    if (activeParams.id == 'triangle') cycle = 4;
+    else cycle = 9;
     if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match
     if (puzzle.grid[x][y] != null
      && puzzle.grid[x][y].type === activeParams.type
      && puzzle.grid[x][y].color === activeParams.color) {
-      puzzle.grid[x][y].count = puzzle.grid[x][y].count % 4 + 1
+      puzzle.grid[x][y].count = puzzle.grid[x][y].count % cycle + 1
       // Remove when it matches activeParams -- this allows fluid cycling
       if (puzzle.grid[x][y].count === activeParams.count) {
         puzzle.grid[x][y] = null
       }
     } else {
       puzzle.grid[x][y] = {
-        'type':activeParams.type,
-        'color':activeParams.color,
-        'count':activeParams.count
+        'type': activeParams.type,
+        'color': activeParams.color,
+        'count': activeParams.count
       }
     }
   } else if (activeParams.type == 'arrow' || activeParams.type == 'dart') {
@@ -666,25 +610,6 @@ function onElementClicked(event, x, y) {
       }
     }
   }
-
-  // puzzle.settings.CUSTOM_MECHANICS = false
-  // for (var x=1; x<puzzle.width; x+=2) {
-  //   for (var y=1; y<puzzle.height; y+=2) {
-  //     var cell = puzzle.grid[x][y]
-  //     if (cell != null && ['bridge', 'arrow', 'sizer', 'twobytwo'].includes(cell.type)) {
-  //       puzzle.settings.CUSTOM_MECHANICS = true
-  //     }
-  //   }
-  // }
-  // for (var x=0; x<puzzle.width; x+=2) {
-  //   for (var y=0; y<puzzle.height; y+=2) {
-  //     var cell = puzzle.grid[x][y]
-  //     if (['cross', 'curve'].includes(cell.type)) {
-  //       puzzle.settings.CUSTOM_MECHANICS = true
-  //     }
-  //   }
-  // }
-  puzzle.settings.CUSTOM_MECHANICS = true
   puzzleModified()
   writePuzzle()
   reloadPuzzle()
@@ -700,12 +625,10 @@ var symbolData = {
   'nega': {'type':'nega', 'title':'Negation'},
   'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
   'poly': {'type':'poly', 'title':'Polyomino'},
-  'rpoly': {'type':'poly', 'title':'Rotatable polyomino'},
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
-  'rylop': {'type':'ylop', 'title':'Rotatable negation polyomino'},
   'bridge': {'type':'bridge', 'title':'Seren\'s Bridge: VALIDATION IS BUGGED'},
   'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
-  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
+  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer (Canonical Design by Seren)'},
   'cross': {'type':'cross', 'title':'Cross'},
   'curve': {'type':'curve', 'title':'Diamond'},
   'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
@@ -713,21 +636,40 @@ var symbolData = {
   'twobytwo': {'type':'twobytwo', 'title':'Two-By-Two'},
   'dart': {'type':'dart', 'count':1, 'rot':0, 'title':'Dart'},
   'polynt': {'type':'polynt', 'title':'unsuspiciousperson\'s Antipolyomino'}, // i just really liked the idea lol oops
-  'rpolynt': {'type':'polynt', 'title':'Rotatable Antipolyomino'},
+  'divdiamond': {'type':'divdiamond', 'count':1, 'title':'ItzShaun\'s Divided Diamond'}, // i just really liked the idea lol oops
+  'vtriangle': {'type':'vtriangle', 'title':'sus\' Tenuous Triangle'},
+  'x-lu': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
+  'x-ru': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
+  'x-ld': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
+  'x-rd': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
+  'pentagon': {'type':'pentagon', 'title':'ItzShaun\'s Pentagons'},
+  'copier': {'type':'copier', 'title':'artless\' Copiers'},
+  'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
+  'scaler': {'type':'scaler', 'title':'artless\' Scalers'},
 }
+
+let xButtons = [];
+
 function drawSymbolButtons() {
   var symbolTable = document.getElementById('symbolButtons')
   symbolTable.style.display = null
   for (var button of symbolTable.getElementsByTagName('button')) {
     var params = symbolData[button.id]
     params.id = button.id
-    params.height = 64
-    params.width = 64
-    params.border = 2
+    params.height = params.type == 'x' ? 30 : 58
+    params.width = params.type == 'x' ? 30 : 58
+    params.border = params.type == 'x' ? 0 : 2
+    if (params.type == 'x') xButtons.push(button.id)
     if (activeParams.id === button.id) {
-      button.parentElement.style.background = 'var(--border)'
+      if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
+        document.getElementById('x-fakebutton').style.backgroundColor = activeParams.color
+        button.parentElement.style.backgroundColor = null
+      } else {
+        document.getElementById('x-fakebutton').style.backgroundColor = null
+        button.parentElement.style.backgroundColor = activeParams.color
+      }
     } else {
-      button.parentElement.style.background = null
+      button.parentElement.style.backgroundColor = null
     }
     button.style.padding = 0
     button.style.border = params.border
@@ -735,13 +677,8 @@ function drawSymbolButtons() {
     button.style.width = params.width + 2*params.border
     button.title = params.title
     button.params = params
-    if (['poly', 'rpoly', 'ylop', 'rylop', 'polynt', 'rpolynt'].includes(button.id)) {
+    if (['poly', 'ylop', 'polynt'].includes(button.id)) {
       button.params.polyshape = activeParams.polyshape
-      if (button.id[0] == 'r') {
-        button.params.polyshape |= window.ROTATION_BIT
-      } else {
-        button.params.polyshape &= ~window.ROTATION_BIT
-      }
       button.onpointerdown = function() {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
@@ -752,28 +689,41 @@ function drawSymbolButtons() {
           drawSymbolButtons()
         }
       }
-    } else if (button.id == 'triangle') {
+    } else if (button.id == 'triangle' || button.id == 'divdiamond') {
+      let cycle;
+      if (button.id == 'triangle') cycle = 4;
+      else cycle = 9;
       button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
-          var count = symbolData.triangle.count
+          var count = symbolData[activeParams.id].count
           count += (event.isRightClick() ? -1 : 1)
-          if (count <= 0) count = 4
-          if (count >= 5) count = 1
-          symbolData.triangle.count = count
+          if (count <= 0) count = cycle
+          if (count > cycle) count = 1
+          symbolData[activeParams.id].count = count
           activeParams.count = count
         }
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()
       }
       button.oncontextmenu = function(event) {event.preventDefault()}
-    } else if (button.id == 'arrow') {
-      if (localStorage.customMechanics != 'true') {
-        button.style.display = 'none'
-        continue
-      }
+    } else if (params.type == 'x') {
       button.style.display = null
-
+      button.onpointerdown = function(event) {
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        const corners = { 'x-lu': 1, 'x-ru': 2, 'x-ld': 4, 'x-rd': 8 }
+        for (xbutton of xButtons) {
+          if (event.isRightClick())
+            symbolData[xbutton].spokes = ((symbolData[xbutton].spokes - 1) & ~corners[this.id]) + 1;
+          else
+            symbolData[xbutton].spokes = ((symbolData[xbutton].spokes - 1) ^ corners[this.id]) + 1;
+        }
+        activeParams = Object.assign(activeParams, this.params)
+        drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {event.preventDefault()}
+    } else if (button.id == 'arrow') {
+      button.style.display = null
       button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
@@ -790,12 +740,7 @@ function drawSymbolButtons() {
       }
       button.oncontextmenu = function(event) {event.preventDefault()}
     } else if (button.id == 'dart') {
-      if (localStorage.customMechanics != 'true') {
-        button.style.display = 'none'
-        continue
-      }
       button.style.display = null
-
       button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
@@ -812,12 +757,7 @@ function drawSymbolButtons() {
       }
       button.oncontextmenu = function(event) {event.preventDefault()}
     } else {
-      if (['bridge', 'sizer', 'twobytwo'].includes(button.id) && localStorage.customMechanics != 'true') {
-        button.style.display = 'none'
-        continue
-      }
       button.style.display = null
-
       button.onpointerdown = function() {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         activeParams = Object.assign(activeParams, this.params)
@@ -825,10 +765,17 @@ function drawSymbolButtons() {
       }
     }
     while (button.firstChild) button.removeChild(button.firstChild)
-    var svg = window.drawSymbol(params, localStorage.customMechanics == 'true')
-    button.appendChild(svg)
-
-    if (['poly', 'rpoly', 'ylop', 'rylop', 'polynt', 'rpolynt'].includes(button.id)) {
+    var svg = window.drawSymbol(params, true)
+    if (button.id == 'x-lu') {
+      var fakebutton = document.getElementById('x-fakesvg')
+      while (fakebutton.firstChild) fakebutton.removeChild(fakebutton.firstChild)
+      fakebutton.appendChild(svg)
+      svg.setAttribute('viewBox', '-15 -15 60 60')
+      svg.setAttribute('width', '60px')
+    }
+    else if (button.id == 'x-ru' || button.id == 'x-ld' || button.id == 'x-rd') svg.style.display = "none"
+    else button.appendChild(svg)
+    if (['poly', 'ylop', 'polynt'].includes(button.id)) {
       var is4Wide = (activeParams.polyshape & 15) && (activeParams.polyshape & 61440)
       var is4Tall = (activeParams.polyshape & 4369) && (activeParams.polyshape & 34952)
       if (is4Wide || is4Tall) {
@@ -844,6 +791,20 @@ function drawColorButtons() {
   var changeActiveColor = function() {
     reloadPuzzle() // Disable manual solve mode to allow puzzle editing
     activeParams.color = this.id
+    var symbolTable = document.getElementById('symbolButtons')
+    for (var button of symbolTable.getElementsByTagName('button')) {
+      if (activeParams.id === button.id) {
+        if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
+          document.getElementById('x-fakebutton').style.backgroundColor = activeParams.color
+          button.parentElement.style.backgroundColor = null
+        } else {
+          document.getElementById('x-fakebutton').style.backgroundColor = null
+          button.parentElement.style.backgroundColor = activeParams.color
+        }
+      } else {
+        button.parentElement.style.backgroundColor = null
+      }
+    }
     drawColorButtons()
   }
   for (var button of colorTable.getElementsByTagName('button')) {
@@ -887,6 +848,7 @@ function drawColorButtons() {
         }
 
         this.parentElement.style.background = 'var(--border)'
+
         input.focus()
         event.preventDefault()
       }
@@ -1214,7 +1176,6 @@ function dragStart(event, elem) {
     'x': event.pageX || event.clientX || event.touches[0].pageX,
     'y': event.pageY || event.clientY || event.touches[0].pageY,
   }
-  console.log('Drag started at', dragging.x, dragging.y)
 
   var anchor = document.createElement('div')
   document.body.appendChild(anchor)
@@ -1300,7 +1261,6 @@ function dragMove(event, elem) {
 }
 
 function puzzleModified() {
-  document.getElementById('newButton').disabled = false
   document.getElementById('deleteButton').disabled = false
 }
 

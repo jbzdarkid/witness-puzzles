@@ -20,6 +20,10 @@ class RegionData {
   }
 }
 
+function isBounded(puzzle, x, y) {
+  return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height);
+}
+
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Whether or not the puzzle is valid
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
@@ -36,20 +40,29 @@ window.validate = function(puzzle, quick) {
   puzzle.hasSizers = false
   
   puzzle.invalidElements = []
+  puzzle.invalidFromXs = {}
 
   // Validate gap failures as an early exit.
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == null) continue
-      if (!needsRegions && cell.type != 'line' && cell.type != 'triangle' && cell.type != 'arrow') needsRegions = true
+      if (!needsRegions && cell.type != 'line' && cell.type != 'triangle' && cell.type != 'vtriangle' && cell.type != 'arrow') needsRegions = true
       if (cell.type == 'nega') puzzle.hasNegations = true
       if (cell.type == 'poly' || cell.type == 'ylop' || cell.type == 'polynt') puzzle.hasPolyominos = true
       if (cell.type == 'sizer') puzzle.hasSizers = true
       if (cell.line > window.LINE_NONE) {
-        if (cell.dot < window.DOT_NONE && puzzle.settings.CUSTOM_MECHANICS) { // custom: check for line go over
+        if (window.CUSTOM_X < cell.dot && cell.dot < window.DOT_NONE) { // custom: check for line go over
           window.preValidateAltDots(puzzle, cell, {'x': x, 'y': y}, quick)
           if (quick && !puzzle.valid) return
+        } else if (cell.dot <= window.CUSTOM_X) {
+          let spokes = -13 - cell.dot // im currently on this line of code, pushing to fix bug rq
+          if (spokes == 0) {
+            console.log('X with no spokes at', x, y)
+            puzzle.invalidElements.push({"x": x, "y": y})
+            puzzle.valid = false
+            if (quick) return
+          }
         }
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
@@ -70,6 +83,8 @@ window.validate = function(puzzle, quick) {
     }
   }
 
+  window.preValidateTTriangles(puzzle)
+
   puzzle.negations = []
   if (needsRegions) {
     var regions = puzzle.getRegions()
@@ -79,19 +94,6 @@ window.validate = function(puzzle, quick) {
   console.log('Found', regions.length, 'region(s)')
   console.debug(regions)
 
-  // if (puzzle.settings.CUSTOM_MECHANICS) {
-  //   for (var region of regions) {
-  //     regionData = validateRegion(puzzle, region, quick)
-  //     puzzle.negations = puzzle.negations.concat(regionData.negations)
-  //     puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-  //     puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-  //   }
-  //   // When using custom mechanics, we have to handle negations slightly differently.
-  //   // Negations need to be applied after all regions are validated, so that we can evaluate negations for
-  //   // all regions simultaneously. This is because certain custom mechanics are cross-region.
-  // } else {
-
-  // actually we don't handle things differently because cross & curve isnt cross-region
   if (puzzle.hasSizers) puzzle.sizerCount = null
   for (var region of regions) {
     regionData = validateRegion(puzzle, region, quick)
@@ -102,7 +104,6 @@ window.validate = function(puzzle, quick) {
     puzzle.valid = puzzle.valid && regionData.valid()
     if (quick && !puzzle.valid) return
   }
-  // }
   console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
 }
 
@@ -177,6 +178,7 @@ window.validateRegion = function(puzzle, region, quick) {
 // Recursively matches negations and invalid elements from the grid. Note that this function
 // doesn't actually modify the two lists, it just iterates through them with index/index2.
 function regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0, index2=0) {
+  window.preValidateTTriangles(puzzle)
   if (index2 >= negationSymbols.length) {
     console.debug('0 negation symbols left, returning negation-less regionCheck')
     return regionCheck(puzzle, region, false) // @Performance: We could pass quick here.
@@ -256,10 +258,12 @@ function regionCheck(puzzle, region, quick) {
   console.log('Validating region of size', region.cells.length, region)
   var regionData = new RegionData()
 
-  var squares = []
-  var stars = []
-  var coloredObjects = {}
-  var squareColor = null
+  let squares = []
+  let square2s = []
+  let stars = []
+  let coloredObjects = {}
+  let squareColor = null
+  let square2Color = null
 
   for (var pos of region.cells) {
     var cell = puzzle.getCell(pos.x, pos.y)
@@ -301,6 +305,16 @@ function regionCheck(puzzle, region, quick) {
         } else if (squareColor != cell.color) {
           squareColor = -1 // Signal value which indicates square color collision
         }
+      } else if (cell.type === 'pentagon') {
+        square2s.push(pos)
+        if (square2Color == null)
+          square2Color = cell.color
+        else if (square2Color != cell.color)
+          square2Color = -1 // Signal value which indicates pentagon color collision
+        if (squareColor == square2Color) {
+          squareColor = -1
+          square2Color = -1 // signal which hrfjklshgjk
+        }
       }
 
       if (cell.type === 'star') {
@@ -312,6 +326,11 @@ function regionCheck(puzzle, region, quick) {
 
   if (squareColor === -1) {
     regionData.invalidElements = regionData.invalidElements.concat(squares)
+    if (quick) return regionData
+  }
+
+  if (square2Color === -1) {
+    regionData.invalidElements = regionData.invalidElements.concat(square2s)
     if (quick) return regionData
   }
 
@@ -347,14 +366,21 @@ function regionCheck(puzzle, region, quick) {
       let cell = puzzle.getCell(pos.x, pos.y);
       if (cell && cell.line === 0 && cell.type === "line") cell = true 
       regionMatrix[pos.y][pos.x] = cell || true
-    }
-    window.validateBridges(puzzle, region, regionData)
-    window.validateArrows(puzzle, region, regionData)
-    window.validateSizers(puzzle, region, regionData)
+    } // oh boy
     window.validateAltDots(puzzle, region, regionData, quick)
-    window.validateTwoByTwos(puzzle, region, regionData, regionMatrix, quick)
+    window.validateXs(puzzle, region, regionData)
+    // window.validatePentagons(puzzle, region, regionData)
+    window.validateArrows(puzzle, region, regionData)
     window.validateDarts(puzzle, region, regionData, regionMatrix)
+    window.validateTTriangles(puzzle, region, regionData, regionMatrix)
+    // window.validateCopiers(puzzle, region, regionData)
+    window.validateSizers(puzzle, region, regionData)
+    // window.validateScalers(puzzle, region, regionData)
+    window.validateBridges(puzzle, region, regionData)
+    window.validateDivDiamonds(puzzle, region, regionData)
+    window.validateCHexes(puzzle, region, regionData)
     window.validateAntipolys(puzzle, region, regionData, regionMatrix)
+    window.validateTwoByTwos(puzzle, region, regionData, regionMatrix, quick)
   }
   console.debug('Region has', regionData.veryInvalidElements.length, 'very invalid elements')
   console.debug('Region has', regionData.invalidElements.length, 'invalid elements')

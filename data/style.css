@@ -16,6 +16,10 @@ label, select, option, input, a, button, #symboltheme {
   transition: all 0.5s ease-out;
 }
 
+body {
+  margin: 0;
+}
+
 .title, .title > label {
   font-size: 48px;
 }
@@ -68,6 +72,62 @@ header i {
     align-items: stretch;
 }
 
+table {
+  table-layout:fixed;
+}
+
+#meta {
+  max-width: calc(100vw - 4rem);
+}
+
+#x-fakebutton {
+  width: 62px;
+}
+
+#x-fakewrapper {
+  position: relative;
+  width: 52px;
+  padding: 0;
+  border: 1px black solid;
+  background-color: var(--alt-background);
+  border-radius: 0.5vw;
+  display: block;
+  width: 60px;
+  height: 60px;
+}
+
+#x-fakewrapper table {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  padding: 0;
+  border-spacing: 0;
+  margin: 0;
+}
+
+#x-fakewrapper td, #x-fakewrapper button {
+  padding: 0;
+  background-color: transparent;
+}
+
+#x-fakesvg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.editor-screen {
+  justify-content: start;
+  overflow-x: overlay;
+}
+
+.editor-puzzlebox {
+  align-self: center;
+  justify-content: center;
+}
+
 .vlist {
     flex-direction: column;
 }
@@ -86,6 +146,14 @@ header i {
   min-height: 100%;
 }
 
+.metaButton-wrapper {
+  justify-content: space-between;
+}
+
+#metaButtons {
+  flex: 0 1 auto;
+}
+
 .spacer {
   -ms-flex: 999 1 auto !important;
   flex: 999 0 auto !important;
@@ -93,7 +161,7 @@ header i {
 
 .main {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin: 1rem;
 }
@@ -144,6 +212,10 @@ body {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
+}
+
+td {
+  padding: 2px;
 }
 
 /* Slider control main bar */

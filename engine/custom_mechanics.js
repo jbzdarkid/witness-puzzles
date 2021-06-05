@@ -122,7 +122,7 @@ window.validateBridges = function(puzzle, region, regionData) {
           regionData.addVeryInvalid(bridge)
         }
       }
-    } else if (!window.bridgeTest(region, puzzle, color, bridges[color])) {
+    } else if (!bridgeTest(region, puzzle, color, bridges[color])) {
       for (var bridge of bridges[color]) {
         regionData.addInvalid(bridge)
       }
@@ -294,7 +294,7 @@ window.validateDarts = function(puzzle, region, regionData, regionMatrix) {
       if (count > cell.count) break
       x += (dir.x * 2)
       y += (dir.y * 2)
-      if (puzzle.matchesSymmetricalPos(x, y, pos.x + (dir.x * 2), pos.y + (dir.y * 2))) break // pillars
+      if (puzzle.matchesSymmetricalPos(x, y, pos.x, pos.y)) break // pillars
     }
     if (count !== cell.count) {
       console.log('Dart at', pos.x, pos.y, 'detected', count, 'cells in region, but should contain', cell.count)
@@ -305,6 +305,134 @@ window.validateDarts = function(puzzle, region, regionData, regionMatrix) {
 
 window.validateAntipolys = function(puzzle, region, regionData, regionMatrix) {
   window.polyntFitnt(region, puzzle, regionData, regionMatrix)
+}
+
+window.validateXs = function(puzzle, region, regionData) {
+  
+}
+
+let ttriangleColor = [null, null, null, null, null]; // 0, 1, 2, 3, 4
+let ttrianglepos   = {}
+let illegalColors  = []
+
+window.preValidateTTriangles = function(puzzle) {
+  ttriangleColor = [null, null, null, null, null]; // 0, 1, 2, 3, 4
+  ttrianglepos   = {}
+  illegalColors  = []
+  for (var x=1; x<puzzle.width; x+=2) {
+    for (var y=1; y<puzzle.height; y+=2) {
+      var cell = puzzle.grid[x][y]
+      if (cell == null) continue
+      if (cell.type != 'vtriangle') continue
+      // detect colored dfjdsklf
+      if (ttrianglepos[cell.color] === undefined) ttrianglepos[cell.color] = [{'x': x, 'y': y}]; 
+      else ttrianglepos[cell.color].push({'x': x, 'y': y});
+      if (illegalColors.includes(cell.color)) continue // don't have to calc already bonked color
+      // count
+      let count = 0
+      if (puzzle.getLine(x - 1, y) > window.LINE_NONE) count++
+      if (puzzle.getLine(x + 1, y) > window.LINE_NONE) count++
+      if (puzzle.getLine(x, y - 1) > window.LINE_NONE) count++
+      if (puzzle.getLine(x, y + 1) > window.LINE_NONE) count++
+      // something here
+      let cvalue = ttriangleColor.indexOf(cell.color)
+      if (cvalue == -1) {
+        if (ttriangleColor[count] !== null) {
+          console.log('Tenuous Triangle at', x, y, 'detected', count, 'lines around, same color: ', ttriangleColor[count])
+          illegalColors.push(ttriangleColor[count])
+          illegalColors.push(cell.color)
+        } else
+        ttriangleColor[count] = cell.color;
+      }
+      else if (count != cvalue) { // illegals!
+        console.log('Tenuous Triangle at', x, y, 'detected', count, 'lines around, but should contain', cvalue)
+        illegalColors.push(cell.color)
+      }
+    }
+  }
+}
+
+window.validateTTriangles = function(puzzle, region, regionData, regionMatrix) {
+  for (c of illegalColors) {
+    for (pos of ttrianglepos[c]) if (regionMatrix[pos.y][pos.x]) regionData.addInvalid(pos)
+  }
+}
+
+window.validateCHexes = function(puzzle, region, regionData) {
+  let celledhexes = [];
+  let darts = [];
+  let stars = [];
+  for (var pos of region.cells) {
+    if (!detectionMode.cell(pos)) continue;
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue
+    if (cell.type == 'poly' || cell.type == 'divdiamond') return; // true!!
+    else if (cell.type == 'celledhex') celledhexes.push(pos);
+    else if (cell.type == 'dart') darts.push(pos);
+    else if (cell.type == 'star') stars.push(cell.color);
+  }
+  if (celledhexes.length == 0) return; // if theres no hexes, true
+  for (var star of stars) {
+    celledhexes = celledhexes.filter((hex, i, arr) => { puzzle.getCell(hex.x, hex.y).color != star });
+    if (celledhexes.length == 0) return;
+  }
+  for (var dart of darts) {
+    var cell = puzzle.getCell(dart.x, dart.y)
+    let dir = DIRECTIONS[cell.rot]
+    var x = dart.x + (dir.x * 2)
+    var y = dart.y + (dir.y * 2)
+    for (var i=0; i<100; i++) { // lol infinite loops
+      if (!puzzle.pillar && (0 > x || x >= puzzle.width || 0 > y || y >= puzzle.height)) break; // non-pillars
+      celledhexes = celledhexes.filter((hex, i, arr) => { return (hex.x != x || hex.y != y) });
+      if (celledhexes.length == 0) return;
+      x += (dir.x * 2)
+      y += (dir.y * 2)
+      if (puzzle.matchesSymmetricalPos(x, y, dart.x, dart.y)) break // pillars
+    }
+  }
+  if (celledhexes.length == 0) return;
+  console.log('Celled Hexagons in the region are not affected')
+  for (var hex of celledhexes) regionData.addInvalid(hex)
+}
+
+window.validateDivDiamonds = function(puzzle, region, regionData, quick) {
+  let symbols = 0;
+  let target = -1;
+  let nonSymbols = ['start', 'end']
+  let divdiamonds = [];
+  for (var pos of region.cells) {
+    var cell = puzzle.getCell(pos.x, pos.y)
+    if (cell == null) continue
+    if (nonSymbols.includes(cell.type)) continue
+    // if (cell.type == 'line' && (cell.dot === window.DOT_NONE || cell.dot !== undefined || cell.dot !== null)) continue
+    if (cell.type == 'line' && (!cell.dot)) continue
+    symbols++;
+    if (cell.type == 'divdiamond') {
+      if (quick) {
+        if (target == -1) target = cell.count
+        else if (target != cell.count) {
+          console.log('Divided Diamond at', pos.x, pos.y, 'wants to have', cell.count, 'symbols in region, but should contain', target)
+          regionData.addInvalid(pos)
+          return regionData
+        }
+      }
+      divdiamonds.push(pos)
+    }
+  }
+  if (quick) {
+    if (symbols != target) {
+      console.log('Divided Diamonds wants to have', target, 'symbols in region, but contains', symbols)
+      for (dd of divdiamonds) regionData.addInvalid(dd)
+    }
+  } else {
+    for (dd of divdiamonds) {
+      var cell = puzzle.getCell(dd.x, dd.y)
+      if (symbols != cell.count) {
+        console.log('Divided Diamond at', dd.x, dd.y, 'wants to have', cell.count, 'symbols in region, but contains', symbols)
+        regionData.addInvalid(dd)
+      }
+    }
+  }
 }
 
 })
