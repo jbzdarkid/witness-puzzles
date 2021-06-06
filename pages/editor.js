@@ -41,7 +41,6 @@ function readPuzzle() {
     console.log('Reading puzzle', puzzleList[0])
     var serialized = window.localStorage.getItem(puzzleList[0])
     puzzle = Puzzle.deserialize(serialized)
-    puzzleModified()
     reloadPuzzle()
   } catch (e) {
     console.log(e)
@@ -60,19 +59,21 @@ function writeNewPuzzle(newPuzzle) {
 
   if (puzzleList.length > 1) {
     document.getElementById('loadButton').disabled = false
+    document.getElementById('deleteButton').disabled = false
   }
 
   puzzle = newPuzzle
-  writePuzzle()
+  writePuzzle(true)
   reloadPuzzle()
 }
 
 // The current puzzle (element 0 in the puzzle list) is out of date.
 // Clean it up, and reserialize it.
-function writePuzzle() {
+function writePuzzle(newPuzzle) {
   console.log('Writing puzzle', puzzle)
   var puzzleToSave = puzzle.clone()
   puzzleToSave.clearLines()
+  if (!newPuzzle) document.getElementById('deleteButton').disabled = false
 
   var puzzleList = readPuzzleList()
   // @Robustness: Some intelligence about showing day / month / etc depending on date age
@@ -296,15 +297,7 @@ window.createEmptyPuzzle = function() {
   } else {
     newPuzzle.name = 'Unnamed ' + style + ' Puzzle'
   }
-  if (document.getElementById('newButton').disabled === true) {
-    // Previous puzzle was unmodified, overwrite it
-    puzzle = newPuzzle
-    reloadPuzzle()
-  } else {
-    // Previous puzzle had modifications
-    document.getElementById('newButton').disabled = true
-    writeNewPuzzle(newPuzzle)
-  }
+  writeNewPuzzle(newPuzzle)
 }
 
 window.loadPuzzle = function() {
@@ -439,7 +432,7 @@ window.onload = function() {
     if (this.innerText.length === 0) this.innerText = 'Unnamed Puzzle'
     // Update the puzzle with the new name
     puzzle.name = this.innerText
-    writePuzzle()
+    writePuzzle(false)
   }
 
   for (var resize of document.getElementsByClassName('resize')) {
@@ -719,8 +712,7 @@ function onElementClicked(event, x, y) {
     }
   }
 
-  puzzleModified()
-  writePuzzle()
+  writePuzzle(false)
   reloadPuzzle()
 }
 
@@ -1286,8 +1278,7 @@ function dragMove(event, elem) {
 
   while (Math.abs(dx) >= xLim) {
     if (!resizePuzzle(xScale * Math.sign(dx), 0, elem.id)) break
-    puzzleModified()
-    writePuzzle()
+    writePuzzle(false)
     reloadPuzzle()
     dx -= Math.sign(dx) * xLim
     dragging.x = newDragging.x
@@ -1295,17 +1286,11 @@ function dragMove(event, elem) {
 
   while (Math.abs(dy) >= yLim) {
     if (!resizePuzzle(0, yScale * Math.sign(dy), elem.id)) break
-    puzzleModified()
-    writePuzzle()
+    writePuzzle(false)
     reloadPuzzle()
     dy -= Math.sign(dy) * yLim
     dragging.y = newDragging.y
   }
-}
-
-function puzzleModified() {
-  document.getElementById('newButton').disabled = false
-  document.getElementById('deleteButton').disabled = false
 }
 
 })
