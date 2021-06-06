@@ -88,6 +88,7 @@ function writePuzzle() {
 
 // Delete the active puzzle then read the next one.
 window.deletePuzzle = function() {
+  if (document.getElementById('deleteButton').disabled) return
   var puzzleList = readPuzzleList()
   if (puzzleList.length === 0) {
     document.getElementById('deleteButton').disabled = true
@@ -312,6 +313,7 @@ window.createEmptyPuzzle = function() {
 }
 
 window.loadPuzzle = function() {
+  if (document.getElementById('loadButton').disabled) return
   var puzzleList = readPuzzleList()
   if (puzzleList.length === 0) return
 
