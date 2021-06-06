@@ -8,6 +8,7 @@ BUGS
   - also sensitivity is scuffed
   - if you re tap on an incomplete path and go down it can refresh the page
   - doing that also lags tf out of the line rendering properly
+- QuotaExceeded is because I'm saving the names into puzzleList and the puzzles into localstorage but the puzzle name keeps changing so it saves every single version.
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
@@ -27,6 +28,8 @@ FEATURES
   - trace2.js
     var sens = parseFloat(localStorage.sensitivity)
   - RM swapfiles
+- login-gated page for "show (and dismiss) all errors/feedback"
+- login-gated page for validate_puzzles.html
 - Put the license *somewhere* into the header, so that if someone clones the repo they don't have to do it.
 - Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
 - RGB filters
