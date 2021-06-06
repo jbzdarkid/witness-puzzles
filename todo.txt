@@ -1,6 +1,7 @@
 SHIP BLOCKERS
 
 BUGS
+- QuotaExceeded is because I'm saving the names into puzzleList and the puzzles into localstorage but the puzzle name keeps changing so it saves every single version.
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
