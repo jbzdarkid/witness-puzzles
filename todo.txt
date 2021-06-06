@@ -10,9 +10,6 @@ BUGS
   - doing that also lags tf out of the line rendering properly
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
-- Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
-- Editor grid is off-center when smaller than 4x4 (again)
-- Change style is not being saved (even though puzzle isn't modified, we should still save the style change)
 - Perf:
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
