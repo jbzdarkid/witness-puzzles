@@ -1,6 +1,13 @@
 SHIP BLOCKERS
+- you make a rotationally symmetric puzzle and expand it to a 5x5 and then it stops being symmetrical
 
 BUGS
+- Android is still fairly buggy.
+  - while solving a puzzle the page scrolling is annoying af, practically not even usable
+  - it only does the annoying scrolling in editor
+  - also sensitivity is scuffed
+  - if you re tap on an incomplete path and go down it can refresh the page
+  - doing that also lags tf out of the line rendering properly
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Editor puzzle title isn't selecting all text on desktop, it looks like the onclick is continuing through.
@@ -11,6 +18,15 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Steal back stuff from prod
+  - stuff in editor.onElementClicked
+  - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
+  - CSS variables in engine/display2.js, engine/svg.js, engine.utilities.js, theme/*.css
+  - maybe engine/play.js
+  - steal some svg shapes from engine/svg.js
+  - trace2.js
+    var sens = parseFloat(localStorage.sensitivity)
+  - RM swapfiles
 - Put the license *somewhere* into the header, so that if someone clones the repo they don't have to do it.
 - Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
 - RGB filters
