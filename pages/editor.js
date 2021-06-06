@@ -16,11 +16,10 @@ function readPuzzleList() {
 
 function writePuzzleList(puzzleList) {
   if (puzzleList == null) throw 'Attempted to write puzzle list but none was provided'
-  try {
-    window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
-  } catch (e) {
-    if (!(e instanceof QuotaExceededError)) throw e
+  for (var key of Object.keys(window.localStorage)) {
+    if (!puzzleList.includes(key)) window.localStorage.removeItem(key)
   }
+  window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))
 }
 
 // Read the first puzzle in the list, and try to load it.
@@ -78,11 +77,7 @@ function writePuzzle() {
   var puzzleList = readPuzzleList()
   // @Robustness: Some intelligence about showing day / month / etc depending on date age
   puzzleList[0] = puzzleToSave.name + ' on ' + (new Date()).toLocaleString()
-  try {
-    window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
-  } catch (e) {
-    if (!(e instanceof QuotaExceededError)) throw e
-  }
+  window.localStorage.setItem(puzzleList[0], puzzleToSave.serialize())
   writePuzzleList(puzzleList)
 }
 
