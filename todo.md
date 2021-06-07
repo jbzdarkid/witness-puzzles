@@ -36,3 +36,24 @@ things to do
 - [ ] vertical pillar, torus even
 - [ ] multipuzzle
 - [ ] panel sequence export + panel custom play mode
+
+# progress
+
+Currently working on: validation v2
+made work:
+- [x] Base Infrastructure
+- [x] Dots, Crosses, Diamonds
+- [x] Squares, Pentagons, Stars
+- [x] Triangles, Arrows, Darts
+- [x] Divided Diamonds
+- [x] Two-By-Twos
+- [x] Celled Hexes
+- [x] Polyominos, Scalers (in progress)
+- [ ] Tenuous Triangles
+- [ ] Xs
+- [ ] Bridges
+- [ ] Sizers
+- [ ] Negators, Copiers
+- [ ] Diagonal Lines
+- [ ] Double Squares
+- [ ] Corner Negators
