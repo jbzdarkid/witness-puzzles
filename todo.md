@@ -7,6 +7,7 @@
 - - [ ] arrows
 - - [ ] ask unsus for antimino tutorial
 - - [ ] copy artless' homework
+- - [ ] vtriangle
 - [ ] finally tackle seren's code
 - [ ] diag lines
 - [ ] graph editor mode (alternative validation)
@@ -21,3 +22,6 @@
 - [ ] relocate all puzzles in 1 folder
 - [ ] online upload program, something like witnesspuzzles (low prio)
 - [ ] fix android being h to play with
+- [ ] fix drag boy not working on less than 2x2s
+- [ ] alternate symmetry style
+- [ ] vertical pillar, torus even
