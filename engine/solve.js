@@ -130,7 +130,7 @@ window.solve = function(p, partialCallback, finalCallback) {
 
   taskLoop(partialCallback, function() {
     var end = (new Date()).getTime()
-    console.log('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+    console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
     if (finalCallback) finalCallback(solutionPaths)
   })
   return solutionPaths
@@ -291,7 +291,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 }
 
 window.cancelSolving = function() {
-  console.log('Cancelled solving')
+  console.info('Cancelled solving')
   window.MAX_SOLUTIONS = 0 // Causes all new solveLoop calls to exit immediately.
   tasks = []
 }
@@ -317,7 +317,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   var symStart = document.getElementById('symStart_' + target + '_' + x + '_' + y)
   window.onTraceStart(puzzle, {'x':x, 'y':y}, document.getElementById(target), start, symStart)
 
-  console.log('Drawing solution of length', path.length)
+  console.info('Drawing solution of length', path.length)
   for (var i=1; i<path.length; i++) {
     var cell = puzzle.getCell(x, y)
 
@@ -334,12 +334,8 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       } else if (cell.end === 'bottom') {
         window.onMove(0, 24)
       }
-<<<<<<< HEAD
-      break;
-=======
       if (i != path.length-1) throw Error('Path contains ' + (path.length - 1 - i) + ' trailing directions')
       break
->>>>>>> upstream/master
     } else if (path[i] === PATH_LEFT) {
       dx = -1
       cell.dir = 'left'
@@ -378,7 +374,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   for (var x=0; x<puzzle.width; x++) {
     rows += ('' + x).padEnd(5, ' ') + '|'
   }
-  console.log(rows)
+  console.info(rows)
   for (var y=0; y<puzzle.height; y++) {
     var output = ('' + y).padEnd(3, ' ') + '|'
     for (var x=0; x<puzzle.width; x++) {
@@ -386,7 +382,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       var dir = (cell != null && cell.dir != null ? cell.dir : '')
       output += dir.padEnd(5, ' ') + '|'
     }
-    console.log(output)
+    console.info(output)
   }
 }
 

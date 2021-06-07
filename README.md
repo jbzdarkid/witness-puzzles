@@ -1,8 +1,5 @@
-# The Witness - Alternative Dots Extension Pack
-This extension is a fork of [JS Implementation of The Witness puzzles](https://github.com/jbzdarkid/witness-puzzles) that adds two custom gimmicks, "cross" and "curve".
-
-## I don't know what else to put here
-spite is the greatest motivator? yes.
+# Funny Looksy - The Witness Custom Modded Panels
+This extension is a fork of [witnesspuzzles.com](https://witnesspuzzles.com/) that adds a lot of custom gimmicks created by the community.
 
 ## People I shamelessly stole codes from
 - [The Original](https://github.com/jbzdarkid/witness-puzzles)

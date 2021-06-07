@@ -1,7 +1,8 @@
-## todo
+# todo
+wow i have a lot of   
+things to do
 
-- [ ] validate.js revamp cuz i feel like im tacking on things
-- [ ] navigation / main page
+## low effort (i can do it within hour)
 - [ ] tutorials for:
 - - [ ] darts
 - - [ ] arrows
@@ -9,22 +10,29 @@
 - - [ ] copy artless' homework
 - - [ ] vtriangle
 - - [ ] ask shaun to introduce other shapes too (smh)
-- [ ] finally tackle seren's code
-- [ ] diag lines
-- [ ] graph editor mode (alternative validation)
-- [ ] optimize solver to prune bad regions (all my homies hate negators)
-- [ ] theme customization v2 - embed within puzzle
-- [ ] encode save puzzle
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
-- [ ] dualsquare implementation
-- [ ] cornernegator implementation
 - [ ] draw svg for multitriangles (for graph mode)
 - [ ] relocate all puzzles in 1 folder
+
+## relatively low effort (i can do it in a day)
+- [ ] navigation / main page
+- [ ] theme customization v2 - embed within puzzle
 - [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
-- [ ] fix android being h to play with
 - [ ] fix drag boy not working on less than 2x2s
+- [ ] play template so i dont have to copy code
+
+## important stuffs (h)
+- [ ] validate.js revamp cuz i feel like im tacking on things
+- [ ] diag lines
+- [ ] finally tackle seren's code
+- [ ] optimize solver to prune bad regions (all my homies hate negators)
+- [ ] fix android being h to play with
+
+## low priority
+- [ ] graph editor mode (alternative validation)
+- [ ] dualsquare implementation
+- [ ] cornernegator implementation
 - [ ] alternate symmetry style
 - [ ] vertical pillar, torus even
-- [ ] multipuzzle (low prio)
-- [ ] play template so i dont have to copy code
-- [ ] panel sequence export + panel custom play mode (low prio)
+- [ ] multipuzzle
+- [ ] panel sequence export + panel custom play mode

@@ -33,13 +33,12 @@ class RegionData {
      */
 
     /**
-     * 
      * @param {Puzzle} puzzle 
      * @param {pos<c>} c 
-     * @param {cell} cell 
      */
-    addInvalid(puzzle, c, cell) {
+    addInvalid(puzzle, c) {
         let [x, y] = xy(c);
+        let cell = puzzle.getCell(x, y);
         if (NEGATE_IMMEDIATELY.includes(cell.type) || cell.dot != window.LINE_NONE) {
             if (!this.nega || !this.nega.length) { // oh no! no more negators!
                 if (this.copier && this.copier.length && this.negaSource) { // but i can copy the used up negator!
@@ -64,7 +63,7 @@ class RegionData {
         }
     }
 
-    addInvalids(puzzle, cs) { for (c of cs) { this.addInvalid(puzzle, c, cel(puzzle, c)); }}
+    addInvalids(puzzle, cs) { for (const c of cs) { this.addInvalid(puzzle, c); }}
 }
 
 const NEGATE_IMMEDIATELY = ['triangle', 'arrow', 'dart', 'twobytwo']; // these work individually, and can be negated
@@ -95,6 +94,19 @@ let height;
 function ret(x, y) { return y * width + x; }
 function xy(c) { return [c % width, Math.floor(c / width)]; }
 function cel(puzzle, c) { let [x, y] = xy(c); return puzzle.getCell(x, y); }
+function dr(n) {
+    const DIR = [
+        {'x': 0, 'y':-1},
+        {'x': 1, 'y':-1},
+        {'x': 1, 'y': 0},
+        {'x': 1, 'y': 1},
+        {'x': 0, 'y': 1},
+        {'x':-1, 'y': 1},
+        {'x':-1, 'y': 0},
+        {'x':-1, 'y':-1},
+    ];  
+    return DIR[n];
+}
 const detectionMode = {
     "all":    (x, y) => { return true; },
     "cell":   (x, y) => { return (x & y) % 2 == 1; },
@@ -269,7 +281,7 @@ const preValidate = [
                 if ((DOT_BLUE.includes(cell.dot) && cell.line !== window.LINE_BLUE)
                 || (DOT_YELLOW.includes(cell.dot) && cell.line !== window.LINE_YELLOW)) {
                     console.info('[pre][!] Wrong Colored Dots: ', x, ',', y)
-                    global.regionData[0].addInvalid(puzzle, c, cell);
+                    global.regionData[0].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
             }
@@ -295,7 +307,7 @@ const lineValidate = [
                 ? (!(isCross(x-1,y) && isCross(x+1,y)) && !(isCross(x,y-1) && isCross(x,y+1)))
                 : ( (isCross(x-1,y) && isCross(x+1,y)) ||  (isCross(x,y-1) && isCross(x,y+1)))) { // thats a long list... 2!
                     console.info('[line][!] Wrongly Crossed... well, Cross: ', x, y);
-                    global.regionData[0].addInvalid(puzzle, c, cell);
+                    global.regionData[0].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
             }
@@ -314,7 +326,7 @@ const validate = [
                 let cell = puzzle.getCell(x, y);
                 if (DOT_BLACK.includes(cell.dot)) { // bonk
                     console.info('[!] Uncovered Dot: ', x, y);
-                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
             }
@@ -354,7 +366,7 @@ const validate = [
                 if (!(cell && this.or.includes(cell.type))) continue;
                 if (global.regionColors.cell[regionNum][cell.color].length != 2) {
                     console.info('[!] Star fault: ', cell.color);
-                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
             }
@@ -374,7 +386,7 @@ const validate = [
                 if (global.regionMatrix[y][x+1] == 0) count++
                 if (count != cell.count) {
                     console.info('[!] Triangle fault at', x, y, 'needs', cell.count, 'sides - actually has', count);
-                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
             }
@@ -382,22 +394,12 @@ const validate = [
     }, {
         '_name': 'ARROW CHECKS',
         'or': ['arrow', 'dart'],
-        'exec': function(puzzle, regionNum, global, quick) {
-            const DIR = [
-                {'x': 0, 'y':-1},
-                {'x': 1, 'y':-1},
-                {'x': 1, 'y': 0},
-                {'x': 1, 'y': 1},
-                {'x': 0, 'y': 1},
-                {'x':-1, 'y': 1},
-                {'x':-1, 'y': 0},
-                {'x':-1, 'y':-1},
-            ];            
+        'exec': function(puzzle, regionNum, global, quick) {     
             for (let c of global.regionCells.cell[regionNum]) {
                 let [sourcex, sourcey] = xy(c);
                 let cell = puzzle.getCell(sourcex, sourcey);
                 if (!(cell && this.or.includes(cell.type))) continue;
-                let count = 0; let dir = DIR[cell.rot];
+                let count = 0; let dir = dr(cell.rot);
                 if (cell.type == 'dart') { dir.x *= 2; dir.y *= 2; }
                 let x = sourcex + dir.x; let y = sourcey + dir.y;
                 for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
@@ -412,7 +414,7 @@ const validate = [
                 }
                 if (cell.count != count) {
                     console.info('[!] Directional Counter fault at', sourcex, sourcey, 'needs', cell.count, 'instances - actually has', count);
-                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
             }
@@ -427,7 +429,7 @@ const validate = [
                 if (cell && this.or.includes(cell.type)) {
                     if (cell.count != global.regionCells.all[regionNum].length) {
                         console.info('[!] Divided Diamond fault at', x, y, 'needs', cell.count, 'instances - actually has', global.regionCells.all[regionNum].length);
-                        global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                        global.regionData[regionNum].addInvalid(puzzle, c);
                         if (!puzzle.valid && quick) return;
                     }
                 }
@@ -447,11 +449,70 @@ const validate = [
                       || isReg(x+2, y+2) && isReg(x+2, y) && isReg(x, y+2) 
                       || isReg(x-2, y+2) && isReg(x-2, y) && isReg(x, y+2)) { // thats a long if statement 
                         console.info('[!] Two-by-two fault at', x, y);
-                        global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                        global.regionData[regionNum].addInvalid(puzzle, c);
                         if (!puzzle.valid && quick) return;
                     }
                 }
             }
+        }
+    }, {
+        '_name': 'CELLED HEX CHECK',
+        'or': ['celledhex'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            let hexes = [];
+            let colors = [];
+            let darts = [];
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!cell) continue;
+                switch (cell.type) {
+                    case 'divdiamond':
+                    case 'poly':
+                        return; // true immediately
+                    case 'celledhex':
+                        hexes.push({'pos': c, 'cell': cell});
+                        break;
+                    case 'dart':
+                        darts.push({'pos': c, 'dir': dr(cell.rot)});
+                        break;
+                    case 'sun':
+                        colors.push(cell.color);
+                        break;
+                }
+            }
+            if (!hexes.length) return; // true epic
+            for (const color of colors) {
+                hexes = hexes.filter(c => { return c.cell.color != color; });
+                if (!hexes.length) return; // true epic
+            }
+            for (const dart of darts) {
+                let [sourcex, sourcey] = xy(dart.pos);
+                let x = sourcex + dart.dir.x * 2;
+                let y = sourcey + dart.dir.y * 2;
+                for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
+                    if (!isBounded(puzzle, x, y)) break; 
+                    if (x == sourcex && y == sourcey) break; 
+                    hexes = hexes.filter(c => { return c.pos != ret(x, y); });
+                    if (!hexes.length) return; // true epic
+                    x += dart.dir.x * 2; y += dart.dir.y * 2 // increment
+                    if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
+                }
+            }
+            console.info('[!] Celled Hex Fault');
+            for (const hex of hexes) { // hexes also interact with negators, to be always wrong
+                puzzle.valid = false;
+                puzzle.invalidElements.push(hex.pos);
+            }
+        }
+    }, {
+        '_name': 'POLYOMINO CHECK GOES HERE',
+        'or': ['poly', 'ylop'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            let scalers = 0;
+            let antiscalers = 0;
+            window.polyFit(puzzle, regionNum, global, quick);
+            if (!puzzle.valid && quick) return;
         }
     }
 ];
