@@ -34,7 +34,6 @@ FEATURES
 - Add OUT_OF_BOUNDS_POLY to puzzle.settings
   "If true, polyominos may be placed partially off of the grid as an intermediate solution step."
 - Light and Night theme
-- Add maximum puzzle limit for WP (and remove QuotaExceededError)
 - Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
   Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
 - Retake all images (due to new background style) [WIP]
@@ -52,10 +51,11 @@ and move on.
 - No need for "Mouse Speed 2D" on mobile.
 - Work on making a stable (github pages) version of WP
   Database needs to be checked in (can be fetched via XMLHttpRequest)
-  Layout probably needs to change
+  Folder layout probably needs to change, though now that prod is hosting a gh-pages version, I can try to support both at once.
   Validation & database additions can be done via github issues + github actions (or some other public forum...)
     Hopefully this can do validation & pictures too.
-    images need to be checked in
+    images need to be checked in, so git commit as part of the github action.
+    Might want a separate DB repo, if only to avoid the commit spam.
 - Custom mechanics
 
 Browse
