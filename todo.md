@@ -1,0 +1,22 @@
+## todo
+
+- [ ] validate.js revamp cuz i feel like im tacking on things
+- [ ] navigation / main page
+- [ ] tutorials for:
+- - [ ] darts
+- - [ ] arrows
+- - [ ] ask unsus for antimino tutorial
+- - [ ] copy artless' homework
+- [ ] finally tackle seren's code
+- [ ] diag lines
+- [ ] graph editor mode (alternative validation)
+- [ ] optimize solver to prune bad regions (all my homies hate negators)
+- [ ] theme customization v2 - embed within puzzle
+- [ ] encode save puzzle
+- [ ] copypaste save/load feature (low prio)
+- [ ] now that there's more than crosses and diamonds, change your site description maybe
+- [ ] dualsquare implementation
+- [ ] cornernegator implementation
+- [ ] draw svg for multitriangles (for graph mode)
+- [ ] relocate all puzzles in 1 folder
+- [ ] online upload program, something like witnesspuzzles (low prio)
