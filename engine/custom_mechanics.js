@@ -206,6 +206,10 @@ window.validateSizers = function(puzzle, region, regionData) {
   }
 }
 
+window.postValidateSizers = function(puzzle, region, regionData) {
+  
+}
+
 function isOver(puzzle, pos, xoff, yoff) {
   return (puzzle.getLine(pos.x + xoff, pos.y + yoff) > window.LINE_NONE)
 }
@@ -371,9 +375,9 @@ window.validateXs = function(regionData, regionMatrix) {
   }
 }
 
-let ttriangleColor = [null, null, null, null, null]; // 0, 1, 2, 3, 4
-let ttrianglepos   = {}
-let illegalColors  = []
+let ttriangleColor; // 0, 1, 2, 3, 4
+let ttrianglepos;
+let illegalColors;
 
 window.preValidateTTriangles = function(puzzle) {
   ttriangleColor = [null, null, null, null, null]; // 0, 1, 2, 3, 4
@@ -394,6 +398,11 @@ window.preValidateTTriangles = function(puzzle) {
       if (puzzle.getLine(x + 1, y) > window.LINE_NONE) count++
       if (puzzle.getLine(x, y - 1) > window.LINE_NONE) count++
       if (puzzle.getLine(x, y + 1) > window.LINE_NONE) count++
+      if (count == 0) {
+        console.log('Tenuous Triangle at', x, y, 'detected has no adjacent line')
+        illegalColors.push(cell.color)
+        continue;
+      }
       // something here
       let cvalue = ttriangleColor.indexOf(cell.color)
       if (cvalue == -1) {

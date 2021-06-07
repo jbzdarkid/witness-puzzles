@@ -498,7 +498,7 @@ window.Puzzle = class {
       }
       output += '\n'
     }
-    console.info(output)
+    console.log(output)
   }
 }
 

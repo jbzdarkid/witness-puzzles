@@ -1,0 +1,30 @@
+## todo
+
+- [ ] validate.js revamp cuz i feel like im tacking on things
+- [ ] navigation / main page
+- [ ] tutorials for:
+- - [ ] darts
+- - [ ] arrows
+- - [ ] ask unsus for antimino tutorial
+- - [ ] copy artless' homework
+- - [ ] vtriangle
+- - [ ] ask shaun to introduce other shapes too (smh)
+- [ ] finally tackle seren's code
+- [ ] diag lines
+- [ ] graph editor mode (alternative validation)
+- [ ] optimize solver to prune bad regions (all my homies hate negators)
+- [ ] theme customization v2 - embed within puzzle
+- [ ] encode save puzzle
+- [ ] now that there's more than crosses and diamonds, change your site description maybe
+- [ ] dualsquare implementation
+- [ ] cornernegator implementation
+- [ ] draw svg for multitriangles (for graph mode)
+- [ ] relocate all puzzles in 1 folder
+- [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
+- [ ] fix android being h to play with
+- [ ] fix drag boy not working on less than 2x2s
+- [ ] alternate symmetry style
+- [ ] vertical pillar, torus even
+- [ ] multipuzzle (low prio)
+- [ ] play template so i dont have to copy code
+- [ ] panel sequence export + panel custom play mode (low prio)

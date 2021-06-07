@@ -172,7 +172,7 @@ window.setLogLevel = function(level) {
   console.groupEnd = consoleGroupEnd
   if (level === 'spam') return
 }
-setLogLevel('log')
+setLogLevel('info')
 
 window.setTheme = function(theme) {
   document.getElementById('theme').href = './theme/' + theme + '.css'

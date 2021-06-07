@@ -1,9 +1,9 @@
 :root {
-    --background: rgb(0, 0, 0); /* used to be PAGE_BACKGROUND*/
-    --alt-background: rgb(0, 0, 0);
-    --active: rgb(0, 0, 0);
+    --background: rgb(19, 14, 14); /* used to be PAGE_BACKGROUND*/
+    --alt-background: rgb(49, 49, 49);
+    --active: rgb(82, 82, 82);
     --border: rgb(255, 255, 255);
-    --outer: rgb(0, 0, 0); /* used to be OUTER_BACKGROUND*/
+    --outer: rgb(2, 2, 2); /* used to be OUTER_BACKGROUND*/
     --line-undone: rgb(114, 59, 59); /* used to be FOREGROUND*/
     --inner: rgb(61, 46, 46); /* used to be BACKGROUND*/
     --line-default: rgb(170, 94, 94);
