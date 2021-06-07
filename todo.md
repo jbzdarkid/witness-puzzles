@@ -39,7 +39,7 @@ things to do
 
 # progress
 
-Currently working on: validation v2
+Currently working on: validation v2  
 made work:
 - [x] Base Infrastructure
 - [x] Dots, Crosses, Diamonds
@@ -49,6 +49,7 @@ made work:
 - [x] Two-By-Twos
 - [x] Celled Hexes
 - [x] Polyominos, Scalers (in progress)
+- [ ] Antipolyominos
 - [ ] Tenuous Triangles
 - [ ] Xs
 - [ ] Bridges
