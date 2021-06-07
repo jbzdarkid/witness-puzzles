@@ -8,6 +8,7 @@
 - - [ ] ask unsus for antimino tutorial
 - - [ ] copy artless' homework
 - - [ ] vtriangle
+- - [ ] ask shaun to introduce other shapes too (smh)
 - [ ] finally tackle seren's code
 - [ ] diag lines
 - [ ] graph editor mode (alternative validation)
@@ -26,3 +27,5 @@
 - [ ] alternate symmetry style
 - [ ] vertical pillar, torus even
 - [ ] multipuzzle (low prio)
+- [ ] play template so i dont have to copy code
+- [ ] panel sequence export + panel custom play mode (low prio)
