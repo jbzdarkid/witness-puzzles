@@ -1,364 +1,463 @@
+// what if i rewrite
 namespace(function() {
-
 class RegionData {
-  constructor() {
-    this.invalidElements = []
-    this.veryInvalidElements = []
-    this.negations = []
-  }
 
-  addInvalid(elem) {
-    this.invalidElements.push(elem)
-  }
+    constructor() {
+        // puzzle.invalidElements = []; // confirmed bad ones
+        // this.nega = []; // c of negators
+        // this.copier = []; // c of copiers, which can be used in place of negators
+        /**
+         * {
+         *  pos: <position in c form>,
+         *  copyfrom: <position in c form>,
+         * }
+         */
+        // puzzle.negations = []; // confirmed negation pairs
+        this.invalids = []; // invalid? (needs checking)
+    }
+    /**
+     * InvalidQuestionMark data structure
+     * {
+     *   pos: <position in c form>,
+     *   region: <region number>,
+     *   type: <cell.type>,
+     *   color: <cell.color>,
+     *   count: <cell.count>,
+     *   rot: <cell.rot>
+     * }
+     * * what if two stars and one triangle in a region?
+     * ! removing a sun would satisfy, given that the triangles are satisfied
+     * 
+     * * what if 2 orange star, 2 blue star and 1 orange&blue hypothetical symbol?
+     * ! add hypothetical symbol into the loop
+     */
 
-  addVeryInvalid(elem) {
-    this.veryInvalidElements.push(elem)
-  }
+    /**
+     * 
+     * @param {Puzzle} puzzle 
+     * @param {pos<c>} c 
+     * @param {cell} cell 
+     */
+    addInvalid(puzzle, c, cell) {
+        let [x, y] = xy(c);
+        if (NEGATE_IMMEDIATELY.includes(cell.type) || cell.dot != window.LINE_NONE) {
+            if (!this.nega || !this.nega.length) { // oh no! no more negators!
+                if (this.copier && this.copier.length && this.negaSource) { // but i can copy the used up negator!
+                    let copyc = this.copier.pop();
+                    let [copyx, copyy] = xy(copyc);
+                    let [sourcex, sourcey] = xy(this.negaSource)
+                    window.savedGrid[copyx][copyy] = window.savedGrid[sourcex][sourcey]; // copy!
+                    puzzle.negations.push({ 'source': {'x': copyx, 'y': copyy}, 'target': {'x': x, 'y': y} });
+                    eraseShape(puzzle, x, y); eraseShape(puzzle, copyx, copyy);
+                } else { // copiers won't save you now!
+                    puzzle.valid = false;
+                    puzzle.invalidElements.push(c);
+                }
+            } else { // use a negator...
+                let negac = this.nega.pop();
+                let [negax, negay] = xy(negac); 
+                puzzle.negations.push({ 'source': {'x': negax, 'y': negay}, 'target': {'x': x, 'y': y} });
+                eraseShape(puzzle, x, y); eraseShape(puzzle, negax, negay);
+            }
+        } else {
+            this.invalids.push(c);
+        }
+    }
 
-  valid() {
-    return (this.invalidElements.length === 0 && this.veryInvalidElements.length === 0)
-  }
+    addInvalids(puzzle, cs) { for (c of cs) { this.addInvalid(puzzle, c, cel(puzzle, c)); }}
 }
 
+const NEGATE_IMMEDIATELY = ['triangle', 'arrow', 'dart', 'twobytwo']; // these work individually, and can be negated
+const CHECK_ALSO = { // removing this 1 thing can affect these other symbols
+    'square': ['pentagon', 'star'],
+    'pentagon': ['square', 'star'],
+};
+const METASHAPES = ['nega', 'copier'];
+const NONSYMBOLS = ['line']; // extension sake
+const NONSYMBOL_PROPERTY = ['type', 'line', 'start', 'end'];
+const COLOR_DEPENDENT = ['square', 'star', 'pentagon', 'vtriangle', 'bridge'];
+
+function eraseShape(puzzle, x, y) {
+    let cell = puzzle.grid[x][y];
+    if (cell && NONSYMBOLS.includes(cell.type)) {
+        let newCell = {};
+        for (prop of NONSYMBOL_PROPERTY)
+            newCell[prop] = cell[prop]
+        puzzle.grid[x][y] = newCell;
+    } else {
+        puzzle.grid[x][y] = null;
+    }
+}
+
+// coordinate conversion
+let width; 
+let height;
+function ret(x, y) { return y * width + x; }
+function xy(c) { return [c % width, Math.floor(c / width)]; }
+function cel(puzzle, c) { let [x, y] = xy(c); return puzzle.getCell(x, y); }
+const detectionMode = {
+    "all":    (x, y) => { return true; },
+    "cell":   (x, y) => { return (x & y) % 2 == 1; },
+    "line":   (x, y) => { return (x & y) % 2 == 0; },
+    "corner": (x, y) => { return (x | y) % 2 == 0; },
+    "edge":   (x, y) => { return (x ^ y) % 2 == 1; }
+};
+function intersect(a, b) { return a.filter(k => b.includes(k)); } // intersection of two arrays
+function intersects(a, b) { // check for intersection
+    if (a.length == 0 && b.length == 0) return false;
+    if (a.length == 1) return b.includes(a[0]); if (b.length == 1) return a.includes(b[0]);
+    return a.reduce((k, p) => { return k || b.includes(p);}, false);
+}
 function isBounded(puzzle, x, y) {
   return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height);
 }
 
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
-// valid: Whether or not the puzzle is valid
-// invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
-// negations: Negation pairs (for the purpose of darkening)
+// valid: Boolean (true/false)
+// invalidElements: Array[Object{'x':int, 'y':int}]
+// negations: Array[Object{'source':{'x':int, 'y':int}, 'target':{'x':int, 'y':int}}]
 window.validate = function(puzzle, quick) {
-  console.log('Validating', puzzle)
-  puzzle.valid = true // Assume valid until we find an invalid element
-
-  var needsRegions = false
-  var monoRegion = new Region(puzzle.width)
-  // These two are both used by validateRegion, so they are saved on the puzzle itself.
-  puzzle.hasNegations = false
-  puzzle.hasPolyominos = false
-  puzzle.hasSizers = false
-  
-  puzzle.invalidElements = []
-  initializeXs()
-
-  // Validate gap failures as an early exit.
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = puzzle.grid[x][y]
-      if (cell == null) continue;
-      if (!needsRegions && cell.type != 'line' && cell.type != 'triangle' && cell.type != 'vtriangle' && cell.type != 'arrow') needsRegions = true
-      if (cell.type == 'nega') puzzle.hasNegations = true
-      if (cell.type == 'poly' || cell.type == 'ylop' || cell.type == 'polynt') puzzle.hasPolyominos = true
-      if (cell.type == 'sizer') puzzle.hasSizers = true
-      if (cell.line > window.LINE_NONE) {
-        if (window.CUSTOM_X < cell.dot && cell.dot < window.DOT_NONE) { // custom: check for line go over
-          window.preValidateAltDots(puzzle, cell, {'x': x, 'y': y}, quick)
-          if (quick && !puzzle.valid) return
-        } else if (cell.dot <= window.CUSTOM_X)
-          window.preValidateXs(puzzle, cell, {'x': x, 'y': y}, quick)
-        if (cell.gap > window.GAP_NONE) {
-          console.log('Solution line goes over a gap at', x, y)
-          puzzle.invalidElements.push({"x": x, "y": y})
-          puzzle.valid = false
-          if (quick) return
+    let global;
+    puzzle.invalidElements = []; // once elements go in this list, nothing is removed
+    puzzle.negations = [];
+    puzzle.valid = true; // puzzle true until proven false
+    width = puzzle.width;
+    height = puzzle.height;
+    [puzzle, global] = init(puzzle);
+    for (fn of preValidate) {
+        if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { // prereq for exec
+            fn.exec(puzzle, global, quick); if (!puzzle.valid && quick) return;
         }
-        if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
-            (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
-          console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
-          puzzle.invalidElements.push({"x": x, "y": y})
-          puzzle.valid = false
-          if (quick) return
+    }
+    for (fn of lineValidate) { // zeroth region (on-the-line) detection
+        if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { 
+            fn.exec(puzzle, global, quick); if (!puzzle.valid && quick) return;
         }
-      } else {
-        monoRegion.setCell(x, y)
-      }
     }
-  }
-
-  window.preValidateTTriangles(puzzle)
-
-  puzzle.negations = []
-  if (needsRegions) {
-    var regions = puzzle.getRegions()
-  } else {
-    var regions = [monoRegion]
-  }
-  console.log('Found', regions.length, 'region(s)')
-  console.debug(regions)
-
-  if (puzzle.hasSizers) puzzle.sizerCount = null
-  for (var region of regions) {
-    regionData = validateRegion(puzzle, region, quick)
-    console.log('Region valid:', regionData.valid())
-    puzzle.negations = puzzle.negations.concat(regionData.negations)
-    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-    puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-    puzzle.valid = puzzle.valid && regionData.valid()
-    if (quick && !puzzle.valid) return
-  }
-  console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
-}
-
-// Determines whether or not a particular region is valid or not, including negation symbols.
-// If quick is true, exits after the first invalid element is found (small performance gain)
-// This function applies negations to all "very invalid elements", i.e. elements which cannot become
-// valid by another element being negated. Then, it passes off to regionCheckNegations2,
-// which attempts to apply any remaining negations to any other invalid elements.
-window.validateRegion = function(puzzle, region, quick) {
-  if (!puzzle.hasNegations) return regionCheck(puzzle, region, quick)
-
-  // Get a list of negation symbols in the grid, and set them to 'nonce'
-  var negationSymbols = []
-  for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell != null && cell.type === 'nega') {
-      pos.cell = cell
-      negationSymbols.push(pos)
-      puzzle.updateCell2(pos.x, pos.y, 'type', 'nonce')
-    }
-  }
-  console.debug('Found', negationSymbols.length, 'negation symbols')
-  if (negationSymbols.length === 0) {
-    // No negation symbols in this region. Note that there must be negation symbols elsewhere
-    // in the puzzle, since puzzle.hasNegations was true.
-    return regionCheck(puzzle, region, quick)
-  }
-
-  // Get a list of elements that are currently invalid (before any negations are applied)
-  // This cannot be quick, as we need a full list (for the purposes of negation).
-  var regionData = regionCheck(puzzle, region, false)
-  console.debug('Negation-less regioncheck valid:', regionData.valid())
-
-  // Set 'nonce' back to 'nega' for the negation symbols
-  for (var pos of negationSymbols) {
-    puzzle.updateCell2(pos.x, pos.y, 'type', 'nega')
-  }
-
-  var combinations = []
-
-  var invalidElements = regionData.invalidElements
-  var veryInvalidElements = regionData.veryInvalidElements
-
-  for (var i=0; i<invalidElements.length; i++) {
-    invalidElements[i].cell = puzzle.getCell(invalidElements[i].x, invalidElements[i].y)
-  }
-  for (var i=0; i<veryInvalidElements.length; i++) {
-    veryInvalidElements[i].cell = puzzle.getCell(veryInvalidElements[i].x, veryInvalidElements[i].y)
-  }
-
-  console.debug('Forcibly negating', veryInvalidElements.length, 'symbols')
-  var baseCombination = []
-  while (negationSymbols.length > 0 && veryInvalidElements.length > 0) {
-    var source = negationSymbols.pop()
-    var target = veryInvalidElements.pop()
-    puzzle.setCell(source.x, source.y, null)
-    puzzle.setCell(target.x, target.y, null)
-    baseCombination.push({'source':source, 'target':target})
-  }
-
-  var regionData = regionCheckNegations2(puzzle, region, negationSymbols, invalidElements)
-
-  // Restore required negations
-  for (var combination of baseCombination) {
-    puzzle.setCell(combination.source.x, combination.source.y, combination.source.cell)
-    puzzle.setCell(combination.target.x, combination.target.y, combination.target.cell)
-    regionData.negations.push(combination)
-  }
-  return regionData
-}
-
-// Recursively matches negations and invalid elements from the grid. Note that this function
-// doesn't actually modify the two lists, it just iterates through them with index/index2.
-function regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, index=0, index2=0) {
-  window.preValidateTTriangles(puzzle)
-  if (index2 >= negationSymbols.length) {
-    console.debug('0 negation symbols left, returning negation-less regionCheck')
-    return regionCheck(puzzle, region, false) // @Performance: We could pass quick here.
-  }
-
-  if (index >= invalidElements.length) {
-    var i = index2
-    // pair off all negation symbols, 2 at a time
-    if (puzzle.settings.NEGATIONS_CANCEL_NEGATIONS) {
-      for (; i<negationSymbols.length-1; i+=2) {
-        var source = negationSymbols[i]
-        var target = negationSymbols[i+1]
-        puzzle.setCell(source.x, source.y, null)
-        puzzle.setCell(target.x, target.y, null)
-      }
-    }
-
-    console.debug(negationSymbols.length - i, 'negation symbol(s) left over with nothing to negate')
-    for (; i<negationSymbols.length; i++) {
-      puzzle.updateCell2(negationSymbols[i].x, negationSymbols[i].y, 'type', 'nonce')
-    }
-    // Cannot be quick, as we need the full list of invalid symbols.
-    var regionData = regionCheck(puzzle, region, false)
-
-    i = index2
-    if (puzzle.settings.NEGATIONS_CANCEL_NEGATIONS) {
-      for (; i<negationSymbols.length-1; i+=2) {
-        var source = negationSymbols[i]
-        var target = negationSymbols[i+1]
-        puzzle.setCell(source.x, source.y, source.cell)
-        puzzle.setCell(target.x, target.y, target.cell)
-        regionData.negations.push({'source':source, 'target':target})
-      }
-    }
-    for (; i<negationSymbols.length; i++) {
-      puzzle.updateCell2(negationSymbols[i].x, negationSymbols[i].y, 'type', 'nega')
-      regionData.addInvalid(negationSymbols[i])
-    }
-    return regionData
-  }
-
-  var source = negationSymbols[index2++]
-  puzzle.setCell(source.x, source.y, null)
-
-  var firstRegionData = null
-  for (var i=index; i<invalidElements.length; i++) {
-    var target = invalidElements[i]
-    console.spam('Attempting negation pair', source, target)
-
-    console.group()
-    puzzle.setCell(target.x, target.y, null)
-    var regionData = regionCheckNegations2(puzzle, region, negationSymbols, invalidElements, i + 1, index2)
-    puzzle.setCell(target.x, target.y, target.cell)
-    console.groupEnd()
-
-    if (!firstRegionData) {
-      firstRegionData = regionData
-      firstRegionData.negations.push({'source':source, 'target':target})
-    }
-    if (regionData.valid()) {
-      regionData.negations.push({'source':source, 'target':target})
-      break;
-    }
-  }
-
-  puzzle.setCell(source.x, source.y, source.cell)
-  // For display purposes only. The first attempt will always pair off the most negation symbols,
-  // so it's the best choice to display (if we're going to fail).
-  return (regionData.valid() ? regionData : firstRegionData)
-}
-
-// Checks if a region is valid. This does not handle negations -- we assume that there are none.
-// Note that this function needs to always ask the puzzle for the current contents of the cell,
-// since the region is only coordinate locations, and might be modified by regionCheckNegations2
-// @Performance: This is a pretty core function to the solve loop.
-function regionCheck(puzzle, region, quick) {
-  console.log('Validating region of size', region.cells.length, region)
-  var regionData = new RegionData()
-
-  let squares = []
-  let stars = []
-  let coloredObjects = {}
-  let squareColor = null
-
-  for (var pos of region.cells) {
-    var cell = puzzle.getCell(pos.x, pos.y)
-    if (cell == null) continue;
-    
-    // Check for uncovered dots
-    if (cell.dot > window.DOT_NONE) {
-      console.log('Dot at', pos.x, pos.y, 'is not covered')
-      regionData.addVeryInvalid(pos)
-      if (quick) return regionData
-    }
-
-    // Check for triangles
-    if (cell.type === 'triangle') {
-      var count = 0
-      if (puzzle.getLine(pos.x - 1, pos.y) > window.LINE_NONE) count++
-      if (puzzle.getLine(pos.x + 1, pos.y) > window.LINE_NONE) count++
-      if (puzzle.getLine(pos.x, pos.y - 1) > window.LINE_NONE) count++
-      if (puzzle.getLine(pos.x, pos.y + 1) > window.LINE_NONE) count++
-      if (cell.count !== count) {
-        console.log('Triangle at grid['+pos.x+']['+pos.y+'] has', count, 'borders')
-        regionData.addVeryInvalid(pos)
-        if (quick) return regionData
-      }
-    }
-
-    // Count color-based elements
-    if (cell.color != null) {
-      var count = coloredObjects[cell.color]
-      if (count == null) {
-        count = 0
-      }
-      coloredObjects[cell.color] = count + 1
-
-      if (cell.type === 'square') {
-        squares.push(pos)
-        if (squareColor == null)
-          squareColor = cell.color
-        else if (squareColor != cell.color)
-          squareColor = -1 // Signal value which indicates square color collision
-      }
-
-      if (cell.type === 'star') {
-        pos.color = cell.color
-        stars.push(pos)
-      }
-    }
-  }
-
-  for (var star of stars) {
-    var count = coloredObjects[star.color]
-    if (count === 1) {
-      console.log('Found a', star.color, 'star in a region with 1', star.color, 'object')
-      regionData.addVeryInvalid(star)
-      if (quick) return regionData
-    } else if (count > 2) {
-      console.log('Found a', star.color, 'star in a region with', count, star.color, 'objects')
-      regionData.addInvalid(star)
-      if (quick) return regionData
-    }
-  }
-
-  if (puzzle.hasPolyominos) {
-    if (!window.polyFit(region, puzzle)) {
-      for (var pos of region.cells) {
-        var cell = puzzle.getCell(pos.x, pos.y)
-        if (cell == null) continue;
-        if (cell.type === 'poly' || cell.type === 'ylop') {
-          regionData.addInvalid(pos)
-          if (quick) return regionData
+    for (let i = 1; i < global.regions.all.length; i++) { // there is at least 1 region (i think)
+        for (fn of validate) {
+            if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { 
+                fn.exec(puzzle, i, global, quick); if (!puzzle.valid && quick) return;
+            }
         }
-      }
     }
-  }
-
-  // customs: why else would you use this website
-  let regionMatrix = Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => null));
-  for (var pos of region.cells) {
-    let cell = puzzle.getCell(pos.x, pos.y);
-    if (cell && cell.line === 0 && cell.type === "line") cell = true 
-    regionMatrix[pos.y][pos.x] = cell || true
-  } // oh boy
-  window.validateAltDots(puzzle, region, regionData, quick)
-  window.validateXs(regionData, regionMatrix)
-  squareColor = window.validatePentagons(puzzle, region, regionData, squareColor)
-  window.validateArrows(puzzle, region, regionData)
-  window.validateDarts(puzzle, region, regionData, regionMatrix)
-  window.validateTTriangles(puzzle, region, regionData, regionMatrix)
-  // window.validateCopiers(puzzle, region, regionData)
-  window.validateSizers(puzzle, region, regionData)
-  // window.validateScalers(puzzle, region, regionData)
-  window.validateBridges(puzzle, region, regionData)
-  window.validateDivDiamonds(puzzle, region, regionData)
-  window.validateCHexes(puzzle, region, regionData)
-  window.validateAntipolys(puzzle, region, regionData, regionMatrix)
-  window.validateTwoByTwos(puzzle, region, regionData, regionMatrix, quick)
-
-  if (squareColor === -1) {
-    regionData.invalidElements = regionData.invalidElements.concat(squares)
-    if (quick) return regionData
-  }
-
-  console.log('Region has', regionData.veryInvalidElements.length, 'very invalid elements')
-  console.log('Region has', regionData.invalidElements.length, 'invalid elements')
-  return regionData
+    // handle metashapes here cuz AAAAAAAAAAAAAAHHHHHHHHHHH
+    for (fn of postValidate) {
+        if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { // prereq for exec
+            fn.exec(puzzle, global, quick); if (!puzzle.valid && quick) return;
+        }
+    }
+    for (let i = 0; i < puzzle.invalidElements.length; i++) {
+        let c = puzzle.invalidElements[i];
+        let [x, y] = xy(c);
+        puzzle.invalidElements[i] = {'x': x, 'y': y};
+    }
+    puzzle.grid = window.savedGrid;
+    delete window.savedGrid;
+    puzzle.valid = puzzle.invalidElements.length == 0;
+    console.warn(puzzle, global);
 }
+
+function init(puzzle) { // initialize globals
+    let global = {
+        'valid': true,
+        'shapes': new Set(),
+        'regionData': [],
+        'regionNum': 0,
+        'regionMatrix': Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => 0)),
+        'regions': {
+            all: [[]],
+            cell: [],
+            line: [],
+            corner: [],
+            edge: [],
+        }
+    };
+    window.savedGrid = puzzle.grid;
+    let i = 0;
+    global.regionData.push(new RegionData()) // regiondata for region 0 (the line)
+    for (region of puzzle.getRegions()) {
+        i++;
+        global.regions.all.push([])
+        global.regionData.push(new RegionData())
+        for (const pos of region.cells) {
+            global.regionMatrix[pos.y][pos.x] = i;
+            global.regions.all[i].push(ret(pos.x, pos.y));
+        }
+        global.regionNum = i;
+    }
+    for (let x = 0; x < puzzle.width; x++) {
+        for (let y = 0; y < puzzle.height; y++) {
+            let c = ret(x, y);
+            if (global.regionMatrix[y][x] == 0) global.regions.all[0].push(c)
+            let cell = puzzle.grid[x][y];
+            if (cell == null) continue;
+            // dots
+            if (cell.dot > window.DOT_NONE) global.shapes.add('dot')
+            else if (window.CUSTOM_CURVE < cell.dot && cell.dot <= window.CUSTOM_CROSS) global.shapes.add('cross')
+            else if (window.    CUSTOM_X < cell.dot && cell.dot <= window.CUSTOM_CURVE) global.shapes.add('curve')
+            else if (                                  cell.dot <= window.CUSTOM_X    ) global.shapes.add('x')
+            if (NONSYMBOLS.includes(cell.type)) continue;
+            global.shapes.add(cell.type);
+            // all my homies hate metashapes
+            let regionNum = global.regionMatrix[y][x];
+            if (METASHAPES.includes(cell.type)) {
+                if (!global.regionData[regionNum][cell.type]) global.regionData[regionNum][cell.type] = [];
+                global.regionData[regionNum][cell.type].push(c);
+            }
+            if (!global.regionData[regionNum].negaSource && cell.type == 'nega') 
+                global.regionData[regionNum].negaSource = c;
+        }
+    }
+    // filtering it now instead of continuing everything
+    for (region of global.regions.all) {
+        global.regions.cell.push(region.filter(c => { let [x, y] = xy(c); return detectionMode.cell(x, y); }));
+        global.regions.line.push(region.filter(c => { let [x, y] = xy(c); return detectionMode.line(x, y); }));
+    }
+    for (region of global.regions.line) {
+        global.regions.corner.push(region.filter(c => { let [x, y] = xy(c); return detectionMode.corner(x, y); }));
+        global.regions.edge  .push(region.filter(c => { let [x, y] = xy(c); return detectionMode.edge  (x, y); }));
+    }
+    global.regionCells = { all: [], cell: [], line: [], corner: [], edge: [] };
+    for (region of global.regions.all) {
+        global.regionCells.all.push(region.filter(c => { let cell = cel(puzzle, c); if (!cell) return false; if (cell.type == 'line' && !cell.dot) return false; return true; }));
+    }
+    for (region of global.regionCells.all) {
+        global.regionCells.cell.push(region.filter(c => { let [x, y] = xy(c); return detectionMode.cell(x, y); }));
+        global.regionCells.line.push(region.filter(c => { let [x, y] = xy(c); return detectionMode.line(x, y); }));
+    }
+    for (region of global.regionCells.line) {
+        global.regionCells.corner.push(region.filter(c => { let [x, y] = xy(c); return detectionMode.corner(x, y); }));
+        global.regionCells.edge  .push(region.filter(c => { let [x, y] = xy(c); return detectionMode.edge  (x, y); }));
+    }
+    global.shapes = Array.from(global.shapes); // array-ify shapes for streamline
+    if (intersects(COLOR_DEPENDENT, global.shapes)) { // colorify
+        global.regionColors = {
+            all: [],
+            cell: [],
+            line: [],
+            corner: [],
+            edge: [],
+        };
+        for (const [k, regions] of Object.entries(global.regions)) {
+            let i = 0;
+            for (const region of regions) {
+                global.regionColors[k].push({});
+                for (const pos of region) { // triple loop! yeahhhh
+                    const cell = cel(puzzle, pos);
+                    if (!cell || !cell.color) continue;
+                    if (!global.regionColors[k][i][cell.color]) global.regionColors[k][i][cell.color] = [];
+                    global.regionColors[k][i][cell.color].push(pos);
+                }
+                i++;
+            }
+        }
+    }
+    return [puzzle, global];
+}
+
+const preValidate = [
+    {
+        '_name': 'WRONG COLORED LINE DETECTION',
+        'or': ['dot', 'cross', 'curve'], // this should trigger on all poly
+        'exec': function(puzzle, global, quick) {
+            const DOT_BLUE   = [window.DOT_BLUE, window.CUSTOM_CROSS_BLUE, window.CUSTOM_CROSS_BLUE_FILLED, window.CUSTOM_CURVE_BLUE, window.CUSTOM_CURVE_BLUE_FILLED];
+            const DOT_YELLOW = [window.DOT_YELLOW, window.CUSTOM_CROSS_YELLOW, window.CUSTOM_CROSS_YELLOW_FILLED, window.CUSTOM_CURVE_YELLOW, window.CUSTOM_CURVE_YELLOW_FILLED];
+            for (let c of global.regionCells.all[0]) { // cell on line rn
+                let [x, y] = xy(c);
+                let cell = puzzle.grid[x][y];
+                if ((DOT_BLUE.includes(cell.dot) && cell.line !== window.LINE_BLUE)
+                || (DOT_YELLOW.includes(cell.dot) && cell.line !== window.LINE_YELLOW)) {
+                    console.info('[pre][!] Wrong Colored Dots: ', x, ',', y)
+                    global.regionData[0].addInvalid(puzzle, c, cell);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }
+];
+
+const lineValidate = [
+    {
+        '_name': 'CROSS N CURVES',
+        'or': ['cross', 'curve'],
+        'exec': function(puzzle, global, quick) {
+            const isCross = function(x, y) {
+                if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width; // pillary boys, i hate pillary boys
+                if (isBounded(puzzle, x, y)) return (global.regionMatrix[y][x] == 0);
+                return false;
+            }
+            for (let c of global.regionCells.corner[0]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!cell.dot || cell.dot >= window.DOT_NONE) continue;
+                if ((cell.dot > window.CUSTOM_CURVE) // CROSS;
+                ? (!(isCross(x-1,y) && isCross(x+1,y)) && !(isCross(x,y-1) && isCross(x,y+1)))
+                : ( (isCross(x-1,y) && isCross(x+1,y)) ||  (isCross(x,y-1) && isCross(x,y+1)))) { // thats a long list... 2!
+                    console.info('[line][!] Wrongly Crossed... well, Cross: ', x, y);
+                    global.regionData[0].addInvalid(puzzle, c, cell);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }
+]
+
+const validate = [
+    {
+        '_name': 'DOT CHECK',
+        'or': ['dot', 'cross', 'curve'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            const DOT_BLACK  = [window.DOT_BLACK, window.DOT_BLUE, window.DOT_YELLOW, window.DOT_INVISIBLE, window.CUSTOM_CROSS_FILLED, window.CUSTOM_CROSS_BLUE_FILLED, window.CUSTOM_CROSS_YELLOW_FILLED, window.CUSTOM_CURVE_FILLED];
+            for (let c of global.regionCells.line[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (DOT_BLACK.includes(cell.dot)) { // bonk
+                    console.info('[!] Uncovered Dot: ', x, y);
+                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }, {
+        '_name': 'SQUARE & PENTAGON',
+        'or': ['square', 'pentagon'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            let pos = {'square': [], 'pentagon': []};
+            let color = {'square': null, 'pentagon': null};
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!(cell && this.or.includes(cell.type))) continue;
+                pos[cell.type].push(c);
+                if (color[cell.type] == -1) continue; // no need to continue already bonked
+                if (color[cell.type] == null) color[cell.type] = cell.color; // init
+                else if (color[cell.type] != cell.color) { // bonk
+                    console.info('[!] Segregation fault: ', cell.color, cell.type)
+                    color[cell.type] = -1
+                }
+                if (color.square == color.pentagon) {
+                    console.info('[!] Cross-Shape Segregation fault: ', cell.color)
+                    color.square = -1; color.pentagon = -1;
+                }
+            }
+            if (color.square   == -1) global.regionData[regionNum].addInvalids(puzzle, pos.square);
+            if (color.pentagon == -1) global.regionData[regionNum].addInvalids(puzzle, pos.pentagon);
+        }
+    }, {
+        '_name': 'STAR',
+        'or': ['star'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!(cell && this.or.includes(cell.type))) continue;
+                if (global.regionColors.cell[regionNum][cell.color].length != 2) {
+                    console.info('[!] Star fault: ', cell.color);
+                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }, {
+        '_name': 'TRIANGLE CHECK',
+        'or': ['triangle'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!(cell && this.or.includes(cell.type))) continue;
+                let count = 0 // count !!
+                if (global.regionMatrix[y-1][x] == 0) count++
+                if (global.regionMatrix[y+1][x] == 0) count++
+                if (global.regionMatrix[y][x-1] == 0) count++
+                if (global.regionMatrix[y][x+1] == 0) count++
+                if (count != cell.count) {
+                    console.info('[!] Triangle fault at', x, y, 'needs', cell.count, 'sides - actually has', count);
+                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }, {
+        '_name': 'ARROW CHECKS',
+        'or': ['arrow', 'dart'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            const DIR = [
+                {'x': 0, 'y':-1},
+                {'x': 1, 'y':-1},
+                {'x': 1, 'y': 0},
+                {'x': 1, 'y': 1},
+                {'x': 0, 'y': 1},
+                {'x':-1, 'y': 1},
+                {'x':-1, 'y': 0},
+                {'x':-1, 'y':-1},
+            ];            
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [sourcex, sourcey] = xy(c);
+                let cell = puzzle.getCell(sourcex, sourcey);
+                if (!(cell && this.or.includes(cell.type))) continue;
+                let count = 0; let dir = DIR[cell.rot];
+                if (cell.type == 'dart') { dir.x *= 2; dir.y *= 2; }
+                let x = sourcex + dir.x; let y = sourcey + dir.y;
+                for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
+                    if (!isBounded(puzzle, x, y)) break; 
+                    if (x == sourcex && y == sourcey) break; 
+                    if (global.regionMatrix[y][x] == (cell.type == 'arrow' ? 0 : regionNum)) {
+                        count++;
+                        if (count > cell.count) break;
+                    }
+                    x += dir.x; y += dir.y // increment
+                    if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
+                }
+                if (cell.count != count) {
+                    console.info('[!] Directional Counter fault at', sourcex, sourcey, 'needs', cell.count, 'instances - actually has', count);
+                    global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }, {
+        '_name': 'DIVIDED DIAMOND CHECK',
+        'or': ['divdiamond'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (cell && this.or.includes(cell.type)) {
+                    if (cell.count != global.regionCells.all[regionNum].length) {
+                        console.info('[!] Divided Diamond fault at', x, y, 'needs', cell.count, 'instances - actually has', global.regionCells.all[regionNum].length);
+                        global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                        if (!puzzle.valid && quick) return;
+                    }
+                }
+            }
+        }
+    }, {
+        '_name': 'TWO BY TWO CHECK',
+        'or': ['twobytwo'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            let isReg = function(x, y) { return isBounded(puzzle, x, y) && (global.regionMatrix[y][x] == regionNum); };
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (cell && this.or.includes(cell.type)) {
+                    if ( isReg(x+2, y-2) && isReg(x+2, y) && isReg(x, y-2) 
+                      || isReg(x-2, y-2) && isReg(x-2, y) && isReg(x, y-2) 
+                      || isReg(x+2, y+2) && isReg(x+2, y) && isReg(x, y+2) 
+                      || isReg(x-2, y+2) && isReg(x-2, y) && isReg(x, y+2)) { // thats a long if statement 
+                        console.info('[!] Two-by-two fault at', x, y);
+                        global.regionData[regionNum].addInvalid(puzzle, c, cell);
+                        if (!puzzle.valid && quick) return;
+                    }
+                }
+            }
+        }
+    }
+];
+
+const postValidate = [
+
+];
+
 })

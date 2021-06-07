@@ -480,7 +480,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
   for (var styleSheet of document.styleSheets) {
     if (styleSheet.title === 'animations') {
       data.animations = styleSheet
-      break;
+      break
     }
   }
 
@@ -561,7 +561,7 @@ function hookMovementEvents(start) {
     for (var node = event.target; node != null; node = node.parentElement) {
       if (node == data.svg) {
         eventIsWithinPuzzle = true
-        break;
+        break
       }
     }
     if (!eventIsWithinPuzzle) return // Ignore drag events that aren't within the puzzle
@@ -604,7 +604,7 @@ window.onMove = function(dx, dy) {
     // Potentially move the location to a new cell, and make absolute boundary checks
     var moveDir = move()
     data.path[data.path.length - 1].redraw()
-    if (moveDir === MOVE_NONE) break;
+    if (moveDir === MOVE_NONE) break
     console.debug('Moved', ['none', 'left', 'right', 'top', 'bottom'][moveDir])
 
     // Potentially adjust data.x/data.y if our position went around a pillar

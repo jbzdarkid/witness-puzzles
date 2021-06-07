@@ -258,3 +258,8 @@ input[type="range"]::-ms-thumb {
   height: 33px;
   width: 17px;
 }
+
+.flashing {
+  animation: 1s 1 forwards line-fail !important;
+  animation: 0.4s 20 alternate-reverse error;
+}
