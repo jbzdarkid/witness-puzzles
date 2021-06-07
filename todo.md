@@ -25,3 +25,4 @@
 - [ ] fix drag boy not working on less than 2x2s
 - [ ] alternate symmetry style
 - [ ] vertical pillar, torus even
+- [ ] multipuzzle (low prio)
