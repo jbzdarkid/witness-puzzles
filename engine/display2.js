@@ -248,14 +248,6 @@ function drawStartAndEnd(puzzle, svg) {
       var cell = puzzle.grid[x][y]
       if (cell == null) continue
       if (cell.end != null) {
-        if (puzzle.symmetry != null) {
-          var sym = puzzle.getSymmetricalPos(x, y)
-          var symCell = puzzle.getCell(sym.x, sym.y)
-          if (symCell.end == null) {
-            console.error('Found an endpoint at', x, y, 'but there was no symmetrical endpoint at', sym.x, sym.y)
-          }
-        }
-
         window.drawSymbolWithSvg(svg, {
           'type': 'end',
           'width': 58,
@@ -270,11 +262,6 @@ function drawStartAndEnd(puzzle, svg) {
         var symStart = null
         if (puzzle.symmetry != null) {
           var sym = puzzle.getSymmetricalPos(x, y)
-          var symCell = puzzle.getCell(sym.x, sym.y)
-          if (symCell.start !== true) {
-            console.error('Found a startpoint at', x, y, 'but there was no symmetrical startpoint at', sym.x, sym.y)
-          }
-
           window.drawSymbolWithSvg(svg, {
             'type': 'start',
             'width': 58,

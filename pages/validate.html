@@ -12,6 +12,38 @@
     <script type="text/javascript" src="/engine/trace2.js"></script>
   </head>
   <script>
+    // Backup checks to ensure we have valid puzzle data.
+    // These should always pass for puzzles created by the built-in editor.
+    function validate_user_data(puzzle, path) {
+      var puzzleHasStart = false
+      var puzzleHasEnd = false
+      for (var x=0; x<puzzle.width; x++) {
+        for (var y=0; y<puzzle.height; y++) {
+          var cell = puzzle.grid[x][y]
+          if (cell == null) continue
+          if (cell.start === true) {
+            puzzleHasStart = true
+            if (puzzle.symmetry != null) {
+              var symCell = puzzle.getSymmetricalCell(x, y)
+              if (symCell == null || symCell.start !== true) {
+                throw Error('Startpoint at ' + x + ' ' + y + ' does not have a symmetrical startpoint')
+              }
+          }
+          if (cell.end != null) {
+            puzzleHasEnd = true
+            if (puzzle.symmetry != null) {
+              var symCell = puzzle.getSymmetricalCell(x, y)
+              if (symCell == null || symCell.end == null || symCell.end != puzzle.getSymmetricalDir(cell.end)) {
+                throw Error('Endpoint at ' + x + ' ' + y + ' does not have a symmetrical endpoint')
+              }
+            }
+          }
+        }
+      }
+      if (!puzzleHasStart) throw Error('Puzzle does not have a startpoint')
+      if (!puzzleHasEnd) throw Error('Puzzle does not have an endpoint')
+    }
+
     window.validate_and_capture_image = function(solution_json) {
       window.setLogLevel('error')
       var setData = function(data) {
@@ -25,6 +57,7 @@
       try {
         var puzzle = Puzzle.deserialize(solution_json)
         var path = JSON.parse(solution_json)['path'] // Path is passed as an extra property on the solution_json
+        validate_user_data(puzzle, path)
 
         // Although we were passed a drawn solution object, we clear, redraw, and revalidate to make sure
         // we weren't passed invalid or malformed data. This javascript is running serverside,
