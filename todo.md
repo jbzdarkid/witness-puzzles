@@ -20,3 +20,4 @@
 - [ ] draw svg for multitriangles (for graph mode)
 - [ ] relocate all puzzles in 1 folder
 - [ ] online upload program, something like witnesspuzzles (low prio)
+- [ ] fix android being h to play with
