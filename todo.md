@@ -15,13 +15,12 @@
 - [ ] optimize solver to prune bad regions (all my homies hate negators)
 - [ ] theme customization v2 - embed within puzzle
 - [ ] encode save puzzle
-- [ ] copypaste save/load feature (low prio)
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
 - [ ] dualsquare implementation
 - [ ] cornernegator implementation
 - [ ] draw svg for multitriangles (for graph mode)
 - [ ] relocate all puzzles in 1 folder
-- [ ] online upload program, something like witnesspuzzles (low prio)
+- [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
 - [ ] fix android being h to play with
 - [ ] fix drag boy not working on less than 2x2s
 - [ ] alternate symmetry style
