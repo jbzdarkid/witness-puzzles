@@ -15,7 +15,6 @@ function readPuzzleList() {
 }
 
 function writePuzzleList(puzzleList) {
-  if (puzzleList == null) throw 'Attempted to write puzzle list but none was provided'
   for (var key of Object.keys(window.localStorage)) {
     if (!puzzleList.includes(key)) window.localStorage.removeItem(key)
   }
