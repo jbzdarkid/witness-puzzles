@@ -94,17 +94,17 @@ let height;
 function ret(x, y) { return y * width + x; }
 function xy(c) { return [c % width, Math.floor(c / width)]; }
 function cel(puzzle, c) { let [x, y] = xy(c); return puzzle.getCell(x, y); }
+const DIR = [
+    {'x': 0, 'y':-1},
+    {'x': 1, 'y':-1},
+    {'x': 1, 'y': 0},
+    {'x': 1, 'y': 1},
+    {'x': 0, 'y': 1},
+    {'x':-1, 'y': 1},
+    {'x':-1, 'y': 0},
+    {'x':-1, 'y':-1},
+];  
 function dr(n) {
-    const DIR = [
-        {'x': 0, 'y':-1},
-        {'x': 1, 'y':-1},
-        {'x': 1, 'y': 0},
-        {'x': 1, 'y': 1},
-        {'x': 0, 'y': 1},
-        {'x':-1, 'y': 1},
-        {'x':-1, 'y': 0},
-        {'x':-1, 'y':-1},
-    ];  
     return DIR[n];
 }
 const detectionMode = {
