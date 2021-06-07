@@ -27,7 +27,6 @@ window.serializePuzzle = function(puzzle) {
   var settingsFlags = 0
   if (puzzle.settings.NEGATIONS_CANCEL_NEGATIONS) settingsFlags |= SETTINGS_FLAG_NCN
   if (puzzle.settings.SHAPELESS_ZERO_POLY)        settingsFlags |= SETTINGS_FLAG_SZP
-  if (puzzle.settings.PRECISE_POLYOMINOS)         settingsFlags |= SETTINGS_FLAG_PP
   if (puzzle.settings.FLASH_FOR_ERRORS)           settingsFlags |= SETTINGS_FLAG_FFE
   if (puzzle.settings.FAT_STARTPOINTS)            settingsFlags |= SETTINGS_FLAG_FS
   s.writeByte(settingsFlags)
