@@ -310,9 +310,8 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   // Extract the start data from the first path element
   var x = path[0].x
   var y = path[0].y
-  if (puzzle.getCell(x, y).start !== true) {
-    throw Error('Path does not begin with a startpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + JSON.stringify(puzzle.getCell(x, y)))
-  }
+  var cell = puzzle.getCell(x, y)
+  if (cell == null || cell.start !== true) throw Error('Path does not begin with a startpoint: ' + JSON.stringify(cell))
 
   var start = document.getElementById('start_' + target + '_' + x + '_' + y)
   var symStart = document.getElementById('symStart_' + target + '_' + x + '_' + y)
@@ -335,7 +334,12 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       } else if (cell.end === 'bottom') {
         window.onMove(0, 24)
       }
+<<<<<<< HEAD
       break;
+=======
+      if (i != path.length-1) throw Error('Path contains ' + (path.length - 1 - i) + ' trailing directions')
+      break
+>>>>>>> upstream/master
     } else if (path[i] === PATH_LEFT) {
       dx = -1
       cell.dir = 'left'
@@ -348,6 +352,8 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     } else if (path[i] === PATH_BOTTOM) {
       dy = +1
       cell.dir = 'down'
+    } else {
+      throw Error('Path element ' + (i-1) + ' was not a valid path direction: ' + path[i])
     }
 
     console.log('Currently at', x, y, cell, 'moving', dx, dy)
@@ -365,9 +371,8 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
     }
   }
-  if (puzzle.getCell(x, y).end == null) {
-    throw Error('Path does not end at an endpoint: puzzle.getCell(' + x + ')(' + y + ') = ' + JSON.stringify(puzzle.getCell(x, y)))
-  }
+  var cell = puzzle.getCell(x, y)
+  if (cell == null || cell.end == null) throw Error('Path does not end at an endpoint: ' + JSON.stringify(cell))
 
   var rows = '   |'
   for (var x=0; x<puzzle.width; x++) {

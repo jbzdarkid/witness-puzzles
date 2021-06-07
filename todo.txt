@@ -1,0 +1,120 @@
+SHIP BLOCKERS
+- you make a rotationally symmetric puzzle and expand it to a 5x5 and then it stops being symmetrical
+
+BUGS
+- Android is still fairly buggy.
+  - while solving a puzzle the page scrolling is annoying af, practically not even usable
+  - it only does the annoying scrolling in editor
+  - also sensitivity is scuffed
+  - if you re tap on an incomplete path and go down it can refresh the page
+  - doing that also lags tf out of the line rendering properly
+- Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
+- Puzzle titles are overlapping with the rest of the menu bar (on play_template)
+- Perf:
+  * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
+  * Find a way to make color counts cheaper, *especially* when there are no elements that care.
+
+FEATURES
+- Steal back stuff from prod
+  - stuff in editor.onElementClicked
+  - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
+  - CSS variables in engine/display2.js, engine/svg.js, engine.utilities.js, theme/*.css
+  - maybe engine/play.js
+  - steal some svg shapes from engine/svg.js
+  - trace2.js
+    var sens = parseFloat(localStorage.sensitivity)
+  - RM swapfiles
+- login-gated page for "show (and dismiss) all errors/feedback"
+- login-gated page for validate_puzzles.html
+- Put the license *somewhere* into the header, so that if someone clones the repo they don't have to do it.
+- Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
+- RGB filters
+- Reduce puzzle serialization size? [WIP]
+  This is the main play I have against people attacking my system -- make it harder to send bad data.
+- Add OUT_OF_BOUNDS_POLY to puzzle.settings
+  "If true, polyominos may be placed partially off of the grid as an intermediate solution step."
+- Light and Night theme
+- Add maximum puzzle limit for WP (and remove QuotaExceededError)
+- Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
+  Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
+- Retake all images (due to new background style) [WIP]
+  Also, I should take images in dark theme, and have some way to show the appropriate ones.
+  Some complaints about background color being too close to line color? Make background brighter. Just a bit.
+  Ok, I think it's time for a script to finish this.
+- Some graphical indication that cancel actually fired?
+  Hard, because we don't have an easy differentation between 'we got results bc cancelled' and 'we got results bc finished'. I guess we could set a flag...
+- Work on speedrunning solver / improving "unique puzzles"
+  Can't do this just with a cache key -- but I can recompute the key for all the regions after the fact.
+  Or I could make a key for the puzzle as a whole? Regardless, not as easy as just hacking the cache key.
+and move on.
+- Editor dot button should act like triangles
+  Hard, requires changing when the style changes
+- No need for "Mouse Speed 2D" on mobile.
+- Work on making a stable (github pages) version of WP
+  Database needs to be checked in (can be fetched via XMLHttpRequest)
+  Layout probably needs to change
+  Validation & database additions can be done via github issues + github actions (or some other public forum...)
+    Hopefully this can do validation & pictures too.
+    images need to be checked in
+- Custom mechanics
+
+Browse
+-- Sorting
+    Date (default, currently implemented)
+    Solve count?
+    Popularity? (-> rating system)
+    By mechanic?
+
+Editor
+-- Pillar + resize is still horrendously broken.
+-- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
+   Seems like this doesn't actually abort quickly, for some reason. Try to use the profiler?
+-- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
+
+Tracing
+-- Tracing down against walls and gap-2 is awkward
+    The game is awful at this too.
+-- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
+
+Server
+-- Sign-in?
+
+Tutorial
+-- Internal names:
+  dots (aka hexagons)
+  stones (aka squares)
+  shapers (aka polyominos, tetrominos, tetris)
+  erasers (aka negations, deleters, eliminators)
+  groupers (aka stars, suns)
+  counters (aka triangles, doritos)
+  [proposed custom mechanics]
+    sizers (aka
+-- Make a list of all the differences from the game (each needs a tutorial or a setting)
+    Have a 'left/right arrows' with a bunch of puzzle images (or maybe animated static objects)
+    [image]\n[explanation]\n[left arrow] step # [right arrow]
+-- Need to explain complex mechanics
+    Double negation
+    Polys outside the grid
+    Poly overlapping
+    Precise polyominos
+    Two-stage negation
+-- Sadly, need to explain normal mechanics
+    The best option here is to cherry-pick puzzles from the base game.
+    That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
+-- Should also have an explanation for the different 'styles' (which is probably how I'll implement settings)
+
+Low Prio / Misc
+-- "Edit this puzzle"?
+-- Add all puzzles in the game to the system. Maybe a separate category / identifier?
+    Add tests & speedrunner solver
+-- Favicon still needs improving
+    RM the dot, it's invisible
+    Figure out something better for the tri (star?)
+-- Fix generation colors / general improvements to random puzzles
+    >general support for random puzzles
+-- random generation for challenges
+    copy game RNG should be easy (now that I do it myself)
+    use trace callback func
+    maze can be 'click to reveal' like memory card game
+    should play the music if I can
+-- Update deps (?)

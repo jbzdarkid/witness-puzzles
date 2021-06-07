@@ -1,0 +1,110 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <meta name="robots" content="noindex, nofollow, nosnippet"/>
+    <script type="text/javascript" src="/engine/utilities.js"></script>
+    <script type="text/javascript" src="/engine/svg.js"></script>
+    <script type="text/javascript" src="/engine/polyominos.js"></script>
+    <script type="text/javascript" src="/engine/puzzle.js"></script>
+    <script type="text/javascript" src="/engine/validate.js"></script>
+    <script type="text/javascript" src="/engine/custom_mechanics.js"></script>
+    <script type="text/javascript" src="/engine/display2.js"></script>
+    <script type="text/javascript" src="/engine/solve.js"></script>
+    <script type="text/javascript" src="/engine/trace2.js"></script>
+  </head>
+  <script>
+    // Backup checks to ensure we have valid puzzle data.
+    // These should always pass for puzzles created by the built-in editor.
+    function validate_user_data(puzzle, path) {
+      var puzzleHasStart = false
+      var puzzleHasEnd = false
+      for (var x=0; x<puzzle.width; x++) {
+        for (var y=0; y<puzzle.height; y++) {
+          var cell = puzzle.grid[x][y]
+          if (cell == null) continue
+          if (cell.start === true) {
+            puzzleHasStart = true
+            if (puzzle.symmetry != null) {
+              var symCell = puzzle.getSymmetricalCell(x, y)
+              if (symCell == null || symCell.start !== true) {
+                throw Error('Startpoint at ' + x + ' ' + y + ' does not have a symmetrical startpoint')
+              }
+          }
+          if (cell.end != null) {
+            puzzleHasEnd = true
+            if (puzzle.symmetry != null) {
+              var symCell = puzzle.getSymmetricalCell(x, y)
+              if (symCell == null || symCell.end == null || symCell.end != puzzle.getSymmetricalDir(cell.end)) {
+                throw Error('Endpoint at ' + x + ' ' + y + ' does not have a symmetrical endpoint')
+              }
+            }
+          }
+        }
+      }
+      if (!puzzleHasStart) throw Error('Puzzle does not have a startpoint')
+      if (!puzzleHasEnd) throw Error('Puzzle does not have an endpoint')
+    }
+
+    window.validate_and_capture_image = function(solution_json) {
+      window.setLogLevel('error')
+      var setData = function(data) {
+        var result = document.createElement('p')
+        result.id = 'result'
+        result.data = JSON.stringify(data)
+        document.body.append(result)
+      }
+
+      var data = {}
+      try {
+        var puzzle = Puzzle.deserialize(solution_json)
+        var path = JSON.parse(solution_json)['path'] // Path is passed as an extra property on the solution_json
+        validate_user_data(puzzle, path)
+
+        // Although we were passed a drawn solution object, we clear, redraw, and revalidate to make sure
+        // we weren't passed invalid or malformed data. This javascript is running serverside,
+        // so it's the only safe place to ensure that we don't publish invalid puzzles.
+        window.draw(puzzle)
+        puzzle.clearLines()
+        window.drawPath(puzzle, path)
+        window.validate(puzzle, true) // Quick validation, since we aren't actually *showing* this to anyone.
+      } catch (exc) {
+        data.error = exc.message
+        console.error(exc.stack)
+        return setData(data)
+      }
+      if (puzzle.valid !== true) {
+        data.error = 'Puzzle validation failed due to these elements: ' + JSON.stringify(puzzle.invalidElements)
+        return setData(data)
+      }
+
+      // Solution was valid, go ahead with puzzle creation.
+      // Extract additional properties, then clean the puzzle and redraw for image capture.
+      data.valid = puzzle.valid
+      data.title = puzzle.name
+      puzzle.clearLines()
+      data.puzzle_json = puzzle.serialize()
+      window.draw(puzzle)
+
+      // All of this is just to take a clean screenshot. Since these screenshots are publicly hosted,
+      // it's very important that they're not generated clientside.
+      var svg = document.getElementById('puzzle')
+      var xml = new XMLSerializer().serializeToString(svg)
+      var img = document.getElementById('image')
+      img.src = 'data:image/svg+xml;base64,' + btoa(xml)
+      img.onload = function() {
+        var canvas = document.getElementById('canvas')
+        canvas.width = svg.getBBox().width + 10
+        canvas.height = svg.getBBox().height + 10
+        var ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        // Base-64 encode the image, which python should just be able to read.
+        data.screenshot = canvas.toDataURL() // Defaults to PNG, 100%
+        return setData(data)
+      }
+    }
+  </script>
+  <body>
+    <svg id="puzzle"></svg>
+    <canvas id="canvas" style="display:none"></canvas>
+    <img id="image" style="display:none"></img>
+  </body>
+</html>
