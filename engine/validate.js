@@ -507,11 +507,31 @@ const validate = [
         }
     }, {
         '_name': 'POLYOMINO CHECK GOES HERE',
-        'or': ['poly', 'ylop'],
+        'or': ['poly', 'ylop', 'scaler'],
         'exec': function(puzzle, regionNum, global, quick) {
-            let scalers = 0;
-            let antiscalers = 0;
-            window.polyFit(puzzle, regionNum, global, quick);
+            const DOWNSCALEABLE = [51, 255, 13311, 65331, 65484, 13107, 13260, 52275, 52479, 65535, 1048627, 1048831, 1061887, 1113907, 1114060, 1061683, 1061836, 1100851, 1101055, 1048627];
+            // what is that monsterous object
+            let polys = []; let smallable = [];
+            let bigs = 0; let smalls = 0;
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!(cell && ['poly', 'ylop'].includes(cell.type))) continue;
+                switch (cell.type) {
+                    case 'poly':
+                        if (DOWNSCALEABLE.includes(cell.polyshape)) smallable.push(cell.polyshape);
+                        else polys.push(cell.polyshape);
+                        break;
+                    case 'ylop':
+                        if (DOWNSCALEABLE.includes(cell.polyshape)) smallable.push(-cell.polyshape);
+                        else polys.push(-cell.polyshape);
+                        break;
+                    case 'scaler':
+                        cell.flip ? (bigs += 1) : (smalls += 1);
+                        break;
+                }
+            }
+            let ret = window.polyFitMaster(puzzle, regionNum, global, quick, [], polys, smallable, bigs, smalls);
             if (!puzzle.valid && quick) return;
         }
     }

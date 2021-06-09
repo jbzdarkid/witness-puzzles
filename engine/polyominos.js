@@ -7,6 +7,7 @@ function getPolySize(polyshape) {
       if (isSet(polyshape, x, y)) size++
     }
   }
+  if (isEnlarged(polyshape)) size *= 4;
   return size
 }
 
@@ -19,6 +20,8 @@ function isSet(polyshape, x, y) {
   if (x >= 4 || y >= 4) return false
   return (polyshape & mask(x, y)) !== 0
 }
+
+function isEnlarged(polyshape) { return (polyshape & 131072) !== 0; }
 
 // This is 2^20, whereas all the other bits fall into 2^(0-15)
 window.ROTATION_BIT = mask(5, 0)
@@ -45,14 +48,6 @@ function getRotations(polyshape) {
   return rotations
 }
 
-function fitsGrid(cells, x, y, puzzle) {
-  for (var cell of cells) {
-    if (cell.x + x < 0 || cell.x + x >= puzzle.width) return false
-    if (cell.y + y < 0 || cell.y + y >= puzzle.height) return false
-  }
-  return true
-}
-
 // IMPORTANT NOTE: When formulating these, the top row must contain (0, 0)
 // That means there will never be any negative y values.
 // (0, 0) must also be a cell in the shape, so that
@@ -75,30 +70,7 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false) {
     for (var y=0; y<4; y++) {
       if (!isSet(polyshape, x, y)) continue;
       polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y)})
-
-      // "Precise" polyominos adds cells in between the apparent squares in the polyomino.
-      // This prevents the solution line from going through polyominos in the solution.
-      // if (precise) {
-      //   if (ylop) {
-      //     // Ylops fill up/left if no adjacent cell, and always fill bottom/right
-      //     if (!isSet(polyshape, x - 1, y)) {
-      //       polyomino.push({'x':2*(x - topLeft.x) - 1, 'y':2*(y - topLeft.y)})
-      //     }
-      //     if (!isSet(polyshape, x, y - 1)) {
-      //       polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) - 1})
-      //     }
-      //     polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
-      //     polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
-      //   } else {
-      //     // Normal polys only fill bottom/right if there is an adjacent cell.
-      //     if (isSet(polyshape, x + 1, y)) {
-      //       polyomino.push({'x':2*(x - topLeft.x) + 1, 'y':2*(y - topLeft.y)})
-      //     }
-      //     if (isSet(polyshape, x, y + 1)) {
-      //       polyomino.push({'x':2*(x - topLeft.x), 'y':2*(y - topLeft.y) + 1})
-      //     }
-      //   }
-      // }
+      
     }
   }
   return polyomino
@@ -122,6 +94,45 @@ var knownCancellations = {}
 // * -2 represents a square that needs to be covered twice (inside the region & covered by an onimoylop)
 // * And etc, for additional layers of polyominos/onimoylops.
 function xy(c) { return [c % window.puzzle.width, Math.floor(c / window.puzzle.width)]; } // worse xy lol
+const DOWNSCALE = { 51: 1, 255: 3, 13311: 19, 65331: 49, 65484: 50, 13107: 17, 13260: 18, 52275: 33, 52479: 35, 65535: 51, 1048627: 1048577, 1048831: 1048579, 1061887: 1048595, 1113907: 1048625, 1114060: 1048626, 1061683: 1048593, 1061836: 1048594, 1100851: 1048609, 1101055: 1048611, 1114111: 1048627 };
+const DOWNSCALEABLE = [51, 255, 13311, 65331, 65484, 13107, 13260, 52275, 52479, 65535, 1048627, 1048831, 1061887, 1113907, 1114060, 1061683, 1061836, 1100851, 1101055, 1048627];
+const UPSCALE = { 1: 51, 3: 255, 19: 13311, 49: 65331, 50: 65484, 17: 13107, 18: 13260, 33: 52275, 35: 52479, 51: 65535, 1048577: 1048627, 1048579: 1048831, 1048595: 1061887, 1048625: 1113907, 1048626: 1114060, 1048593: 1061683, 1048594: 1061836, 1048609: 1100851, 1048611: 1101055, 1048627: 1114111 };
+const UPSCALABLE = [1, 3, 19, 49, 50, 17, 18, 33, 35, 51, 1048577, 1048579, 1048595, 1048625, 1048626, 1048593, 1048594, 1048609, 1048611, 1048627];
+// that is a long list
+window.polyFitMaster = function(puzzle, regionNum, global, quick, finalpolys, bigable, smallable, bigs, smalls) {
+  // all my homies hate scaler
+  if (bigs > 0 && smalls > 0 && window.polyFitMaster(puzzle, regionNum, global, quick, finalpolys, bigable, smallable, bigs - 1, smalls - 1)) return true; // bigs and smalls cancel each other out;
+  // use up smalls
+  if (smalls > 0) for (let i = 0; i < smallable.length; i++) {
+    let res = bigable.slice();
+    let list = smallable.slice();
+    let small = DOWNSCALE[smallable[i]];
+    if (!DOWNSCALEABLE.includes(small)) {
+      list.splice(i, 1);
+      res.push(small);
+    }
+    if (window.polyFitMaster(puzzle, regionNum, global, quick, finalpolys, res, list, bigs, smalls - 1)) return true;
+  }
+  for (elem of smallable) bigable.push(elem);
+  smallable = null;
+  // use up bigs now
+  if (bigs > 0) for (let i = 0; i < bigable.length; i++) {
+    let res = finalpolys.slice();
+    let list = bigable.slice();
+    if (!UPSCALABLE.includes(bigable[i])) {
+      list.splice(i, 1);
+      res.push(bigable[i] + 131072);
+    } else {
+      list[i] = UPSCALE[bigable[i]];
+    }
+    if (window.polyFitMaster(puzzle, regionNum, global, quick, res, list, null, bigs, smalls - 1)) return true;
+  }
+  for (elem of bigable) finalpolys.push(elem);
+  bigable = null;
+  // no scaler, polyfit now
+  return window.polyFit(puzzle, regionNum, global, quick);
+}
+
 window.polyFit = function(puzzle, regionNum, global, quick) {
   let polypos = [];
   let polys = []
@@ -146,13 +157,11 @@ window.polyFit = function(puzzle, regionNum, global, quick) {
     return true;
   }
   if (polyCount > 0 && polyCount !== global.regions.cell[regionNum].length) {
-    console.info('[!] Combined size of polyominos and onimoylops', polyCount, 'does not match region size', global.regions.cell[regionNum].length);
-    global.regionData[regionNum].addInvalids(puzzle, polypos);
+    console.log('[!] Combined size of polyominos and onimoylops', polyCount, 'does not match region size', global.regions.cell[regionNum].length);
     return false;
   }
   if (polyCount < 0) {
-    console.info('[!] Combined size of onimoylops is greater than polyominos by', -polyCount)
-    global.regionData[regionNum].addInvalids(puzzle, polypos);
+    console.log('[!] Combined size of onimoylops is greater than polyominos by', -polyCount)
     return false;
   }
   key = null;
@@ -163,7 +172,7 @@ window.polyFit = function(puzzle, regionNum, global, quick) {
     key  = '';  for (const ylop of ylops) key += ' ' + ylop.polyshape;
     key += '|'; for (const poly of polys) key += ' ' + poly.polyshape;
     ret = knownCancellations[key];
-    if (ret !== null) return true;
+    if (ret !== null) return ret;
   }
   // For polyominos, we clear the grid to mark it up again:
   let savedGrid = puzzle.grid;
@@ -179,12 +188,7 @@ window.polyFit = function(puzzle, regionNum, global, quick) {
   ret = placeYlops(ylops, 0, polys.slice(), puzzle);
   if (polyCount === 0) knownCancellations[key] = ret;
   puzzle.grid = savedGrid;
-  if (ret === false) {
-    console.info('[!] Ret returns false')
-    global.regionData[regionNum].addInvalids(puzzle, polypos);
-    return false;
-  }
-  return true;
+  return ret;
 }
 
 // turns out the poly function was also recursing and brute forcing like no tomorrow, lets go
@@ -202,14 +206,14 @@ window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // bes
   }
   if (polynts.length === 0) {
     console.log('No not polyominos inside the region, vacuously true')
-    return true
+    return true;
   }
   var ret = true // true until breaks are found
   for (var polyntpos of polynts) {
     var polynt = puzzle.getCell(polyntpos.x, polyntpos.y)
     if (getPolySize(polynt.polyshape) > regionSize) {
       console.log('polynt size is bigger than region, true')
-      return true
+      return true;
     }
     for (var polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
       console.spam('Selected polyntshape', polyntshape)
@@ -217,24 +221,24 @@ window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // bes
       for (var pos of region.cells) {
         if (!puzzle.pillar && (0 > pos.x || pos.x >= puzzle.width || 0 > pos.y || pos.y >= puzzle.height)) continue; // non-pillars
         if ((pos.x & pos.y) % 2 != 1) continue;
-        var found = true
+        var found = true;
         for (cell of cells) {
           if (regionMatrix[cell.y + pos.y] === undefined || regionMatrix[cell.y + pos.y][cell.x + pos.x] == null) {
-            found = false
+            found = false;
             break;
           }
         }
         if (found) {
           console.log('Antipolyomino at', polyntpos.x, polyntpos.y, 'can fit')
           regionData.addInvalid(polyntpos)
-          ret = false 
+          ret = false;
           break;
         }
       }
       if (found) break;
     }
   }
-  return ret
+  return ret;
 }
 
 // If false, poly doesn't fit and grid is unmodified
