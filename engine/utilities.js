@@ -29,6 +29,44 @@ window.onerror = function(message, url, line) {
   }
 }
 
+var proxy = {
+  'get': function(_, key) {
+    try {
+      return this._map[key]
+    } catch (e) {
+      return null
+    }
+  },
+  'set': function(_, key, value) {
+    if (value == null) {
+      delete this._map[key]
+    } else {
+      this._map[key] = value.toString()
+      window.localStorage.setItem('settings', JSON.stringify(this._map))
+    }
+  },
+  'init': function() {
+    this._map = {}
+    try {
+      var j = window.localStorage.getItem('settings')
+      if (j != null) this._map = JSON.parse(j)
+    } catch (e) {/* Do nothing */}
+
+    function setIfNull(map, key, value) {
+      if (map[key] == null) map[key] = value
+    }
+
+    // Set any values which are not defined
+    setIfNull(this._map, 'theme', 'light')
+    setIfNull(this._map, 'volume', '0.12')
+    setIfNull(this._map, 'sensitivity', '0.7')
+    setIfNull(this._map, 'expanded', 'false')
+    setIfNull(this._map, 'customMechanics', 'false')
+    return this
+  },
+}
+window.settings = new Proxy({}, proxy.init())
+
 var tracks = {
   'start':   '/data/panel_start_tracing.aac',
   'success': '/data/panel_success.aac',
@@ -40,7 +78,7 @@ var audio = new Audio(src='/data/panel_start_tracing.aac')
 window.PLAY_SOUND = function(name) {
   audio.pause()
   audio.src = tracks[name]
-  audio.volume = localStorage.volume
+  audio.volume = parseFloat(window.settings.volume)
   audio.play()
 }
 
@@ -61,7 +99,7 @@ window.ERROR = function(message) {
 window.LINE_PRIMARY = '#8FF'
 window.LINE_SECONDARY = '#FF2'
 
-if (localStorage.theme === 'true') { // Dark theme
+if (window.settings.theme == 'night') {
   window.BACKGROUND       = '#221'
   window.OUTER_BACKGROUND = '#070704'
   window.FOREGROUND       = '#751'
@@ -74,7 +112,7 @@ if (localStorage.theme === 'true') { // Dark theme
   window.PAGE_BACKGROUND  = '#000'
   window.ALT_BACKGROUND   = '#333' // An off-black. Good for mild contrast.
   window.ACTIVE_COLOR     = '#555' // Color for 'while the element is being pressed'
-} else { // Light theme
+} else if (window.settings.theme == 'light') {
   window.BACKGROUND       = '#0A8'
   window.OUTER_BACKGROUND = '#113833'
   window.FOREGROUND       = '#344'
@@ -294,7 +332,7 @@ window.loadHeader = function(titleText) {
     this.style.display = 'none'
     var expandedSettings = document.getElementById('expandedSettings')
     expandedSettings.style.display = null
-    localStorage.expandedSettings = 'true'
+    window.settings.expanded = 'true'
   }
 
   var expandedSettings = document.createElement('div')
@@ -311,10 +349,10 @@ window.loadHeader = function(titleText) {
     this.parentElement.style.display = 'none'
     var collapsedSettings = document.getElementById('collapsedSettings')
     collapsedSettings.style.display = null
-    localStorage.expandedSettings = 'false'
+    window.settings.expanded = 'false'
   }
 
-  if (localStorage.expandedSettings == 'true') {
+  if (window.settings.expanded == 'true') {
     collapsedSettings.onpointerdown()
   }
 
@@ -332,16 +370,16 @@ window.loadHeader = function(titleText) {
   document.body.style.background = window.PAGE_BACKGROUND
   var themeButton = document.createElement('button')
   expandedSettings.appendChild(themeButton)
-  if (localStorage.theme === 'true') {
-    themeButton.innerText = 'Dark theme'
+  if (window.settings.theme == 'night') {
+    themeButton.innerText = 'Night theme'
     themeButton.onpointerdown = function() {
-      localStorage.theme = 'false'
+      window.settings.theme = 'light'
       location.reload()
     }
-  } else {
+  } else if (window.settings.theme == 'light') {
     themeButton.innerText = 'Light theme'
     themeButton.onpointerdown = function() {
-      localStorage.theme = 'true'
+      window.settings.theme = 'night'
       location.reload()
     }
   }
@@ -354,7 +392,6 @@ window.loadHeader = function(titleText) {
   sensLabel.htmlFor = 'sens'
   sensLabel.innerText = 'Mouse Speed 2D'
 
-  if (localStorage.sensitivity == null) localStorage.sensitivity = 0.7
   var sens = document.createElement('input')
   expandedSettings.appendChild(sens)
   sens.type = 'range'
@@ -362,9 +399,9 @@ window.loadHeader = function(titleText) {
   sens.min = '0.1'
   sens.max = '1.3'
   sens.step = '0.1'
-  sens.value = localStorage.sensitivity
+  sens.value = window.settings.sensitivity
   sens.onchange = function() {
-    localStorage.sensitivity = this.value
+    window.settings.sensitivity = this.value
   }
   sens.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 
@@ -374,9 +411,6 @@ window.loadHeader = function(titleText) {
   volumeLabel.htmlFor = 'volume'
   volumeLabel.innerText = 'Volume'
 
-  if (localStorage.volume == null || localStorage.volume < 0 || localStorage.volume > 0.24) {
-    localStorage.volume = 0.12
-  }
   var volume = document.createElement('input')
   expandedSettings.appendChild(volume)
   volume.type = 'range'
@@ -384,21 +418,21 @@ window.loadHeader = function(titleText) {
   volume.min = '0'
   volume.max = '0.24'
   volume.step = '0.02'
-  volume.value = localStorage.volume
+  volume.value = parseFloat(window.settings.volume)
   volume.onchange = function() {
-    localStorage.volume = this.value
+    window.settings.volume = this.value
   }
   volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 
   expandedSettings.appendChild(document.createElement('br'))
 
   // Custom mechanics -- disabled for now
-  localStorage.customMechanics = false
+  window.settings.customMechanics = false
   /*
   var customMechanics = createCheckbox()
   expandedSettings.appendChild(customMechanics)
   customMechanics.id = 'customMechanics'
-  if (localStorage.customMechanics == 'true') {
+  if (window.settings.customMechanics == 'true') {
     customMechanics.style.background = window.BORDER
     customMechanics.checked = true
   }
@@ -406,7 +440,7 @@ window.loadHeader = function(titleText) {
   customMechanics.onpointerdown = function() {
     this.checked = !this.checked
     this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
-    localStorage.customMechanics = this.checked
+    window.settings.customMechanics = this.checked
     window.location.reload()
   }
 

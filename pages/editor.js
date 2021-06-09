@@ -16,6 +16,7 @@ function readPuzzleList() {
 
 function writePuzzleList(puzzleList) {
   for (var key of Object.keys(window.localStorage)) {
+    if (key == 'settings') continue // Don't throw away user settings!
     if (!puzzleList.includes(key)) window.localStorage.removeItem(key)
   }
   window.localStorage.setItem('puzzleList', JSON.stringify(puzzleList))

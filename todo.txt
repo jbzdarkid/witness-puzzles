@@ -15,6 +15,10 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Telemetry tracking (even if it's not doing anything yet)
+  - Puzzle started
+  - Puzzle completed
+  - Puzzle completed time
 - Steal back stuff from prod
   - stuff in editor.onElementClicked
   - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
@@ -33,10 +37,9 @@ FEATURES
   This is the main play I have against people attacking my system -- make it harder to send bad data.
 - Add OUT_OF_BOUNDS_POLY to puzzle.settings
   "If true, polyominos may be placed partially off of the grid as an intermediate solution step."
-- Light and Night theme
-- Add maximum puzzle limit for WP (and remove QuotaExceededError)
 - Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
   Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
+  Fragment should probably be a puzzle ID, not an offset. Wellll maybe not, what if we delete one?
 - Retake all images (due to new background style) [WIP]
   Also, I should take images in dark theme, and have some way to show the appropriate ones.
   Some complaints about background color being too close to line color? Make background brighter. Just a bit.
