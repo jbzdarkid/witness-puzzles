@@ -45,14 +45,6 @@ function getRotations(polyshape) {
   return rotations
 }
 
-function fitsGrid(cells, x, y, puzzle) {
-  for (var cell of cells) {
-    if (cell.x + x < 0 || cell.x + x >= puzzle.width) return false
-    if (cell.y + y < 0 || cell.y + y >= puzzle.height) return false
-  }
-  return true
-}
-
 // IMPORTANT NOTE: When formulating these, the top row must contain (0, 0)
 // That means there will never be any negative y values.
 // (0, 0) must also be a cell in the shape, so that
