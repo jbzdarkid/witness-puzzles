@@ -5,8 +5,8 @@ window.serializePuzzle = function(puzzle) {
   var version = 0
 
   s.writeInt(version)
-  s.writeInt(puzzle.width)
-  s.writeInt(puzzle.height)
+  s.writeByte(puzzle.width)
+  s.writeByte(puzzle.height)
   s.writeString(puzzle.name)
 
   var genericFlags = 0
@@ -44,8 +44,8 @@ window.deserializePuzzle = function(data) {
   var version = s.readInt()
   if (version > 0) throw Error('Cannot read data from unknown version: ' + version)
 
-  var width = s.readInt()
-  var height = s.readInt()
+  var width = s.readByte()
+  var height = s.readByte()
   var puzzle = new Puzzle(width, height)
   puzzle.name = s.readString()
 
@@ -215,12 +215,12 @@ class Serializer {
       cell.polyshape = this.readInt()
     }
 
-    cell.start = this.readByte() === 1
-    var cellEnd = this.readByte()
-    if (cellEnd === CELL_END_LEFT)   cell.end = 'left'
-    if (cellEnd === CELL_END_RIGHT)  cell.end = 'left'
-    if (cellEnd === CELL_END_TOP)    cell.end = 'left'
-    if (cellEnd === CELL_END_BOTTOM) cell.end = 'bottom'
+    var startEnd = this.readByte()
+    if (startEnd & CELL_START)      cell.start = true
+    if (startEnd & CELL_END_LEFT)   cell.end = 'left'
+    if (startEnd & CELL_END_RIGHT)  cell.end = 'right'
+    if (startEnd & CELL_END_TOP)    cell.end = 'top'
+    if (startEnd & CELL_END_BOTTOM) cell.end = 'bottom'
 
     return cell
   }
@@ -262,12 +262,13 @@ class Serializer {
       this.writeInt(cell.polyshape)
     }
 
-    this.writeByte(cell.start === true ? 0 : 1)
-    if      (cell.end == 'left')   this.writeByte(CELL_END_LEFT)
-    else if (cell.end == 'right')  this.writeByte(CELL_END_RIGHT)
-    else if (cell.end == 'top')    this.writeByte(CELL_END_TOP)
-    else if (cell.end == 'bottom') this.writeByte(CELL_END_BOTTOM)
-    else                           this.writeByte(CELL_END_NULL)
+    var startEnd = 0
+    if (cell.start === true)  startEnd |= CELL_START
+    if (cell.end == 'left')   startEnd |= CELL_END_LEFT
+    if (cell.end == 'right')  startEnd |= CELL_END_RIGHT
+    if (cell.end == 'top')    startEnd |= CELL_END_TOP
+    if (cell.end == 'bottom') startEnd |= CELL_END_BOTTOM
+    this.writeByte(startEnd)
   }
 }
 
@@ -280,11 +281,11 @@ var CELL_TYPE_TRIANGLE = 5
 var CELL_TYPE_POLY     = 6
 var CELL_TYPE_YLOP     = 7
 
-var CELL_END_NULL      = 0
-var CELL_END_LEFT      = 1
-var CELL_END_RIGHT     = 2
-var CELL_END_TOP       = 3
-var CELL_END_BOTTOM    = 4
+var CELL_START         = 1
+var CELL_END_LEFT      = 2
+var CELL_END_RIGHT     = 4
+var CELL_END_TOP       = 8
+var CELL_END_BOTTOM    = 16
 
 var GENERIC_FLAG_AUTOSOLVED   = 1
 var GENERIC_FLAG_SYMMETRICAL  = 2
