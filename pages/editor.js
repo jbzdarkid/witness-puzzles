@@ -843,6 +843,8 @@ function drawColorButtons() {
   for (var button of colorTable.getElementsByTagName('button')) {
     var params = {
       'height':45,
+      'width':140,
+      'border':2,
       'type':'crayon',
       'text': button.id,
       'color': button.id,
