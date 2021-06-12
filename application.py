@@ -21,6 +21,7 @@ host_redirect('/pages/editor_test.html', '/editor_test.html')
 host_redirect('/pages/validate.html', '/validate.html')
 host_redirect('/pages/triangles.html', '/triangles.html')
 host_redirect('/pages/triangles.js', '/triangles.js')
+host_redirect('/pages/telemetry.html', '/telemetry.html')
 
 # Large blocks of data
 host_statically('data')
