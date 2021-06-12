@@ -273,7 +273,7 @@ window.Puzzle = class {
   }
 
   // Note: Does not use this.width/this.height, so that it may be used to ask about resizing.
-  isValidSize(width, height) {
+  getSizeError(width, height) {
     if (this.pillar && width < 4) return 'Pillars may not have a width of 1'
     if (width * height < 25) return 'Puzzles may not be smaller than 2x2 or 1x4'
     if (width > 21 || height > 21) return 'Puzzles may not be larger than 10 in either dimension'
