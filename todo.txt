@@ -20,6 +20,14 @@ FEATURES
   - Puzzle started
   - Puzzle completed
   - Puzzle completed time
+  - Generate a GUID when loading the play_template. (maybe it's time for play_template.js?)
+    Post on page load: START_PUZZLE(session ID, puzzle) -> insert where (sessionId, puzzle, start_time = now())
+    Post on first solve: SOLVE_PUZZLE(session ID) -> update where (sessionId == sessionId) set (completion_time = now())
+    Then, I can compute:
+    - Number of solves
+    - Completion rate
+    - avg Completion time
+  - Maybe I want a separate telemetry.js, and move out of utilities?
 - Steal back stuff from prod
   - stuff in editor.onElementClicked
   - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
