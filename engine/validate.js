@@ -20,6 +20,46 @@ class RegionData {
   }
 }
 
+// Sanity checks for data which comes from the user. Now that people have learned that /publish is an open endpoint,
+// we have to make sure they don't submit data which passes validation but is untrustworthy.
+// These checks should always pass for puzzles created by the built-in editor.
+window.validate_user_data = function(puzzle, path) {
+  var puzzleHasStart = false
+  var puzzleHasEnd = false
+
+  if (puzzle.pillar && puzzle.width % 2 !== 0) throw Error('Pillar puzzles must have an even width')
+  if (puzzle.name.length > 50) throw Error('Puzzle name must be less than 50 characters')
+
+  if (puzzle.grid.length !== puzzle.width) throw Error('Puzzle width does not match grid size')
+  for (var x=0; x<puzzle.width; x++) {
+    if (puzzle.grid[x].length !== puzzle.height) throw Error('Puzzle height does not match grid size')
+    for (var y=0; y<puzzle.height; y++) {
+      var cell = puzzle.grid[x][y]
+      if (cell == null) continue
+
+      if (cell.start === true) {
+        puzzleHasStart = true
+        if (puzzle.symmetry != null) {
+          var symCell = puzzle.getSymmetricalCell(x, y)
+          if (symCell == null || symCell.start !== true) {
+            throw Error('Startpoint at ' + x + ' ' + y + ' does not have a symmetrical startpoint')
+          }
+        }
+      }
+      if (cell.end != null) {
+        puzzleHasEnd = true
+        if (puzzle.symmetry != null) {
+          var symCell = puzzle.getSymmetricalCell(x, y)
+          if (symCell == null || symCell.end == null || symCell.end != puzzle.getSymmetricalDir(cell.end)) {
+            throw Error('Endpoint at ' + x + ' ' + y + ' does not have a symmetrical endpoint')
+          }
+        }
+      }
+    }
+  }
+  if (!puzzleHasStart) throw Error('Puzzle does not have a startpoint')
+  if (!puzzleHasEnd) throw Error('Puzzle does not have an endpoint')
+}
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Whether or not the puzzle is valid
 // invalidElements: Symbols which are invalid (for the purpose of negating / flashing)
