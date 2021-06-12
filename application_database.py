@@ -69,7 +69,7 @@ class Feedback(db.Model):
 
 def add_feedback(data):
   print(f'Recieved feedback: {data}')
-  page = request.environ.get('HTTP_REFERRER', '')
+  page = request.environ.get('HTTP_REFERER', '')
   db.session.add(Feedback(page=page, data=data))
   db.session.commit()
 
@@ -92,7 +92,7 @@ class Error(db.Model):
 
 def add_error(data):
   print(f'Recieved error: {data}')
-  page = request.environ.get('HTTP_REFERRER', '')
+  page = request.environ.get('HTTP_REFERER', '')
   db.session.add(Error(page=page, data=data))
   db.session.commit()
 
