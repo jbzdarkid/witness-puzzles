@@ -14,6 +14,10 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Clicking the Auto-Solve repeatedly makes the progress bar freak out and displays the wrong number of solutions.
+- There is also no way to cancel an auto-solve, and
+- it is possible to edit the puzzle while the auto-solve is loading, causing an incorrect number of solutions.
+- symmetry puzzles should still show line colors when solved
 - Reduce puzzle serialization size? [Good to go, pending test against DB]
   This is the main play I have against people attacking my system -- make it harder to send bad data.
 - Telemetry tracking (even if it's not doing anything yet)
