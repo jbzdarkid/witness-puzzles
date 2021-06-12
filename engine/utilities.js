@@ -19,15 +19,10 @@ Event.prototype.isRightClick = function() {
 /*** End cross-compatibility ***/
 
 // https://stackoverflow.com/q/12571650
-window_onerror = window.onerror
-window.onerror = function(message, url, line) {
-  FEEDBACK(message + ' on line ' + line)
-  if (window_onerror == null) {
-    console.error('Error in file ' + url + ' on line ' + line)
-  } else {
-    window_onerror(message, url, line)
-  }
-}
+window.addEventListener('error', function(event) {
+  ERROR(event.error.stack)
+  console.error('Error in file ' + event.filename + ' on line ' + event.line)
+})
 
 var proxy = {
   'get': function(_, key) {
