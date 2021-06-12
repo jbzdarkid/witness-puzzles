@@ -119,12 +119,14 @@ def browse():
 application.add_url_rule('/browse', 'browse', browse)
 
 # Users providing feedback
+@csrf.exempt
 def feedback():
   add_feedback(request.form['data'])
   return '', 200
 application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
 
 # Internal errors
+@csrf.exempt
 def error():
   add_error(request.form['data'])
   return '', 200
