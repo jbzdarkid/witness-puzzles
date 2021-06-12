@@ -38,11 +38,9 @@ def login():
 application.add_url_rule('/pages/login.html', 'login', login, methods=['GET', 'POST'])
 
 def logout():
-  print(current_user.get_id())
   if current_user.get_id() != None:
     logout_user()
-  print(request.args)
-  return redirect(request.args.get('next') or '/browse.html')
+  return redirect(request.args.get('next', 'browse.html'))
 application.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 
 def browse_page():
