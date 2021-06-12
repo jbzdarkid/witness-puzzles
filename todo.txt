@@ -1,7 +1,8 @@
 SHIP BLOCKERS
-- you make a rotationally symmetric puzzle and expand it to a 5x5 and then it stops being symmetrical
 
 BUGS
+- Move full-puzzle validation into validate.js
+  Add validation for invalid grid sizes (wrt pillars)
 - Android is still fairly buggy.
   - while solving a puzzle the page scrolling is annoying af, practically not even usable
   - it only does the annoying scrolling in editor

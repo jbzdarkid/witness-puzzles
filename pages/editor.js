@@ -1005,7 +1005,7 @@ function shapeChooserClick(event, cell) {
 // row/column is added. The endpoint will try to stay fixed, but may be re-oriented.
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
 // and endpoints in sync with the original design.
-function resizePuzzle(dx, dy, id) {
+function resizePuzzle(dx, dy, drag) {
   var newWidth = puzzle.width + dx
   var newHeight = puzzle.height + dy
   console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
@@ -1022,11 +1022,11 @@ function resizePuzzle(dx, dy, id) {
     // Symmetry pillar puzzles always expand horizontally in both directions.
     var xOffset = dx / 2
   } else {
-    var xOffset = (id.includes('left') ? dx : 0)
+    var xOffset = (drag == 'left' ? dx : 0)
   }
-  var yOffset = (id.includes('top') ? dy : 0)
+  var yOffset = (drag == 'top' ? dy : 0)
 
-  console.log('Shifting contents by', xOffset, yOffset)
+  console.log('Shifting contents by', xOffset, yOffset, 'with drag', drag)
 
   // Determine if the cell at x, y should be copied from the original.
   // For non-symmetrical puzzles, the answer is always 'no' -- all elements should be directly copied across.
@@ -1046,13 +1046,13 @@ function resizePuzzle(dx, dy, id) {
     if (!puzzle.pillar) {
       if (puzzle.symmetry.x) { // Normal Horizontal Symmetry
         if (dx > 0 && x == (newWidth-1)/2) return CLEAR
-        if (id.includes('right')  && x >= (newWidth+1)/2) return COPY
-        if (id.includes('left')   && x <= (newWidth-1)/2) return COPY
+        if (drag == 'right'  && x >= (newWidth+1)/2) return COPY
+        if (drag == 'left'   && x <= (newWidth-1)/2) return COPY
       }
       if (puzzle.symmetry.y) { // Normal Vertical Symmetry
         if (dy > 0 && y == (newHeight-1)/2) return CLEAR
-        if (id.includes('bottom') && y >= (newHeight+1)/2) return COPY
-        if (id.includes('top')    && y <= (newHeight-1)/2) return COPY
+        if (drag == 'bottom' && y >= (newHeight+1)/2) return COPY
+        if (drag == 'top'    && y <= (newHeight-1)/2) return COPY
       }
     } else { // Pillar symmetries
       if (puzzle.symmetry.x && !puzzle.symmetry.y) { // Pillar Horizontal Symmetry
@@ -1066,13 +1066,13 @@ function resizePuzzle(dx, dy, id) {
       }
 
       if (!puzzle.symmetry.x && puzzle.symmetry.y) { // Pillar Vertical Symmetry
-        if (dx !== 0 && id.includes('right') && x >= newWidth/2) return COPY
-        if (dx !== 0 && id.includes('left')  && x <  newWidth/2) return COPY
-        if (dy !== 0 && id.includes('bottom')) {
+        if (dx !== 0 && drag == 'right' && x >= newWidth/2) return COPY
+        if (dx !== 0 && drag == 'left'  && x <  newWidth/2) return COPY
+        if (dy !== 0 && drag == 'bottom') {
           if (y > (newHeight-1)/2) return COPY
           if (y === (newHeight-1)/2 && x > newWidth/2) return COPY
         }
-        if (dy !== 0 && id.includes('top')) {
+        if (dy !== 0 && drag == 'top') {
           if (y < (newHeight-1)/2) return COPY
           if (y === (newHeight-1)/2 && x < newWidth/2) return COPY
         }
@@ -1085,15 +1085,15 @@ function resizePuzzle(dx, dy, id) {
           if (x === newWidth*3/4 && y > (newHeight-1)/2) return COPY
           if (x >   newWidth*3/4) return COPY
         }
-        if (dy !== 0 && id.includes('bottom') && y > (newHeight-1)/2) return COPY
-        if (dy !== 0 && id.includes('top')    && y < (newHeight-1)/2) return COPY
+        if (dy !== 0 && drag == 'bottom' && y > (newHeight-1)/2) return COPY
+        if (dy !== 0 && drag == 'top'    && y < (newHeight-1)/2) return COPY
       }
 
       if (!puzzle.symmetry.x && !puzzle.symmetry.y) { // Pillar Two Lines
-        if (dx !== 0 && id.includes('right')  && x >= newWidth/2)      return COPY
-        if (dx !== 0 && id.includes('left')   && x <  newWidth/2)      return COPY
-        if (dy !== 0 && id.includes('bottom') && y >= (newHeight-1)/2) return COPY
-        if (dy !== 0 && id.includes('top')    && y <  (newHeight-1)/2) return COPY
+        if (dx !== 0 && drag == 'right'  && x >= newWidth/2)      return COPY
+        if (dx !== 0 && drag == 'left'   && x <  newWidth/2)      return COPY
+        if (dy !== 0 && drag == 'bottom' && y >= (newHeight-1)/2) return COPY
+        if (dy !== 0 && drag == 'top'    && y <  (newHeight-1)/2) return COPY
       }
     }
 
@@ -1275,9 +1275,11 @@ function dragMove(event, elem) {
 
   // Note: We only modify dragging when we reach a limit.
   // Note: We use Math.sign (rather than Math.round or Math.floor) since we only want to resize 1 unit at a time.
+  // Note: Certain computations care about the dragging direction, so we compute that before entering, to avoid confusion about corners.
 
   while (Math.abs(dx) >= xLim) {
-    if (!resizePuzzle(xScale * Math.sign(dx), 0, elem.id)) break
+    var drag = (elem.id.includes('right') ? 'right' : 'left')
+    if (!resizePuzzle(xScale * Math.sign(dx), 0, drag)) break
     writePuzzle(false)
     reloadPuzzle()
     dx -= Math.sign(dx) * xLim
@@ -1285,7 +1287,8 @@ function dragMove(event, elem) {
   }
 
   while (Math.abs(dy) >= yLim) {
-    if (!resizePuzzle(0, yScale * Math.sign(dy), elem.id)) break
+    var drag = (elem.id.includes('top') ? 'top' : 'bottom')
+    if (!resizePuzzle(0, yScale * Math.sign(dy), drag)) break
     writePuzzle(false)
     reloadPuzzle()
     dy -= Math.sign(dy) * yLim
