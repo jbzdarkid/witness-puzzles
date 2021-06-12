@@ -9,6 +9,11 @@
   </head>
   <body>
     <script>loadHeader('Log in to WitnessPuzzles')</script>
+    <script>
+    if ('{{ logged_in }}' == 'true') {
+      document.getElementById('title').innerText = 'You are already logged in!'
+    }
+    </script>
     <br><br>
     <form method="post">
       <label for="username">Username:</label>

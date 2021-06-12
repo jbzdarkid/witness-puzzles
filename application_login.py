@@ -26,7 +26,8 @@ def load_user(user_id):
 host_redirect('/pages/login.html', '/login.html')
 def login():
   if request.method == 'GET':
-    return render_template('login.html')
+    logged_in = 'true' if current_user.get_id() == ADMIN_USERNAME else 'false'
+    return render_template('login.html', logged_in=logged_in)
 
   if request.form['username'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
     user = UserMixin()
