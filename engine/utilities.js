@@ -80,14 +80,14 @@ window.PLAY_SOUND = function(name) {
 window.FEEDBACK = function(message) {
   var request = new XMLHttpRequest()
   request.open('POST', '/feedback', true) // Fire and forget
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   request.send('data=' + message)
 }
 
 window.ERROR = function(message) {
   var request = new XMLHttpRequest()
   request.open('POST', '/error', true) // Fire and forget
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   request.send('data=' + message)
 }
 
