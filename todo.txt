@@ -14,6 +14,7 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Add client & server version to telemetry
 - Editor undo/redo
   > Only for active puzzle
   > Keep in-memory (do not write to local storage)
