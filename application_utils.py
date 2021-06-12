@@ -8,8 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from PIL import Image
-from io import BytesIO
-from base64 import b64decode
 import boto3
 
 application = Flask(__name__, template_folder='pages')

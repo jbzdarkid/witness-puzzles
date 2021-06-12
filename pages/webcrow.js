@@ -34,7 +34,6 @@ function drawPuzzle() {
   }
 
   var xPos = 40
-  var topLeft = {'x':40, 'y':40}
   for (var x=0; x<puzzle.width; x++) {
     var yPos = 40
     var width = (x%2 === 0 ? 24 : 58)

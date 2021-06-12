@@ -172,8 +172,6 @@ window.validateRegion = function(puzzle, region, quick) {
     puzzle.updateCell2(pos.x, pos.y, 'type', 'nega')
   }
 
-  var combinations = []
-
   var invalidElements = regionData.invalidElements
   var veryInvalidElements = regionData.veryInvalidElements
 
