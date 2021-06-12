@@ -14,6 +14,12 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Editor undo/redo
+  > Only for active puzzle
+  > Keep in-memory (do not write to local storage)
+  > Linear (overwritten once a change is made)
+  Just keep an array of serialized puzzles and an index, then when you call writePuzzle it should splice at index.
+  Undo & Redo w/ gray out once we hit the limit. Pretty easy IMO.
 - Reduce puzzle serialization size? [Good to go, pending test against DB]
   This is the main play I have against people attacking my system -- make it harder to send bad data.
 - Telemetry tracking (even if it's not doing anything yet)
