@@ -295,10 +295,11 @@ window.loadHeader = function(titleText) {
 
   var feedbackButton = document.createElement('label')
   navbar.appendChild(feedbackButton)
+  feedbackButton.id = 'feedbackButton'
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
-  feedbackButton.onpointerdown = function () {
+  feedbackButton.onpointerdown = function() {
     var feedback = prompt('Provide feedback:')
     if (feedback) {
       window.FEEDBACK(feedback)

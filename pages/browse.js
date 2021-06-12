@@ -8,6 +8,10 @@ window.onload = function() {
     logout.href = '/logout?next=browse.html'
     logout.innerText = 'Logout'
     document.body.insertBefore(logout, document.getElementById('puzzleTable'))
+
+    var feedbackButton = document.getElementById('feedbackButton')
+    feedbackButton.innerText = 'View feedback'
+    feedbackButton.onpointerdown = function() {window.location = '/telemetry.html'}
   }
 }
 
