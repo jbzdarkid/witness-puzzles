@@ -24,11 +24,11 @@ class RegionData {
 // we have to make sure they don't submit data which passes validation but is untrustworthy.
 // These checks should always pass for puzzles created by the built-in editor.
 window.validate_user_data = function(puzzle, path) {
+  var sizeError = puzzle.getSizeError(puzzle.width, puzzle.height)
+  if (sizeError != null) throw Error(sizeError)
+
   var puzzleHasStart = false
   var puzzleHasEnd = false
-
-  if (puzzle.pillar && puzzle.width % 2 !== 0) throw Error('Pillar puzzles must have an even width')
-  if (puzzle.name.length > 50) throw Error('Puzzle name must be less than 50 characters')
 
   if (puzzle.grid.length !== puzzle.width) throw Error('Puzzle width does not match grid size')
   for (var x=0; x<puzzle.width; x++) {

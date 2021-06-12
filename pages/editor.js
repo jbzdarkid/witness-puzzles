@@ -43,8 +43,8 @@ function readPuzzle() {
     puzzle = Puzzle.deserialize(serialized)
     reloadPuzzle()
   } catch (e) {
-    console.log(e)
-    console.log('Could not parse puzzle, deleting')
+    console.error(e)
+    console.error('Could not parse puzzle, deleting')
     deletePuzzle() // Will call readPuzzle() again
   }
 }
@@ -485,8 +485,7 @@ window.publishPuzzle = function() {
         window.location = url
       }
     } else {
-      publish.innerText = 'Could not validate puzzle!'
-      console.error(this.responseText)
+      publish.innerText = 'Error: ' + this.responseText
     }
   }
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
@@ -1010,13 +1009,7 @@ function resizePuzzle(dx, dy, drag) {
   var newHeight = puzzle.height + dy
   console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
 
-  if (newWidth <= 0 || newHeight <= 0) return false
-  if (newWidth > 21 || newHeight > 21) return false
-  if (puzzle.symmetry != null) {
-    if (puzzle.symmetry.x && newWidth <= 2) return false
-    if (puzzle.symmetry.y && newHeight <= 2) return false
-    if (puzzle.pillar && puzzle.symmetry.x && newWidth%4 !== 0) return false
-  }
+  if (puzzle.getSizeError(newWidth, newHeight) != null) return false
 
   if (puzzle.pillar && puzzle.symmetry != null) {
     // Symmetry pillar puzzles always expand horizontally in both directions.

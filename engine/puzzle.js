@@ -272,6 +272,21 @@ window.Puzzle = class {
     return dirs
   }
 
+  // Note: Does not use this.width/this.height, so that it may be used to ask about resizing.
+  isValidSize(width, height) {
+    if (this.pillar && width < 4) return 'Pillars may not have a width of 1'
+    if (width * height < 25) return 'Puzzles may not be smaller than 2x2 or 1x4'
+    if (width > 21 || height > 21) return 'Puzzles may not be larger than 10 in either dimension'
+    if (this.symmetry != null) {
+      if (this.symmetry.x && width <= 2) return 'Symmetrical puzzles must be sufficiently wide for both lines'
+      if (this.symmetry.y && height <= 2) return 'Symmetrical puzzles must be sufficiently wide for both lines'
+      if (this.pillar && this.symmetry.x && width % 4 !== 0) return 'X + Pillar symmetry must be an even number of rows, to keep both startpoints at the same parity'
+    }
+
+    return null
+  }
+
+
   // Called on a solution. Computes a list of gaps to show as hints which *do not*
   // break the path.
   loadHints() {
