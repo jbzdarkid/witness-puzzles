@@ -51,7 +51,7 @@ application.add_url_rule('/pages/browse.html', 'browse_page', browse_page)
 def delete():
   if current_user.get_id() != ADMIN_USERNAME:
     return '', 200
-  display_hash = request.form["puzzle"]
+  display_hash = request.form['puzzle']
   print(f'Authenticated as {current_user.id}; deleting puzzle {display_hash}')
 
   delete_puzzle(display_hash)
@@ -61,7 +61,7 @@ application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 def refresh():
   if current_user.get_id() != ADMIN_USERNAME:
     return '', 200
-  display_hash = request.form["puzzle"]
+  display_hash = request.form['puzzle']
   print(f'Authenticated as {current_user.id}; refreshing image for puzzle {display_hash}')
 
   puzzle = get_puzzle(display_hash)
@@ -77,3 +77,19 @@ def refresh():
 
   return new_url, 200
 application.add_url_rule('/refresh', 'refresh', refresh, methods=['POST'])
+
+def telemetry_page():
+  if current_user.get_id() != ADMIN_USERNAME:
+    return render_template('404_generic.html'), 404
+  return render_template('telemetry.html', feedback=get_all_feedback(), errors=get_all_errors())
+application.add_url_rule('/telemetry', 'telemetry', telemetry_page, methods=['GET'])
+
+def delete_telemetry():
+  if current_user.get_id() != ADMIN_USERNAME:
+    return '', 200
+  if request.form['type'] == 'feedback':
+    delete_feedback(int(request.form['id']))
+  if request.form['type'] == 'error':
+    delete_error(int(request.form['id']))
+  return '', 200
+application.add_url_rule('/delete_telemetry', 'delete_telemetry', delete_telemetry, methods=['POST'])

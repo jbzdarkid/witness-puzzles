@@ -1,0 +1,19 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <meta name="robots" content="noindex, nofollow, nosnippet"/>
+    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="/data/favicon.png">
+    <script type="text/javascript" src="/engine/utilities.js"></script>
+    <script type="text/javascript" src="/engine/svg.js"></script>
+    <script type="text/javascript" src="/pages/telemetry.js"></script>
+    <title>Telemetry from WitnessPuzzles</title>
+  </head>
+  <body>
+    <script>loadHeader('Telemetry from Witness Puzzles')</script>
+    <script>
+      window.csrfToken = '{{ csrf_token() }}'
+      window.allFeedback = {{ feedback|tojson }}
+      window.allErrors = {{ errors|tojson }}
+    </script>
+  </body>
+</html>

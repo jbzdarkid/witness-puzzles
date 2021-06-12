@@ -73,6 +73,17 @@ def add_feedback(data):
   db.session.add(Feedback(page=page, data=data))
   db.session.commit()
 
+def get_all_feedback():
+  feedback = []
+  for row in db.session.query(Feedback).all():
+    # https://stackoverflow.com/a/1960546
+    feedback.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
+  return feedback
+
+def delete_feedback(id):
+  db.session.query(Feedback).filter(Feedback.id == id).delete()
+  db.session.commit()
+
 class Error(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   page = db.Column(db.Text, nullable=True)
@@ -83,6 +94,17 @@ def add_error(data):
   print(f'Recieved error: {data}')
   page = request.environ.get('HTTP_REFERRER', '')
   db.session.add(Error(page=page, data=data))
+  db.session.commit()
+
+def get_all_errors():
+  errors = []
+  for row in db.session.query(Error).all():
+    # https://stackoverflow.com/a/1960546
+    errors.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
+  return errors
+
+def delete_error(id):
+  db.session.query(Error).filter(Error.id == id).delete()
   db.session.commit()
 
 db.create_all()
@@ -97,4 +119,20 @@ if application.debug:
       url = '/images/26/267BCA24.png',
       title = 'Puzzle ' + str(i),
     ))
+  db.session.add(Feedback(
+    page='play_template.html',
+    data='hi this is some feedback'
+  ))
+  db.session.add(Feedback(
+    page='browse.html',
+    data='hi this is some other feedback'
+  ))
+  db.session.add(Error(
+    page='play_template.html',
+    data='error on line 7'
+  ))
+  db.session.add(Error(
+    page='browse.html',
+    data='error on line 12'
+  ))
   db.session.commit()

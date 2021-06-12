@@ -61,7 +61,7 @@ function loadPuzzles() {
         ;(function(puzzle, cell, img) {
           var del = document.createElement('button')
           del.innerText = 'X'
-          del.style = 'background: black; color: red'
+          del.style = 'background: black; color: red; cursor: pointer'
           del.onpointerdown = function(event) {
             event.preventDefault()
             var sure = prompt('Are you sure you want to delete puzzle ' + puzzle.title + '?')
@@ -84,6 +84,7 @@ function loadPuzzles() {
           cell.appendChild(del)
 
           var ref = document.createElement('span')
+          ref.style.cursor = 'pointer'
           ref.innerHTML = '&#128260;'
           ref.onpointerdown = function(event) {
             event.preventDefault()

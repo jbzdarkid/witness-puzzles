@@ -23,7 +23,7 @@ window_onerror = window.onerror
 window.onerror = function(message, url, line) {
   FEEDBACK(message + ' on line ' + line)
   if (window_onerror == null) {
-    console.error('Parse error in file ' + url + ' on line ' + line)
+    console.error('Error in file ' + url + ' on line ' + line)
   } else {
     window_onerror(message, url, line)
   }
