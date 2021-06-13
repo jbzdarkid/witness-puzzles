@@ -16,6 +16,7 @@
     <script async type="text/javascript" src="/engine/custom_mechanics.js"></script>
     <script async type="text/javascript" src="/engine/display2.js"></script>
     <script async type="text/javascript" src="/engine/trace2.js"></script>
+    <script async type="text/javascript" src="/engine/telemetry.js"></script>
     <title>{{ title|safe }}</title>
   </head>
   <body>
@@ -34,6 +35,11 @@
 
       var puzzle = Puzzle.deserialize({{ puzzle|tojson }})
       draw(puzzle)
+      window.START_PUZZLE()
+      window.TRACE_COMPLETION_FUNC = function() {
+        window.SOLVE_PUZZLE()
+        window.TRACE_COMPLETION_FUNC = null
+      }
     }
   </script>
 </html>
