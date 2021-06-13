@@ -107,6 +107,26 @@ def delete_error(id):
   db.session.query(Error).filter(Error.id == id).delete()
   db.session.commit()
 
+class Telemetry(db.Model):
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  version = db.Column(db.Text, nullable=True)
+  puzzle = db.Column(db.Text, nullable=True)
+  sessionId = db.Column(db.Text, nullable=False, unique=True)
+  startTime = db.Column(db.DateTime, nullable=False)
+  solveTime = db.Column(db.DateTime, nullable=True)
+
+def add_puzzle_start(version, page, sessionId):
+  try:
+    puzzle = page.rsplit('/', 1)[1]
+  except IndexError:
+    return # Page was somehow not a valid puzzle.
+  db.session.add(Telemetry(version=version, puzzle=puzzle, sessionId=sessionId, startTime = datetime.utcnow()))
+  db.session.commit()
+
+def add_puzzle_solve(sessionId):
+  db.session.query(Telemetry).filter(Telemetry.sessionId == sessionId).update(solveTime = datetime.utcnow())
+  db.session.commit()
+
 db.create_all()
 
 if application.debug:

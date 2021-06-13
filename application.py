@@ -119,6 +119,24 @@ def browse():
   return to_json_string(output)
 application.add_url_rule('/browse', 'browse', browse)
 
+# Puzzle statistics telemetry
+@csrf.exempt
+def telemetry():
+  page = request.environ.get('HTTP_REFERER', '')
+  version = request.form['version']
+  data = request.form['data']
+
+  if request.form['type'] == 'feedback': # Users providing feedback
+    add_feedback(version, page, data)
+  elif request.form['type'] == 'error': # Javascript errors
+    add_feedback(version, page, data)
+  elif request.form['type'] == 'puzzle_start': # Page load on play_template, indicating a puzzle was started
+    add_puzzle_start(version, page, sessionId)
+  elif request.form['type'] == 'puzzle_solve': # Successful solve on play_template, indicating a puzzle was completed
+    add_puzzle_solve(sessionId)
+  return '', 200
+application.add_url_rule('/telemetry', 'telemetry', telemetry, methods=['POST'])
+
 # Users providing feedback
 @csrf.exempt
 def feedback():

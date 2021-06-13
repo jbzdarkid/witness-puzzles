@@ -83,7 +83,7 @@ def telemetry_page():
   if current_user.get_id() != ADMIN_USERNAME:
     return render_template('404_generic.html'), 404
   return render_template('telemetry.html', feedback=get_all_feedback(), errors=get_all_errors())
-application.add_url_rule('/pages/telemetry.html', 'telemetry', telemetry_page, methods=['GET'])
+application.add_url_rule('/pages/telemetry.html', 'telemetry_page', telemetry_page, methods=['GET'])
 
 def delete_telemetry():
   if current_user.get_id() != ADMIN_USERNAME:
