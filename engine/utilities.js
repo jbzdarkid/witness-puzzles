@@ -16,6 +16,12 @@ Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMove
 Event.prototype.isRightClick = function() {
   return this.which === 3 || (this.touches && this.touches.length > 1)
 }
+Event.prototype.position = funciton() {
+  return {
+    'x': event.pageX || event.clientX || (event.touches && event.touches[0].pageX) || null,
+    'y': event.pageY || event.clientY || (event.touches && event.touches[0].pageY) || null,
+  }
+}
 /*** End cross-compatibility ***/
 
 var proxy = {

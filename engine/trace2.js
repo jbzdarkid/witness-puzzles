@@ -548,10 +548,7 @@ function hookMovementEvents(start) {
       window.trace(event, data.puzzle, null, null, null)
       return
     }
-    data.lastTouchPos = {
-      'x': event.pageX || event.touches[0].pageX,
-      'y': event.pageY || event.touches[0].pageY,
-    }
+    data.lastTouchPos = event.position
   }
   document.ontouchmove = function(event) {
     if (data.tracing !== true) return
@@ -566,10 +563,7 @@ function hookMovementEvents(start) {
     if (!eventIsWithinPuzzle) return // Ignore drag events that aren't within the puzzle
     event.preventDefault() // Prevent accidental scrolling if the touch event is within the puzzle.
 
-    var newPos = {
-      'x': event.pageX || event.touches[0].pageX,
-      'y': event.pageY || event.touches[0].pageY,
-    }
+    var newPos = event.position
     onMove(newPos.x - data.lastTouchPos.x, newPos.y - data.lastTouchPos.y)
     data.lastTouchPos = newPos
   }
