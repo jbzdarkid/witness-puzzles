@@ -1,5 +1,7 @@
 import os
+from base64 import b64decode
 from flask import render_template, request
+from io import BytesIO
 from json import dumps as to_json_string
 from traceback import format_exc
 
