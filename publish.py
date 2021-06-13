@@ -41,7 +41,7 @@ for path in paths:
 # path = path.parent / (path.stem + path.suffix)
 # path = path.parent / path.name
 
-replacements = {}
+replacements = {'%version%': version}
 for path in all_paths:
   if path.suffix == '.js':
     hash = hashlib.sha256()

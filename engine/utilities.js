@@ -18,12 +18,6 @@ Event.prototype.isRightClick = function() {
 }
 /*** End cross-compatibility ***/
 
-// https://stackoverflow.com/q/12571650
-window.addEventListener('error', function(event) {
-  ERROR(event.error.stack)
-  console.error('Error in file ' + event.filename + ' on line ' + event.line)
-})
-
 var proxy = {
   'get': function(_, key) {
     try {
@@ -75,20 +69,6 @@ window.PLAY_SOUND = function(name) {
   audio.src = tracks[name]
   audio.volume = parseFloat(window.settings.volume)
   audio.play()
-}
-
-window.FEEDBACK = function(message) {
-  var request = new XMLHttpRequest()
-  request.open('POST', '/feedback', true) // Fire and forget
-  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  request.send('data=' + message)
-}
-
-window.ERROR = function(message) {
-  var request = new XMLHttpRequest()
-  request.open('POST', '/error', true) // Fire and forget
-  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  request.send('data=' + message)
 }
 
 window.LINE_PRIMARY = '#8FF'

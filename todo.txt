@@ -18,7 +18,6 @@ FEATURES
 - There is also no way to cancel an auto-solve, and
 - it is possible to edit the puzzle while the auto-solve is loading, causing an incorrect number of solutions.
 - symmetry puzzles should still show line colors when solved
-- Add client & server version to telemetry
 - Editor undo/redo
   > Only for active puzzle
   > Keep in-memory (do not write to local storage)
@@ -38,7 +37,6 @@ FEATURES
     - Number of solves
     - Completion rate
     - avg Completion time
-  - Maybe I want a separate telemetry.js, and move out of utilities?
 - Steal back stuff from prod
   - stuff in editor.onElementClicked
   - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
