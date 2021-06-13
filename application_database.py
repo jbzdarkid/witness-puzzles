@@ -127,6 +127,36 @@ def add_puzzle_solve(sessionId):
   db.session.query(Telemetry).filter(Telemetry.sessionId == sessionId).update(solveTime = datetime.utcnow())
   db.session.commit()
 
+class Feedback2(db.Model):
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+  client_version = db.Column(db.Text, nullable=False)
+  server_version = db.Column(db.Text, nullable=False)
+  page = db.Column(db.Text, nullable=True)
+  type = db.Column(db.Text, nullable=False)
+  data = db.Column(db.Text, nullable=False)
+
+def add_feedback2(client_version, server_version, page, type, data):
+  db.session.add(Feedback2(
+    client_version=client_version,
+    server_version=server_version
+    page=page,
+    type=type,
+    data=data
+  ))
+  db.session.commit()
+
+def get_all_feedback2():
+  feedback = []
+  for row in db.session.query(Feedback2).all():
+    # https://stackoverflow.com/a/1960546
+    feedback.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
+  return feedback
+
+def delete_feedback2(id):
+  db.session.query(Feedback2).filter(Feedback2.id == id).delete()
+  db.session.commit()
+
 db.create_all()
 
 if application.debug:

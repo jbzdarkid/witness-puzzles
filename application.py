@@ -125,13 +125,14 @@ application.add_url_rule('/browse', 'browse', browse)
 @csrf.exempt
 def telemetry():
   page = request.environ.get('HTTP_REFERER', '')
-  version = request.form['version']
+  client_version = request.form['version']
+  server_version = '%version%'
   data = request.form['data']
 
   if request.form['type'] == 'feedback': # Users providing feedback
-    add_feedback(version, page, data)
+    add_feedback2(client_version, server_version, page, data)
   elif request.form['type'] == 'error': # Javascript errors
-    add_feedback(version, page, data)
+    add_feedback2(client_version, server_version, page, data)
   elif request.form['type'] == 'puzzle_start': # Page load on play_template, indicating a puzzle was started
     add_puzzle_start(version, page, sessionId)
   elif request.form['type'] == 'puzzle_solve': # Successful solve on play_template, indicating a puzzle was completed
