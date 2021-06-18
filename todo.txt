@@ -14,6 +14,8 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Create a boolean which governs the early-validation logic, and compute it at entry. Also, don't run this logic for triangle-only puzzles, it's clearly not faster.
+- Try to make webcrow async, even a little bit -- the lag when waiting on a click is not ideal.
 - Clicking the Auto-Solve repeatedly makes the progress bar freak out and displays the wrong number of solutions.
 - There is also no way to cancel an auto-solve, and
 - it is possible to edit the puzzle while the auto-solve is loading, causing an incorrect number of solutions.
