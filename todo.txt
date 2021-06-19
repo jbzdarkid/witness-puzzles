@@ -64,6 +64,7 @@ FEATURES
 - Retake all images (due to new background style) [WIP]
   Also, I should take images in dark theme, and have some way to show the appropriate ones.
   Some complaints about background color being too close to line color? Make background brighter. Just a bit.
+  Complaint about contrast between black and background on the dark theme.
   Ok, I think it's time for a script to finish this.
 - Some graphical indication that cancel actually fired?
   Hard, because we don't have an easy differentation between 'we got results bc cancelled' and 'we got results bc finished'. I guess we could set a flag...
@@ -82,6 +83,7 @@ and move on.
     images need to be checked in, so git commit as part of the github action.
     Might want a separate DB repo, if only to avoid the commit spam.
 - Custom mechanics
+- pillar puzzles are too easy when you can see the whole thing.
 
 Browse
 -- Sorting
