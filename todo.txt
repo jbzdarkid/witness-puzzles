@@ -14,12 +14,35 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- All telemetry should contain the session ID. I'd suggest just starting a new table w/ the new fields. That way I don't risk breaking anything.
+  The idea here is to (eventually?) limit the number of errors for a given session ID. This will prevent confusion about how frequent an error is (since it may occur many many times)
+  I should also (at some point) dedupe rows in the telemetry page. This + a count will let me sort by importance/age, and also clear out feedback more efficiently. (Alternately, just provide a "delete all similar" button? Shift-click?)
+- Telemetry page is only semi-compatible with dark theme; fix table borders & buttons
+- Create a boolean which governs the early-validation logic, and compute it at entry. Also, don't run this logic for triangle-only puzzles, it's clearly not faster.
+- Try to make webcrow async, even a little bit -- the lag when waiting on a click is not ideal.
+- Clicking the Auto-Solve repeatedly makes the progress bar freak out and displays the wrong number of solutions.
+- There is also no way to cancel an auto-solve, and
+- it is possible to edit the puzzle while the auto-solve is loading, causing an incorrect number of solutions.
+- symmetry puzzles should still show line colors when solved
+- Editor undo/redo
+  > Only for active puzzle
+  > Keep in-memory (do not write to local storage)
+  > Linear (overwritten once a change is made)
+  Just keep an array of serialized puzzles and an index, then when you call writePuzzle it should splice at index.
+  Undo & Redo w/ gray out once we hit the limit. Pretty easy IMO.
 - Reduce puzzle serialization size? [Good to go, pending test against DB]
   This is the main play I have against people attacking my system -- make it harder to send bad data.
 - Telemetry tracking (even if it's not doing anything yet)
   - Puzzle started
   - Puzzle completed
   - Puzzle completed time
+  - Generate a GUID when loading the play_template. (maybe it's time for play_template.js?)
+    Post on page load: START_PUZZLE(session ID, puzzle) -> insert where (sessionId, puzzle, start_time = now())
+    Post on first solve: SOLVE_PUZZLE(session ID) -> update where (sessionId == sessionId) set (completion_time = now())
+    Then, I can compute:
+    - Number of solves
+    - Completion rate
+    - avg Completion time
 - Steal back stuff from prod
   - stuff in editor.onElementClicked
   - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
@@ -41,6 +64,7 @@ FEATURES
 - Retake all images (due to new background style) [WIP]
   Also, I should take images in dark theme, and have some way to show the appropriate ones.
   Some complaints about background color being too close to line color? Make background brighter. Just a bit.
+  Complaint about contrast between black and background on the dark theme.
   Ok, I think it's time for a script to finish this.
 - Some graphical indication that cancel actually fired?
   Hard, because we don't have an easy differentation between 'we got results bc cancelled' and 'we got results bc finished'. I guess we could set a flag...
@@ -59,6 +83,7 @@ and move on.
     images need to be checked in, so git commit as part of the github action.
     Might want a separate DB repo, if only to avoid the commit spam.
 - Custom mechanics
+- pillar puzzles are too easy when you can see the whole thing.
 
 Browse
 -- Sorting

@@ -1198,10 +1198,7 @@ document.addEventListener('touchmove', function(event) {
 }, passive)
 
 function dragStart(event, elem) {
-  dragging = {
-    'x': event.pageX || event.clientX || event.touches[0].pageX,
-    'y': event.pageY || event.clientY || event.touches[0].pageY,
-  }
+  dragging = event.position
   console.log('Drag started at', dragging.x, dragging.y)
 
   var anchor = document.createElement('div')
@@ -1229,10 +1226,7 @@ function dragEnd(event, elem) {
 }
 
 function dragMove(event, elem) {
-  var newDragging = {
-    'x': event.pageX || event.clientX || event.touches[0].pageX,
-    'y': event.pageY || event.clientY || event.touches[0].pageY,
-  }
+  var newDragging = event.position
   console.spam(newDragging.x, newDragging.y)
   if (event.buttons === 0) return dragEnd(event, elem)
   if (dragging == null) return
