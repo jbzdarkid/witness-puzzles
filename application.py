@@ -1,5 +1,7 @@
 import os
+from base64 import b64decode
 from flask import render_template, request
+from io import BytesIO
 from json import dumps as to_json_string
 from traceback import format_exc
 
@@ -79,7 +81,7 @@ def publish():
   if 'error' in data:
     return data['error'], 400
 
-  title = data['title']
+  title = data.get('title', 'Unnamed Puzzle')
   # [22:] to remove the "data:image/png;base64," prefix
   image = BytesIO(b64decode(data['screenshot'][22:]))
   puzzle_json = data['puzzle_json']
