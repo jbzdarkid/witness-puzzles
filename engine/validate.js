@@ -1,7 +1,6 @@
 // what if i rewrite
 namespace(function() {
 class RegionData {
-
     constructor() {
         // puzzle.invalidElements = []; // confirmed bad ones
         // this.nega = []; // c of negators
@@ -64,6 +63,31 @@ class RegionData {
     }
 
     addInvalids(puzzle, cs) { for (const c of cs) { this.addInvalid(puzzle, c); }}
+}
+const DOWNSCALE = { 51: 1, 255: 3, 13311: 19, 65331: 49, 65484: 50, 13107: 17, 13260: 18, 52275: 33, 52479: 35, 65535: 51, 1048627: 1048577, 1048831: 1048579, 1061887: 1048595, 1113907: 1048625, 1114060: 1048626, 1061683: 1048593, 1061836: 1048594, 1100851: 1048609, 1101055: 1048611, 1114111: 1048627 };
+const DOWNSCALEABLE = [51, 255, 13311, 65331, 65484, 13107, 13260, 52275, 52479, 65535, 1048627, 1048831, 1061887, 1113907, 1114060, 1061683, 1061836, 1100851, 1101055, 1048627];
+const UPSCALE = { 1: 51, 3: 255, 19: 13311, 49: 65331, 50: 65484, 17: 13107, 18: 13260, 33: 52275, 35: 52479, 51: 65535, 1048577: 1048627, 1048579: 1048831, 1048595: 1061887, 1048625: 1113907, 1048626: 1114060, 1048593: 1061683, 1048594: 1061836, 1048609: 1100851, 1048611: 1101055, 1048627: 1114111 };
+const UPSCALEABLE = [1, 3, 19, 49, 50, 17, 18, 33, 35, 51, 1048577, 1048579, 1048595, 1048625, 1048626, 1048593, 1048594, 1048609, 1048611, 1048627];
+class Polyomino {
+    constructor(puzzle, c) {
+        this.pos = c;
+        let [x, y] = xy(c);
+        this.cell = puzzle.getCell(x, y);
+        this.shape = this.cell.polyshape; // 131072: upscale flag, 1048576: rotate flag
+        this.type = this.cell.type;
+    }
+
+    downscalable() { return DOWNSCALEABLE.includes(this.shape); }
+      upscalable() { return   UPSCALEABLE.includes(this.shape); }
+    downscale() { this.shape = DOWNSCALE[this.shape]; }
+      upscale() { this.shape =   UPSCALE[this.shape]; }
+
+    getCount() {
+        let count = 0;
+        for (i = 1; i > 65536; i << 1) if (this.shape & i) count++;
+        if (this.type == 'ylop') count *= -1;
+        return count;
+    }
 }
 
 const NEGATE_IMMEDIATELY = ['triangle', 'arrow', 'dart', 'twobytwo']; // these work individually, and can be negated
@@ -507,32 +531,24 @@ const validate = [
         }
     }, {
         '_name': 'POLYOMINO CHECK GOES HERE',
-        'or': ['poly', 'ylop', 'scaler'],
+        'or': ['poly', 'ylop', 'polynt', 'scaler'],
         'exec': function(puzzle, regionNum, global, quick) {
-            const DOWNSCALEABLE = [51, 255, 13311, 65331, 65484, 13107, 13260, 52275, 52479, 65535, 1048627, 1048831, 1061887, 1113907, 1114060, 1061683, 1061836, 1100851, 1101055, 1048627];
-            // what is that monsterous object
-            let polys = []; let smallable = [];
-            let bigs = 0; let smalls = 0;
+            let polys = []; let scalers = [0, 0];
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && ['poly', 'ylop'].includes(cell.type))) continue;
-                switch (cell.type) {
-                    case 'poly':
-                        if (DOWNSCALEABLE.includes(cell.polyshape)) smallable.push(cell.polyshape);
-                        else polys.push(cell.polyshape);
-                        break;
-                    case 'ylop':
-                        if (DOWNSCALEABLE.includes(cell.polyshape)) smallable.push(-cell.polyshape);
-                        else polys.push(-cell.polyshape);
-                        break;
-                    case 'scaler':
-                        cell.flip ? (bigs += 1) : (smalls += 1);
-                        break;
+                if (!(cell && this.or.includes(cell.type))) continue;
+                if (cell.type == 'scaler') {
+                    if (cell.flip) scalers[1]++;
+                    else scalers[0]++;
                 }
+                else polys.push(new Polyomino(puzzle, c));
             }
-            let ret = window.polyFitMaster(puzzle, regionNum, global, quick, [], polys, smallable, bigs, smalls);
-            if (!puzzle.valid && quick) return;
+            let downscalable = [];          
+            for (let i = 0; i < polys.length; i++) if (polys[i].downscalable()) downscalable.push(i); // every polys are upscalable rn
+            global.polyntCorrect = true; global.polyIncorrect = true;
+            let ret = window.polyFitMaster(puzzle, regionNum, global, polys, scalers, downscalable, Array.from({length: polys.length}, (_, i) => i));
+            console.warn('return:', ret);
         }
     }
 ];

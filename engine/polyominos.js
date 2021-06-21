@@ -94,51 +94,63 @@ var knownCancellations = {}
 // * -2 represents a square that needs to be covered twice (inside the region & covered by an onimoylop)
 // * And etc, for additional layers of polyominos/onimoylops.
 function xy(c) { return [c % window.puzzle.width, Math.floor(c / window.puzzle.width)]; } // worse xy lol
-const DOWNSCALE = { 51: 1, 255: 3, 13311: 19, 65331: 49, 65484: 50, 13107: 17, 13260: 18, 52275: 33, 52479: 35, 65535: 51, 1048627: 1048577, 1048831: 1048579, 1061887: 1048595, 1113907: 1048625, 1114060: 1048626, 1061683: 1048593, 1061836: 1048594, 1100851: 1048609, 1101055: 1048611, 1114111: 1048627 };
-const DOWNSCALEABLE = [51, 255, 13311, 65331, 65484, 13107, 13260, 52275, 52479, 65535, 1048627, 1048831, 1061887, 1113907, 1114060, 1061683, 1061836, 1100851, 1101055, 1048627];
-const UPSCALE = { 1: 51, 3: 255, 19: 13311, 49: 65331, 50: 65484, 17: 13107, 18: 13260, 33: 52275, 35: 52479, 51: 65535, 1048577: 1048627, 1048579: 1048831, 1048595: 1061887, 1048625: 1113907, 1048626: 1114060, 1048593: 1061683, 1048594: 1061836, 1048609: 1100851, 1048611: 1101055, 1048627: 1114111 };
-const UPSCALABLE = [1, 3, 19, 49, 50, 17, 18, 33, 35, 51, 1048577, 1048579, 1048595, 1048625, 1048626, 1048593, 1048594, 1048609, 1048611, 1048627];
 // that is a long list
-window.polyFitMaster = function(puzzle, regionNum, global, quick, finalpolys, bigable, smallable, bigs, smalls) {
-  // all my homies hate scaler
-  if (bigs > 0 && smalls > 0 && window.polyFitMaster(puzzle, regionNum, global, quick, finalpolys, bigable, smallable, bigs - 1, smalls - 1)) return true; // bigs and smalls cancel each other out;
-  // use up smalls
-  if (smalls > 0) for (let i = 0; i < smallable.length; i++) {
-    let res = bigable.slice();
-    let list = smallable.slice();
-    let small = DOWNSCALE[smallable[i]];
-    if (!DOWNSCALEABLE.includes(small)) {
-      list.splice(i, 1);
-      res.push(small);
+window.polyFitMaster = function(puzzle, regionNum, global, polys, scalers, downscalable, upscalable) {
+  if ((scalers[0] > 0 && upscalable.length == 0) || (scalers[1] > 0 && downscalable.length == 0)) return ['scaler'];
+  if (scalers[0] > 0 && scalers[1] > 0 && // Pre-calculate scenarios where they cross each other out
+      window.polyFitMaster(puzzle, regionNum, global, polys, [scalers[0] - 1, scalers[1] - 1], downscalable, upscalable).length == 0) return [];
+  if (scalers[1] > 0) { // calculate small first
+    scalers[1]--;
+    for (let j = 0; j < downscalable.length; j++) {
+      let newPolys        = polys       .slice(); // copy first
+      let newDownscalable = downscalable.slice();
+      let   newUpscalable =   upscalable.slice();
+      let i = downscalable[j];
+      newPolys[i].downscale();
+      if (!newPolys[i].downscalable()) {
+        newDownscalable.splice(j, 1);
+        newUpscalable[i] = -1;
+      }
+      if (window.polyFitMaster(puzzle, regionNum, global, newPolys, scalers.slice(), newDownscalable, newUpscalable).length == 0) return [];
     }
-    if (window.polyFitMaster(puzzle, regionNum, global, quick, finalpolys, res, list, bigs, smalls - 1)) return true;
-  }
-  for (elem of smallable) bigable.push(elem);
-  smallable = null;
-  // use up bigs now
-  if (bigs > 0) for (let i = 0; i < bigable.length; i++) {
-    let res = finalpolys.slice();
-    let list = bigable.slice();
-    if (!UPSCALABLE.includes(bigable[i])) {
-      list.splice(i, 1);
-      res.push(bigable[i] + 131072);
-    } else {
-      list[i] = UPSCALE[bigable[i]];
+  } else if (scalers[0] > 0) {
+    upscalable = upscalable.filter(val => val >= 0); // filter out downscaled boys at once
+    scalers[0]--;
+    for (let j = 0; j <   upscalable.length; j++) {
+      let newPolys        = polys       .slice(); // copy first
+      let   newUpscalable =   upscalable.slice();
+      let i =   upscalable[j];
+      newPolys[i].  upscale();
+      if (!newPolys[i].  upscalable()) {
+          newUpscalable.splice(j, 1);
+      }
+      if (window.polyFitMaster(puzzle, regionNum, global, newPolys, scalers.slice(), []             , newUpscalable).length == 0) return [];
     }
-    if (window.polyFitMaster(puzzle, regionNum, global, quick, res, list, null, bigs, smalls - 1)) return true;
+  } else { // finally, no scalers
+    let ylops   = polys.filter(val => val.type == 'ylop');
+    let polynts = polys.filter(val => val.type == 'polynt');
+    polys       = polys.filter(val => val.type == 'poly');
+    let polyCorrect = true; polyntCorrect = true;
+    if (polys  .length != 0 || ylops.length != 0) {
+      polyCorrect   = window.polyFit    (puzzle, regionNum, global, polys, ylops);
+      if ( polyCorrect  ) global.polyIncorrect = false;
+    } 
+    if (polynts.length != 0) {
+      polyntCorrect = window.polyntFitnt(puzzle, regionNum, global, polynts);
+      if (!polyntCorrect) global.polyntCorrect = false;
+    }
+    if (polyCorrect && polyntCorrect) return []; // correct case!
   }
-  for (elem of bigable) finalpolys.push(elem);
-  bigable = null;
-  // no scaler, polyfit now
-  return window.polyFit(puzzle, regionNum, global, quick);
+  let ret = [];
+  if ( global.polyIncorrect) { ret += 'poly'; ret += 'ylop'; }
+  if (!global.polyntCorrect)   ret += 'polynt';
+  if (ret.length == 0) ret += 'scaler'; // something should be wrong
+  return ret;
 }
 
-window.polyFit = function(puzzle, regionNum, global, quick) {
-  let polypos = [];
-  let polys = []
-  let ylops = []
+window.polyFit = function(puzzle, regionNum, global, polys, ylops) {
   let polyCount = 0
-  let key, ret;
+  let key, ret; // USE REDUCE GET POLYCOUNT
   for (let c of global.regionCells.cell[regionNum]) {
       let [x, y] = xy(c);
       let cell = puzzle.getCell(x, y);
@@ -186,13 +198,14 @@ window.polyFit = function(puzzle, regionNum, global, quick) {
     }
   } // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
   ret = placeYlops(ylops, 0, polys.slice(), puzzle);
+  console.info(ret)
   if (polyCount === 0) knownCancellations[key] = ret;
   puzzle.grid = savedGrid;
   return ret;
 }
 
 // turns out the poly function was also recursing and brute forcing like no tomorrow, lets go
-window.polyntFitnt = function(region, puzzle, regionData, regionMatrix) { // best name
+window.polyntFitnt = function(puzzle, regionNum, global, quick, polys) { // best name
   var polynts = []
   var regionSize = 0
   for (const pos of region.cells) {
