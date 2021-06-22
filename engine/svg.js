@@ -537,7 +537,7 @@ window.drawSymbolWithSvg = function(svg, params) {
       simplePath(svg, params, 'M -2 -13.5 Q 0 -15 2 -13.5 L 10 -8 Q 12 -7 12 -5 L 12 5 Q 12 7 10 8 L 2 12.6 Q 0 14 -2 12.5 L -10 8 Q -12 7 -12 5 L -12 -5 Q -12 -7 -10 -8')
       break;
     case 'scaler':
-      simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7 14 -8 14').setAttribute('transform', 'scale(' + (params.flip ? -1 : 1) + ')');
+      simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14.6 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7.4 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7.4 14 -8 14').setAttribute('transform', 'translate(' + midx + ', ' + midy + ') scale(' + (params.flip ? -1 : 1) + ')');
       break;
     default: //------------------------------------ERROR HANDLING
       console.error('Cannot draw unknown SVG type: ' + params.type)

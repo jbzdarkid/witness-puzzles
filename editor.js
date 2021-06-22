@@ -517,7 +517,7 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'scaler'].includes(activeParams.type)) {
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -530,6 +530,20 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
       }
     }
+  } else if (['scaler'].includes(activeParams.type)) {
+    if (x%2 !== 1 || y%2 !== 1) return
+    if (puzzle.grid[x][y] != null
+      && puzzle.grid[x][y].type === activeParams.type
+      && puzzle.grid[x][y].color === activeParams.color) {
+        if (puzzle.grid[x][y].flip == activeParams.flip) puzzle.grid[x][y].flip = (1 - activeParams.flip);
+        else puzzle.grid[x][y] = null
+     } else {
+       puzzle.grid[x][y] = {
+         'type': activeParams.type,
+         'color': activeParams.color,
+         'flip': activeParams.flip,
+       }
+     }
   } else if (['poly', 'ylop', 'polynt'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
@@ -644,7 +658,7 @@ var symbolData = {
   'pentagon': {'type':'pentagon', 'title':'ItzShaun\'s Pentagons'},
   'copier': {'type':'copier', 'title':'artless\' Copiers'},
   'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
-  'scaler': {'type':'scaler', 'title':'artless\' Scalers'},
+  'scaler': {'type':'scaler', 'flip': 0, 'title':'artless\' Scalers'},
 }
 
 let xButtons = [];
@@ -750,6 +764,20 @@ function drawSymbolButtons() {
           if (rot > 7) rot = 0
           symbolData.dart.rot = rot
           activeParams.rot = rot
+        }
+        activeParams = Object.assign(activeParams, this.params)
+        drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {event.preventDefault()}
+    } else if (button.id == 'scaler') {
+      button.style.display = null
+      button.onpointerdown = function(event) {
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        if (activeParams.id === this.id) {
+          var flip = symbolData.scaler.flip
+          flip = 1 - flip;
+          symbolData.scaler.flip = flip
+          activeParams.flip = flip
         }
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()

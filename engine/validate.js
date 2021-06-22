@@ -147,6 +147,10 @@ function intersects(a, b) { // check for intersection
 function isBounded(puzzle, x, y) {
   return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height);
 }
+function matrix(global, x, y) {
+    if (!global.regionMatrix[y]) return undefined;
+    return global.regionMatrix[y][x];
+}
 
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Boolean (true/false)
@@ -310,6 +314,71 @@ const preValidate = [
                 }
             }
         }
+    }, {
+        '_name': 'INIT POLYOMINO VALIDATION',
+        'or': ['poly', 'ylop', 'polynt', 'scaler'],
+        'exec': function(puzzle, global, quick) {
+            global.polyntCorrect = []; global.polyIncorrect = [];
+        }
+    }, {
+        '_name': 'TENUOUS TRIANGLE VALUE DETERMINATION',
+        'or': ['vtriangle'],
+        'exec': function(puzzle, global, quick) {
+            global.vtriangleColors = {};
+            for (const region of global.regionCells.cell) for (const c of region) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!this.or.includes(cell.type)) continue;
+                let color = cell.color;
+                if (quick && global.vtriangleColors[color] == -1) continue;
+                let count = 0;
+                if (matrix(global, x+1, y) === 0) count++;
+                if (matrix(global, x-1, y) === 0) count++;
+                if (matrix(global, x, y-1) === 0) count++;
+                if (matrix(global, x, y+1) === 0) count++;
+                if (!puzzle.settings.ALLOW_ZERO_TENUOUS_TRIANGLE && count == 0) count = -1;
+                if (!global.vtriangleColors[color]) global.vtriangleColors[color] = count;
+                else {
+                    for (const [k, v] of Object.entries(global.vtriangleColors)) {
+                        if (k == color) { if (v != count)   global.vtriangleColors[k] = -1; }
+                        else              if (v == count) { global.vtriangleColors[k] = -1; global.vtriangleColors[color] = -1; }
+                    }
+                }
+            }
+        }
+    }, {
+        '_name': 'SIZER VALUE DETERMINATION',
+        'or': ['sizer'],
+        'exec': function(puzzle, global, quick) {
+            let globalSizerInfo = [];
+            for (let i = 1; i <= global.regionNum; i++) { 
+                const region = global.regionCells.cell[i];
+                let sizerInfo = {size: 0, weight: {}, pos: {}};
+                sizerInfo.size = global.regions.cell[i].length;
+                for (const c of region) {
+                    let [x, y] = xy(c);
+                    let cell = puzzle.getCell(x, y);
+                    if (!this.or.includes(cell.type)) continue;
+                    let color = cell.color;
+                    if (!sizerInfo.pos[color]) sizerInfo.pos[color] = [];
+                    sizerInfo.pos[color].push(c);
+                }
+                if (Object.keys(sizerInfo.pos).length === 0) continue; // no sizer in the region
+                for (const k in sizerInfo.pos) {
+                    sizerInfo.weight[k] = sizerInfo.size / sizerInfo.pos[k].length;
+                    if (!puzzle.settings.ALLOW_FRACTION_SIZER && (sizerInfo.size % sizerInfo.pos[k].length != 0)) sizerInfo.weight[k] = -1;
+                }
+                globalSizerInfo.push(sizerInfo);
+            }
+            global.sizerWeights = {}
+            for (const i in globalSizerInfo) {
+                for (const [k, v] of Object.entries(globalSizerInfo[i].weight)) {
+                    if (global.sizerWeights[k] == -1) continue;
+                    if (!global.sizerWeights[k]) global.sizerWeights[k] = v;
+                    else if (global.sizerWeights[k] != v) global.sizerWeights[k] = -1;
+                }
+            }
+        }
     }
 ];
 
@@ -320,8 +389,7 @@ const lineValidate = [
         'exec': function(puzzle, global, quick) {
             const isCross = function(x, y) {
                 if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width; // pillary boys, i hate pillary boys
-                if (isBounded(puzzle, x, y)) return (global.regionMatrix[y][x] == 0);
-                return false;
+                return matrix(global, x, y) === 0;
             }
             for (let c of global.regionCells.corner[0]) {
                 let [x, y] = xy(c);
@@ -404,15 +472,37 @@ const validate = [
                 let cell = puzzle.getCell(x, y);
                 if (!(cell && this.or.includes(cell.type))) continue;
                 let count = 0 // count !!
-                if (global.regionMatrix[y-1][x] == 0) count++
-                if (global.regionMatrix[y+1][x] == 0) count++
-                if (global.regionMatrix[y][x-1] == 0) count++
-                if (global.regionMatrix[y][x+1] == 0) count++
+                if (matrix(global, x+1, y) === 0) count++;
+                if (matrix(global, x-1, y) === 0) count++;
+                if (matrix(global, x, y-1) === 0) count++;
+                if (matrix(global, x, y+1) === 0) count++;
                 if (count != cell.count) {
                     console.info('[!] Triangle fault at', x, y, 'needs', cell.count, 'sides - actually has', count);
                     global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
+            }
+        }
+    }, {
+        '_name': 'TENUOUS TRIANGLE CHECK',
+        'or': ['vtriangle'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!(cell && this.or.includes(cell.type))) continue;
+                if (global.vtriangleColors[cell.color] == -1) global.regionData[regionNum].addInvalid(puzzle, c);
+            }
+        }
+    }, {
+        '_name': 'SIZER CHECK',
+        'or': ['sizer'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (let c of global.regionCells.cell[regionNum]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (!(cell && this.or.includes(cell.type))) continue;
+                if (global.sizerWeights[cell.color] == -1) global.regionData[regionNum].addInvalid(puzzle, c);
             }
         }
     }, {
@@ -429,7 +519,7 @@ const validate = [
                 for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
                     if (!isBounded(puzzle, x, y)) break; 
                     if (x == sourcex && y == sourcey) break; 
-                    if (global.regionMatrix[y][x] == (cell.type == 'arrow' ? 0 : regionNum)) {
+                    if (matrix(global, x, y) === (cell.type == 'arrow' ? 0 : regionNum)) {
                         count++;
                         if (count > cell.count) break;
                     }
@@ -463,7 +553,7 @@ const validate = [
         '_name': 'TWO BY TWO CHECK',
         'or': ['twobytwo'],
         'exec': function(puzzle, regionNum, global, quick) {
-            let isReg = function(x, y) { return isBounded(puzzle, x, y) && (global.regionMatrix[y][x] == regionNum); };
+            let isReg = function(x, y) { return isBounded(puzzle, x, y) && (matrix(global, x, y) === regionNum); };
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
@@ -534,10 +624,12 @@ const validate = [
         'or': ['poly', 'ylop', 'polynt', 'scaler'],
         'exec': function(puzzle, regionNum, global, quick) {
             let polys = []; let scalers = [0, 0];
+            let pos = { poly: [], ylop: [], polynt: [], scaler: [] };
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
                 if (!(cell && this.or.includes(cell.type))) continue;
+                pos[cell.type].push(c);
                 if (cell.type == 'scaler') {
                     if (cell.flip) scalers[1]++;
                     else scalers[0]++;
@@ -546,9 +638,10 @@ const validate = [
             }
             let downscalable = [];          
             for (let i = 0; i < polys.length; i++) if (polys[i].downscalable()) downscalable.push(i); // every polys are upscalable rn
-            global.polyntCorrect = true; global.polyIncorrect = true;
+            global.polyntCorrect[regionNum] = true; global.polyIncorrect[regionNum] = true;
             let ret = window.polyFitMaster(puzzle, regionNum, global, polys, scalers, downscalable, Array.from({length: polys.length}, (_, i) => i));
-            console.warn('return:', ret);
+            for (mistake of ret)
+                global.regionData[regionNum].addInvalids(puzzle, pos[mistake]);
         }
     }
 ];

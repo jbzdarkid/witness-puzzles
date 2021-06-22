@@ -240,7 +240,7 @@ function drawSymbols(puzzle, svg, target) {
         }
         switch (cell.dot % 6) {
           case -1:
-            params.color = 'white';
+            params.color = 'var(--line-default)';
             break;
           case -2:
             params.color = 'black';

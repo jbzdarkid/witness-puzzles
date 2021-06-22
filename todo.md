@@ -11,15 +11,15 @@ things to do
 - - [ ] vtriangle
 - - [ ] ask shaun to introduce other shapes too (smh)
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
-- [ ] draw svg for multitriangles (for graph mode)
 - [ ] relocate all puzzles in 1 folder
 
 ## relatively low effort (i can do it in a day)
 - [ ] navigation / main page
 - [ ] theme customization v2 - embed within puzzle
 - [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
-- [ ] fix drag boy not working on less than 2x2s
+- [x] fix drag boy not working on less than 2x2s
 - [ ] play template so i dont have to copy code
+- [ ] draw svg for multitriangles (for graph mode)
 
 ## important stuffs (h)
 - [ ] validate.js revamp cuz i feel like im tacking on things
@@ -49,11 +49,11 @@ made work:
 - [x] Two-By-Twos
 - [x] Celled Hexes
 - [x] Polyominos, Scalers (in progress)
-- [ ] Antipolyominos
-- [ ] Tenuous Triangles
-- [ ] Xs
+- [x] Antipolyominos
+- [x] Tenuous Triangles
+- [ ] Xs (in progress)
 - [ ] Bridges
-- [ ] Sizers
+- [x] Sizers
 - [ ] Negators, Copiers
 - [ ] Diagonal Lines
 - [ ] Double Squares
