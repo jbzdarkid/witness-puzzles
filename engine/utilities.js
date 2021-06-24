@@ -150,11 +150,11 @@ window.setLogLevel = function(level) {
   console.error = consoleError
   if (level === 'error') return
 
-  // Less serious than error, but flagged nonetheless
+  // Less serious than error, but flagged nonetheless (Default for auto solves)
   console.warn = consoleWarn
   if (level === 'warn') return
 
-  // Default visible, important information
+  // Only shows validation data, useful for manual solves
   console.info = consoleInfo
   if (level === 'info') return
 

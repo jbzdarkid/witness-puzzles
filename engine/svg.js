@@ -111,7 +111,7 @@ const triangleDistributions = [
 function triangleSingle(svg, params, xoffset, yoffset) {
   let path = createElement('path')
   svg.appendChild(path)
-  path.setAttribute('d', 'M -7 7 Q -9 7 -8 5 L -1 -6 Q 0 -7 1 -6 L 8 5 Q 9 7 7 7 z')
+  path.setAttribute('d', 'M -7 7 Q -9.1 7 -7.9 5 L -1 -6 Q 0 -7.7 1 -6 L 7.9 5 Q 9.1 7 7 7 z')
   setAttr(path, params)
   path.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
 }
@@ -218,19 +218,19 @@ window.drawSymbolWithSvg = function(svg, params) {
             triangleSingle(svg, params, 0, 0);
             break;
           case 2:
-            triangleSingle(svg, params, -10, 0);
-            triangleSingle(svg, params,  10, 0);
+            triangleSingle(svg, params, -9, 0);
+            triangleSingle(svg, params,  9, 0);
             break;
           case 3:
-            triangleSingle(svg, params,  0, -10);
-            triangleSingle(svg, params, -10, 10);
-            triangleSingle(svg, params,  10, 10);
+            triangleSingle(svg, params,  0, -8);
+            triangleSingle(svg, params, -9,  8);
+            triangleSingle(svg, params,  9,  8);
             break;
           case 4:
-            triangleSingle(svg, params, -10, -10);
-            triangleSingle(svg, params,  10, -10);
-            triangleSingle(svg, params, -10, 10);
-            triangleSingle(svg, params,  10, 10);
+            triangleSingle(svg, params, -9, -9);
+            triangleSingle(svg, params,  9, -9);
+            triangleSingle(svg, params, -9,  9);
+            triangleSingle(svg, params,  9,  9);
             break;
         }
       break;
@@ -493,7 +493,7 @@ window.drawSymbolWithSvg = function(svg, params) {
         simplePath(svg, params, 'M -13.5 12 Q -16.5 12 -13.5 7.5 L -1.5 -12 Q 0 -15 1.5 -12 L 15 9 Q 16.5 12 13.5 12 L 7 9 L 10.5 9 L 1.5 -6 Q 0 -8.3 -1.5 -6 L -10.5 9 L -7 9 L -1 -2 Q 0 -3.8 1 -2 L 7 9 L 13.5 12')
       }
       else {
-        triangleSingle(svg, params, 0, 3);
+        simplePath(svg, params, 'M -6 6 Q -8.2 6 -7 4 L -1 -5 Q 0 -6.6 1 -5 L 7 4 Q 8.2 6 6 6').setAttribute('transform', 'translate(' + midx + ', ' + (midy + 4) + ')');
         simplePath(svg, params, 'M -10 8.2 Q -11 10 -12 10 L -14 10 Q -15.2 10 -14 8 L -1 -12 Q 0 -13.6 1 -12 L 14 8 Q 15.2 10 14 10 L 12 10 Q 11 10 10 8.2 L 1 -6 Q 0 -7.7 -1 -6')
       }
       break;
@@ -537,7 +537,8 @@ window.drawSymbolWithSvg = function(svg, params) {
       simplePath(svg, params, 'M -2 -13.5 Q 0 -15 2 -13.5 L 10 -8 Q 12 -7 12 -5 L 12 5 Q 12 7 10 8 L 2 12.6 Q 0 14 -2 12.5 L -10 8 Q -12 7 -12 5 L -12 -5 Q -12 -7 -10 -8')
       break;
     case 'scaler':
-      simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14.6 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7.4 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7.4 14 -8 14').setAttribute('transform', 'translate(' + midx + ', ' + midy + ') scale(' + (params.flip ? -1 : 1) + ')');
+      if (params.flip) simplePath(svg, params, 'M -13 -14 Q -14 -14 -13 -12 L -2 10 Q 0 14.6 2 10 L 13 -12 Q 14 -14 13 -14 L 8 -14 Q 7.4 -14 7 -13 Q 6 -11 5 -11 L -1 -11 Q -2.3 -11 -2 -10 L -1 -6 Q -0.8 -5 0 -5 L 3 -5 Q 3.5 -5 3 -4 L 1 0 Q 0 2 -1 0 L -6 -11 Q -7.4 -14 -8 -14');
+      else simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14.6 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7.4 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7.4 14 -8 14');
       break;
     default: //------------------------------------ERROR HANDLING
       console.error('Cannot draw unknown SVG type: ' + params.type)

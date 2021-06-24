@@ -48,11 +48,11 @@ made work:
 - [x] Divided Diamonds
 - [x] Two-By-Twos
 - [x] Celled Hexes
-- [x] Polyominos, Scalers (in progress)
+- [x] Polyominos, Scalers
 - [x] Antipolyominos
 - [x] Tenuous Triangles
-- [ ] Xs (in progress)
-- [ ] Bridges
+- [x] Xs
+- [x] Bridges
 - [x] Sizers
 - [ ] Negators, Copiers
 - [ ] Diagonal Lines

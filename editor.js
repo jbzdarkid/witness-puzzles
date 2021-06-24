@@ -664,6 +664,7 @@ var symbolData = {
 let xButtons = [];
 
 function drawSymbolButtons() {
+
   var symbolTable = document.getElementById('symbolButtons')
   symbolTable.style.display = null
   for (var button of symbolTable.getElementsByTagName('button')) {
@@ -948,7 +949,7 @@ function shapeChooser() {
       cell.style.height = 58
       if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
         cell.clicked = true
-        cell.style.background = 'black'
+        cell.style.background = 'var(--line-default)'
       } else {
         cell.clicked = false
         cell.style.background = 'var(--line-undone)'
@@ -958,11 +959,21 @@ function shapeChooser() {
 }
 
 function shapeChooserClick(event, cell) {
+  function polySort(shape) {
+    let xBar = 4369;
+    let yBar =   15;
+    if (shape == 0) return 0;
+    while ((shape & xBar) == 0) shape >>= 1;
+    while ((shape & yBar) == 0) shape >>= 4;
+    return shape;
+  }
+
   var chooser = document.getElementById('chooser')
   if (cell == null) { // Clicked outside the chooser, close the selection window
     var anchor = document.getElementById('anchor')
     var puzzle = document.getElementById('puzzle')
 
+    activeParams.polyshape = polySort(activeParams.polyshape)
     if (activeParams.polyshape === 0 || activeParams.polyshape === 1048576) {
       activeParams.polyshape += 1 // Ensure that at least one square is filled
       drawSymbolButtons()

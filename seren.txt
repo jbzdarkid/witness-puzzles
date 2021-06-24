@@ -1,0 +1,55 @@
+bridges algorithm
+
+bridges: aggregate bridges in region by color
+for each color: 
+	if theres bridges outside this region: try to negate 
+	if impossible, wrong
+	bridge test
+
+bridge test:
+nodes: cell in region where iscellbridgepathfriendly is true
+=> cellbridgepathfriendly: cells that don't have anything or is same color
+graph: [[], [], [] ... []]. [] x node length
+for each right node in nodes:
+for each left node in nodes:
+if puzzlecellsadjacent, graph left<->right
+
+puzzlecellsadjacent:
+left is adjacent to right (2 direction: right, down) (4/2 to avoid doubleclick)
+
+isbridge = [true, false, false, false, true, false]... if node is bridge or not
+isintree = makeminimaltree(graph, first index of true, isbridge)
+makeminimaltree:
+	seen: [f, f, ...graph.length... f]
+	result: [f, f, ...graph.length... f]
+	start from first index of true, go down graph recursively (dfs)
+---
+req: A, E, I
+from node: see A, B, C  (res0: true)
+dfsA: see 0, C, D, E (resA: true)
+dfsC: see 0, A, D, E, F (resC: false)
+dfsD: see A, C, H, I (resD: false)
+dfsH: see B, E, G (resH: false)
+dfsB: see 0, A, F, H (resB: false)
+dfsF: see B (resF: false)
+B is false || false = false
+H is false || false = false
+dfsE: see A, C, H (resE: true)
+H is false || true = true
+dfsG: see H, I (resG: false)
+dfsI: see D, G (resI: true)
+G is true
+H is still true
+D is true
+C is true
+
+0, A, C, D, E, G, H, I is true, rest is false (array)
+
+anyways... if bridge isnt in tree, false
+istreeunique?
+::
+seen is copy of istreeunique (we found main tree)
+for each node that wasnt in
+B (b is true), rtn = null
+0 => candi = 0, rtn = 0
+A => candi = A, rtn = XXX

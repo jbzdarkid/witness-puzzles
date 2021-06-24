@@ -35,10 +35,10 @@ class RegionData {
      * @param {Puzzle} puzzle 
      * @param {pos<c>} c 
      */
-    addInvalid(puzzle, c) {
+    addInvalid(puzzle, c, immediately=false) {
         let [x, y] = xy(c);
         let cell = puzzle.getCell(x, y);
-        if (NEGATE_IMMEDIATELY.includes(cell.type) || cell.dot != window.LINE_NONE) {
+        if (immediately || NEGATE_IMMEDIATELY.includes(cell.type) || cell.dot > window.CUSTOM_X) {
             if (!this.nega || !this.nega.length) { // oh no! no more negators!
                 if (this.copier && this.copier.length && this.negaSource) { // but i can copy the used up negator!
                     let copyc = this.copier.pop();
@@ -62,39 +62,51 @@ class RegionData {
         }
     }
 
-    addInvalids(puzzle, cs) { for (const c of cs) { this.addInvalid(puzzle, c); }}
+    addInvalids(puzzle, cs, immediately=false) { for (const c of cs) { this.addInvalid(puzzle, c, immediately); }}
 }
-const DOWNSCALE = { 51: 1, 255: 3, 13311: 19, 65331: 49, 65484: 50, 13107: 17, 13260: 18, 52275: 33, 52479: 35, 65535: 51, 1048627: 1048577, 1048831: 1048579, 1061887: 1048595, 1113907: 1048625, 1114060: 1048626, 1061683: 1048593, 1061836: 1048594, 1100851: 1048609, 1101055: 1048611, 1114111: 1048627 };
-const DOWNSCALEABLE = [51, 255, 13311, 65331, 65484, 13107, 13260, 52275, 52479, 65535, 1048627, 1048831, 1061887, 1113907, 1114060, 1061683, 1061836, 1100851, 1101055, 1048627];
-const UPSCALE = { 1: 51, 3: 255, 19: 13311, 49: 65331, 50: 65484, 17: 13107, 18: 13260, 33: 52275, 35: 52479, 51: 65535, 1048577: 1048627, 1048579: 1048831, 1048595: 1061887, 1048625: 1113907, 1048626: 1114060, 1048593: 1061683, 1048594: 1061836, 1048609: 1100851, 1048611: 1101055, 1048627: 1114111 };
-const UPSCALEABLE = [1, 3, 19, 49, 50, 17, 18, 33, 35, 51, 1048577, 1048579, 1048595, 1048625, 1048626, 1048593, 1048594, 1048609, 1048611, 1048627];
+
 class Polyomino {
     constructor(puzzle, c) {
         this.pos = c;
         let [x, y] = xy(c);
         this.cell = puzzle.getCell(x, y);
-        this.shape = this.cell.polyshape; // 131072: upscale flag, 1048576: rotate flag
+        this.shape = this.cell.polyshape + 0; // 131072: upscale flag, 1048576: rotate flag
         this.type = this.cell.type;
     }
-
-    downscalable() { return DOWNSCALEABLE.includes(this.shape); }
-      upscalable() { return   UPSCALEABLE.includes(this.shape); }
-    downscale() { this.shape = DOWNSCALE[this.shape]; }
-      upscale() { this.shape =   UPSCALE[this.shape]; }
-
-    getCount() {
-        let count = 0;
-        for (i = 1; i > 65536; i << 1) if (this.shape & i) count++;
-        if (this.type == 'ylop') count *= -1;
-        return count;
+    aon(e) { return (this.cell.polyshape & e == 0) || (this.cell.polyshape & e == e); }
+    downscalable() {
+        return this.aon(51) && this.aon(204) && this.aon(13056) && this.aon(52224); // check if each 2x2 square is in same state
+    }
+    upscalable() { 
+        return (this.cell.polyshape == this.cell.polyshape & 1048627); // check if only first 2x2 exist (+1048576)
+    }
+    downscale() { // nearest neighbor
+        let ret = this.cell.polyshape & 1048576;
+        if (this.cell.polyshape &    1) ret += 1; // if x1y1~x2y2, x1y1
+        if (this.cell.polyshape &    4) ret += 2;
+        if (this.cell.polyshape &  512) ret += 16;
+        if (this.cell.polyshape & 2048) ret += 32; 
+        this.cell.polyshape = ret;
+    }
+    upscale() { 
+        if (this.upscalable()) {
+            let ret = this.cell.polyshape & 1048576;
+            if (this.cell.polyshape &  1) ret += 51; // if x1y1, x1y1~x2y2
+            if (this.cell.polyshape &  2) ret += 204;
+            if (this.cell.polyshape & 16) ret += 13056;
+            if (this.cell.polyshape & 32) ret += 52224; 
+            this.cell.polyshape = ret;
+        } else this.cell.polyshape += 131072;
     }
 }
 
-const NEGATE_IMMEDIATELY = ['triangle', 'arrow', 'dart', 'twobytwo']; // these work individually, and can be negated
+const NEGATE_IMMEDIATELY = ['dot', 'cross', 'curve', 'triangle', 'arrow', 'dart', 'twobytwo']; // these work individually, and can be negated
 const CHECK_ALSO = { // removing this 1 thing can affect these other symbols
-    'square': ['pentagon', 'star'],
-    'pentagon': ['square', 'star'],
+    'square': ['pentagon'],
+    'pentagon': ['square'],
+    'celledhex': ['dart', 'divdiamond', 'poly', 'ylop']
 };
+const ALWAYS_CHECK = ['bridge', 'star'];
 const METASHAPES = ['nega', 'copier'];
 const NONSYMBOLS = ['line']; // extension sake
 const NONSYMBOL_PROPERTY = ['type', 'line', 'start', 'end'];
@@ -187,6 +199,8 @@ window.validate = function(puzzle, quick) {
             fn.exec(puzzle, global, quick); if (!puzzle.valid && quick) return;
         }
     }
+    for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
+    console.info(puzzle.invalidElements)
     for (let i = 0; i < puzzle.invalidElements.length; i++) {
         let c = puzzle.invalidElements[i];
         let [x, y] = xy(c);
@@ -195,7 +209,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = puzzle.invalidElements.length == 0;
-    console.warn(puzzle, global);
+    // console.warn(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -379,6 +393,42 @@ const preValidate = [
                 }
             }
         }
+    }, {
+        '_name': 'BRIDGE CROSS-REGION CHECK',
+        'or': ['bridge'],
+        'exec': function(puzzle, global, quick) {
+            global.bridges = {};
+            global.invalidBridges = {};
+            global.bridgeRegions = {};
+            for (const region of global.regionCells.cell) {
+                let bridges = {};
+                for (const c of region) {
+                    let [x, y] = xy(c);
+                    let cell = puzzle.getCell(x, y);
+                    if (!this.or.includes(cell.type)) continue;
+                    let color = cell.color;
+                    if (!global.bridgeRegions[color]) global.bridgeRegions[color] = new Set([matrix(global, x, y)]);
+                    else global.bridgeRegions[color].add(matrix(global, x, y));
+                    if (global.bridges[color]) { // already existing
+                        if (!global.invalidBridges[color]) global.invalidBridges[color] = global.bridges[color];
+                        delete global.bridges[color];
+                        global.invalidBridges[color].push(c);
+                    } else {
+                        if (!bridges[color]) bridges[color] = [];
+                        bridges[color].push(c);
+                    }
+                }
+                Object.assign(global.bridges, bridges);
+            }
+            for (const k in global.bridgeRegions) global.bridgeRegions[k] = Array.from(global.bridgeRegions[k]);
+            // TODO: change this with better negation handling after ur done negating
+            Object.assign(global.bridges, global.invalidBridges);
+            let bridgeRegions = Array.from({length: global.regionNum + 1}, () => []);
+            for (const [color, regions] of Object.entries(global.bridgeRegions)) {
+                for (const region of regions) bridgeRegions[region].push(color);
+            }
+            global.bridgeRegions = bridgeRegions;
+        }
     }
 ];
 
@@ -402,6 +452,25 @@ const lineValidate = [
                     global.regionData[0].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
+            }
+        }
+    }, {
+        '_name': 'X MARKINGS',
+        'or': ['x'],
+        'exec': function(puzzle, global, quick) {
+            global.invalidXs = [];
+            for (let c of global.regionCells.corner[0]) {
+                let [x, y] = xy(c);
+                let cell = puzzle.getCell(x, y);
+                if (cell.dot > window.CUSTOM_X) continue;
+                let spokes = -cell.dot - 13
+                let regions = new Set();
+                if (spokes & 1) regions.add(matrix(global, x-1, y-1));
+                if (spokes & 2) regions.add(matrix(global, x+1, y-1));
+                if (spokes & 4) regions.add(matrix(global, x-1, y+1));
+                if (spokes & 8) regions.add(matrix(global, x+1, y+1));
+                regions = Array.from(regions);
+                global.invalidXs.push(regions);
             }
         }
     }
@@ -432,7 +501,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 pos[cell.type].push(c);
                 if (color[cell.type] == -1) continue; // no need to continue already bonked
                 if (color[cell.type] == null) color[cell.type] = cell.color; // init
@@ -455,7 +524,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 if (global.regionColors.cell[regionNum][cell.color].length != 2) {
                     console.info('[!] Star fault: ', cell.color);
                     global.regionData[regionNum].addInvalid(puzzle, c);
@@ -470,7 +539,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 let count = 0 // count !!
                 if (matrix(global, x+1, y) === 0) count++;
                 if (matrix(global, x-1, y) === 0) count++;
@@ -490,7 +559,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 if (global.vtriangleColors[cell.color] == -1) global.regionData[regionNum].addInvalid(puzzle, c);
             }
         }
@@ -501,7 +570,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 if (global.sizerWeights[cell.color] == -1) global.regionData[regionNum].addInvalid(puzzle, c);
             }
         }
@@ -512,7 +581,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [sourcex, sourcey] = xy(c);
                 let cell = puzzle.getCell(sourcex, sourcey);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 let count = 0; let dir = dr(cell.rot);
                 if (cell.type == 'dart') { dir.x *= 2; dir.y *= 2; }
                 let x = sourcex + dir.x; let y = sourcey + dir.y;
@@ -540,7 +609,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (cell && this.or.includes(cell.type)) {
+                if (this.or.includes(cell.type)) {
                     if (cell.count != global.regionCells.all[regionNum].length) {
                         console.info('[!] Divided Diamond fault at', x, y, 'needs', cell.count, 'instances - actually has', global.regionCells.all[regionNum].length);
                         global.regionData[regionNum].addInvalid(puzzle, c);
@@ -557,7 +626,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (cell && this.or.includes(cell.type)) {
+                if (this.or.includes(cell.type)) {
                     if ( isReg(x+2, y-2) && isReg(x+2, y) && isReg(x, y-2) 
                       || isReg(x-2, y-2) && isReg(x-2, y) && isReg(x, y-2) 
                       || isReg(x+2, y+2) && isReg(x+2, y) && isReg(x, y+2) 
@@ -579,7 +648,6 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!cell) continue;
                 switch (cell.type) {
                     case 'divdiamond':
                     case 'poly':
@@ -628,7 +696,7 @@ const validate = [
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (!(cell && this.or.includes(cell.type))) continue;
+                if (!this.or.includes(cell.type)) continue;
                 pos[cell.type].push(c);
                 if (cell.type == 'scaler') {
                     if (cell.flip) scalers[1]++;
@@ -640,8 +708,72 @@ const validate = [
             for (let i = 0; i < polys.length; i++) if (polys[i].downscalable()) downscalable.push(i); // every polys are upscalable rn
             global.polyntCorrect[regionNum] = true; global.polyIncorrect[regionNum] = true;
             let ret = window.polyFitMaster(puzzle, regionNum, global, polys, scalers, downscalable, Array.from({length: polys.length}, (_, i) => i));
+            for (poly of polys) {
+                poly.cell.polyshape = poly.shape;
+            }
             for (mistake of ret)
                 global.regionData[regionNum].addInvalids(puzzle, pos[mistake]);
+        }
+    }, {
+        '_name': 'BRIDGE CHECK',
+        'or': ['bridge'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (const color of global.bridgeRegions[regionNum]) {
+                if (global.invalidBridges[color]) { // invalid
+                    for (c of global.bridges[color]) {
+                        let [x, y] = xy(c);
+                        if (matrix(global, x, y) == regionNum) global.regionData[regionNum].addInvalid(puzzle, c);
+                    }
+                } else { // valid, start logic
+                    //* make adjacency graph
+                    let adj = {};
+                    function isCellBridgePathFriendly(x, y, color) { 
+                        if (matrix(global, x, y) !== regionNum) return false;
+                        let cell = puzzle.getCell(x, y);
+                        return !cell || !cell.color === null || cell.color === color; 
+                    }
+                    for (c of global.regions.cell[regionNum]) {
+                        adj[c] = [];
+                        let [x, y] = xy(c);
+                        if (isCellBridgePathFriendly(x-2, y, color)) adj[c].push(ret(x-2, y));
+                        if (isCellBridgePathFriendly(x+2, y, color)) adj[c].push(ret(x+2, y));
+                        if (isCellBridgePathFriendly(x, y-2, color)) adj[c].push(ret(x, y-2));
+                        if (isCellBridgePathFriendly(x, y+2, color)) adj[c].push(ret(x, y+2));
+                    }
+                    //* make tree
+                    let seen = new Set();
+                    let tree = new Set(global.bridges[color]);
+                    function treeloop(fromparam) {
+                        const from = fromparam;
+                        seen.add(from);
+                        for (const child of adj[from]) if (!seen.has(child)) {
+                            treeloop(child);
+                            if (tree.has(child)) tree.add(from);
+                        }
+                    }
+                    treeloop(global.bridges[color][0]);
+                    seen = new Set(tree);
+                    //* check if tree is unique
+                    function uniqueloop(from) {
+                        seen.add(from);
+                        let reachableTreeNode = null;
+                        for (const child of adj[from]) {
+                            const candidate = tree.has(child) ? child : (seen.has(child) ? null : uniqueloop(child));
+                            if (candidate !== null && candidate !== reachableTreeNode) {
+                                if (reachableTreeNode === null) reachableTreeNode = candidate;
+                                else return -1;
+                            }
+                        }
+                        return reachableTreeNode;
+                    }
+                    let res = false;
+                    for (c of global.regions.cell[regionNum]) if (!seen.has(c) && (uniqueloop(c) === -1)) res = true;
+                    if (res) {
+                        console.info('[!] Bridge fault on region', regionNum, 'color', color, global.bridges[color]);
+                        global.regionData[regionNum].addInvalids(puzzle, global.bridges[color]);
+                    }
+                }
+            }
         }
     }
 ];
