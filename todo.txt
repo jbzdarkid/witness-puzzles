@@ -1,6 +1,7 @@
 SHIP BLOCKERS
 
 BUGS
+- iOS is scrolling while solving, looks like I broke this when I tried to fix android.
 - Android is still fairly buggy.
   - while solving a puzzle the page scrolling is annoying af, practically not even usable
   - it only does the annoying scrolling in editor
@@ -10,6 +11,8 @@ BUGS
 - Some nonsense with floodfill going *through* single lines, which of course makes everything *weird*.
 - Puzzle titles are overlapping with the rest of the menu bar (on play_template)
 - Perf:
+  * Check if it's practically worth running earlyExit when doing triangle computation. Maybe I should just always turn this off in pure-triangle puzzles?
+  * Precompute "doPruning" and save it, so we don't recompute the value on every solve loop. Maybe take a look for other cheap dereferences that are happening?
   * Early validate for triangles... specifically 1 & 2 (if they have 2/3 sides covered)
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
