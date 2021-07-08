@@ -517,7 +517,7 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex'].includes(activeParams.type)) {
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'portal', 'blackhole'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -659,6 +659,11 @@ var symbolData = {
   'copier': {'type':'copier', 'title':'artless\' Copiers'},
   'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
   'scaler': {'type':'scaler', 'flip': 0, 'title':'artless\' Scalers'},
+  'portal': {'type':'portal', 'rot': 0, 'title':'MarioMak\'s Portals'},
+  'blackhole': {'type':'blackhole', 'rot': 0, 'title':'Pruz\'s Black Holes'},
+  'atriangle': {'type':'atriangle', 'count':1, 'title':'Klyzx\'s Antitriangles'},
+  'whitehole': {'type':'whitehole', 'rot': 0, 'title':'White Holes'},
+  'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
 
 let xButtons = [];

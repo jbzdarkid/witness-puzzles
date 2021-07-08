@@ -12,10 +12,11 @@ things to do
 - - [ ] ask shaun to introduce other shapes too (smh)
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
 - [ ] relocate all puzzles in 1 folder
+- [ ] hide symmetry lines toggle
 
 ## relatively low effort (i can do it in a day)
 - [ ] navigation / main page
-- [ ] theme customization v2 - embed within puzzle
+- [ ] theme customization v2 - embed within puzzle (puzzle back/foreground)
 - [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
 - [x] fix drag boy not working on less than 2x2s
 - [ ] play template so i dont have to copy code
@@ -56,5 +57,10 @@ made work:
 - [x] Sizers
 - [ ] Negators, Copiers
 - [ ] Diagonal Lines
-- [ ] Double Squares
-- [ ] Corner Negators
+- [ ] Portals
+- [ ] Black, Whiteholes
+- [ ] Antitriangle
+
+todo tomorrow
+antitriangle svg
+redo code in editor.js

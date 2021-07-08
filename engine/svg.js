@@ -114,6 +114,7 @@ function triangleSingle(svg, params, xoffset, yoffset) {
   path.setAttribute('d', 'M -7 7 Q -9.1 7 -7.9 5 L -1 -6 Q 0 -7.7 1 -6 L 7.9 5 Q 9.1 7 7 7 z')
   setAttr(path, params)
   path.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
+  return path;
 }
 
 function onebyone(svg, params, xoffset, yoffset) {
@@ -122,6 +123,7 @@ function onebyone(svg, params, xoffset, yoffset) {
   setAttr(hex, params)
   hex.setAttribute('points', '7.07 0, 0 7.07, -7.07 0, 0 -7.07')
   hex.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
+  return hex;
 }
 
 function enobyeno(svg, params, xoffset, yoffset) {
@@ -130,6 +132,7 @@ function enobyeno(svg, params, xoffset, yoffset) {
   setAttr(hex, params)
   hex.setAttribute('points', '8.49 0, 0 8.49, -8.49 0, 0 -8.49, 8.49 0, 4.24 0, 0 -4.24, -4.24 0, 0 4.24, 4.24 0')
   hex.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
+  return hex;
 }
 
 function dartSingle(svg, params, rot, xoffset, yoffset) {
@@ -141,6 +144,7 @@ function dartSingle(svg, params, rot, xoffset, yoffset) {
   let transform = rotate(45 * params.rot)
   transform += ' translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')'
   path.setAttribute('transform', transform)
+  return path;
 }
 
 //********************** MAIN **********************//
@@ -207,6 +211,45 @@ window.drawSymbolWithSvg = function(svg, params) {
               let Xcoord = midx + 11 * (2 * x - wide + 1)
               let Ycoord = midy + 10 * (2 * y - high + 1)
               poly.setAttribute('points', '0 -8, -8 6, 8 6')
+              setAttr(poly, params)
+              poly.setAttribute('transform', 'translate(' + Xcoord + ', ' + Ycoord + ')')
+            }
+          }
+        }
+      else
+        switch (params.count) {
+          case 1:
+            triangleSingle(svg, params, 0, 0);
+            break;
+          case 2:
+            triangleSingle(svg, params, -9, 0);
+            triangleSingle(svg, params,  9, 0);
+            break;
+          case 3:
+            triangleSingle(svg, params,  0, -8);
+            triangleSingle(svg, params, -9,  8);
+            triangleSingle(svg, params,  9,  8);
+            break;
+          case 4:
+            triangleSingle(svg, params, -9, -9);
+            triangleSingle(svg, params,  9, -9);
+            triangleSingle(svg, params, -9,  9);
+            triangleSingle(svg, params,  9,  9);
+            break;
+        }
+      break;
+    case 'atriangle': //------------------------------------TRIANGLE
+      if (localStorage.symbolTheme == "Canonical") {
+          let distribution = triangleDistributions[params.count]
+          let high = distribution.length
+          for (var y = 0; y < high; y++) {
+            let wide = distribution[y]
+            for (var x = 0; x < wide; x++) {
+              poly = createElement('polygon')
+              svg.appendChild(poly)
+              let Xcoord = midx + 11 * (2 * x - wide + 1)
+              let Ycoord = midy + 10 * (2 * y - high + 1)
+              poly.setAttribute('points', '0 9, 9 -7, -9 -7, 0 9, 0 4, -3.5 -3, 3.5 -3, 0 4')
               setAttr(poly, params)
               poly.setAttribute('transform', 'translate(' + Xcoord + ', ' + Ycoord + ')')
             }
@@ -540,6 +583,56 @@ window.drawSymbolWithSvg = function(svg, params) {
       if (params.flip) simplePath(svg, params, 'M -13 -14 Q -14 -14 -13 -12 L -2 10 Q 0 14.6 2 10 L 13 -12 Q 14 -14 13 -14 L 8 -14 Q 7.4 -14 7 -13 Q 6 -11 5 -11 L -1 -11 Q -2.3 -11 -2 -10 L -1 -6 Q -0.8 -5 0 -5 L 3 -5 Q 3.5 -5 3 -4 L 1 0 Q 0 2 -1 0 L -6 -11 Q -7.4 -14 -8 -14');
       else simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14.6 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7.4 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7.4 14 -8 14');
       break;
+    case 'portal':
+      if (localStorage.symbolTheme == "Canonical") {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '10px');
+        for (a of [0, 90, 180, 270]) {
+          simplePath(svg, params, 'M -6 -10 A 3 3 90 0 1 6 -10 C 6 -14 -6 -14 -6 -10').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+      } else {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '16px');
+        let b1 = simpleDot(svg, params, 0, 0)
+        b1.setAttribute('r', '13px');
+        b1.setAttribute('fill', 'var(--inner)');
+        let b2 = simpleLine(svg, params, 20, 7, 45);
+        let b3 = simpleLine(svg, params, 20, 7, 135);
+        let b4 = simpleLine(svg, params, 20, 7, 225);
+        let b5 = simpleLine(svg, params, 20, 7, 315);
+        b2.setAttribute('fill', 'var(--inner)');
+        b3.setAttribute('fill', 'var(--inner)');
+        b4.setAttribute('fill', 'var(--inner)');
+        b5.setAttribute('fill', 'var(--inner)');
+        simpleDot(svg, params, 0, 0).setAttribute('r', '10px');
+      }
+      break;
+    case 'blackhole':
+      if (localStorage.symbolTheme == "Canonical") {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '20px');
+        let temp = simpleDot(svg, params, 0, 0);
+        temp.setAttribute('r', '25px');
+        temp.setAttribute('opacity', '0.5');
+      } else {
+        for (a of [0, 72, 144, 216, 288]) {
+          simplePath(svg, params, 'M 0 2 A 1 1 0 0 0 0 -14 A 1 1 0 0 0 0 -10 A 1 1 0 0 1 0 -2 A 1 1 0 0 0 0 2').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+      }
+      break;
+    case 'whitehole':
+      if (localStorage.symbolTheme == "Canonical") {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '20px');
+        let b2 = simpleDot(svg, params, 0, 0);
+        b2.setAttribute('r', '17px');
+        b2.setAttribute('fill', 'var(--inner)');
+        let temp = simpleDot(svg, params, 0, 0);
+        temp.setAttribute('r', '25px');
+        temp.setAttribute('opacity', '0.5');
+      } else {
+        for (a of [0, 72, 144, 216, 288]) {
+          simplePath(svg, params, 'M 0 4 A 1 1 90 0 1 0 -16 L 0 -13 A 1 1 90 0 0 0 0 A 1 1 90 0 0 0 0 A 1 1 90 0 1 0 -11 A 1 1 90 0 0 0 -13 L 0 -16 A 1 1 90 0 1 0 -8 A 1 1 90 0 0 0 -4 A 1 1 90 0 1 0 4').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+      }
+      break;
+    case 'none': break;
     default: //------------------------------------ERROR HANDLING
       console.error('Cannot draw unknown SVG type: ' + params.type)
       break;

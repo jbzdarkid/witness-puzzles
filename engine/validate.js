@@ -39,8 +39,8 @@ class RegionData {
         let [x, y] = xy(c);
         let cell = puzzle.getCell(x, y);
         if (immediately || NEGATE_IMMEDIATELY.includes(cell.type) || cell.dot > window.CUSTOM_X) {
-            if (!this.nega || !this.nega.length) { // oh no! no more negators!
-                if (this.copier && this.copier.length && this.negaSource) { // but i can copy the used up negator!
+            if (!this.nega?.length) { // oh no! no more negators!
+                if (this.copier?.length && this.negaSource) { // but i can copy the used up negator!
                     let copyc = this.copier.pop();
                     let [copyx, copyy] = xy(copyc);
                     let [sourcex, sourcey] = xy(this.negaSource)
@@ -114,7 +114,7 @@ const COLOR_DEPENDENT = ['square', 'star', 'pentagon', 'vtriangle', 'bridge'];
 
 function eraseShape(puzzle, x, y) {
     let cell = puzzle.grid[x][y];
-    if (cell && NONSYMBOLS.includes(cell.type)) {
+    if (NONSYMBOLS.includes(cell?.type)) {
         let newCell = {};
         for (prop of NONSYMBOL_PROPERTY)
             newCell[prop] = cell[prop]
@@ -140,9 +140,7 @@ const DIR = [
     {'x':-1, 'y': 0},
     {'x':-1, 'y':-1},
 ];  
-function dr(n) {
-    return DIR[n];
-}
+function dr(n) { return [DIR[n].x, DIR[n].y]; }
 const detectionMode = {
     "all":    (x, y) => { return true; },
     "cell":   (x, y) => { return (x & y) % 2 == 1; },
@@ -156,13 +154,8 @@ function intersects(a, b) { // check for intersection
     if (a.length == 1) return b.includes(a[0]); if (b.length == 1) return a.includes(b[0]);
     return a.reduce((k, p) => { return k || b.includes(p);}, false);
 }
-function isBounded(puzzle, x, y) {
-  return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height);
-}
-function matrix(global, x, y) {
-    if (!global.regionMatrix[y]) return undefined;
-    return global.regionMatrix[y][x];
-}
+function isBounded(puzzle, x, y) { return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height); }
+function matrix(global, x, y) { return global.regionMatrix[y]?.[x]; }
 
 // Determines if the current grid state is solvable. Modifies the puzzle element with:
 // valid: Boolean (true/false)
@@ -299,8 +292,8 @@ function init(puzzle) { // initialize globals
                 global.regionColors[k].push({});
                 for (const pos of region) { // triple loop! yeahhhh
                     const cell = cel(puzzle, pos);
-                    if (!cell || !cell.color) continue;
-                    if (!global.regionColors[k][i][cell.color]) global.regionColors[k][i][cell.color] = [];
+                    if (!cell?.color) continue;
+                    global.regionColors[k][i][cell.color] ??= [];
                     global.regionColors[k][i][cell.color].push(pos);
                 }
                 i++;
@@ -351,12 +344,10 @@ const preValidate = [
                 if (matrix(global, x, y-1) === 0) count++;
                 if (matrix(global, x, y+1) === 0) count++;
                 if (!puzzle.settings.ALLOW_ZERO_TENUOUS_TRIANGLE && count == 0) count = -1;
-                if (!global.vtriangleColors[color]) global.vtriangleColors[color] = count;
-                else {
-                    for (const [k, v] of Object.entries(global.vtriangleColors)) {
-                        if (k == color) { if (v != count)   global.vtriangleColors[k] = -1; }
-                        else              if (v == count) { global.vtriangleColors[k] = -1; global.vtriangleColors[color] = -1; }
-                    }
+                global.vtriangleColors[color] ??= count;
+                for (const [k, v] of Object.entries(global.vtriangleColors)) {
+                    if (k == color) { if (v != count)   global.vtriangleColors[k] = -1; }
+                    else              if (v == count) { global.vtriangleColors[k] = -1; global.vtriangleColors[color] = -1; }
                 }
             }
         }
@@ -388,8 +379,8 @@ const preValidate = [
             for (const i in globalSizerInfo) {
                 for (const [k, v] of Object.entries(globalSizerInfo[i].weight)) {
                     if (global.sizerWeights[k] == -1) continue;
-                    if (!global.sizerWeights[k]) global.sizerWeights[k] = v;
-                    else if (global.sizerWeights[k] != v) global.sizerWeights[k] = -1;
+                    global.sizerWeights[k] ??= v;
+                    if (global.sizerWeights[k] != v) global.sizerWeights[k] = -1;
                 }
             }
         }
@@ -407,10 +398,10 @@ const preValidate = [
                     let cell = puzzle.getCell(x, y);
                     if (!this.or.includes(cell.type)) continue;
                     let color = cell.color;
-                    if (!global.bridgeRegions[color]) global.bridgeRegions[color] = new Set([matrix(global, x, y)]);
-                    else global.bridgeRegions[color].add(matrix(global, x, y));
+                    global.bridgeRegions[color] ??= new Set([matrix(global, x, y)]);
+                    global.bridgeRegions[color].add(matrix(global, x, y));
                     if (global.bridges[color]) { // already existing
-                        if (!global.invalidBridges[color]) global.invalidBridges[color] = global.bridges[color];
+                        global.invalidBridges[color] ??= global.bridges[color];
                         delete global.bridges[color];
                         global.invalidBridges[color].push(c);
                     } else {
@@ -504,8 +495,8 @@ const validate = [
                 if (!this.or.includes(cell.type)) continue;
                 pos[cell.type].push(c);
                 if (color[cell.type] == -1) continue; // no need to continue already bonked
-                if (color[cell.type] == null) color[cell.type] = cell.color; // init
-                else if (color[cell.type] != cell.color) { // bonk
+                color[cell.type] ??= cell.color; // init
+                if (color[cell.type] != cell.color) { // bonk
                     console.info('[!] Segregation fault: ', cell.color, cell.type)
                     color[cell.type] = -1
                 }
@@ -582,18 +573,19 @@ const validate = [
                 let [sourcex, sourcey] = xy(c);
                 let cell = puzzle.getCell(sourcex, sourcey);
                 if (!this.or.includes(cell.type)) continue;
-                let count = 0; let dir = dr(cell.rot);
-                if (cell.type == 'dart') { dir.x *= 2; dir.y *= 2; }
-                let x = sourcex + dir.x; let y = sourcey + dir.y;
+                let count = 0; let [dx, dy] = dr(cell.rot);
+                let x = sourcex; let y = sourcey;
+                if (cell.type == 'arrow') { x -= dx; y -= dy; }
+                dx *= 2; dy *= 2; x += dx; y += dy;
                 for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
+                    if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
                     if (!isBounded(puzzle, x, y)) break; 
                     if (x == sourcex && y == sourcey) break; 
                     if (matrix(global, x, y) === (cell.type == 'arrow' ? 0 : regionNum)) {
                         count++;
                         if (count > cell.count) break;
                     }
-                    x += dir.x; y += dir.y // increment
-                    if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
+                    x += dx; y += dy // increment
                 }
                 if (cell.count != count) {
                     console.info('[!] Directional Counter fault at', sourcex, sourcey, 'needs', cell.count, 'instances - actually has', count);
@@ -656,9 +648,10 @@ const validate = [
                         hexes.push({'pos': c, 'cell': cell});
                         break;
                     case 'dart':
-                        darts.push({'pos': c, 'dir': dr(cell.rot)});
+                        const [dxtemp, dytemp] = dr(cell.rot);
+                        darts.push({'pos': c, 'dx': dxtemp*2, 'dy': dytemp*2});
                         break;
-                    case 'sun':
+                    case 'star':
                         colors.push(cell.color);
                         break;
                 }
@@ -670,14 +663,14 @@ const validate = [
             }
             for (const dart of darts) {
                 let [sourcex, sourcey] = xy(dart.pos);
-                let x = sourcex + dart.dir.x * 2;
-                let y = sourcey + dart.dir.y * 2;
+                let x = sourcex + dart.dx;
+                let y = sourcey + dart.dy;
                 for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
                     if (!isBounded(puzzle, x, y)) break; 
                     if (x == sourcex && y == sourcey) break; 
                     hexes = hexes.filter(c => { return c.pos != ret(x, y); });
                     if (!hexes.length) return; // true epic
-                    x += dart.dir.x * 2; y += dart.dir.y * 2 // increment
+                    x += dart.dx; y += dart.dy // increment
                     if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
                 }
             }
