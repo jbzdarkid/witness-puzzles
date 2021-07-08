@@ -1,4 +1,5 @@
 SHIP BLOCKERS
+- z.write(arcname, path) is backwards. Double check zip file construction for non-replaced files.
 
 BUGS
 - iOS is scrolling while solving, looks like I broke this when I tried to fix android.
