@@ -45,6 +45,12 @@ function getRotations(polyshape) {
   return rotations
 }
 
+// 90 degree rotations of the polyomino
+window.rotatePolyshape = function(polyshape, count=1) {
+  var rotations = getRotations(polyshape & window.ROTATION_BIT)
+  return rotations[count % 4]
+}
+
 // IMPORTANT NOTE: When formulating these, the top row must contain (0, 0)
 // That means there will never be any negative y values.
 // (0, 0) must also be a cell in the shape, so that
