@@ -2,6 +2,7 @@ SHIP BLOCKERS
 - z.write(arcname, path) is backwards. Double check zip file construction for non-replaced files.
 
 BUGS
+- Dragging is busted, a bit. Dragging down left while on the left side of a horizontal is not causing left motion! (likely true 4x)
 - iOS is scrolling while solving, looks like I broke this when I tried to fix android.
 - Android is still fairly buggy.
   - while solving a puzzle the page scrolling is annoying af, practically not even usable
@@ -27,13 +28,14 @@ FEATURES
 - Clicking the Auto-Solve repeatedly makes the progress bar freak out and displays the wrong number of solutions.
 - There is also no way to cancel an auto-solve, and
 - it is possible to edit the puzzle while the auto-solve is loading, causing an incorrect number of solutions.
-- symmetry puzzles should still show line colors when solved
+- symmetry puzzles should still show line colors when solved (Add two more fade colors, shouldn't be too too hard)
 - Editor undo/redo
   > Only for active puzzle
   > Keep in-memory (do not write to local storage)
   > Linear (overwritten once a change is made)
   Just keep an array of serialized puzzles and an index, then when you call writePuzzle it should splice at index.
   Undo & Redo w/ gray out once we hit the limit. Pretty easy IMO.
+  (This probably should only happen once I have new serialization. Just for memory consumption reasons.)
 - Reduce puzzle serialization size? [Good to go, pending test against DB]
   This is the main play I have against people attacking my system -- make it harder to send bad data.
 - Telemetry tracking (even if it's not doing anything yet)

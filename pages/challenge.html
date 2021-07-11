@@ -22,17 +22,14 @@
   <body>
     <script>loadHeader('The Challenge')</script>
 
+    <iframe width="400px" height="150px" frameborder="0" src="https://www.youtube.com/embed/B25mZ15bQaY"></iframe>
+
     <div style="text-align: center;">
-      <button id="soln" onpointerdown="showSolutions()">Show Solutions</button>
-      <button id="new" onpointerdown="startChallenge()">Start New</button>
+      <button onpointerdown="showSolutions()">Show Solutions</button>
+      <button onpointerdown="restartChallenge()">Start New</button>
     </div>
 
-    <div style="display: flex">
-      <svg id="polyominos" style="pointer-events: auto"></svg>
-      <svg id="triangles-left" style="pointer-events: auto"></svg>
-      <svg id="triangles-right" style="pointer-events: auto"></svg>
-      <svg id="pillar-left" style="pointer-events: auto"></svg>
-      <svg id="pillar-right" style="pointer-events: auto"></svg>
+    <div id="challenge" style="text-align: center;">
     </div>
     <div id="solutionViewer-meta" style="display: flex">
       <!--

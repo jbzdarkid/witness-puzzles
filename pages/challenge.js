@@ -1,13 +1,47 @@
 namespace(function() {
 
 var seed = 0
+var difficulty = 0
+var completedPuzzles = []
+
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
   seed = parseInt(params.get('seed')) || 0
-
+  if (seed === 0) {
+    seed = crypto.getRandomValues(new Uint32Array(1))[0]
+    params.set('seed', seed)
+    window.location.search = params.toString()
+    return // Changing window.location triggers a refresh, and we don't want to generate puzzles after doing that!
+  }
+  if (params.get('difficulty') == 'hard') {
+    difficulty = 1
+  }
+  // TODO: Show record player. This will cover the loading times + also verisimilitude. Yis.
   generatePuzzles() // TODO: Hard mode? Maybe... always hard mode?
+  document.getElementById('polyominos').style.display = null
 }
 
+// TODO: TRACE_FAILURE_FUNC so I can do rerolls?
+window.TRACE_COMPLETION_FUNC = function(puzzle) {
+  // TODO: window.setTimeout here... instant disappear is bad!
+  completedPuzzles.push(puzzle.name)
+
+  if (completedPuzzles.includes('pillar-left') && completedPuzzles.includes('pillar-right')) {
+    // Stop video
+    // play fanfare?
+  } else if (completedPuzzles.includes('triangles-left') && completedPuzzles.includes('triangles-right')) {
+    document.getElementById('triangles-left').style.display = 'none'
+    document.getElementById('triangles-right').style.display = 'none'
+    document.getElementById('pillar-left').style.display = null
+    document.getElementById('pillar-right').style.display = null
+  } else if (puzzle.name == 'polyominos') {
+    document.getElementById('polyominos').style.display = 'none'
+    document.getElementById('triangles-left').style.display = null
+    document.getElementById('triangles-right').style.display = null
+  }
+}
+
+// TODO: Confirm styles via hacking. Make notes here based on old version offsets.
 var styles = [
   {
     'id': 'polyominos', 'difficulty': 9999,
@@ -16,14 +50,14 @@ var styles = [
       puzzle.grid[0][8].start = true
       puzzle.grid[8][0].end = 'top'
 
-      // TODO: Select a random colors
+      // TODO: Select a random color
       for (var cell of randomDistinctCells(puzzle, 2)) {
         puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': 'yellow', 'polyshape': randomPolyomino()}
       }
       for (var cell of randomDistinctCells(puzzle, 2)) {
         puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'orange'}
       }
-      for (var cell of randomEdges(puzzle, 4)) { // TODO: How many gaps?
+      for (var cell of randomEdges(puzzle, 8)) {
         puzzle.grid[cell.x][cell.y].gap = 1
       }
       return puzzle
@@ -52,16 +86,12 @@ var styles = [
       }
       return puzzle
     }
-  }, {
+  }, { // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
     'id': 'pillar-left', 'difficulty': 9999,
     'createPuzzle': function() {
       var puzzle = new Puzzle(6, 6, true)
       applyRandomPillarSymmetry(puzzle)
 
-      // TODO: Confirm syntax
-      for (var cell of randomEdges(puzzle, 8)) {
-        puzzle.grid[cell.x][cell.y].gap = 1
-      }
       for (var cell of randomEdges(puzzle, 8)) {
         puzzle.grid[cell.x][cell.y].dot = 1
       }
@@ -74,12 +104,10 @@ var styles = [
       applyRandomPillarSymmetry(puzzle)
 
       for (var cell of randomDistinctCells(puzzle, 3)) {
-        puzzle.updateCell2(cell.x, cell.y, 'type', 'stone')
-        puzzle.updateCell2(cell.x, cell.y, 'color', 'white')
+        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
       }
       for (var cell of randomDistinctCells(puzzle, 3)) {
-        puzzle.updateCell2(cell.x, cell.y, 'type', 'stone')
-        puzzle.updateCell2(cell.x, cell.y, 'color', 'black')
+        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
       }
       return puzzle
     }
@@ -87,12 +115,20 @@ var styles = [
 ]
 
 function generatePuzzles(style) {
-  for (var style of styles) {
-    while (true) {
+  completedPuzzles = [] // Reset the solved puzzle list
+  for (var style of styles) { // TODO: Make async because pillars are slow?
+    for (var i=0; i<10000; i++) {
       var puzzle = style['createPuzzle']()
       var paths = window.solve(puzzle)
-      if (paths.length > 0 && paths.length <= style.difficulty) {
+      if ((paths.length > 0 && paths.length <= style.difficulty) || i === 9999) {
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        svg.id = style.id
+        svg.style = 'pointer-events: auto' // TODO: Do I need this? If yes, move into draw(). If no, scourge.
+        document.getElementById('challenge').appendChild(svg)
+
         window.draw(puzzle, style.id)
+        puzzle.name = style.id
+        document.getElementById(style.id).style.display = 'none'
         // TODO: Create solution viewer here. One per puzzle, I think?
         break
       }
@@ -101,14 +137,26 @@ function generatePuzzles(style) {
 }
 
 // Helper functions for RNG, not mimicing the game
-// TODO: I can do better here, right? Steal the hashing function from youtube video. Then make a struct with {seed, hardmode, div ID}
-function randInt(n) {
-  seed = ((seed << 13) ^ seed) - (seed >> 21)
-  return Math.abs(seed) % Math.floor(n)
-}
-
 function randomElement(list) {
   return list[randInt(list.length)]
+}
+
+function randInt(n) {
+  seed += 1
+  var rng = squirrel3(seed)
+  rng = squirrel3(rng + difficulty)
+  return rng % Math.floor(n)
+}
+
+// Credit https://youtu.be/LWFzPP8ZbdU (Squirrel Eiserloh, GDC 2017)
+function squirrel3(data) {
+  data = (data * 0xB5297A4D) & 0xFFFFFFFF
+  data = (data ^ data >> 8)
+  data = (data * 0x68E31DA4) & 0xFFFFFFFF
+  data = (data ^ data << 8)  & 0xFFFFFFFF
+  data = (data * 0x1B56C4E9) & 0xFFFFFFFF
+  data = (data ^ data >> 8)
+  return data
 }
 
 function randomDistinctCells(puzzle, count) {
@@ -166,7 +214,7 @@ function randomPolyomino() {
                        #       ##       #
                                         # */
     polyshape = randomElement([4369, 785, 561, 113])
-  } else if (size === 4) {
+  } else if (size === 5) {
     /* RRRR #####  RRRD ####  RRDR ###   RRDD ###  RDRR ##    RDRD ##    RDDR ##   RDDD ##   (RRRR does not fit, and is thus not included. TODO: Confirm behavior!)
                            #         ##         #        ###        ##         #         #
                                                 #                    #         ##        #
