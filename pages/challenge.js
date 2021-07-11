@@ -44,6 +44,18 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
 // TODO: Confirm styles via hacking. Make notes here based on old version offsets.
 var styles = [
   {
+    'id': 'test-triangle-perf', 'difficulty': 0,
+    'createPuzzle': function() {
+      var puzzle = new Puzzle(5, 5)
+      puzzle.grid[0][10].start = true
+      puzzle.grid[10][0].end = 'top'
+
+      for (var cell of randomDistinctCells(puzzle, 10)) {
+        puzzle.grid[cell.x][cell.y] = {'type': 'triangle', 'color': 'orange', 'count': randomTriangle()}
+      }
+      return puzzle
+    }
+  }/*,{
     'id': 'polyominos', 'difficulty': 9999,
     'createPuzzle': function() {
       var puzzle = new Puzzle(4, 4)
@@ -58,6 +70,26 @@ var styles = [
         puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'orange'}
       }
       for (var cell of randomEdges(puzzle, 8)) {
+        puzzle.grid[cell.x][cell.y].gap = 1
+      }
+      return puzzle
+    }
+  }, {
+    'id': 'symmetry', 'difficulty': 9999,
+    'createPuzzle': function() {
+      var puzzle = new Puzzle(6, 6)
+      puzzle.grid[0][8].start = true
+      puzzle.grid[8][0].end = 'top'
+      puzzle.style.symmetry = {'x': true, 'y': true}
+
+      var i = 0
+      for (var cell of randomDistinctCorners(puzzle, 6)) {
+        if (i < 2) puzzle.grid[cell.x][cell.y].dot = 1
+        if (i < 4) puzzle.grid[cell.x][cell.y].dot = 2
+        if (i < 6) puzzle.grid[cell.x][cell.y].dot = 3
+        i++
+      }
+      for (var cell of randomEdges(puzzle, 6)) {
         puzzle.grid[cell.x][cell.y].gap = 1
       }
       return puzzle
