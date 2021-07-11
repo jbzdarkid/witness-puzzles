@@ -343,10 +343,6 @@ window.Puzzle = class {
   }
 
   _floodFill(x, y, region) {
-    // Inlined safety checks so we can get the col, which is slightly more performant.
-    x = this._mod(x)
-    if (!this._safeCell(x, y)) return
-
     var col = this.grid[x]
     var cell = col[y]
     if (cell === MASKED_PROCESSED) return
@@ -355,10 +351,26 @@ window.Puzzle = class {
     }
     col[y] = MASKED_PROCESSED
 
-    this._floodFill(x, y + 1, region)
-    this._floodFill(x + 1, y, region)
-    this._floodFill(x, y - 1, region)
-    this._floodFill(x - 1, y, region)
+    if (y < this.height - 1) this._floodFill(x, y + 1, region)
+    if (x < this.width - 1)  this._floodFill(x + 1, y, region)
+    if (y > 0)               this._floodFill(x, y - 1, region)
+    if (x > 0)               this._floodFill(x - 1, y, region)
+  }
+
+  // @Cutnpaste ish version for pillars. Note the different safety checks due to pillaring.
+  _floodFillPillar(x, y, region) {
+    var col = this.grid[x]
+    var cell = col[y]
+    if (cell === MASKED_PROCESSED) return
+    if (cell !== MASKED_INB_NONCOUNT) {
+      region.setCell(x, y)
+    }
+    col[y] = MASKED_PROCESSED
+
+    if (y < this.height - 1) this._floodFillPillar(x, y + 1, region)
+                             this._floodFillPillar(this._mod(x + 1), y, region)
+    if (y > 0)               this._floodFillPillar(x, y - 1, region)
+                             this._floodFillPillar(this._mod(x - 1), y, region)
   }
 
   // Re-uses the same grid, but only called on edges which border the outside
@@ -460,7 +472,11 @@ window.Puzzle = class {
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.
         var region = new Region(this.width)
-        this._floodFill(x, y, region)
+        if (this.pillar === false) {
+          this._floodFill(x, y, region)
+        } else {
+          this._floodFillPillar(x, y, region)
+        }
         regions.push(region)
       }
     }
