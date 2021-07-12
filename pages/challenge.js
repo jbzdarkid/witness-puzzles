@@ -259,8 +259,7 @@ var scrambleOrder = []
 window.generatePuzzles = function(style) {
   for (var puzzle of completedPuzzles) hide(puzzle)
   completedPuzzles = []
-  // TODO: Randomize (shuffle?)
-  scrambleOrder = ['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry']
+  scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
   var possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
   document.getElementById('start').disabled = true
   document.getElementById('start').innerText = 'New challenge'
@@ -276,7 +275,7 @@ window.generatePuzzles = function(style) {
         var isSolvable = (paths.length > 0 && paths.length <= style.difficulty)
         // Invert solvability for impossible triple panels
         if (style.id.startsWith('triple') && !possibleTriples.includes(style.id)) isSolvable = !isSolvable
-        if (style.id.startsWith('triple') && puzzleHasInvalidTriple(puzzle))continue
+        if (style.id.startsWith('triple') && puzzleHasInvalidTriple(puzzle)) continue
 
         // Hack! Create dummy puzzles when unsolvable
         if (!isSolvable && i == 9) {
@@ -366,8 +365,22 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
 }
 
 // Helper functions for RNG, not mimicing the game
-function randomElement(list) {
+function getRandomElement(list) {
   return list[randInt(list.length)]
+}
+
+function popRandomElement(list) {
+  return list.splice(randInt(list.length), 1)[0]
+}
+
+function shuffle(list) {
+  for (var i=list.length-1; i>0; i--) { // Knuth randomization
+    var j = randInt(i)
+    var tmp = list[j]
+    list[j] = list[i]
+    list[i] = tmp
+  }
+  return list
 }
 
 function randInt(n) {
@@ -398,7 +411,7 @@ function randomDistinctCells(puzzle, count) {
   
   var randomCells = []
   for (var i=0; i<count; i++) {
-    randomCells.push(cells.splice(randInt(cells.length), 1)[0])
+    randomCells.push(popRandomElement(cells))
   }
   return randomCells
 }
@@ -413,7 +426,7 @@ function cutRandomEdges(puzzle, count, gapType) {
   }
   
   for (var i=0; i<count; i++) {
-    var cell = randomElement(cells)
+    var cell = getRandomElement(cells)
     puzzle.grid[cell.x][cell.y].gap = gapType
   }
 }
@@ -430,7 +443,7 @@ function placeRandomDots(puzzle, count, dotColor, onEdge) {
   }
 
   for (var i=0; i<count; i++) {
-    var cell = cells.splice(randInt(cells.length), 1)[0]
+    var cell = popRandomElement(cells)
     puzzle.grid[cell.x][cell.y].dot = dotColor
   }
 }
@@ -454,18 +467,18 @@ function randomPolyomino() {
   if (size === 3) {
     /* RR ###  RD ##
                    # */
-    polyshape = randomElement([273, 49])
+    polyshape = getRandomElement([273, 49])
   } else if (size === 4) {
     /* RRR ####  RRD ###  RDR ##   RDD ##
                        #       ##       #
                                         # */
-    polyshape = randomElement([4369, 785, 561, 113])
+    polyshape = getRandomElement([4369, 785, 561, 113])
   } else if (size === 5) {
     /* RRRR #####  RRRD ####  RRDR ###   RRDD ###  RDRR ##    RDRD ##    RDDR ##   RDDD ##   (RRRR does not fit, and is thus not included. TODO: Confirm behavior!)
                            #         ##         #        ###        ##         #         #
                                                 #                    #         ##        #
                                                                                          # */
-    polyshape = randomElement([12561, 8977, 1809, 1585, 1137, 241])
+    polyshape = getRandomElement([12561, 8977, 1809, 1585, 1137, 241])
   }
   return window.rotatePolyshape(polyshape, randInt(4))
 }
