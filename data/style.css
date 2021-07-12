@@ -37,6 +37,12 @@ body { text-align: center; }
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
+/* Use with "animation: turnOn 1s linear" to simulate panel power-on */
+@keyframes turnOn {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Slider control main bar */
 input[type="range"] {
   appearance: none;

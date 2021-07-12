@@ -22,14 +22,17 @@
   <body>
     <script>loadHeader('The Challenge')</script>
 
-    <iframe width="400px" height="150px" frameborder="0" src="https://www.youtube.com/embed/B25mZ15bQaY"></iframe>
+<!--
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <iframe id="player-iframe" width="400px" height="150px" frameborder="0" src="https://www.youtube.com/embed/B25mZ15bQaY"></iframe>
+    -->
 
     <div style="text-align: center;">
+      <button id="start" onpointerdown="generatePuzzles()">Start Challenge</button>
       <button onpointerdown="showSolutions()">Show Solutions</button>
-      <button onpointerdown="restartChallenge()">Start New</button>
     </div>
 
-    <div id="challenge" style="text-align: center;">
+    <div id="challenge" style="display: flex; justify-content: space-evenly">
     </div>
     <div id="solutionViewer-meta" style="display: flex">
       <!--
