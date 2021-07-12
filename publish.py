@@ -14,7 +14,6 @@ output = subprocess.run(['git', 'tag', version])
 if output.returncode != 0:
   print(f'Tag {version} already exists. Please choose another one.')
   exit(-2)
-subprocess.run(['git', 'push', 'origin', version], check=True)
 
 paths = [
   Path('application.py'),
@@ -50,7 +49,8 @@ for path in all_paths:
 
 z = zipfile.ZipFile(f'{version}.zip', 'w')
 for path in all_paths:
-  arcname = str(path.relative_to(Path(__file__).parent))
+  # path = path.resolve()
+  arcname = str(path.resolve().relative_to(Path(__file__).parent))
 
   if path.suffix in ['.js', '.html', '.py']:
     with path.open() as f:
@@ -60,6 +60,8 @@ for path in all_paths:
       arcname = arcname.replace(key, replacements[key])
     z.writestr(arcname, contents)
   else:
-    z.write(arcname, path)
+    z.write(path, arcname)
 
 z.close()
+
+subprocess.run(['git', 'push', 'origin', version], check=True)

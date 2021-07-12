@@ -15,6 +15,7 @@ var puzzle = null
 var path = []
 var SOLVE_SYNC = false
 var SYNC_THRESHOLD = 9 // Depth at which we switch to a synchronous solver (for perf)
+var doPruning = false
 
 var percentages = []
 var NODE_DEPTH = 9
@@ -108,6 +109,31 @@ window.solve = function(p, partialCallback, finalCallback) {
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
   if (window.MAX_SOLUTIONS === 0) window.MAX_SOLUTIONS = 10000
+
+  // Large pruning optimization -- Attempt to early exit once we cut out a region.
+  // Inspired by https://github.com/Overv/TheWitnessSolver
+  // For non-pillar puzzles, every time we draw a line from one edge to another, we cut out two regions.
+  // We can detect this by asking if we've ever left an edge, and determining if we've just touched an edge.
+  // However, just touching the edge isn't sufficient, since we could still enter either region.
+  // As such, we wait one additional step, to see which half we have moved in to, then we evaluate
+  // whichever half you moved away from (since you can no longer re-enter it).
+  //
+  // Consider this pathway (tracing X-X-X-A-B-C).
+  // ....X....
+  // . . X . .
+  // ....X....
+  // . . A . .
+  // ...CB....
+  //
+  // Note that, once we have reached B, the puzzle is divided in half. However, we could go either
+  // left or right -- so we don't know which region is safe to validate.
+  // Once we reach C, however, the region to the right is closed off.
+  // As such, we can start a flood fill from the cell to the right of A, computed by A+(C-B).
+  //
+  // Unfortunately, this optimization doesn't work for pillars, since the two regions are still connected.
+  // Additionally, this optimization doesn't work when custom mechanics are active, as many custom mechanics
+  // depend on the path through the entire puzzle
+  doPruning = (puzzle.pillar === false && !puzzle.settings.CUSTOM_MECHANICS)
 
   task = {
     'code': function() {
@@ -226,30 +252,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     if (numEndpoints === 0) return tailRecurse(x, y)
   }
 
-  // Large optimization -- Attempt to early exit once we cut out a region.
-  // Inspired by https://github.com/Overv/TheWitnessSolver
-  // For non-pillar puzzles, every time we draw a line from one edge to another, we cut out two regions.
-  // We can detect this by asking if we've ever left an edge, and determining if we've just touched an edge.
-  // However, just touching the edge isn't sufficient, since we could still enter either region.
-  // As such, we wait one additional step, to see which half we have moved in to, then we evaluate
-  // whichever half you moved away from (since you can no longer re-enter it).
-  //
-  // Consider this pathway (tracing X-X-X-A-B-C).
-  // ....X....
-  // . . X . .
-  // ....X....
-  // . . A . .
-  // ...CB....
-  //
-  // Note that, once we have reached B, the puzzle is divided in half. However, we could go either
-  // left or right -- so we don't know which region is safe to validate.
-  // Once we reach C, however, the region to the right is closed off.
-  // As such, we can start a flood fill from the cell to the right of A, computed by A+(C-B).
-  //
-  // Unfortunately, this optimization doesn't work for pillars, since the two regions are still connected.
-  // Additionally, this optimization doesn't work when custom mechanics are active, as many custom mechanics
-  // depend on the path through the entire puzzle
-  if (puzzle.pillar === false && !puzzle.settings.CUSTOM_MECHANICS) {
+  if (doPruning) {
     var isEdge = x <= 0 || y <= 0 || x >= puzzle.width - 1 || y >= puzzle.height - 1
     var newEarlyExitData = [
       earlyExitData[0] || (!isEdge && earlyExitData[2].isEdge), // Have we ever left an edge?
