@@ -1,5 +1,6 @@
 SHIP BLOCKERS
 - z.write(arcname, path) is backwards. Double check zip file construction for non-replaced files.
+- Retitle webcrow
 
 BUGS
 - Dragging is busted, a bit. Dragging down left while on the left side of a horizontal is not causing left motion! (likely true 4x)

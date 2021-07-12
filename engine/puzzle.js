@@ -342,8 +342,7 @@ window.Puzzle = class {
     }
   }
 
-  _floodFill(x, y, region) {
-    var col = this.grid[x]
+  _floodFill(x, y, region, col) {
     var cell = col[y]
     if (cell === MASKED_PROCESSED) return
     if (cell !== MASKED_INB_NONCOUNT) {
@@ -351,75 +350,60 @@ window.Puzzle = class {
     }
     col[y] = MASKED_PROCESSED
 
-    if (y < this.height - 1) this._floodFill(x, y + 1, region)
-    if (x < this.width - 1)  this._floodFill(x + 1, y, region)
-    if (y > 0)               this._floodFill(x, y - 1, region)
-    if (x > 0)               this._floodFill(x - 1, y, region)
-  }
-
-  // @Cutnpaste ish version for pillars. Note the different safety checks due to pillaring.
-  _floodFillPillar(x, y, region) {
-    var col = this.grid[x]
-    var cell = col[y]
-    if (cell === MASKED_PROCESSED) return
-    if (cell !== MASKED_INB_NONCOUNT) {
-      region.setCell(x, y)
-    }
-    col[y] = MASKED_PROCESSED
-
-    if (y < this.height - 1) this._floodFillPillar(x, y + 1, region)
-                             this._floodFillPillar(this._mod(x + 1), y, region)
-    if (y > 0)               this._floodFillPillar(x, y - 1, region)
-                             this._floodFillPillar(this._mod(x - 1), y, region)
+    if (y < this.height - 1)        this._floodFill(x,        y + 1, region, col)
+    if (y > 0)                      this._floodFill(x,        y - 1, region, col)
+    if (x < this.width - 1)         this._floodFill(x + 1,        y, region, this.grid[x+1])
+    else if (this.pillar !== false) this._floodFill(0,            y, region, this.grid[0])
+    if (x > 0)                      this._floodFill(x - 1,        y, region, this.grid[x-1])
+    else if (this.pillar !== false) this._floodFill(this.width-1, y, region, this.grid[this.width-1])
   }
 
   // Re-uses the same grid, but only called on edges which border the outside
   // Called first to mark cells that are connected to the outside, i.e. should not be part of any region.
   _floodFillOutside(x, y) {
-    // Needs safety checks because we're going around corners.
-    // Inlined so that we can easily set the cell after.
-    x = this._mod(x)
-    if (!this._safeCell(x, y)) return
-    var cell = this.grid[x][y]
+    var col = this.grid[x]
+    var cell = col[y]
     if (cell === MASKED_PROCESSED) return
     if (x%2 !== y%2 && cell !== MASKED_GAP2) return // Only flood-fill through gap-2
     if (x%2 === 0 && y%2 === 0 && cell === MASKED_DOT) return // Don't flood-fill through dots
-    this.grid[x][y] = MASKED_PROCESSED
+    col[y] = MASKED_PROCESSED
 
-    if (x%2 === 0 && y%2 === 0) return // Don't flood fill through corners
+    if (x%2 === 0 && y%2 === 0) return // Don't flood fill through corners (what? Clarify.)
 
-    this._floodFillOutside(x, y + 1)
-    this._floodFillOutside(x + 1, y)
-    this._floodFillOutside(x, y - 1)
-    this._floodFillOutside(x - 1, y)
+    if (y < this.height - 1)        this._floodFillOutside(x,        y + 1, region, col)
+    if (y > 0)                      this._floodFillOutside(x,        y - 1, region, col)
+    if (x < this.width - 1)         this._floodFillOutside(x + 1,        y, region, this.grid[x+1])
+    else if (this.pillar !== false) this._floodFillOutside(0,            y, region, this.grid[0])
+    if (x > 0)                      this._floodFillOutside(x - 1,        y, region, this.grid[x-1])
+    else if (this.pillar !== false) this._floodFillOutside(this.width-1, y, region, this.grid[this.width-1])
   }
 
   // Returns the original grid (pre-masking). You will need to switch back once you are done flood filling.
   switchToMaskedGrid() {
     // Make a copy of the grid -- we will be overwriting it
     var savedGrid = this.grid
-    this.grid = []
+    this.grid = new Array(this.width)
     // Override all elements with empty lines -- this means that flood fill is just
     // looking for lines with line=0.
     for (var x=0; x<this.width; x++) {
       var savedRow = savedGrid[x]
-      var row = []
-      for (var y=0; y<this.height; y++) {
-        // Cells are always part of the region
-        if (x%2 === 1 && y%2 === 1) {
-          row.push(MASKED_INB_COUNT)
-          continue
-        }
-
+      var row = new Array(this.height)
+      if (x%2 === 1) { // Cells are always part of the region
+        for (var y=1; y<this.height; y+=2) row[y] = MASKED_INB_COUNT
+        var skip = 2 // Skip these cells during iteration
+      } else {
+        var skip = 1
+      }
+      for (var y=0; y<this.height; y+=skip) {
         var cell = savedRow[y]
         if (cell.line > window.LINE_NONE) {
-          row.push(MASKED_PROCESSED) // Traced lines should not be a part of the region
+          row[y] = MASKED_PROCESSED // Traced lines should not be a part of the region
         } else if (cell.gap === window.GAP_FULL) {
-          row.push(MASKED_GAP2)
+          row[y] = MASKED_GAP2
         } else if (cell.dot > window.DOT_NONE) {
-          row.push(MASKED_DOT)
+          row[y] = MASKED_DOT
         } else {
-          row.push(MASKED_INB_COUNT)
+          row[y] = MASKED_INB_COUNT
         }
       }
       this.grid[x] = row
@@ -444,18 +428,18 @@ window.Puzzle = class {
 
     // Mark all outside cells as 'not in any region' (aka null)
 
-    if (this.pillar === false) {
-      // Left and right edges (only applies to non-pillars)
-      for (var y=1; y<this.height; y+=2) {
-        this._floodFillOutside(0, y)
-        this._floodFillOutside(this.width - 1, y)
-      }
-    }
-
     // Top and bottom edges
     for (var x=1; x<this.width; x+=2) {
       this._floodFillOutside(x, 0)
       this._floodFillOutside(x, this.height - 1)
+    }
+
+    // Left and right edges (only applies to non-pillars)
+    if (this.pillar === false) {
+      for (var y=1; y<this.height; y+=2) {
+        this._floodFillOutside(0, y)
+        this._floodFillOutside(this.width - 1, y)
+      }
     }
 
     return savedGrid
@@ -472,11 +456,7 @@ window.Puzzle = class {
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.
         var region = new Region(this.width)
-        if (this.pillar === false) {
-          this._floodFill(x, y, region)
-        } else {
-          this._floodFillPillar(x, y, region)
-        }
+        this._floodFill(x, y, region, this.grid[x])
         regions.push(region)
       }
     }
@@ -497,7 +477,7 @@ window.Puzzle = class {
     // If the masked grid hasn't been used at this point, then create a new region.
     // This will also mark all lines inside the new region as used.
     var region = new Region(this.width)
-    this._floodFill(x, y, region)
+    this._floodFill(x, y, region, this.grid[x])
 
     this.grid = savedGrid
     return region
