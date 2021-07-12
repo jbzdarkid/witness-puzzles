@@ -17,13 +17,11 @@ host_redirect('/pages/browse.html', '/index.html')
 
 # Short name redirects
 host_redirect('/pages/browse.html', '/browse.html')
-host_redirect('/pages/editor.html', '/editor.html')
-host_redirect('/pages/test.html', '/test.html')
-host_redirect('/pages/editor_test.html', '/editor_test.html')
-host_redirect('/pages/validate.html', '/validate.html')
 host_redirect('/pages/challenge.html', '/challenge.html')
-host_redirect('/pages/challenge.js', '/challenge.js')
+host_redirect('/pages/editor.html', '/editor.html')
 host_redirect('/pages/telemetry.html', '/telemetry.html')
+host_redirect('/pages/validate.html', '/validate.html')
+host_redirect('/pages/webcrow.html', '/webcrow.html')
 
 # Large blocks of data
 host_statically('data')
@@ -32,34 +30,32 @@ host_statically('sourcemaps')
 
 # Actual page sources
 host_statically('pages/browse.js')
-host_statically('pages/editor.html')
-host_statically('pages/editor.js')
-host_statically('pages/validate.html')
 host_statically('pages/challenge.html')
 host_statically('pages/challenge.js')
+host_statically('pages/editor.html')
+host_statically('pages/editor.js')
+host_statically('pages/telemetry.js')
+host_statically('pages/validate.html')
 host_statically('pages/webcrow.html')
 host_statically('pages/webcrow.js')
-host_statically('pages/telemetry.js')
 
 if application.debug:
+  host_redirect('/pages/test.html', '/test.html')
+  host_redirect('/pages/verify_puzzles.html', '/verify_puzzles.html')
+  host_redirect('/pages/editor_test.html', '/editor_test.html')
+
   host_statically('pages/test.html')
   host_statically('pages/test.js')
   host_statically('pages/editor_test.html')
   host_statically('pages/editor_test.js')
+  host_statically('pages/verify_puzzles.html')
+  host_statically('pages/verify_puzzles.js')
 
   host_statically('pages/_UTM.html')
   host_statically('pages/_UTM.js')
   host_statically('pages/_UTM2.js')
 
   host_statically('images')
-
-  host_redirect('/pages/verify_puzzles.html', '/verify_puzzles.html')
-  host_statically('pages/verify_puzzles.js')
-
-  host_statically('pages/triple.html')
-  host_statically('pages/triple.js')
-  host_redirect('/pages/triple.html', '/triple.html')
-  host_redirect('/pages/triple.js', '/triple.js')
 
 def page_not_found(error):
   return render_template('404_generic.html'), 404
