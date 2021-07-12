@@ -360,8 +360,7 @@ window.Puzzle = class {
 
   // Re-uses the same grid, but only called on edges which border the outside
   // Called first to mark cells that are connected to the outside, i.e. should not be part of any region.
-  _floodFillOutside(x, y) {
-    var col = this.grid[x]
+  _floodFillOutside(x, y, col) {
     var cell = col[y]
     if (cell === MASKED_PROCESSED) return
     if (x%2 !== y%2 && cell !== MASKED_GAP2) return // Only flood-fill through gap-2
@@ -370,12 +369,12 @@ window.Puzzle = class {
 
     if (x%2 === 0 && y%2 === 0) return // Don't flood fill through corners (what? Clarify.)
 
-    if (y < this.height - 1)        this._floodFillOutside(x,        y + 1, region, col)
-    if (y > 0)                      this._floodFillOutside(x,        y - 1, region, col)
-    if (x < this.width - 1)         this._floodFillOutside(x + 1,        y, region, this.grid[x+1])
-    else if (this.pillar !== false) this._floodFillOutside(0,            y, region, this.grid[0])
-    if (x > 0)                      this._floodFillOutside(x - 1,        y, region, this.grid[x-1])
-    else if (this.pillar !== false) this._floodFillOutside(this.width-1, y, region, this.grid[this.width-1])
+    if (y < this.height - 1)        this._floodFillOutside(x,        y + 1, col)
+    if (y > 0)                      this._floodFillOutside(x,        y - 1, col)
+    if (x < this.width - 1)         this._floodFillOutside(x + 1,        y, this.grid[x+1])
+    else if (this.pillar !== false) this._floodFillOutside(0,            y, this.grid[0])
+    if (x > 0)                      this._floodFillOutside(x - 1,        y, this.grid[x-1])
+    else if (this.pillar !== false) this._floodFillOutside(this.width-1, y, this.grid[this.width-1])
   }
 
   // Returns the original grid (pre-masking). You will need to switch back once you are done flood filling.
@@ -430,15 +429,15 @@ window.Puzzle = class {
 
     // Top and bottom edges
     for (var x=1; x<this.width; x+=2) {
-      this._floodFillOutside(x, 0)
-      this._floodFillOutside(x, this.height - 1)
+      this._floodFillOutside(x, 0, this.grid[x])
+      this._floodFillOutside(x, this.height - 1, this.grid[x])
     }
 
     // Left and right edges (only applies to non-pillars)
     if (this.pillar === false) {
       for (var y=1; y<this.height; y+=2) {
-        this._floodFillOutside(0, y)
-        this._floodFillOutside(this.width - 1, y)
+        this._floodFillOutside(0, y, this.grid[0])
+        this._floodFillOutside(this.width - 1, y, this.grid[this.width-1])
       }
     }
 
