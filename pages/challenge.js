@@ -95,11 +95,9 @@ var styles = {
   'triple-threecolor-0': tripleThreeColor,
   'triple-threecolor-1': tripleThreeColor,
   'triple-threecolor-2': tripleThreeColor,
-  'triangle-left': function() {
-    return triangles(6)
-  }, 'triangle-right' function() {
-    return triangles(8)
-  }, 'pillar-left': function() {
+  'triangle-left': function() {return triangles(6)},
+  'triangle-right': function() {return triangles(8)},
+  'pillar-left': function() {
     var puzzle = new Puzzle(6, 6, true)
     // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
     applyRandomPillarSymmetry(puzzle)
@@ -185,17 +183,33 @@ window.generatePuzzles = function(style) {
   scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
   possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
 
-  document.getElementById('start').disabled = true // Disable until first puzzle generates
-  document.getElementById('start').innerText = 'New challenge'
+  document.getElementById('start').disabled = true
+  document.getElementById('start').innerText = 'Generating...'
 
-  setLogLevel('error') // TODO: Set it back? How do we know when we're done?
-  for (var styleName in styles) {
+  setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam.
+
+  var styleKeys = Object.keys(styles)
+
+  var onComplete = function() {
+    if (styleKeys.length === 0) {
+      setLogLevel('info')
+      console.info('All done!')
+      // TODO: How does this music timing feel?
+      document.getElementById('start').disabled = false
+      document.getElementById('start').innerText = 'Reroll'
+      // ytMessage('seekTo')
+      // ytMessage('playVideo')
+      return
+    }
+    
+    var styleName = styleKeys.pop()
     hide(styleName)
-    generatePuzzleAsync(styleName, 100)
+    generatePuzzleAsync(styleName, 100, onComplete)
   }
+  onComplete()
 }
 
-function generatePuzzleAsync(styleName, i) {
+function generatePuzzleAsync(styleName, i, onComplete) {
   if (i === 0) {
     // Hack! Bug! Create dummy puzzles when unsolvable
     puzzle = new Puzzle(1, 0)
@@ -203,40 +217,35 @@ function generatePuzzleAsync(styleName, i) {
     puzzle.grid[2][0].end = 'right'
     window.draw(puzzle, styleName)
     console.error('Failed to generate a random puzzle for ' + styleName)
-    return
+    onComplete()
   }
 
   var puzzle = styles[styleName]()
 
   // Not allowed for solvable *or* unsolvable triples.
   if (styleName.startsWith('triple') && puzzleHasInvalidTriple(puzzle)) {
-    generatePuzzleAsync(styleName, i) // No need to modify the iteration count, this check is very cheap.
+    generatePuzzleAsync(styleName, i, onComplete) // No need to modify the iteration count, this check is very cheap.
     return
   }
 
   window.solve(puzzle, null, function(paths) {
     var isSolvable = (paths.length > 0) // TODO: Difficulty...?
     
-    if (styleName == 'pillar-left') debugger
-
     // Invert solvability for impossible triple panels
     if (styleName.startsWith('triple') && !possibleTriples.includes(styleName)) isSolvable = !isSolvable
 
     if (!isSolvable) {
-      generatePuzzleAsync(styleName, i-1)
+      generatePuzzleAsync(styleName, i-1, onComplete)
       return
     }
 
     window.draw(puzzle, styleName)
     puzzle.name = styleName
     if (styleName == 'easy-maze') {
-      // Once the first puzzle loads, start the challenge. TODO: How does this feel with music?
       show(styleName)
-      document.getElementById('start').disabled = false
-      // ytMessage('seekTo')
-      // ytMessage('playVideo')
     } else if (styleName.startsWith('triple')) {
       // Add a cover to the triple panels, so that they can power on in sequence.
+      // TODO: pointer-events none is only ok at the end, though?
       var svg = document.getElementById(styleName)
       var panelCover = window.createElement('rect')
       panelCover.setAttribute('width', svg.style.width)
@@ -247,12 +256,13 @@ function generatePuzzleAsync(styleName, i) {
       svg.appendChild(panelCover)
     }
     // TODO: Create solution viewer here. One per puzzle.
+    onComplete()
   })
 }
 
 // TODO: TRACE_FAILURE_FUNC so I can do rerolls?
+// TODO: Ok so this is cute and all but the point is so people can *practice* these puzzles. So, like, stoppit.
 window.TRACE_COMPLETION_FUNC = function(puzzle) {
-  // TODO: More elegance with power-on? At least for triples, we need placeholders otherwise it's gonna jump around
   completedPuzzles.push(puzzle.name)
 
   window.setTimeout(function() {
