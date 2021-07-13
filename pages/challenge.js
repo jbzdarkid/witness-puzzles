@@ -89,6 +89,16 @@ var styles = {
     placeRandomCornerDots(puzzle, 2, window.DOT_YELLOW)
     cutRandomEdges(puzzle, 6, window.GAP_BREAK)
     return puzzle
+  }, 'triple-twocolor-0': tripleTwoColor,
+  'triple-twocolor-1': tripleTwoColor,
+  'triple-twocolor-2': tripleTwoColor,
+  'triple-threecolor-0': tripleThreeColor,
+  'triple-threecolor-1': tripleThreeColor,
+  'triple-threecolor-2': tripleThreeColor,
+  'triangle-left': function() {
+    return triangles(6)
+  }, 'triangle-right' function() {
+    return triangles(8)
   }, 'pillar-left': function() {
     var puzzle = new Puzzle(6, 6, true)
     // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
