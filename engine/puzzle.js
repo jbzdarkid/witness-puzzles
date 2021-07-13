@@ -485,21 +485,23 @@ window.Puzzle = class {
   logGrid() {
     var output = ''
     for (var y=0; y<this.height; y++) {
+      var row = []
       for (var x=0; x<this.width; x++) {
         var cell = this.getCell(x, y)
-        if (cell == null) output += ' '
-        else if (typeof(cell) == 'number') output += cell
-        else if (cell.start === true) output += 'S'
-        else if (cell.end != null) output += 'E'
+        if (cell == null)                  row[x] = ' '
+        // else if (typeof(cell) == 'number') row[x] = cell
+        else if (cell.start === true)      row[x] = 'S'
+        else if (cell.end != null)         row[x] = 'E'
         else if (cell.type === 'line') {
-          if (cell.line === 0) output += '.'
-          if (cell.line === 1) output += '#'
-          if (cell.line === 2) output += '#'
-          if (cell.line === 3) output += 'o'
-        }
-        else output += '?'
+          if (cell.line === 0)             row[x] = '.'
+          if (cell.gap > 0)                row[x] = ' '
+          if (cell.dot > 0)                row[x] = 'X'
+          if (cell.line === 1)             row[x] = '#'
+          if (cell.line === 2)             row[x] = '#'
+          if (cell.line === 3)             row[x] = 'o'
+        } else                             row[x] = '?'
       }
-      output += '\n'
+      output += row.join('') + '\n'
     }
     console.info(output)
   }

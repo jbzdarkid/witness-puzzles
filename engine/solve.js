@@ -59,6 +59,7 @@ function countNodes(x, y, depth) {
 
 // Generates a solution via DFS recursive backtracking
 window.solve = function(p, partialCallback, finalCallback) {
+  if (task != null) throw Error('Cannot start another solve() while one is already in progress')
   var start = (new Date()).getTime()
 
   puzzle = p

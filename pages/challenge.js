@@ -15,6 +15,16 @@ window.onload = function() {
   if (params.get('difficulty') == 'hard') {
     difficulty = 1 // TODO: Hard mode? Maybe... always hard mode?
   }
+
+  var challenge = document.getElementById('challenge')
+  for (var styleName in styles) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.id = styleName
+    // TODO: Do I need pointer-events? If yes, move into draw() [and scourge]. If no, just scourge.
+    svg.style = 'pointer-events: auto; opacity: none'
+    challenge.appendChild(svg)
+    // TODO: This should be a loading icon, which gets overwritten by the actual puzzle.
+  }
 }
 
 function ytMessage(func) {
@@ -25,229 +35,131 @@ function ytMessage(func) {
 }
 
 // TODO: Confirm styles via hacking. Make notes here based on old version offsets.
-var styles = [
-  {
-    'id': 'easy-maze', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(3, 3)
-      puzzle.grid[0][6].start = true
-      puzzle.grid[6][0].end = 'top'
+var styles = {
+  'easy-maze': function() {
+    var puzzle = new Puzzle(3, 3)
+    puzzle.grid[0][6].start = true
+    puzzle.grid[6][0].end = 'top'
 
-      cutRandomEdges(puzzle, 10, window.GAP_BREAK) // Or something.
-      return puzzle
-    }
-  }, {
-    'id': 'scramble-stars', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
+    cutRandomEdges(puzzle, 10, window.GAP_BREAK) // Or something.
+    return puzzle
+  }, 'scramble-stars': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[8][0].end = 'top'
 
-      // TODO: Select a random color
-      for (var cell of randomDistinctCells(puzzle, 4)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'yellow'}
-      }
-      cutRandomEdges(puzzle, 8, window.GAP_BREAK)
-      placeRandomDots(puzzle, 4, window.DOT_BLACK)
-      return puzzle
+    // TODO: Select a random color
+    for (var cell of randomEmptyCells(puzzle, 4)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'yellow'}
     }
-  }, {
-    'id': 'scramble-maze', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(7, 7)
-      puzzle.grid[0][14].start = true
-      puzzle.grid[14][0].end = 'top'
+    cutRandomEdges(puzzle, 8, window.GAP_BREAK)
+    placeRandomCornerDots(puzzle, 4, window.DOT_BLACK)
+    return puzzle
+  }, 'scramble-maze': function() {
+    var puzzle = new Puzzle(7, 7)
+    puzzle.grid[0][14].start = true
+    puzzle.grid[14][0].end = 'top'
 
-      cutRandomEdges(puzzle, 20, window.GAP_BREAK)
-      return puzzle
-    }
-  }, {
-    'id': 'scramble-polyominos', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
+    cutRandomEdges(puzzle, 20, window.GAP_BREAK)
+    return puzzle
+  }, 'scramble-polyominos': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[8][0].end = 'top'
 
-      // TODO: Select a random color
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': 'yellow', 'polyshape': randomPolyomino()}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'orange'}
-      }
-      cutRandomEdges(puzzle, 8, window.GAP_BREAK)
-      return puzzle
+    // TODO: Select a random color
+    for (var cell of randomEmptyCells(puzzle, 2)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': 'yellow', 'polyshape': randomPolyomino()}
     }
-  }, {
-    'id': 'scramble-symmetry', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(6, 6)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-      puzzle.symmetry = {'x': true, 'y': true}
+    for (var cell of randomEmptyCells(puzzle, 2)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'orange'}
+    }
+    cutRandomEdges(puzzle, 8, window.GAP_BREAK)
+    return puzzle
+  }, 'scramble-symmetry': function() {
+    var puzzle = new Puzzle(6, 6)
+    puzzle.grid[0][0].start = true
+    puzzle.grid[12][12].start = true
+    puzzle.grid[12][0].end = 'right'
+    puzzle.grid[0][12].end = 'left'
+    puzzle.symmetry = {'x': true, 'y': true}
 
-      placeRandomDots(puzzle, 2, window.DOT_BLACK)
-      placeRandomDots(puzzle, 2, window.DOT_BLUE)
-      placeRandomDots(puzzle, 2, window.DOT_YELLOW)
-      cutRandomEdges(puzzle, 6, window.GAP_BREAK)
-      return puzzle
-    }
-  }, {
-    'id': 'triple-twocolor-0', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
+    placeRandomCornerDots(puzzle, 2, window.DOT_BLACK)
+    placeRandomCornerDots(puzzle, 2, window.DOT_BLUE)
+    placeRandomCornerDots(puzzle, 2, window.DOT_YELLOW)
+    cutRandomEdges(puzzle, 6, window.GAP_BREAK)
+    return puzzle
+  }, 'pillar-left': function() {
+    var puzzle = new Puzzle(6, 6, true)
+    // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
+    applyRandomPillarSymmetry(puzzle)
 
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
-      }
-      return puzzle
-    }
-  }, {
-    'id': 'triple-twocolor-1', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
+    placeRandomEdgeDots(puzzle, 8, window.DOT_BLACK, true)
+    return puzzle
+  }, 'pillar-right': function() {
+    var puzzle = new Puzzle(6, 6, true)
+    // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
+    applyRandomPillarSymmetry(puzzle)
 
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
-      }
-      return puzzle
+    for (var cell of randomEmptyCells(puzzle, 3)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
     }
-  }, {
-    'id': 'triple-twocolor-2', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
-      }
-      return puzzle
+    for (var cell of randomEmptyCells(puzzle, 3)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
     }
-  }, {
-    'id': 'triple-threecolor-0', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-
-      for (var cell of randomDistinctCells(puzzle, 5)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'purple'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'green'}
-      }
-      return puzzle
-    }
-  }, {
-    'id': 'triple-threecolor-1', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-
-      for (var cell of randomDistinctCells(puzzle, 5)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'purple'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'green'}
-      }
-      return puzzle
-    }
-  }, {
-    'id': 'triple-threecolor-2', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-
-      for (var cell of randomDistinctCells(puzzle, 5)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'purple'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 2)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'green'}
-      }
-      return puzzle
-    }
-  }, {
-    'id': 'triangles-left', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-
-      for (var cell of randomDistinctCells(puzzle, 6)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'triangle', 'color': 'orange', 'count': randomTriangle()}
-      }
-      return puzzle
-    }
-  }, {
-    'id': 'triangles-right', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(4, 4)
-      puzzle.grid[0][8].start = true
-      puzzle.grid[8][0].end = 'top'
-
-      for (var cell of randomDistinctCells(puzzle, 8)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'triangle', 'color': 'orange', 'count': randomTriangle()}
-      }
-      return puzzle
-    }
-  }, {
-    'id': 'pillar-left', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(6, 6, true)
-      // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
-      applyRandomPillarSymmetry(puzzle)
-
-      placeRandomDots(puzzle, 8, window.DOT_BLACK, true)
-      return puzzle
-    }
-  }, {
-    'id': 'pillar-right', 'difficulty': 9999,
-    'createPuzzle': function() {
-      var puzzle = new Puzzle(6, 6, true)
-      // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
-      applyRandomPillarSymmetry(puzzle)
-
-      for (var cell of randomDistinctCells(puzzle, 3)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
-      }
-      for (var cell of randomDistinctCells(puzzle, 3)) {
-        puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
-      }
-      return puzzle
-    }
+    return puzzle
   }
-]
+}
+
+// Some functions separated out to avoid duplication
+function tripleTwoColor() {
+  var puzzle = new Puzzle(4, 4)
+  puzzle.grid[0][8].start = true
+  puzzle.grid[8][0].end = 'top'
+
+  for (var cell of randomEmptyCells(puzzle, 6)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
+  }
+  for (var cell of randomEmptyCells(puzzle, 6)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
+  }
+  return puzzle
+}
+
+function tripleThreeColor() {
+  var puzzle = new Puzzle(4, 4)
+  puzzle.grid[0][8].start = true
+  puzzle.grid[8][0].end = 'top'
+
+  for (var cell of randomEmptyCells(puzzle, 5)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
+  }
+  for (var cell of randomEmptyCells(puzzle, 2)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'purple'}
+  }
+  for (var cell of randomEmptyCells(puzzle, 2)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'green'}
+  }
+  return puzzle
+}
+
+function triangles(count) {
+  var puzzle = new Puzzle(4, 4)
+  puzzle.grid[0][8].start = true
+  puzzle.grid[8][0].end = 'top'
+
+  for (var cell of randomEmptyCells(puzzle, count)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'triangle', 'color': 'orange', 'count': randomTriangle()}
+  }
+  return puzzle
+}
 
 function hide(id) {
   var elem = document.getElementById(id)
   if (elem == null) throw Error('Could not find element with id ' + id)
   elem.style.display = 'none'
 }
+
 function show(id) {
   var elem = document.getElementById(id)
   if (elem == null) throw Error('Could not find element with id ' + id)
@@ -256,70 +168,76 @@ function show(id) {
 
 var completedPuzzles = []
 var scrambleOrder = []
+var possibleTriples = []
 window.generatePuzzles = function(style) {
-  for (var puzzle of completedPuzzles) hide(puzzle)
+  // TODO: Set URL seed according to actual value. TODO: location.hash time?
   completedPuzzles = []
   scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
-  var possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
-  document.getElementById('start').disabled = true
+  possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
+
+  document.getElementById('start').disabled = true // Disable until first puzzle generates
   document.getElementById('start').innerText = 'New challenge'
-  var challenge = document.getElementById('challenge')
-  while (challenge.firstChild) challenge.removeChild(challenge.firstChild)
-  
-  for (var style of styles) { // TODO: Make async because pillars are slow?
-    //window.setTimeout(function() {
-      for (var i=0; i<100; i++) {
-        var puzzle = style['createPuzzle']()
-        var paths = window.solve(puzzle)
-        
-        var isSolvable = (paths.length > 0 && paths.length <= style.difficulty)
-        // Invert solvability for impossible triple panels
-        if (style.id.startsWith('triple') && !possibleTriples.includes(style.id)) isSolvable = !isSolvable
-        if (style.id.startsWith('triple') && puzzleHasInvalidTriple(puzzle)) continue
 
-        // Hack! Create dummy puzzles when unsolvable
-        if (!isSolvable && i == 9) {
-          puzzle = new Puzzle(1, 0)
-          puzzle.grid[0][0].start = true
-          puzzle.grid[2][0].end = 'right'
-          paths = window.solve(puzzle)
-          isSolvable = true
-        }
-        
-        if (isSolvable) {
-          var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-          svg.id = style.id
-          svg.style = 'pointer-events: auto' // TODO: Do I need this? If yes, move into draw(). If no, scourge.
-          challenge.appendChild(svg)
-
-          window.draw(puzzle, style.id)
-          puzzle.name = style.id
-          if (style.id == 'easy-maze') {
-            // Once the first puzzle loads, start the challenge. See how this feels.
-            show(style.id)
-            document.getElementById('start').disabled = false
-            // ytMessage('seekTo')
-            ytMessage('playVideo')
-          } else {
-            if (style.id.startsWith('triple')) {
-              var svg = document.getElementById(style.id)
-              // A rectangle which covers the entire panel, used to animate panel "power on"
-              var panelCover = window.createElement('rect')
-              panelCover.setAttribute('width', svg.style.width)
-              panelCover.setAttribute('height', svg.style.height)
-              panelCover.setAttribute('opacity', 1)
-              panelCover.setAttribute('style', 'pointer-events: none')
-              panelCover.setAttribute('id', style.id + '-cover')
-              svg.appendChild(panelCover)
-            }
-            hide(style.id)
-          }
-          // TODO: Create solution viewer here. One per puzzle, I think?
-          break
-        }
-      }
-    //}, 0)
+  setLogLevel('error') // TODO: Set it back? How do we know when we're done?
+  for (var styleName in styles) {
+    hide(styleName)
+    generatePuzzleAsync(styleName, 100)
   }
+}
+
+function generatePuzzleAsync(styleName, i) {
+  if (i === 0) {
+    // Hack! Bug! Create dummy puzzles when unsolvable
+    puzzle = new Puzzle(1, 0)
+    puzzle.grid[0][0].start = true
+    puzzle.grid[2][0].end = 'right'
+    window.draw(puzzle, styleName)
+    console.error('Failed to generate a random puzzle for ' + styleName)
+    return
+  }
+
+  var puzzle = styles[styleName]()
+
+  // Not allowed for solvable *or* unsolvable triples.
+  if (styleName.startsWith('triple') && puzzleHasInvalidTriple(puzzle)) {
+    generatePuzzleAsync(styleName, i) // No need to modify the iteration count, this check is very cheap.
+    return
+  }
+
+  window.solve(puzzle, null, function(paths) {
+    var isSolvable = (paths.length > 0) // TODO: Difficulty...?
+    
+    if (styleName == 'pillar-left') debugger
+
+    // Invert solvability for impossible triple panels
+    if (styleName.startsWith('triple') && !possibleTriples.includes(styleName)) isSolvable = !isSolvable
+
+    if (!isSolvable) {
+      generatePuzzleAsync(styleName, i-1)
+      return
+    }
+
+    window.draw(puzzle, styleName)
+    puzzle.name = styleName
+    if (styleName == 'easy-maze') {
+      // Once the first puzzle loads, start the challenge. TODO: How does this feel with music?
+      show(styleName)
+      document.getElementById('start').disabled = false
+      // ytMessage('seekTo')
+      // ytMessage('playVideo')
+    } else if (styleName.startsWith('triple')) {
+      // Add a cover to the triple panels, so that they can power on in sequence.
+      var svg = document.getElementById(styleName)
+      var panelCover = window.createElement('rect')
+      panelCover.setAttribute('width', svg.style.width)
+      panelCover.setAttribute('height', svg.style.height)
+      panelCover.setAttribute('opacity', 1)
+      panelCover.setAttribute('style', 'pointer-events: none')
+      panelCover.setAttribute('id', styleName + '-cover')
+      svg.appendChild(panelCover)
+    }
+    // TODO: Create solution viewer here. One per puzzle.
+  })
 }
 
 // TODO: TRACE_FAILURE_FUNC so I can do rerolls?
@@ -353,9 +271,9 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
       document.getElementById('triple-threecolor-0-cover').style.animation = 'turnOn 1.5s linear 4s 1 forwards'
     } else if (puzzle.name.startsWith('triple-threecolor')) {
       hide('triple-threecolor-0'); hide('triple-threecolor-1'); hide('triple-threecolor-2')
-      show('triangles-left'); show('triangles-right')
-    } else if (puzzle.name.startsWith('triangles') && completedPuzzles.includes('triangles-left') && completedPuzzles.includes('triangles-right')) {
-      hide('triangles-left'); hide('triangles-right')
+      show('triangle-left'); show('triangle-right')
+    } else if (puzzle.name.startsWith('triangle') && completedPuzzles.includes('triangle-left') && completedPuzzles.includes('triangle-right')) {
+      hide('triangle-left'); hide('triangle-right')
       show('pillar-left'); show('pillar-right')
     } else if (puzzle.name.startsWith('pillar') && completedPuzzles.includes('pillar-left') && completedPuzzles.includes('pillar-right')) {
       ytMessage('pauseVideo')
@@ -401,55 +319,47 @@ function squirrel3(data) {
   return data
 }
 
-function randomDistinctCells(puzzle, count) {
-  var cells = []
-  for (var x=0; x < puzzle.width; x++) {
-    for (var y=0; y < puzzle.height; y++) {
-      if (x%2 === 1 && y%2 === 1 && puzzle.grid[x][y] == null) cells.push({'x':x, 'y':y})
-    }
-  }
-  
-  var randomCells = []
-  for (var i=0; i<count; i++) {
-    randomCells.push(popRandomElement(cells))
-  }
-  return randomCells
-}
-
-// Cut edges (allowing overlaps)
-function cutRandomEdges(puzzle, count, gapType) {
-  var cells = []
-  for (var x=0; x < puzzle.width; x++) {
-    for (var y=0; y < puzzle.height; y++) {
-      if (x%2 !== y%2 && puzzle.grid[x][y].gap == null) cells.push({'x':x, 'y':y})
-    }
-  }
-  
-  for (var i=0; i<count; i++) {
-    var cell = getRandomElement(cells)
-    puzzle.grid[cell.x][cell.y].gap = gapType
-  }
-}
-
-// Place dots (no overlaps)
-function placeRandomDots(puzzle, count, dotColor, onEdge) {
+function getCells(puzzle, getter, count, filter) {
   var cells = []
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
-      if ((onEdge === false && x%2 === y%2) || (onEdge !== false && x%2 === 0 && y%2 === 0)) {
-        if (puzzle.grid[x][y].dot == null) cells.push({'x':x, 'y':y})
-      }
+      if (filter(x, y)) cells.push({'x':x, 'y':y})
     }
   }
+  var output = []
+  for (var i=0; i<count; i++) output.push(getter(cells))
+  return output
+}
 
-  for (var i=0; i<count; i++) {
-    var cell = popRandomElement(cells)
-    puzzle.grid[cell.x][cell.y].dot = dotColor
-  }
+function randomEmptyCells(puzzle, count) {
+  return getCells(puzzle, popRandomElement, count, function(x, y) {
+    return (x%2 === 1 && y%2 === 1 && puzzle.grid[x][y] == null)
+  })
+}
+
+function cutRandomEdges(puzzle, count, gapType) {
+  var cells = getCells(puzzle, getRandomElement, count, function(x, y) {
+    return (x%2 !== y%2 && puzzle.grid[x][y].gap == null)
+  })
+  for (var cell of cells) puzzle.grid[cell.x][cell.y].gap = gapType
+}
+
+function placeRandomCornerDots(puzzle, count, dotColor) {
+  var cells = getCells(puzzle, popRandomElement, count, function(x, y) {
+    return (x%2 === 0 && y%2 === 0 && puzzle.grid[x][y].dot == null)
+  })
+  for (var cell of cells) puzzle.grid[cell.x][cell.y].dot = dotColor
+}
+
+function placeRandomEdgeDots(puzzle, count, dotColor) {
+  var cells = getCells(puzzle, popRandomElement, count, function(x, y) {
+    return (x%2 !== y%2 && puzzle.grid[x][y].dot == null)
+  })
+  for (var cell of cells) puzzle.grid[cell.x][cell.y].dot = dotColor
 }
 
 // Helper functions for RNG stolen from the game, for verisimilitude
-function randomTriangle() { 
+function randomTriangle() {
   var rng = randInt(100)
   if (rng >=  0 && rng <= 50) return 1 // 51%
   if (rng >= 51 && rng <= 85) return 2 // 35%
