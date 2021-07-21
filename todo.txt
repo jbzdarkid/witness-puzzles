@@ -1,6 +1,8 @@
 SHIP BLOCKERS
 
 BUGS
+- "Seren✩: I let Witness Puzzles run until it resolved. It found some... questionable results."
+https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unknown.png
 - Cursor can overlap the startpoint. Should be easier to fix now that I have a strong idea about how this is supposed to work.
   https://cdn.discordapp.com/attachments/667908286007345202/864022060362629130/unknown.png
 - Solution viewer shows wrong solution on solve
