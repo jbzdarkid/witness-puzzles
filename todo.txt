@@ -3,6 +3,11 @@ SHIP BLOCKERS
 BUGS
 - In editor, right clicking on a dot with gap active -> left click with gap -> no gap placed.
   Ditto edges.
+- "Seren✩: I let Witness Puzzles run until it resolved. It found some... questionable results."
+https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unknown.png
+- Cursor can overlap the startpoint. Should be easier to fix now that I have a strong idea about how this is supposed to work.
+  https://cdn.discordapp.com/attachments/667908286007345202/864022060362629130/unknown.png
+- Solution viewer shows wrong solution on solve
 - Dragging is busted, a bit. Dragging down left while on the left side of a horizontal is not causing left motion! (likely true 4x)
 - iOS is scrolling while solving, looks like I broke this when I tried to fix android.
 - Android is still fairly buggy.
@@ -25,6 +30,8 @@ BUGS
   * pollyfill.io ?
 
 FEATURES
+- Publishing a puzzle should call onblur() so that if you were in the middle of a name change it gets accepted.
+  (related: changing name shouldn't reset autosolve. If possible.)
 - All telemetry should contain the session ID. I'd suggest just starting a new table w/ the new fields. That way I don't risk breaking anything.
   The idea here is to (eventually?) limit the number of errors for a given session ID. This will prevent confusion about how frequent an error is (since it may occur many many times)
   I should also (at some point) dedupe rows in the telemetry page. This + a count will let me sort by importance/age, and also clear out feedback more efficiently. (Alternately, just provide a "delete all similar" button? Shift-click?)

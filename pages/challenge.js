@@ -34,47 +34,58 @@ function ytMessage(func) {
   win.postMessage(JSON.stringify(msg), 'https://www.youtube.com')
 }
 
-// TODO: Confirm styles via hacking. Make notes here based on old version offsets.
 var styles = {
   'easy-maze': function() {
     var puzzle = new Puzzle(3, 3)
     puzzle.grid[0][6].start = true
     puzzle.grid[6][0].end = 'top'
 
-    cutRandomEdges(puzzle, 10, window.GAP_BREAK) // Or something.
+    cutRandomEdges(puzzle, 9)
     return puzzle
-  }, 'scramble-stars': function() {
+  },
+  'hard-maze': largeMaze,
+  'stones': function() {
     var puzzle = new Puzzle(4, 4)
     puzzle.grid[0][8].start = true
     puzzle.grid[8][0].end = 'top'
 
-    // TODO: Select a random color
-    for (var cell of randomEmptyCells(puzzle, 4)) {
-      puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'yellow'}
+    for (var cell of randomNonEmptyCells(puzzle, 7)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
     }
-    cutRandomEdges(puzzle, 8, window.GAP_BREAK)
-    placeRandomCornerDots(puzzle, 4, window.DOT_BLACK)
-    return puzzle
-  }, 'scramble-maze': function() {
-    var puzzle = new Puzzle(7, 7)
-    puzzle.grid[0][14].start = true
-    puzzle.grid[14][0].end = 'top'
-
-    cutRandomEdges(puzzle, 20, window.GAP_BREAK)
+    for (var cell of randomNonEmptyCells(puzzle, 4)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
+    }
+    cutRandomEdges(puzzle, 5)
     return puzzle
   }, 'scramble-polyominos': function() {
     var puzzle = new Puzzle(4, 4)
     puzzle.grid[0][8].start = true
     puzzle.grid[8][0].end = 'top'
 
-    // TODO: Select a random color
-    for (var cell of randomEmptyCells(puzzle, 2)) {
-      puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': 'yellow', 'polyshape': randomPolyomino()}
+    var colors = shuffle(['0x052812', '0xFFC17A', '0xA4C34F', '0xB52EBD', '0x99EC35'])
+    while (true) {
+      var cells = randomEmptyCells(puzzle, 2)
+      var manhattanDistance = Math.abs(cells[0].x - cells[1].x) + Math.abs(cells[0].y - cells[1].y)
+      if (manhattanDistance >= 6) break
     }
+    puzzle.grid[cells[0].x][cells[0].y] = {'type': 'star', 'color': colors[0]}
+    puzzle.grid[cells[1].x][cells[1].y] = {'type': 'star', 'color': colors[0]}
+
     for (var cell of randomEmptyCells(puzzle, 2)) {
-      puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'orange'}
+      puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': colors[1], 'polyshape': randomPolyomino()}
     }
-    cutRandomEdges(puzzle, 8, window.GAP_BREAK)
+    cutRandomEdges(puzzle, 8)
+    return puzzle
+  }, 'scramble-stars': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][8].start = true
+    puzzle.grid[8][0].end = 'top'
+
+    for (var cell of randomEmptyCells(puzzle, 4)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'star', 'color': 'green'}
+    }
+    cutRandomEdges(puzzle, 8)
+    placeRandomCornerDots(puzzle, 4, window.DOT_BLACK)
     return puzzle
   }, 'scramble-symmetry': function() {
     var puzzle = new Puzzle(6, 6)
@@ -84,12 +95,14 @@ var styles = {
     puzzle.grid[0][12].end = 'left'
     puzzle.symmetry = {'x': true, 'y': true}
 
-    placeRandomCornerDots(puzzle, 2, window.DOT_BLACK)
+    cutRandomEdges(puzzle, 6)
     placeRandomCornerDots(puzzle, 2, window.DOT_BLUE)
     placeRandomCornerDots(puzzle, 2, window.DOT_YELLOW)
-    cutRandomEdges(puzzle, 6, window.GAP_BREAK)
+    placeRandomCornerDots(puzzle, 2, window.DOT_BLACK)
     return puzzle
-  }, 'triple-twocolor-0': tripleTwoColor,
+  },
+  'scramble-maze': largeMaze,
+  'triple-twocolor-0': tripleTwoColor,
   'triple-twocolor-1': tripleTwoColor,
   'triple-twocolor-2': tripleTwoColor,
   'triple-threecolor-0': tripleThreeColor,
@@ -100,14 +113,20 @@ var styles = {
   'pillar-left': function() {
     var puzzle = new Puzzle(6, 6, true)
     // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
-    applyRandomPillarSymmetry(puzzle)
+    applyRandomPillarSymmetry(puzzle, leftPillarSymmetry)
 
-    placeRandomEdgeDots(puzzle, 8, window.DOT_BLACK, true)
+    for (var i=0; i<8; i++) {
+      var horiz = randInt(2)
+      var cell = getCells(puzzle, getRandomElement, 1, function(x, y) {
+        return (x%2 === horiz && y%2 === 1 - horiz && puzzle.grid[x][y].dot == null)
+      })[0]
+      puzzle.grid[cell.x][cell.y].dot = window.DOT_BLACK
+    }
     return puzzle
   }, 'pillar-right': function() {
     var puzzle = new Puzzle(6, 6, true)
     // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
-    applyRandomPillarSymmetry(puzzle)
+    applyRandomPillarSymmetry(puzzle, rightPillarSymmetry)
 
     for (var cell of randomEmptyCells(puzzle, 3)) {
       puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'white'}
@@ -120,6 +139,15 @@ var styles = {
 }
 
 // Some functions separated out to avoid duplication
+function largeMaze() {
+  var puzzle = new Puzzle(7, 7)
+  puzzle.grid[0][14].start = true
+  puzzle.grid[14][0].end = 'top'
+  
+  cutRandomEdges(puzzle, 57)
+  return puzzle
+}
+
 function tripleTwoColor() {
   var puzzle = new Puzzle(4, 4)
   puzzle.grid[0][8].start = true
@@ -177,11 +205,15 @@ function show(id) {
 var completedPuzzles = []
 var scrambleOrder = []
 var possibleTriples = []
+var leftPillarSymmetry = 0
+var rightPillarSymmetry = 0
 window.generatePuzzles = function(style) {
   // TODO: Set URL seed according to actual value. TODO: location.hash time?
   completedPuzzles = []
   scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
   possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
+  leftPillarSymmetry = randInt(4)
+  rightPillarSymmetry = randInt(4)
 
   document.getElementById('start').disabled = true
   document.getElementById('start').innerText = 'Generating...'
@@ -268,6 +300,12 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
   window.setTimeout(function() {
     if (puzzle.name == 'easy-maze') {
       hide('easy-maze')
+      show('hard-maze')
+    } else if (puzzle.name == 'hard-maze') {
+      hide('hard-maze')
+      show('stones')
+    } else if (puzzle.name == 'stones') {
+      hide('stones')
       show(scrambleOrder.pop())
     } else if (puzzle.name.startsWith('scramble')) {
       hide(puzzle.name)
@@ -357,11 +395,17 @@ function randomEmptyCells(puzzle, count) {
   })
 }
 
-function cutRandomEdges(puzzle, count, gapType) {
-  var cells = getCells(puzzle, getRandomElement, count, function(x, y) {
-    return (x%2 !== y%2 && puzzle.grid[x][y].gap == null)
+function randomNonEmptyCells(puzzle, count) {
+  return getCells(puzzle, getRandomElement, count, function(x, y) {
+    return (x%2 === 1 && y%2 === 1)
   })
-  for (var cell of cells) puzzle.grid[cell.x][cell.y].gap = gapType
+}
+
+function cutRandomEdges(puzzle, count) {
+  var cells = getCells(puzzle, getRandomElement, count, function(x, y) {
+    return (x%2 !== y%2)
+  })
+  for (var cell of cells) puzzle.grid[cell.x][cell.y].gap = window.GAP_BREAK
 }
 
 function placeRandomCornerDots(puzzle, count, dotColor) {
@@ -387,13 +431,12 @@ function randomTriangle() {
 }
 
 function randomPolyomino() {
-  var polyshape = null
-  var size = randInt(3) + 3
-
   // The game generates polyshapes by randomly moving right or down until the shape is generated, then randomly rotating the result.
   // We can be a bit more efficient by precomputing the shapes.
   // Note that diagonal inverses (RR vs DD) do not effect the random results, and are thus not pictured nor included.
 
+  var polyshape = null
+  var size = randInt(3) + 3
   if (size === 3) {
     /* RR ###  RD ##
                    # */
@@ -413,9 +456,7 @@ function randomPolyomino() {
   return window.rotatePolyshape(polyshape, randInt(4))
 }
 
-// TODO: Verify from game
-function applyRandomPillarSymmetry(puzzle) {
-  var rng = randInt(4)
+function applyRandomPillarSymmetry(puzzle, rng) {
   if (rng === 0) {
     puzzle.symmetry = {'x': false, 'y': false}
     puzzle.grid[2][12].start = true
