@@ -6,6 +6,9 @@
 # Move the WsgiDaemonProcess outside of the </VirtualHost> section
 # Restart the server from AWS
 
+
+# ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@Witnesspuzzles-env.uvbqfe2qc8.us-west-2.elasticbeanstalk.com
+
 Server setup:
 
 # NOTE: /opt/python/current/app is being changed /var/app/current
