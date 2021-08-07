@@ -26,7 +26,6 @@ https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unk
   * pollyfill.io ?
 
 FEATURES
-- Add a "Save screenshot to clipboard" button
 - Publishing a puzzle should call onblur() so that if you were in the middle of a name change it gets accepted.
   (related: changing name shouldn't reset autosolve. If possible.)
 - All telemetry should contain the session ID. I'd suggest just starting a new table w/ the new fields. That way I don't risk breaking anything.
@@ -60,7 +59,7 @@ FEATURES
     - Number of solves
     - Completion rate
     - avg Completion time
-- Steal back stuff from prod
+- Steal back stuff from prodzpod (https://github.com/prodzpod/witness)
   - stuff in editor.onElementClicked
   - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
   - CSS variables in engine/display2.js, engine/svg.js, engine.utilities.js, theme/*.css
@@ -72,9 +71,9 @@ FEATURES
 - login-gated page for "show (and dismiss) all errors/feedback"
 - Put the license *somewhere* into the header, so that if someone clones the repo they don't have to do it.
 - Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
+  Part 1 shipping whenever AWS stops screwing me.
 - RGB filters
-- Add OUT_OF_BOUNDS_POLY to puzzle.settings
-  "If true, polyominos may be placed partially off of the grid as an intermediate solution step."
+- Support OUT_OF_BOUNDS_POLY
 - Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
   Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
   Fragment should probably be a puzzle ID, not an offset. Wellll maybe not, what if we delete one?
@@ -101,6 +100,8 @@ and move on.
     Might want a separate DB repo, if only to avoid the commit spam.
 - Custom mechanics
 - pillar puzzles are too easy when you can see the whole thing.
+- Add a "Save screenshot to clipboard" button
+  Needs some actual support from javascript. Soon!
 
 Browse
 -- Sorting
