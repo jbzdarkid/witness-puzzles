@@ -17,9 +17,9 @@ host_redirect('/pages/browse.html', '/index.html')
 
 # Short name redirects
 host_redirect('/pages/browse.html', '/browse.html')
-host_redirect('/pages/challenge.html', '/challenge.html')
 host_redirect('/pages/editor.html', '/editor.html')
 host_redirect('/pages/telemetry.html', '/telemetry.html')
+host_redirect('/pages/triangles.html', '/triangles.html')
 host_redirect('/pages/validate.html', '/validate.html')
 host_redirect('/pages/webcrow.html', '/webcrow.html')
 
@@ -30,11 +30,11 @@ host_statically('sourcemaps')
 
 # Actual page sources
 host_statically('pages/browse.js')
-host_statically('pages/challenge.html')
-host_statically('pages/challenge.js')
 host_statically('pages/editor.html')
 host_statically('pages/editor.js')
 host_statically('pages/telemetry.js')
+host_statically('pages/triangles.html')
+host_statically('pages/triangles.js')
 host_statically('pages/validate.html')
 host_statically('pages/webcrow.html')
 host_statically('pages/webcrow.js')
@@ -43,6 +43,7 @@ if application.debug:
   host_redirect('/pages/test.html', '/test.html')
   host_redirect('/pages/verify_puzzles.html', '/verify_puzzles.html')
   host_redirect('/pages/editor_test.html', '/editor_test.html')
+  host_redirect('/pages/challenge.html', '/challenge.html')
 
   host_statically('pages/test.html')
   host_statically('pages/test.js')
@@ -50,6 +51,8 @@ if application.debug:
   host_statically('pages/editor_test.js')
   host_statically('pages/verify_puzzles.html')
   host_statically('pages/verify_puzzles.js')
+  host_statically('pages/challenge.html')
+  host_statically('pages/challenge.js')
 
   host_statically('pages/_UTM.html')
   host_statically('pages/_UTM.js')
@@ -117,37 +120,30 @@ def browse():
   return to_json_string(output)
 application.add_url_rule('/browse', 'browse', browse)
 
-# Puzzle statistics telemetry
 @csrf.exempt
 def telemetry():
-  page = request.environ.get('HTTP_REFERER', '')
-  version = request.form['version']
-  data = request.form['data']
+  kwargs = {
+    'session_id': request.form['session_id'],
+    'event_type': request.form['event_type'],
+    'server_version': '%version%',
+    'client_version': request.form['version'],
+    'page': request.environ.get('HTTP_REFERER', ''),
+  }
+  if kwargs['page']:
+    page_parts = kwargs['page'].split('/')
+    if page_parts[-2] == 'play':
+      kwargs['puzzle'] = page_parts[-1]
 
-  if request.form['type'] == 'feedback': # Users providing feedback
-    add_feedback(version, page, data)
-  elif request.form['type'] == 'error': # Javascript errors
-    add_feedback(version, page, data)
-  elif request.form['type'] == 'puzzle_start': # Page load on play_template, indicating a puzzle was started
-    add_puzzle_start(version, page, sessionId)
-  elif request.form['type'] == 'puzzle_solve': # Successful solve on play_template, indicating a puzzle was completed
-    add_puzzle_solve(sessionId)
+  if kwargs['event_type'] in ['feedback', 'error']: # Users providing feedback and javascript errors
+    add_telemetry(**kwargs, data=request.form['data'])
+  elif kwargs['event_type'] == 'puzzle_start': # Page load on play_template
+    add_puzzle_start(**kwargs)
+  elif kwargs['event_type'] == 'puzzle_solve': # Successful solve on play_template
+    add_puzzle_solve(**kwargs)
+  else:
+    print('Unknown event type: ' + kwargs['event_type'])
   return '', 200
 application.add_url_rule('/telemetry', 'telemetry', telemetry, methods=['POST'])
-
-# Users providing feedback
-@csrf.exempt
-def feedback():
-  add_feedback(request.form['data'])
-  return '', 200
-application.add_url_rule('/feedback', 'feedback', feedback, methods=['POST'])
-
-# Internal errors
-@csrf.exempt
-def error():
-  add_error(request.form['data'])
-  return '', 200
-application.add_url_rule('/error', 'error', error, methods=['POST'])
 
 # Verifying that puzzles are valid
 if application.debug:

@@ -1,6 +1,7 @@
 SHIP BLOCKERS
 
 BUGS
+- Audio is laggy -- Try preloading?
 - Cursor can overlap the startpoint. Should be easier to fix now that I have a strong idea about how this is supposed to work.
   https://cdn.discordapp.com/attachments/667908286007345202/864022060362629130/unknown.png
 - Solution viewer shows wrong solution on solve
@@ -19,6 +20,7 @@ BUGS
   * Find a way to make color counts cheaper, *especially* when there are no elements that care.
 
 FEATURES
+- Add a "Save screenshot to clipboard" button
 - Publishing a puzzle should call onblur() so that if you were in the middle of a name change it gets accepted.
   (related: changing name shouldn't reset autosolve. If possible.)
 - All telemetry should contain the session ID. I'd suggest just starting a new table w/ the new fields. That way I don't risk breaking anything.

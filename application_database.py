@@ -78,6 +78,10 @@ def get_all_feedback():
   for row in db.session.query(Feedback).all():
     # https://stackoverflow.com/a/1960546
     feedback.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
+
+  for row in db.session.query(Telemetry).filter(Telemetry.event_type == 'feedback').all():
+    # https://stackoverflow.com/a/1960546
+    feedback.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
   return feedback
 
 def delete_feedback(id):
@@ -101,6 +105,11 @@ def get_all_errors():
   for row in db.session.query(Error).all():
     # https://stackoverflow.com/a/1960546
     errors.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
+
+  for row in db.session.query(Telemetry).filter(Telemetry.event_type == 'error').all():
+    # https://stackoverflow.com/a/1960546
+    errors.append({col.name: str(getattr(row, col.name)) for col in row.__table__.columns})
+
   return errors
 
 def delete_error(id):
@@ -109,27 +118,41 @@ def delete_error(id):
 
 class Telemetry(db.Model):
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  version = db.Column(db.Text, nullable=True)
+  date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+  session_id = db.Column(db.Text, nullable=False)
+  event_type = db.Column(db.Text, nullable=False)
+  server_version = db.Column(db.Text, nullable=False)
+  client_version = db.Column(db.Text, nullable=False)
+  page = db.Column(db.Text, nullable=True)
   puzzle = db.Column(db.Text, nullable=True)
-  sessionId = db.Column(db.Text, nullable=False, unique=True)
-  startTime = db.Column(db.DateTime, nullable=False)
-  solveTime = db.Column(db.DateTime, nullable=True)
+  
+  data = db.Column(db.Text, nullable=True)
+  start_time = db.Column(db.DateTime, nullable=True)
+  solve_time = db.Column(db.DateTime, nullable=True)
 
-def add_puzzle_start(version, page, sessionId):
-  try:
-    puzzle = page.rsplit('/', 1)[1]
-  except IndexError:
-    return # Page was somehow not a valid puzzle.
-  db.session.add(Telemetry(version=version, puzzle=puzzle, sessionId=sessionId, startTime = datetime.utcnow()))
+def add_telemetry(**kwargs):
+  db.session.add(Telemetry(**kwargs))
   db.session.commit()
 
-def add_puzzle_solve(sessionId):
-  db.session.query(Telemetry).filter(Telemetry.sessionId == sessionId).update(solveTime = datetime.utcnow())
-  db.session.commit()
+def add_puzzle_start(puzzle, **kwargs):
+  if not puzzle:
+    return
+  kwargs['start_time'] = datetime.utcnow()
+  add_telemetry(**kwargs)
 
-db.create_all()
+def add_puzzle_solve(puzzle, session_id, **kwargs):
+  if not puzzle:
+    return
+  db.session \
+    .query(Telemetry) \
+    .filter(Telemetry.session_id == session_id and Telemetry.puzzle == puzzle) \
+    .update({'solve_time': datetime.utcnow()})
+  db.session.commit()
 
 if application.debug:
+  db.create_all()
+
   for i in range(1234):
     db.session.add(Puzzle(
       display_hash = '267BCA' + str(i),
