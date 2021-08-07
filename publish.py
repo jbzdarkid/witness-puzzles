@@ -48,9 +48,10 @@ for path in all_paths:
     replacements[path.name] = f'{path.stem}-{hash.hexdigest()[:8]}{path.suffix}'
 
 z = zipfile.ZipFile(f'{version}.zip', 'w')
+root = Path(__file__).parent.resolve()
 for path in all_paths:
-  # path = path.resolve()
-  arcname = str(path.resolve().relative_to(Path(__file__).parent))
+  path = path.resolve()
+  arcname = str(path.relative_to(root))
 
   if path.suffix in ['.js', '.html', '.py']:
     with path.open() as f:

@@ -6,10 +6,7 @@ BUGS
   Ditto edges.
 - "Seren✩: I let Witness Puzzles run until it resolved. It found some... questionable results."
 https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unknown.png
-- Cursor can overlap the startpoint. Should be easier to fix now that I have a strong idea about how this is supposed to work.
-  https://cdn.discordapp.com/attachments/667908286007345202/864022060362629130/unknown.png
 - Solution viewer shows wrong solution on solve
-- Dragging is busted, a bit. Dragging down left while on the left side of a horizontal is not causing left motion! (likely true 4x)
 - iOS is scrolling while solving, looks like I broke this when I tried to fix android.
 - Android is still fairly buggy.
   - while solving a puzzle the page scrolling is annoying af, practically not even usable
