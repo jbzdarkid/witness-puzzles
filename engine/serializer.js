@@ -63,10 +63,10 @@ window.deserializePuzzle = function(data) {
 
   var genericFlags = s.readByte()
   puzzle.autoSolved = genericFlags & GENERIC_FLAG_AUTOSOLVED
-  if (genericFlags & GENERIC_FLAG_SYMMETRICAL) {
+  if (genericFlags & GENERIC_FLAG_SYMMETRICAL !== 0) {
     puzzle.symmetry = {
-      'x': genericFlags & GENERIC_FLAG_SYMMETRY_X,
-      'y': genericFlags & GENERIC_FLAG_SYMMETRY_Y,
+      'x': (genericFlags & GENERIC_FLAG_SYMMETRY_X !== 0),
+      'y': (genericFlags & GENERIC_FLAG_SYMMETRY_Y !== 0),
     }
   }
   puzzle.pillar = genericFlags & GENERIC_FLAG_PILLAR
