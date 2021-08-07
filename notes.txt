@@ -7,7 +7,9 @@
 # Restart the server from AWS
 
 
-# ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@Witnesspuzzles-env.uvbqfe2qc8.us-west-2.elasticbeanstalk.com
+
+
+# ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@Witnesspuzzles5-en.eba-7u725idu.us-west-2.elasticbeanstalk.com
 
 Server setup:
 
@@ -44,6 +46,10 @@ sudo ./certbot-auto --debug
 
 sudo vim /etc/httpd/conf.d/wsgi.conf
 # Move the WsgiDaemonProcess outside of the </VirtualHost> section
+
+
+Failed to restart eb-app.target: Unit not found
+
 
 sudo vim /etc/httpd/conf.d/ssl.conf
 # Add the following to the *beginning* of ssl.conf
@@ -89,6 +95,10 @@ logout
 
 
 # Local development setup:
-./venv/Scripts/activate
-py -3 -m pip install --user -r requirements.txt
+source /opt/python/run/venv/bin/activate
+sudo python3 -m pip install -r requirements.txt
 py -3 application.py
+
+# New local dev setup:
+source /var/app/venv/staging-LQM1lest/bin/activate
+sudo python3 /var/app/current/application.py

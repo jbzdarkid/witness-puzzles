@@ -52,9 +52,9 @@ FEATURES
   - Completion rate
   - avg Completion time
 - Steal back stuff from prodzpod (https://github.com/prodzpod/witness)
-  - stuff in editor.onElementClicked
-  - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
   - CSS variables in engine/display2.js, engine/svg.js, engine.utilities.js, theme/*.css
+  - Editor layout is a bit tighter -- consider smaller buttons & more rows?
+  - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
   - maybe engine/play.js
   - steal some svg shapes from engine/svg.js
   - trace2.js
