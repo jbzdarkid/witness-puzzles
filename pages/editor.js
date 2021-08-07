@@ -491,6 +491,9 @@ window.publishPuzzle = function() {
   request.open('POST', '/publish', true)
   request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
+  // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
+  document.getElementById('puzzleName').blur()
+
   request.send('solution=' + puzzle.serialize())
   currentPublishRequest = request
 
