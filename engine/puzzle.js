@@ -211,6 +211,7 @@ window.Puzzle = class {
     return dir
   }
 
+  // The resulting position is guaranteed to be gridsafe.
   getSymmetricalPos(x, y) {
     if (this.symmetry != null) {
       if (this.pillar === true) {

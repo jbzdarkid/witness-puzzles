@@ -517,14 +517,14 @@ function onElementClicked(event, x, y) {
     if (x%2 === 1 && y%2 === 1) {
       puzzle.grid[x][y] = null
     } else {
-      puzzle.grid[x][y].end = null
-      puzzle.grid[x][y].start = null
-      puzzle.grid[x][y].dot = null
-      puzzle.grid[x][y].gap = null
+      delete puzzle.grid[x][y].end
+      delete puzzle.grid[x][y].start
+      delete puzzle.grid[x][y].dot
+      delete puzzle.grid[x][y].gap
       if (puzzle.symmetry != null) {
         var sym = puzzle.getSymmetricalPos(x, y)
-        puzzle.updateCell2(sym.x, sym.y, 'start', null)
-        puzzle.updateCell2(sym.x, sym.y, 'end', null)
+        delete puzzle.grid[x][y].start
+        delete puzzle.grid[x][y].end
       }
     }
   } else if (activeParams.type == 'start') {

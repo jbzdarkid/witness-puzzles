@@ -2,8 +2,6 @@ SHIP BLOCKERS
 
 BUGS
 - Audio is laggy -- Try preloading?
-- In editor, right clicking on a dot with gap active -> left click with gap -> no gap placed.
-  Ditto edges.
 - "Seren✩: I let Witness Puzzles run until it resolved. It found some... questionable results."
 https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unknown.png
 - Solution viewer shows wrong solution on solve
