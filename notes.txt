@@ -16,7 +16,7 @@ Server setup:
 # Right click on the instance -> Connect, then copy the ssh connection string
 # (e.g. ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@witnesspuzzles.com)
 
-# Once connected, follow these steps:
+# Once connected, follow these steps: [ TODO: Certbot-auto has been deprecated. ]
 cd /usr/local/bin
 sudo yum-config-manager --enable epel
 sudo yum -y install mod24_ssl
