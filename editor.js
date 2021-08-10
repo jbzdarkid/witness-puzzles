@@ -517,7 +517,7 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'portal', 'blackhole'].includes(activeParams.type)) {
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'portal', 'blackhole', 'whitehole', 'pokerchip'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -564,10 +564,10 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
       }
-  } else if (activeParams.type == 'triangle' || activeParams.type == 'divdiamond') {
+  } else if (activeParams.type == 'triangle' || activeParams.type == 'atriangle' || activeParams.type == 'divdiamond') {
     let cycle;
-    if (activeParams.id == 'triangle') cycle = 4;
-    else cycle = 9;
+    if (activeParams.id == 'divdiamond') cycle = 9;
+    else cycle = 4;
     if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match
     if (puzzle.grid[x][y] != null
@@ -639,9 +639,9 @@ var symbolData = {
   'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
   'poly': {'type':'poly', 'title':'Polyomino'},
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
-  'bridge': {'type':'bridge', 'title':'Seren\'s Bridge: VALIDATION IS BUGGED'},
+  'bridge': {'type':'bridge', 'title':'Seren\'s Bridge'},
   'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
-  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer (Canonical Design by Seren)'},
+  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
   'cross': {'type':'cross', 'title':'Cross'},
   'curve': {'type':'curve', 'title':'Diamond'},
   'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
@@ -656,13 +656,14 @@ var symbolData = {
   'x-ld': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
   'x-rd': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
   'pentagon': {'type':'pentagon', 'title':'ItzShaun\'s Pentagons'},
-  'copier': {'type':'copier', 'title':'artless\' Copiers'},
+  'copier': {'type':'copier', 'title':'Gentova\' Copiers'},
   'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
-  'scaler': {'type':'scaler', 'flip': 0, 'title':'artless\' Scalers'},
+  'scaler': {'type':'scaler', 'flip': 0, 'title':'Scalers (Revised Artless\' Carrots)'},
   'portal': {'type':'portal', 'rot': 0, 'title':'MarioMak\'s Portals'},
-  'blackhole': {'type':'blackhole', 'rot': 0, 'title':'Pruz\'s Black Holes'},
+  'blackhole': {'type':'blackhole', 'rot': 0, 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
   'atriangle': {'type':'atriangle', 'count':1, 'title':'Klyzx\'s Antitriangles'},
   'whitehole': {'type':'whitehole', 'rot': 0, 'title':'White Holes'},
+  'pokerchip': {'type':'pokerchip', 'title':'MarioMak\'s Chips'},
   'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
 
@@ -708,10 +709,10 @@ function drawSymbolButtons() {
           drawSymbolButtons()
         }
       }
-    } else if (button.id == 'triangle' || button.id == 'divdiamond') {
+    } else if (button.id == 'triangle' || button.id == 'atriangle' || button.id == 'divdiamond') {
       let cycle;
-      if (button.id == 'triangle') cycle = 4;
-      else cycle = 9;
+      if (button.id == 'divdiamond') cycle = 9;
+      else cycle = 4;
       button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {

@@ -13,6 +13,7 @@ things to do
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
 - [ ] relocate all puzzles in 1 folder
 - [ ] hide symmetry lines toggle
+- [ ] support legacy editor
 
 ## relatively low effort (i can do it in a day)
 - [ ] navigation / main page
@@ -25,9 +26,10 @@ things to do
 ## important stuffs (h)
 - [ ] validate.js revamp cuz i feel like im tacking on things
 - [ ] diag lines
-- [ ] finally tackle seren's code
+- [x] finally tackle seren's code
 - [ ] optimize solver to prune bad regions (all my homies hate negators)
 - [ ] fix android being h to play with
+- [ ] optimize editor.js and stuff
 
 ## low priority
 - [ ] graph editor mode (alternative validation)
@@ -57,9 +59,9 @@ made work:
 - [x] Sizers
 - [ ] Negators, Copiers
 - [ ] Diagonal Lines
-- [ ] Portals
-- [ ] Black, Whiteholes
-- [ ] Antitriangle
+- [x] Portals
+- [x] Black, Whiteholes
+- [x] Antitriangle
 
 todo tomorrow
 antitriangle svg
