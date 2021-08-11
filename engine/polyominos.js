@@ -97,23 +97,21 @@ var knownCancellations = {}
 // * -1 represents a square that needs to be covered once (inside the region, or outside but covered by an onimoylop)
 // * -2 represents a square that needs to be covered twice (inside the region & covered by an onimoylop)
 // * And etc, for additional layers of polyominos/onimoylops.
-function xy(c, w, xoffset=0, yoffset=0) { return [c % w + xoffset, Math.floor(c / w) + yoffset]; }
-function ret(x, y, w, xoffset=0, yoffset=0) { return (y - yoffset) * w + (x - xoffset); }
+function xy(c, w) { return [c % w, Math.floor(c / w)]; }
+function ret(x, y, w) { return y * w + x; }
 function matrix(global, x, y) {
   if (!global.regionMatrix[y]) return undefined;
   return global.regionMatrix[y][x];
 }
-function getPortalCoords(data, c) {
+function getPortalCoords(c, data, w) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
   for (const i in data.originalRegions.all) {
-    // console.info(c, data.originalRegions.all[i], data.originalRegions.all[i].map(a => xy(a, data.width, data.totalSpan[0], data.totalSpan[1])), data.width)
       if (data.originalRegions.all[i].includes(c)) {
-          let [x, y] = xy(c, data.width, data.totalSpan[0], data.totalSpan[1]);
-          console.info(x, y, data.totalSpan, data.width, data.offset[i]);
+          let [x, y] = xy(c, w);
           x += data.offset[i][0]; y += data.offset[i][1];
-          return ret(x, y, data.width, data.totalSpan[0], data.totalSpan[1]);
+          return ret(x - data.totalSpan[0], y - data.totalSpan[1], data.width);
       }
   }
-  return undefined;  // TODO: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA DO THIS
+  return undefined;
 }
 // that is a long list
 window.polyFitMaster = function(puzzle, regionNum, global, polys, scalers, downscalable, upscalable) {
@@ -180,11 +178,11 @@ window.polyFit = function(puzzle, regionNum, global, polys, ylops) {
   polys = polys.map(v => v.cell);
   ylops = ylops.map(v => v.cell);
   if (polyCount > 0 && polyCount !== (data ? data.regions.cell.length : global.regions.cell[regionNum].length)) {
-    console.log('[!] Combined size of polyominos and onimoylops', polyCount, 'does not match region size', (data ? data.regions.cell.length : global.regions.cell[regionNum].length));
+    console.info('[!] Combined size of polyominos and onimoylops', polyCount, 'does not match region size', (data ? data.regions.cell.length : global.regions.cell[regionNum].length));
     return false;
   }
   if (polyCount < 0) {
-    console.log('[!] Combined size of onimoylops is greater than polyominos by', -polyCount)
+    console.info('[!] Combined size of onimoylops is greater than polyominos by', -polyCount)
     return false;
   }
   key = null;
@@ -200,12 +198,12 @@ window.polyFit = function(puzzle, regionNum, global, polys, ylops) {
   // For polyominos, we clear the grid to mark it up again:
   let savedGrid = puzzle.grid;
   // First, we mark all cells as 0: Cells outside the target region should be unaffected.
-  puzzle.grid = Array.from({ length: data ? data.width : puzzle.width }, () => Array.from({ length: data ? data.height : puzzle.height }, () => 0));
+  puzzle.grid = Array(data ? data.height : puzzle.height).fill(0).map(a => Array(data ? data.width : puzzle.width).fill(0));
   // In the normal case, we mark every cell as -1: It needs to be covered by one poly
   if (polyCount > 0) {
     for (let c of (data ? data.regions.cell : global.regions.cell[regionNum])) {
-        let [x, y] = xy(getPortalCoords(data, c), w, span[0], span[1]);
-        puzzle.setCell(x, y, -1);
+        let [x, y] = (data ? xy(c, w) : xy(c, puzzle.width));
+        puzzle.grid[y][x] = -1;
     }
   } // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
   res = placeYlops(ylops, 0, polys.slice(), puzzle);
@@ -220,10 +218,8 @@ window.polyntFitnt = function(puzzle, regionNum, global, polynts) { // best name
     console.log('[!] 1x1 not polyomino');
     return false;
   }
-  console.info(global)
   const isPortaled = global.portalRegion && (global.portalRegion.indexOf(regionNum) + 1);
   const data = isPortaled ? global.portalData[isPortaled-1] : null;
-  let span = data ? data.totalSpan : [0, 0, puzzle.width, puzzle.height];
   const w = data ? data.width : puzzle.width;
   polynts = polynts.filter(v => getPolySize(v.cell.polyshape) <= global.regions.cell[regionNum].length).map(v => v.cell);
   var res = true // true until breaks are found
@@ -231,12 +227,11 @@ window.polyntFitnt = function(puzzle, regionNum, global, polynts) { // best name
     for (var polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
       console.spam('Selected polyntshape', polyntshape)
       let cells = polyominoFromPolyshape(polyntshape)
-      for (var c of global.regions.cell[regionNum]) {
-        let [x, y] = xy(getPortalCoords(data, c), w, span[0], span[1]);
+      for (var c of (data ? data.regions.cell : global.regions.cell[regionNum])) {
+        let [x, y] = (data ? xy(c, w) : xy(c, puzzle.width));
         var found = true;
         for (cell of cells) {
-          console.info(cell.x + x, cell.y + y);
-          if ((data && !data.regions.cell.includes(ret(cell.x, cell.y, puzzle.width) + ret(x, y, w, span[0], span[1])))
+          if ((data && !data.regions.cell.includes(ret(cell.x + x, cell.y + y, w)))
           || (!data && matrix(global, cell.x + x, cell.y + y) != regionNum)) {
             found = false;
             break;
@@ -256,18 +251,18 @@ window.polyntFitnt = function(puzzle, regionNum, global, polynts) { // best name
 
 // If false, poly doesn't fit and grid is unmodified
 // If true, poly fits and grid is modified (with the placement)
-function tryPlacePolyshape(cells, x, y, puzzle, sign) {
+function tryPlacePolyshape(cells, y, x, puzzle, sign) {
   console.spam('Placing at', x, y, 'with sign', sign)
   var numCells = cells.length
   for (var i=0; i<numCells; i++) {
     var cell = cells[i]
-    var puzzleCell = puzzle.getCell(cell.x + x, cell.y + y)
+    var puzzleCell = puzzle.grid[cell.y + y]?.[cell.x + x]
     if (puzzleCell == null) return false
     cell.value = puzzleCell
   }
   for (var i=0; i<numCells; i++) {
     var cell = cells[i]
-    puzzle.setCell(cell.x + x, cell.y + y, cell.value + sign)
+    puzzle.grid[cell.y + y][cell.x + x] = cell.value + sign;
   }
   return true
 }
@@ -285,11 +280,11 @@ function placeYlops(ylops, i, polys, puzzle) {
       console.log('Placing ylop', ylop, 'at', x, y)
       for (var polyshape of ylopRotations) {
         var cells = polyominoFromPolyshape(polyshape, true)
-        if (!tryPlacePolyshape(cells, x, y, puzzle, -1)) continue;
+        if (!tryPlacePolyshape(cells, y, x, puzzle, -1)) continue;
         console.group('')
         if (placeYlops(ylops, i+1, polys, puzzle)) return true
         console.groupEnd('')
-        if (!tryPlacePolyshape(cells, x, y, puzzle, +1)) continue;
+        if (!tryPlacePolyshape(cells, y, x, puzzle, +1)) continue;
       }
     }
   }
@@ -303,10 +298,10 @@ function placeYlops(ylops, i, polys, puzzle) {
 function placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
   var allPolysPlaced = (polys.length === 0)
-  for (var x=0; x<puzzle.width; x++) {
-    var row = puzzle.grid[x]
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = row[y]
+  for (var y=1; y<puzzle.height; y+=2) {
+    var row = puzzle.grid[y]
+    for (var x=1; x<puzzle.width; x+=2) {
+      var cell = row[x]
       if (cell > 0) {
         console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
         return false
@@ -329,7 +324,7 @@ function placePolys(polys, puzzle) {
   var openCells = []
   for (var y=1; y<puzzle.height; y+=2) {
     for (var x=1; x<puzzle.width; x+=2) {
-      if (puzzle.grid[x][y] >= 0) continue;
+      if (puzzle.grid[y][x] >= 0) continue;
       openCells.push({'x':x, 'y':y})
       if (puzzle.pillar === false) break;
     }
@@ -355,7 +350,7 @@ function placePolys(polys, puzzle) {
       for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
         console.spam('Selected polyshape', polyshape)
         var cells = polyominoFromPolyshape(polyshape)
-        if (!tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
+        if (!tryPlacePolyshape(cells, openCell.y, openCell.x, puzzle, +1)) {
           console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
           continue;
         }
@@ -363,7 +358,7 @@ function placePolys(polys, puzzle) {
         if (placePolys(polys, puzzle)) return true
         console.groupEnd('')
         // Should not fail, as it's an inversion of the above tryPlacePolyshape
-        tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, -1)
+        tryPlacePolyshape(cells, openCell.y, openCell.x, puzzle, -1)
       }
       polys.splice(i, 0, poly)
     }

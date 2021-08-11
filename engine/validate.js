@@ -127,8 +127,8 @@ function eraseShape(puzzle, x, y) {
 // coordinate conversion
 let width; 
 let height;
-function ret(x, y, w=width, xoffset=0, yoffset=0) { return (y - yoffset) * w + (x - xoffset); }
-function xy(c, w=width, xoffset=0, yoffset=0) { return [c % w + xoffset, Math.floor(c / w) + yoffset]; }
+function ret(x, y, w=width) { return y * w + x; }
+function xy(c, w=width) { return [c % w, Math.floor(c / w)]; }
 function cel(puzzle, c) { let [x, y] = xy(c); return puzzle.getCell(x, y); }
 const DIR = [
     {'x': 0, 'y':-1},
@@ -163,12 +163,12 @@ function contains(a, b) {
 function isBounded(puzzle, x, y) { return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height); }
 function matrix(global, x, y) { return global.regionMatrix[y]?.[x]; }
 function safepush(obj, k, v, makeset=false) { obj[k] ??= (makeset ? new Set() : []); makeset ? obj[k].add(v) : obj[k].push(v); }
-function getPortalCoords(data, c) {
+function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
     for (const i in data.originalRegions.all) {
         if (data.originalRegions.all[i].includes(c)) {
             let [x, y] = xy(c);
             x += data.offset[i][0]; y += data.offset[i][1];
-            return ret(x, y, data.width, data.totalSpan[0], data.totalSpan[1]);
+            return ret(x - data.totalSpan[0], y - data.totalSpan[1], data.width);
         }
     }
     return undefined;
@@ -388,8 +388,7 @@ function init(puzzle) { // initialize globals
                     for (const c of list) {
                         let [x, y] = xy(c);
                         let cell = puzzle.getCell(x, y);
-                        x += offset[0]; y += offset[1];
-                        const newc = ret(x, y, data.width, data.totalSpan[0], data.totalSpan[1]);
+                        const newc = getPortalCoords(c, data);
                         data.regions.all.push(newc);
                         if (!cell || (cell.type == 'line' && !cell.dot)) continue;
                         safepush(data.regionPosCell, newc, cell);
@@ -408,7 +407,6 @@ function init(puzzle) { // initialize globals
             }
             let numLookup = [...new Set(conversionTable)].sort((a, b) => a - b);
             conversionTable = conversionTable.map(a => numLookup.indexOf(a));
-            console.info(conversionTable, numLookup)
             for (const num in global.portalData) {
                 global.regions.all[num] = global.portalData[num].originalRegions.all.flat();
             }
@@ -421,7 +419,6 @@ function init(puzzle) { // initialize globals
             for (const i in global.portalData) for (const k of global.portalData[i].originalRegionNums) {
                 global.portalRegion[i] = conversionTable[k]
             }
-            console.info(global)
         }
     }
     for (let i = 0; i < global.regionNum; i++) {
@@ -470,17 +467,17 @@ function init(puzzle) { // initialize globals
     filterRegionArr(global.regionCells, 'line', 'corner', detectionMode.corner);
     filterRegionArr(global.regionCells, 'line', 'edge',   detectionMode.edge);
 
-    if (global.portalData) for (const data of global.portalData) {
+    if (global.portalData) for (const data of global.portalData) { 
         const w = data.width;
         filterRegionArr(data.originalRegions, 'all', 'cell',    detectionMode.cell);
         filterRegionArr(data.originalRegions, 'all', 'line',    detectionMode.line);
         filterRegionArr(data.originalRegions, 'line', 'corner', detectionMode.corner);
         filterRegionArr(data.originalRegions, 'line', 'edge',   detectionMode.edge);
         
-        data.regions.cell   = data.regions.all .filter(c => detectionMode.cell  (...xy(c, w, data.totalSpan[0], data.totalSpan[1])));
-        data.regions.line   = data.regions.all .filter(c => detectionMode.line  (...xy(c, w, data.totalSpan[0], data.totalSpan[1])));
-        data.regions.corner = data.regions.line.filter(c => detectionMode.corner(...xy(c, w, data.totalSpan[0], data.totalSpan[1])));
-        data.regions.edge   = data.regions.line.filter(c => detectionMode.edge  (...xy(c, w, data.totalSpan[0], data.totalSpan[1])));
+        data.regions.cell   = data.regions.all .filter(c => detectionMode.cell  (...xy(c, w)));
+        data.regions.line   = data.regions.all .filter(c => detectionMode.line  (...xy(c, w)));
+        data.regions.corner = data.regions.line.filter(c => detectionMode.corner(...xy(c, w)));
+        data.regions.edge   = data.regions.line.filter(c => detectionMode.edge  (...xy(c, w)));
     }
 
     global.regionShapes = [];
@@ -866,7 +863,7 @@ const validate = [
             let pos = {};
             let chippos = {};
             for (const c of global.regionCells.cell[regionNum]) { // here we go
-                const [x, y] = data ? xy(getPortalCoords(data, c), w, data.totalSpan[0], data.totalSpan[1]) : xy(c);
+                const [x, y] = data ? xy(getPortalCoords(c, data), w) : xy(c);
                 let cell = puzzle.getCell(...xy(c));
                 let color = cell.color;
                 if (this.or.includes(cell.type)) {
@@ -936,7 +933,7 @@ const validate = [
                 const cell = puzzle.getCell(...xy(c));
                 const dir = dr(cell.rot).map(a => a * 2); const count = cell.count;
                 const w = data ? data.width : puzzle.width;
-                const [sx, sy] = data ? xy(getPortalCoords(data, c), w, data.totalSpan[0], data.totalSpan[1]) : xy(c);
+                const [sx, sy] = data ? xy(getPortalCoords(c, data), w) : xy(c);
                 let [x, y] = [sx, sy];
                 let wraparound = false;
                 if ((puzzle.pillar && !data) || (puzzle.pillar && span[0] <= 0 && span[2] >= puzzle.width)) {
@@ -951,7 +948,7 @@ const validate = [
                         if (x < 0) x += puzzle.width;
                         if (x >= puzzle.width) x -= puzzle.width;
                     }
-                    if ((data && data.regions.cell.includes(ret(x, y, w, data.totalSpan[0], data.totalSpan[1]))) || !data && matrix(global, x, y) == regionNum) target++;
+                    if ((data && data.regions.cell.includes(ret(x, y, w))) || !data && matrix(global, x, y) == regionNum) target++;
                     if (span[0] > x || x >= span[2] || span[1] > y || y > span[3] || (x == sx && y == sy) || target > count) break;
                 }
                 if (target !== count) {
@@ -991,7 +988,7 @@ const validate = [
                 else return matrix(global, x, y) == regionNum;
             };
             for (const c of twobytwos) {
-                const [x, y] = data ? xy(getPortalCoords(data, c), w, data.totalSpan[0], data.totalSpan[1]) : xy(c);
+                const [x, y] = data ? xy(getPortalCoords(c, data), w) : xy(c);
                 if ( isReg(x+2, y-2) && isReg(x+2, y) && isReg(x, y-2) 
                     || isReg(x-2, y-2) && isReg(x-2, y) && isReg(x, y-2) 
                     || isReg(x+2, y+2) && isReg(x+2, y) && isReg(x, y+2) 
@@ -1089,6 +1086,9 @@ const validate = [
         '_name': 'BRIDGE CHECK',
         'or': ['bridge'],
         'exec': function(puzzle, regionNum, global, quick) {
+            const isPortaled = (global.portalRegion != undefined) && (global.portalRegion.indexOf(regionNum) + 1);
+            let portals = [];
+            if (isPortaled) for (const c of global.regionCells.cell[regionNum]) if (puzzle.getCell(...xy(c))?.type == 'portal') portals.push(c);
             for (const color of global.bridgeRegions[regionNum]) {
                 if (global.invalidBridges[color]) { // invalid
                     for (c of global.bridges[color]) {
@@ -1110,6 +1110,9 @@ const validate = [
                         if (isCellBridgePathFriendly(x+2, y, color)) adj[c].push(ret(x+2, y));
                         if (isCellBridgePathFriendly(x, y-2, color)) adj[c].push(ret(x, y-2));
                         if (isCellBridgePathFriendly(x, y+2, color)) adj[c].push(ret(x, y+2));
+                    }
+                    for (const p1 of portals) for (const p2 of portals) {
+                        if (puzzle.getCell(...xy(p1)).color == puzzle.getCell(...xy(p2)).color && p1 != p2) adj[p1].push(p2);
                     }
                     //* make tree
                     let seen = new Set();
