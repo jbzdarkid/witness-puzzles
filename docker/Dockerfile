@@ -4,7 +4,7 @@ FROM debian:stable-20210721
 # Configure working directory and copy critical files into place
 WORKDIR /var/www/apache-flask/app
 COPY requirements.txt .
-COPY requirements/ .
+COPY requirements/* .
 COPY docker/apache-flask.conf /etc/apache2/sites-available/
 COPY docker/apache-flask.wsgi /var/www/apache-flask/
 
