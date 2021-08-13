@@ -1,10 +1,12 @@
 # Adapted from https://github.com/carlostighe/apache-flask/blob/master/Dockerfile
 FROM debian:stable-20210721
 
-# Configure working directory -- all tasks should run from and save relative to here, unless otherwise specified.
-# RUN mkdir -p /var/www/apache-flask/app
+# Configure working directory and copy critical files into place
 WORKDIR /var/www/apache-flask/app
-COPY . .
+COPY requirements.txt .
+COPY requirements/ .
+COPY docker/apache-flask.conf /etc/apache2/sites-available/
+COPY docker/apache-flask.wsgi /var/www/apache-flask/
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -15,12 +17,10 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 RUN python3 -m pip install -r requirements.txt
 
-# Set up logging
-RUN ln -sf /proc/self/fd/1 /var/log/apache2/access.log
-RUN ln -sf /proc/self/fd/1 /var/log/apache2/error.log
+# Copy non-critical files late, to avoid cache invalidation
+COPY . .
 
 # Set up and run Apache
-RUN mv docker/apache-flask.conf /etc/apache2/sites-available/apache-flask.conf
 RUN a2ensite apache-flask
 RUN a2enmod headers
 RUN a2dissite 000-default.conf
