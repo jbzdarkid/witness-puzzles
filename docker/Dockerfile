@@ -9,6 +9,7 @@ RUN (apt-get update || true) && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # Configure working directory and copy critical files into place
+WORKDIR /var/www/apache-flask/app/
 COPY requirements.txt /var/www/apache-flask/app
 COPY requirements/ /var/www/apache-flask/app/requirements/
 RUN python3 -m pip install -r requirements.txt
