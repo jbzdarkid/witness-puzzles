@@ -1,7 +1,7 @@
 # Adapted from https://github.com/carlostighe/apache-flask/blob/master/Dockerfile
 FROM debian:stable-20210721
 
-RUN apt-get update && apt-get install -y \
+RUN (apt-get update || true) && apt-get install -y \
   apache2 \
   build-essential \
   libapache2-mod-wsgi-py3 \
@@ -12,6 +12,11 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /var/www/apache-flask/app
 COPY requirements/ /var/www/apache-flask/app/requirements/
 RUN python3 -m pip install -r requirements.txt
+
+# For debugging purposes, install & configure vim. For now.
+RUN (apt-get update || true) && apt-get install -y \
+  vim
+COPY docker/.vimrc ~/.vimrc
 
 COPY docker/apache-flask.conf /etc/apache2/sites-available/
 COPY docker/apache-flask.wsgi /var/www/apache-flask/
