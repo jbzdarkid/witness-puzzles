@@ -10,8 +10,8 @@ RUN (apt-get update || true) && apt-get install -y \
 
 # Configure working directory and copy critical files into place
 WORKDIR /var/www/apache-flask/app/
-COPY requirements.txt /var/www/apache-flask/app
-COPY requirements/ /var/www/apache-flask/app/requirements/
+COPY requirements.txt .
+COPY requirements/ requirements/
 RUN python3 -m pip install -r requirements.txt
 
 # For debugging purposes, install & configure vim. For now.
