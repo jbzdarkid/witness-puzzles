@@ -20,15 +20,18 @@ RUN (apt-get update || true) && apt-get install -y \
 COPY docker/.vimrc ~/.vimrc
 
 COPY docker/apache-flask.conf /etc/apache2/sites-available/
-COPY docker/apache-flask.wsgi /var/www/apache-flask/
+COPY docker/apache-flask.wsgi /var/www/apache-flask/app
 # Set up and run Apache
 RUN a2ensite apache-flask
 RUN a2enmod headers
 RUN a2dissite 000-default.conf
 
-# Copy non-critical files late, to avoid cache invalidation
+# Copy non-critical files late, since docker will rebuild everything below if these files change
 COPY . /var/www/apache-flask/app
 
+ENV errorlog=/var/log/apache2/error.log
+ENV accesslog=/var/log/apache2/access.log
+
 EXPOSE 80
-WORKDIR /var/www/apache-flask
+WORKDIR /var/www/apache-flask/app
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
