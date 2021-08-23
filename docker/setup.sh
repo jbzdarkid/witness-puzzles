@@ -18,6 +18,7 @@ wget https://aws-codedeploy-$REGION.s3.$REGION.amazonaws.com/latest/install
 chmod u+x ./install
 sudo ./install auto > /tmp/logfile
 # Update: sudo /opt/codedeploy-agent/bin/install auto
+sudo service codedeploy-agent restart
 
 # Required ?
 sudo mkdir -p /opt/codedeploy-agent/deployment-root/deployment-instructions
