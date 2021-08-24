@@ -1,10 +1,5 @@
-# TODO: https://docs.aws.amazon.com/codedeploy/latest/userguide/integrations-partners-github.html
 version: 0.0
 os: linux
 files:
   - source: /index.html
-    destination: /var/www/apache-flask/app/
-hooks:
-  BeforeInstall:
-    - location: /docker/code-deploy.sh
-      timeout: 900
+    destination: /var/www/
