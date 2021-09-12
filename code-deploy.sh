@@ -5,7 +5,7 @@
 
 REPO="/home/ubuntu/witness-puzzles" # Step 1 is actually to *move ourself* into the folder.
 mkdir -p /var/www/apache-flask/app/
-cd /var/www/apache-flask/app/
+cp -rf "$($pwd)/." /var/www/apache-flask/app/.
 
 apt-get update
 apt-get install -y \
@@ -40,6 +40,7 @@ a2dissite 000-default.conf
 apache2ctl configtest
 systemctl restart apache2
 systemctl status apache2
+
 
 # Add secret environment variables into /etc/apache2/envvars
 # Or, I could put them in apache-flask.wsgi, using os.environ['FOO'] = 'BAR'.
