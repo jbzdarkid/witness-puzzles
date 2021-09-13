@@ -6,6 +6,7 @@ from json import dumps as to_json_string
 from traceback import format_exc
 
 from flask_wtf.csrf import CSRFError
+from sqlalchemy.exc import SQLAlchemyError
 
 from application_database import *
 from application_utils import *
@@ -66,8 +67,12 @@ application.register_error_handler(404, page_not_found)
 application.register_error_handler(CSRFError, page_not_found)
 
 def handle_exception(exc):
-  message = f'Caught a {type(exc).__name__}: {format_exc()}'
-  add_feedback(message)
+  if isinstance(exc, SQLAlchemyError):
+    if db.session.is_active: # db imported from application_database.py
+      db.session.rollback()
+  else:
+    message = f'Caught a {type(exc).__name__}: {format_exc()}'
+    add_feedback(message)
   return '', 500
 application.register_error_handler(Exception, handle_exception)
 
