@@ -477,6 +477,7 @@ window.publishPuzzle = function() {
     if (this.readyState != XMLHttpRequest.DONE) return
 
     var publish = document.getElementById('publish')
+    publish.disabled = false
     if (this.status === 200) {
       publish.innerText = 'Published, click here to play your puzzle!'
       var url = '/play/' + this.responseText
@@ -486,6 +487,11 @@ window.publishPuzzle = function() {
     } else {
       publish.innerText = 'Error: ' + this.responseText
     }
+  }
+  request.ontimeout = function() {
+    if (this !== currentPublishRequest) return
+    var publish = document.getElementById('publish')
+    publish.innerText = 'Error: Request timed out after 2 minutes'
   }
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
   request.open('POST', '/publish', true)
@@ -499,6 +505,7 @@ window.publishPuzzle = function() {
 
   var publish = document.getElementById('publish')
   publish.onpointerdown = null
+  publish.disabled = true
   publish.innerText = 'Validating puzzle...'
 }
 

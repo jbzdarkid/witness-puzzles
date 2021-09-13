@@ -22,7 +22,7 @@ function sendRequest(type, data) {
   body = 'session_id=' + sessionId
   body += '&event_type=' + type
   body += '&version=%version%'
-  body += '&data=' + data
+  if (data != null) body += '&data=' + data
   request.send(body)
 }
 
