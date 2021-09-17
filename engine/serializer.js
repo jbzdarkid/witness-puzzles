@@ -23,6 +23,18 @@ window.serializePuzzle = function(puzzle) {
       s.writeCell(puzzle.grid[x][y])
     }
   }
+  
+  if (puzzle.path != null) {
+    var startPos = puzzle.path.pop()
+    if (puzzle.path.length > 0) {
+      s.writeInt(puzzle.path.length)
+      s.writeByte(startPos.x)
+      s.writeByte(startPos.y)
+      for (var dir of puzzle.path) s.writeByte(dir)
+    }
+  } else {
+    s.writeInt(0)
+  }
 
   var settingsFlags = 0
   if (puzzle.settings.NEGATIONS_CANCEL_NEGATIONS) settingsFlags |= SETTINGS_FLAG_NCN
@@ -46,15 +58,15 @@ window.deserializePuzzle = function(data) {
 
   var width = s.readByte()
   var height = s.readByte()
-  var puzzle = new Puzzle(width, height)
+  var puzzle = new Puzzle(Math.floor(width / 2), Math.floor(height / 2))
   puzzle.name = s.readString()
 
   var genericFlags = s.readByte()
   puzzle.autoSolved = genericFlags & GENERIC_FLAG_AUTOSOLVED
-  if (genericFlags & GENERIC_FLAG_SYMMETRICAL) {
+  if (genericFlags & GENERIC_FLAG_SYMMETRICAL !== 0) {
     puzzle.symmetry = {
-      'x': genericFlags & GENERIC_FLAG_SYMMETRY_X,
-      'y': genericFlags & GENERIC_FLAG_SYMMETRY_Y,
+      'x': (genericFlags & GENERIC_FLAG_SYMMETRY_X !== 0),
+      'y': (genericFlags & GENERIC_FLAG_SYMMETRY_Y !== 0),
     }
   }
   puzzle.pillar = genericFlags & GENERIC_FLAG_PILLAR
@@ -63,6 +75,16 @@ window.deserializePuzzle = function(data) {
       puzzle.grid[x][y] = s.readCell()
     }
   }
+
+  var pathLength = s.readInt()
+  if (pathLength > 0) {
+    var path = [{
+      'x': s.readByte(),
+      'y': s.readByte(),
+    }]
+    for (var i=0; i<pathLength; i++) path.push(s.readByte())
+  }
+
   var settingsFlags = s.readByte()
   puzzle.settings = {
     NEGATIONS_CANCEL_NEGATIONS: settingsFlags & SETTINGS_FLAG_NCN,
@@ -135,13 +157,27 @@ class Serializer {
   writeInt(i) {
     if (i < 0 || i > 0xFFFFFFFF) throw Error('Cannot write out-of-range int ' + i)
     var b1 = (i & 0x000000FF) >> 0
-    var b2 = (i & 0x0000FF00) >> 4
-    var b3 = (i & 0x00FF0000) >> 8
-    var b4 = (i & 0xFF000000) >> 12
+    var b2 = (i & 0x0000FF00) >> 8
+    var b3 = (i & 0x00FF0000) >> 16
+    var b4 = (i & 0xFF000000) >> 24
     this.writeByte(b1)
     this.writeByte(b2)
     this.writeByte(b3)
     this.writeByte(b4)
+  }
+
+  readLong() {
+    var i1 = this.readInt() << 32
+    var i2 = this.readInt()
+    return i1 | i2
+  }
+
+  writeLong(l) {
+    if (l < 0 || l > 0xFFFFFFFFFFFFFFFF) throw Error('Cannot write out-of-range long ' + l)
+    var i1 = l & 0xFFFFFFFF
+    var i2 = (l - i1) / 0x100000000
+    this.writeInt(i1)
+    this.writeInt(i2)
   }
 
   readString() {
@@ -190,8 +226,10 @@ class Serializer {
     if (cellType === CELL_TYPE_LINE) {
       cell.type = 'line'
       cell.line = this.readByte()
-      cell.dot = this.readByte()
-      cell.gap = this.readByte()
+      var dot = this.readByte()
+      if (dot != 0) cell.dot = dot
+      var gap = this.readByte()
+      if (gap != 0) cell.gap = gap
     } else if (cellType === CELL_TYPE_SQUARE) {
       cell.type = 'square'
       cell.color = this.readColor()
@@ -208,11 +246,11 @@ class Serializer {
     } else if (cellType === CELL_TYPE_POLY) {
       cell.type = 'poly'
       cell.color = this.readColor()
-      cell.polyshape = this.readInt()
+      cell.polyshape = this.readLong()
     } else if (cellType === CELL_TYPE_YLOP) {
       cell.type = 'ylop'
       cell.color = this.readColor()
-      cell.polyshape = this.readInt()
+      cell.polyshape = this.readLong()
     }
 
     var startEnd = this.readByte()
@@ -255,11 +293,11 @@ class Serializer {
     } else if (cell.type == 'poly') {
       this.writeByte(CELL_TYPE_POLY)
       this.writeColor(cell.color)
-      this.writeInt(cell.polyshape)
+      this.writeLong(cell.polyshape)
     } else if (cell.type == 'ylop') {
       this.writeByte(CELL_TYPE_YLOP)
       this.writeColor(cell.color)
-      this.writeInt(cell.polyshape)
+      this.writeLong(cell.polyshape)
     }
 
     var startEnd = 0

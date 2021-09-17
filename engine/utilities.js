@@ -16,12 +16,14 @@ Event.prototype.movementY = Event.prototype.movementY || Event.prototype.mozMove
 Event.prototype.isRightClick = function() {
   return this.which === 3 || (this.touches && this.touches.length > 1)
 }
-Event.prototype.position = function() {
-  return {
-    'x': event.pageX || event.clientX || (event.touches && event.touches[0].pageX) || null,
-    'y': event.pageY || event.clientY || (event.touches && event.touches[0].pageY) || null,
+Object.defineProperty(Event.prototype, 'position', {
+  'get': function() {
+    return {
+      'x': event.pageX || event.clientX || (event.touches && event.touches[0].pageX) || null,
+      'y': event.pageY || event.clientY || (event.touches && event.touches[0].pageY) || null,
+    }
   }
-}
+})
 /*** End cross-compatibility ***/
 
 var proxy = {
@@ -63,18 +65,23 @@ var proxy = {
 window.settings = new Proxy({}, proxy.init())
 
 var tracks = {
-  'start':   '/data/panel_start_tracing.aac',
-  'success': '/data/panel_success.aac',
-  'fail':    '/data/panel_failure.aac',
-  'abort':   '/data/panel_abort_tracing.aac',
+  'start':   new Audio(src = '/data/panel_start_tracing.aac'),
+  'success': new Audio(src = '/data/panel_success.aac'),
+  'fail':    new Audio(src = '/data/panel_failure.aac'),
+  'abort':   new Audio(src = '/data/panel_abort_tracing.aac'),
 }
-var audio = new Audio(src='/data/panel_start_tracing.aac')
 
+var currentAudio = null
 window.PLAY_SOUND = function(name) {
-  audio.pause()
-  audio.src = tracks[name]
+  if (currentAudio) currentAudio.pause()
+  var audio = tracks[name]
+  audio.load()
   audio.volume = parseFloat(window.settings.volume)
-  audio.play()
+  audio.play().then(function() {
+    currentAudio = audio
+  }).catch(function() {
+    // Do nothing.
+  })
 }
 
 window.LINE_PRIMARY = '#8FF'

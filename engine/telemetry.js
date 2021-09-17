@@ -13,17 +13,22 @@ window.addEventListener('error', function(event) {
   console.error('Error in file ' + event.filename + ' on line ' + event.line)
 })
 
+var sessionId = uuidv4() // Session ID is unique per page load, so as not to identify the user.
+
 function sendRequest(type, data) {
   var request = new XMLHttpRequest()
   request.open('POST', '/telemetry', true) // Fire and forget
   request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-  request.send('version=%version%&type=' + type + '&data=' + data)
+  body = 'session_id=' + sessionId
+  body += '&event_type=' + type
+  body += '&version=%version%'
+  if (data != null) body += '&data=' + data
+  request.send(body)
 }
 
 window.FEEDBACK     = function(message) { sendRequest('feedback', message) }
 window.ERROR        = function(message) { sendRequest('error', message) }
-var sessionId = uuidv4() // Session ID is generated every page load, so as to not identify the user.
-window.START_PUZZLE = function() { sendRequest('puzzleStart', sessionId) }
-window.SOLVE_PUZZLE = function() { sendRequest('puzzleSolve', sessionId) }
+window.START_PUZZLE = function() { sendRequest('puzzle_start') }
+window.SOLVE_PUZZLE = function() { sendRequest('puzzle_solve') }
 
 })

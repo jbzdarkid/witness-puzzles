@@ -592,7 +592,7 @@ window.onMove = function(dx, dy) {
   }
 
   while (true) {
-    gapAndSymmetryCollision()
+    hardCollision()
 
     // Potentially move the location to a new cell, and make absolute boundary checks
     var moveDir = move()
@@ -794,9 +794,9 @@ function pushCursor(dx, dy) {
   }
 }
 
-// Check to see if we collided with any gaps, or with a symmetrical line.
-// In either case, abruptly zero momentum.
-function gapAndSymmetryCollision() {
+// Check to see if we collided with any gaps, or with a symmetrical line, or a startpoint.
+// In any case, abruptly zero momentum.
+function hardCollision() {
   var lastDir = data.path[data.path.length - 1].dir
   var cell = data.puzzle.getCell(data.pos.x, data.pos.y)
   if (cell == null) return
@@ -805,7 +805,18 @@ function gapAndSymmetryCollision() {
   if (cell.gap === window.GAP_BREAK) {
     console.spam('Collided with a gap')
     gapSize = 21
-  } else if (data.puzzle.symmetry != null) {
+  } else {
+    var nextCell = null
+    if (lastDir === MOVE_LEFT)   nextCell = data.puzzle.getCell(data.pos.x - 1, data.pos.y)
+    if (lastDir === MOVE_RIGHT)  nextCell = data.puzzle.getCell(data.pos.x + 1, data.pos.y)
+    if (lastDir === MOVE_TOP)    nextCell = data.puzzle.getCell(data.pos.x, data.pos.y - 1)
+    if (lastDir === MOVE_BOTTOM) nextCell = data.puzzle.getCell(data.pos.x, data.pos.y + 1)
+    if (nextCell != null && nextCell.start === true && nextCell.line > window.LINE_NONE) {
+      gapSize = -5
+    }
+  }
+
+  if (data.puzzle.symmetry != null) {
     if (data.sym.x === data.pos.x && data.sym.y === data.pos.y) {
       console.spam('Collided with our symmetrical line')
       gapSize = 13

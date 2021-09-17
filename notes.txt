@@ -6,7 +6,15 @@
 # Move the WsgiDaemonProcess outside of the </VirtualHost> section
 # Restart the server from AWS
 
+
+
+
+# ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@Witnesspuzzles5-en.eba-7u725idu.us-west-2.elasticbeanstalk.com
+
 Server setup:
+
+# NOTE: /opt/python/current/app is being changed /var/app/current
+# https://community.letsencrypt.org/t/instructions-for-replacing-certbot-auto/155318/6
 
 # Every time the server is reinstalled, follow these steps: [TODO: Automate]
 # If you also rebuilt the environment, you need to:
@@ -16,7 +24,17 @@ Server setup:
 # Right click on the instance -> Connect, then copy the ssh connection string
 # (e.g. ssh -i ~/.ssh/DefaultKeyPair.pem ec2-user@witnesspuzzles.com)
 
-# Once connected, follow these steps:
+# Once connected, follow these steps to set up ssl:
+# From https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-amazon-linux-2.html#letsencrypt
+cd /tmp
+sudo yum -y install python3 python3-tools augeas-libs
+sudo python3 -m venv /opt/certbot/
+sudo /opt/certbot/bin/pip install --upgrade pip
+sudo /opt/certbot/bin/pip install certbot certbot-apache
+sudo ln -s /opt/certbot/bin/certbot /usr/bin/certbot
+sudo certbot --debug
+
+
 cd /usr/local/bin
 sudo yum-config-manager --enable epel
 sudo yum -y install mod24_ssl
@@ -28,6 +46,10 @@ sudo ./certbot-auto --debug
 
 sudo vim /etc/httpd/conf.d/wsgi.conf
 # Move the WsgiDaemonProcess outside of the </VirtualHost> section
+
+
+Failed to restart eb-app.target: Unit not found
+
 
 sudo vim /etc/httpd/conf.d/ssl.conf
 # Add the following to the *beginning* of ssl.conf
@@ -73,6 +95,10 @@ logout
 
 
 # Local development setup:
-./venv/Scripts/activate
-py -3 -m pip install --user -r requirements.txt
+source /opt/python/run/venv/bin/activate
+sudo python3 -m pip install -r requirements.txt
 py -3 application.py
+
+# New local dev setup:
+source /var/app/venv/staging-LQM1lest/bin/activate
+sudo python3 /var/app/current/application.py

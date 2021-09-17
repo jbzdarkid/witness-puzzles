@@ -1,14 +1,10 @@
 SHIP BLOCKERS
 
 BUGS
-- In editor, right clicking on a dot with gap active -> left click with gap -> no gap placed.
-  Ditto edges.
+- Audio is laggy -- Try preloading?
 - "Seren✩: I let Witness Puzzles run until it resolved. It found some... questionable results."
 https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unknown.png
-- Cursor can overlap the startpoint. Should be easier to fix now that I have a strong idea about how this is supposed to work.
-  https://cdn.discordapp.com/attachments/667908286007345202/864022060362629130/unknown.png
 - Solution viewer shows wrong solution on solve
-- Dragging is busted, a bit. Dragging down left while on the left side of a horizontal is not causing left motion! (likely true 4x)
 - iOS is scrolling while solving, looks like I broke this when I tried to fix android.
 - Android is still fairly buggy.
   - while solving a puzzle the page scrolling is annoying af, practically not even usable
@@ -30,11 +26,8 @@ https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unk
   * pollyfill.io ?
 
 FEATURES
-- Publishing a puzzle should call onblur() so that if you were in the middle of a name change it gets accepted.
-  (related: changing name shouldn't reset autosolve. If possible.)
-- All telemetry should contain the session ID. I'd suggest just starting a new table w/ the new fields. That way I don't risk breaking anything.
-  The idea here is to (eventually?) limit the number of errors for a given session ID. This will prevent confusion about how frequent an error is (since it may occur many many times)
-  I should also (at some point) dedupe rows in the telemetry page. This + a count will let me sort by importance/age, and also clear out feedback more efficiently. (Alternately, just provide a "delete all similar" button? Shift-click?)
+- Dedupe telemetry rows by error text (and show a count of unique/total session IDs?)
+  Ensure that "delete" deletes *all* rows that share that identifier.
 - Telemetry page is only semi-compatible with dark theme; fix table borders & buttons
 - Create a boolean which governs the early-validation logic, and compute it at entry. Also, don't run this logic for triangle-only puzzles, it's clearly not faster.
 - Try to make webcrow async, even a little bit -- the lag when waiting on a click is not ideal.
@@ -42,42 +35,35 @@ FEATURES
 - There is also no way to cancel an auto-solve, and
 - it is possible to edit the puzzle while the auto-solve is loading, causing an incorrect number of solutions.
 - symmetry puzzles should still show line colors when solved (Add two more fade colors, shouldn't be too too hard)
+  Also, add MONOCHROME_SYMMETRY.
+  This is about coloring. It should probably wait until I steal the css variables from prodzpod.
 - Editor undo/redo
   > Only for active puzzle
   > Keep in-memory (do not write to local storage)
   > Linear (overwritten once a change is made)
   Just keep an array of serialized puzzles and an index, then when you call writePuzzle it should splice at index.
   Undo & Redo w/ gray out once we hit the limit. Pretty easy IMO.
-  (This probably should only happen once I have new serialization. Just for memory consumption reasons.)
+  *** (This probably should only happen once I have new serialization. Just for memory consumption reasons.) ***
   Also hook C-Z and C-Y and C-S-Z
-- Reduce puzzle serialization size? [Good to go, pending test against DB]
+- Reduce puzzle serialization size? [WIP, test against editor (again) before shipping.]
   This is the main play I have against people attacking my system -- make it harder to send bad data.
-- Telemetry tracking (even if it's not doing anything yet)
-  - Puzzle started
-  - Puzzle completed
-  - Puzzle completed time
-  - Generate a GUID when loading the play_template. (maybe it's time for play_template.js?)
-    Post on page load: START_PUZZLE(session ID, puzzle) -> insert where (sessionId, puzzle, start_time = now())
-    Post on first solve: SOLVE_PUZZLE(session ID) -> update where (sessionId == sessionId) set (completion_time = now())
-    Then, I can compute:
-    - Number of solves
-    - Completion rate
-    - avg Completion time
-- Steal back stuff from prod
-  - stuff in editor.onElementClicked
-  - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
+- Per-puzzle statistics, using new telemetry table
+  - Number of solves
+  - Completion rate
+  - avg Completion time
+- Steal back stuff from prodzpod (https://github.com/prodzpod/witness)
   - CSS variables in engine/display2.js, engine/svg.js, engine.utilities.js, theme/*.css
+  - Editor layout is a bit tighter -- consider smaller buttons & more rows?
+  - engine/custom_mechanics.js (and also engine/polyominos.js) (and also engine/validate.js, carefully)
   - maybe engine/play.js
   - steal some svg shapes from engine/svg.js
   - trace2.js
-    var sens = parseFloat(localStorage.sensitivity)
-  - RM swapfiles
 - login-gated page for "show (and dismiss) all errors/feedback"
 - Put the license *somewhere* into the header, so that if someone clones the repo they don't have to do it.
 - Track puzzle solve count + solve duration, then provide a way to sort puzzles by count/duration (maybe only visible on /browse, or maybe not ever visible?)
+  Part 1 shipping whenever AWS stops screwing me.
 - RGB filters
-- Add OUT_OF_BOUNDS_POLY to puzzle.settings
-  "If true, polyominos may be placed partially off of the grid as an intermediate solution step."
+- Support OUT_OF_BOUNDS_POLY
 - Changing theme (or otherwise refreshing the browse/ page) does not retain your scroll offset
   Maybe use a fragment for this? Then, on reload, auto-scroll until we reach the fragment?
   Fragment should probably be a puzzle ID, not an offset. Wellll maybe not, what if we delete one?
@@ -104,27 +90,10 @@ and move on.
     Might want a separate DB repo, if only to avoid the commit spam.
 - Custom mechanics
 - pillar puzzles are too easy when you can see the whole thing.
-
-Browse
--- Sorting
-    Date (default, currently implemented)
-    Solve count?
-    Popularity? (-> rating system)
-    By mechanic?
-
-Editor
--- Pillar + resize is still horrendously broken.
--- Look into "cancel" solving? Just set max solutions to 0 (and use + to indicate uncertainty)
-   Seems like this doesn't actually abort quickly, for some reason. Try to use the profiler?
--- Add support for different rulesets. Also add tests for different rulesets (probably just add'l counts for each set).
-
-Tracing
--- Tracing down against walls and gap-2 is awkward
-    The game is awful at this too.
--- "inRawBbox" should potentially finish drawing the path, but leave the cursor as-is
-
-Server
--- Sign-in?
+- Add a "Save screenshot to clipboard" button
+  Needs some actual support from javascript. Soon!
+-- Add all puzzles in the game to the system. Maybe a separate category / identifier?
+    Add tests & speedrunner solver
 
 Tutorial
 -- Internal names:
@@ -149,19 +118,3 @@ Tutorial
     The best option here is to cherry-pick puzzles from the base game.
     That way, people can recognize mechanics. That said, since I'll provide text, there's no reason to go that slowly.
 -- Should also have an explanation for the different 'styles' (which is probably how I'll implement settings)
-
-Low Prio / Misc
--- "Edit this puzzle"?
--- Add all puzzles in the game to the system. Maybe a separate category / identifier?
-    Add tests & speedrunner solver
--- Favicon still needs improving
-    RM the dot, it's invisible
-    Figure out something better for the tri (star?)
--- Fix generation colors / general improvements to random puzzles
-    >general support for random puzzles
--- random generation for challenges
-    copy game RNG should be easy (now that I do it myself)
-    use trace callback func
-    maze can be 'click to reveal' like memory card game
-    should play the music if I can
--- Update deps (?)

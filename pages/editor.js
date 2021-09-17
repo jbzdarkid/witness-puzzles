@@ -477,6 +477,7 @@ window.publishPuzzle = function() {
     if (this.readyState != XMLHttpRequest.DONE) return
 
     var publish = document.getElementById('publish')
+    publish.disabled = false
     if (this.status === 200) {
       publish.innerText = 'Published, click here to play your puzzle!'
       var url = '/play/' + this.responseText
@@ -487,15 +488,24 @@ window.publishPuzzle = function() {
       publish.innerText = 'Error: ' + this.responseText
     }
   }
+  request.ontimeout = function() {
+    if (this !== currentPublishRequest) return
+    var publish = document.getElementById('publish')
+    publish.innerText = 'Error: Request timed out after 2 minutes'
+  }
   request.timeout = 120000 // 120,000 milliseconds = 2 minutes
   request.open('POST', '/publish', true)
   request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+  // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
+  document.getElementById('puzzleName').blur()
 
   request.send('solution=' + puzzle.serialize())
   currentPublishRequest = request
 
   var publish = document.getElementById('publish')
   publish.onpointerdown = null
+  publish.disabled = true
   publish.innerText = 'Validating puzzle...'
 }
 
@@ -517,14 +527,14 @@ function onElementClicked(event, x, y) {
     if (x%2 === 1 && y%2 === 1) {
       puzzle.grid[x][y] = null
     } else {
-      puzzle.grid[x][y].end = null
-      puzzle.grid[x][y].start = null
-      puzzle.grid[x][y].dot = null
-      puzzle.grid[x][y].gap = null
+      delete puzzle.grid[x][y].end
+      delete puzzle.grid[x][y].start
+      delete puzzle.grid[x][y].dot
+      delete puzzle.grid[x][y].gap
       if (puzzle.symmetry != null) {
         var sym = puzzle.getSymmetricalPos(x, y)
-        puzzle.updateCell2(sym.x, sym.y, 'start', null)
-        puzzle.updateCell2(sym.x, sym.y, 'end', null)
+        delete puzzle.grid[x][y].start
+        delete puzzle.grid[x][y].end
       }
     }
   } else if (activeParams.type == 'start') {

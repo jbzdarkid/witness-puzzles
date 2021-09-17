@@ -12,15 +12,23 @@ import boto3
 
 application = Flask(__name__, template_folder='pages')
 
+# TODO: application_secrets.py? Anything is better than this.
+with open('config.txt', 'r') as f:
+  for line in f:
+    line = line.split('#', 1)[0].strip()
+    line = line.split('=', 1)
+    if len(line) == 2:
+      os.environ[line[0]] = line[1]
+
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-if 'RDS_DB_NAME' in os.environ: # Running on AWS
+if 'RDS_DB_NAME' in os.environ: # Running on a server
   application.config.update({
     'SQLALCHEMY_DATABASE_URI':'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
-      user = os.environ['RDS_USERNAME'],
-      pswd = os.environ['RDS_PASSWORD'],
-      host = os.environ['RDS_HOSTNAME'],
-      port = os.environ['RDS_PORT'],
-      name = os.environ['RDS_DB_NAME'],
+      user = os.environ['RDS_USERNAME'], # Same as keepass
+      pswd = os.environ['RDS_PASSWORD'], # Same as keepass
+      host = os.environ['RDS_HOSTNAME'], # Instance endpoint
+      port = os.environ['RDS_PORT'],     # Instance port
+      name = os.environ['RDS_DB_NAME'],  # Instance configuration -> DB name
     ),
     'S3_ACCESS_KEY': os.environ['S3_ACCESS_KEY'],
     'S3_SECRET_ACCESS_KEY': os.environ['S3_SECRET_ACCESS_KEY'],
