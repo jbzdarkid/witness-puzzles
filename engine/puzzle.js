@@ -1,25 +1,5 @@
 namespace(function() {
 
-window.Region = class {
-  constructor(length) {
-    this.cells = []
-    this.grid = []
-    for (var x=0; x<length; x++) {
-      this.grid.push(0)
-    }
-  }
-
-  getCell(x, y) {
-    return ((this.grid[x] & (1 << y)) !== 0)
-  }
-
-  setCell(x, y) {
-    if (this.getCell(x, y)) return
-    this.grid[x] |= (1 << y)
-    this.cells.push({'x':x, 'y':y})
-  }
-}
-
 // A 2x2 grid is internally a 5x5:
 // corner, edge, corner, edge, corner
 // edge,   cell, edge,   cell, edge
@@ -350,7 +330,7 @@ window.Puzzle = class {
     var cell = col[y]
     if (cell === MASKED_PROCESSED) return
     if (cell !== MASKED_INB_NONCOUNT) {
-      region.setCell(x, y)
+      region.push({'x':x, 'y':y})
     }
     col[y] = MASKED_PROCESSED
 
@@ -458,7 +438,7 @@ window.Puzzle = class {
 
         // If this cell is empty (aka hasn't already been used by a region), then create a new one
         // This will also mark all lines inside the new region as used.
-        var region = new Region(this.width)
+        var region = []
         this._floodFill(x, y, region, this.grid[x])
         regions.push(region)
       }
@@ -479,7 +459,7 @@ window.Puzzle = class {
 
     // If the masked grid hasn't been used at this point, then create a new region.
     // This will also mark all lines inside the new region as used.
-    var region = new Region(this.width)
+    var region = []
     this._floodFill(x, y, region, this.grid[x])
 
     this.grid = savedGrid

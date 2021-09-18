@@ -83,7 +83,7 @@ function bridgeTest(region, puzzle, color, bridges) {
 
 window.validateBridges = function(puzzle, region, regionData) {
   var bridges = {}
-  for (var pos of region.cells) {
+  for (var pos of region) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
 
@@ -142,7 +142,7 @@ var DIRECTIONS = [
 ]
 
 window.validateArrows = function(puzzle, region, regionData) {
-  for (var pos of region.cells) {
+  for (var pos of region) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
     if (cell.type != 'arrow') continue
@@ -171,7 +171,7 @@ window.validateArrows = function(puzzle, region, regionData) {
 window.validateSizers = function(puzzle, region, regionData) {
   var sizers = []
   var regionSize = 0
-  for (var pos of region.cells) {
+  for (var pos of region) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++ // Only count cells for the region
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue

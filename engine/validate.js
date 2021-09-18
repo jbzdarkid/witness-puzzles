@@ -69,7 +69,7 @@ window.validate = function(puzzle, quick) {
   puzzle.valid = true // Assume valid until we find an invalid element
 
   var needsRegions = false
-  var monoRegion = new Region(puzzle.width)
+  var monoRegion = []
   // These two are both used by validateRegion, so they are saved on the puzzle itself.
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
@@ -95,7 +95,7 @@ window.validate = function(puzzle, quick) {
           if (quick) return
         }
       } else {
-        monoRegion.setCell(x, y)
+        monoRegion.push({'x':x, 'y':y})
       }
     }
   }
@@ -147,7 +147,7 @@ window.validateRegion = function(puzzle, region, quick) {
 
   // Get a list of negation symbols in the grid, and set them to 'nonce'
   var negationSymbols = []
-  for (var pos of region.cells) {
+  for (var pos of region) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell != null && cell.type === 'nega') {
       pos.cell = cell
@@ -282,7 +282,7 @@ function regionCheckNegations2(puzzle, region, negationSymbols, invalidElements,
 // since the region is only coordinate locations, and might be modified by regionCheckNegations2
 // @Performance: This is a pretty core function to the solve loop.
 function regionCheck(puzzle, region, quick) {
-  console.log('Validating region of size', region.cells.length, region)
+  console.log('Validating region of size', region.length, region)
   var regionData = new RegionData()
 
   var squares = []
@@ -290,7 +290,7 @@ function regionCheck(puzzle, region, quick) {
   var coloredObjects = {}
   var squareColor = null
 
-  for (var pos of region.cells) {
+  for (var pos of region) {
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
 
@@ -359,7 +359,7 @@ function regionCheck(puzzle, region, quick) {
 
   if (puzzle.hasPolyominos) {
     if (!window.polyFit(region, puzzle)) {
-      for (var pos of region.cells) {
+      for (var pos of region) {
         var cell = puzzle.getCell(pos.x, pos.y)
         if (cell == null) continue
         if (cell.type === 'poly' || cell.type === 'ylop') {

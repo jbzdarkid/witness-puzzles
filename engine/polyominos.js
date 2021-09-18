@@ -125,7 +125,7 @@ window.polyFit = function(region, puzzle) {
   var ylops = []
   var polyCount = 0
   var regionSize = 0
-  for (var pos of region.cells) {
+  for (var pos of region) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
@@ -177,7 +177,7 @@ window.polyFit = function(region, puzzle) {
   }
   // In the normal case, we mark every cell as -1: It needs to be covered by one poly
   if (polyCount > 0) {
-    for (var pos of region.cells) puzzle.setCell(pos.x, pos.y, -1)
+    for (var pos of region) puzzle.setCell(pos.x, pos.y, -1)
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
