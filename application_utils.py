@@ -13,12 +13,15 @@ import boto3
 application = Flask(__name__, template_folder='pages')
 
 # TODO: application_secrets.py? Anything is better than this.
-with open('config.txt', 'r') as f:
-  for line in f:
-    line = line.split('#', 1)[0].strip()
-    line = line.split('=', 1)
-    if len(line) == 2:
-      os.environ[line[0]] = line[1]
+try:
+  with open('config.txt', 'r') as f:
+    for line in f:
+      line = line.split('#', 1)[0].strip()
+      line = line.split('=', 1)
+      if len(line) == 2:
+        os.environ[line[0]] = line[1]
+except FileNotFoundError:
+  pass
 
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 if 'RDS_DB_NAME' in os.environ: # Running on a server
