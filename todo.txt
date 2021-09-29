@@ -26,6 +26,9 @@ https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unk
   * pollyfill.io ?
 
 FEATURES
+- Autocommit for the database?
+  from flask_sqlalchemy import SQLAlchemy
+  db = SQLAlchemy(session_options={'autocommit': True})
 - Dedupe telemetry rows by error text (and show a count of unique/total session IDs?)
   Ensure that "delete" deletes *all* rows that share that identifier.
 - Telemetry page is only semi-compatible with dark theme; fix table borders & buttons

@@ -125,7 +125,7 @@ window.polyFit = function(region, puzzle) {
   var ylops = []
   var polyCount = 0
   var regionSize = 0
-  for (var pos of region.cells) {
+  for (var pos of region) {
     if (pos.x%2 === 1 && pos.y%2 === 1) regionSize++
     var cell = puzzle.getCell(pos.x, pos.y)
     if (cell == null) continue
@@ -177,11 +177,11 @@ window.polyFit = function(region, puzzle) {
   }
   // In the normal case, we mark every cell as -1: It needs to be covered by one poly
   if (polyCount > 0) {
-    for (var pos of region.cells) puzzle.setCell(pos.x, pos.y, -1)
+    for (var pos of region) puzzle.setCell(pos.x, pos.y, -1)
   }
   // In the exact match case, we leave every cell marked 0: Polys and ylops need to cancel.
 
-  var ret = placeYlops(ylops, 0, polys.slice(), puzzle)
+  var ret = placeYlops(ylops, 0, polys, puzzle)
   if (polyCount === 0) knownCancellations[key] = ret
   puzzle.grid = savedGrid
   return ret
@@ -212,7 +212,7 @@ function placeYlops(ylops, i, polys, puzzle) {
   if (i === ylops.length) return placePolys(polys, puzzle)
 
   var ylop = ylops[i]
-  var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
+  var ylopRotations = getRotations(ylop.polyshape)
   for (var x=1; x<puzzle.width; x+=2) {
     for (var y=1; y<puzzle.height; y+=2) {
       console.log('Placing ylop', ylop, 'at', x, y)
@@ -285,7 +285,7 @@ function placePolys(polys, puzzle) {
       }
       attemptedPolyshapes.push(poly.polyshape)
       polys.splice(i, 1)
-      for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
+      for (var polyshape of getRotations(poly.polyshape)) {
         console.spam('Selected polyshape', polyshape)
         var cells = polyominoFromPolyshape(polyshape, false, puzzle.settings.PRECISE_POLYOMINOS)
         if (!tryPlacePolyshape(cells, openCell.x, openCell.y, puzzle, +1)) {
