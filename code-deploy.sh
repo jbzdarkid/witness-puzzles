@@ -18,7 +18,7 @@ apt-get install -y \
   libapache2-mod-wsgi-py3 \
   msql-client \
   python3-pip \
-  python3-venv \
+  python3-certbot-apache \
   requests \
   ruby-full \
   vim \
@@ -32,14 +32,15 @@ wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool
 dpkg -i /tmp/chrome.deb
 apt-get autoremove
 
-# Add in python3-certbot-apache
 python3 -m pip install -r "$REPO/requirements.txt"
 
 # Set up and enable flask
-cp -f "$REPO/docker/apache-flask.conf" /etc/apache2/sites-available/
-a2ensite apache-flask
+cp -f "$REPO/docker/witness-puzzles.conf" /etc/apache2/sites-available/
+a2enmod ssl
+a2ensite witness-puzzles
 # a2enmod headers
 a2dissite 000-default.conf
+# a2ensite default-ssl
 
 # Test configuration & restart apache if it passes
 apache2ctl configtest
@@ -50,3 +51,5 @@ certbot --apache \
   -n --agree-tos -m "jbzdarkid@gmail.com" \
   -d witnesspuzzles.com \
   -d www.witnesspuzzles.com  
+
+# TODO: Configure certbot auto-renew
