@@ -10,46 +10,16 @@ from selenium.common.exceptions import TimeoutException
 from PIL import Image
 import boto3
 
+from application_secrets import secrets
+
 application = Flask(__name__, template_folder='pages')
-
-# TODO: application_secrets.py? Anything is better than this.
-with open('config.txt', 'r') as f:
-  for line in f:
-    line = line.split('#', 1)[0].strip()
-    line = line.split('=', 1)
-    if len(line) == 2:
-      os.environ[line[0]] = line[1]
-
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-if 'RDS_DB_NAME' in os.environ: # Running on a server
-  application.config.update({
-    'SQLALCHEMY_DATABASE_URI':'mysql://{user}:{pswd}@{host}:{port}/{name}'.format(
-      user = os.environ['RDS_USERNAME'], # Same as keepass
-      pswd = os.environ['RDS_PASSWORD'], # Same as keepass
-      host = os.environ['RDS_HOSTNAME'], # Instance endpoint
-      port = os.environ['RDS_PORT'],     # Instance port
-      name = os.environ['RDS_DB_NAME'],  # Instance configuration -> DB name
-    ),
-    'S3_ACCESS_KEY': os.environ['S3_ACCESS_KEY'],
-    'S3_SECRET_ACCESS_KEY': os.environ['S3_SECRET_ACCESS_KEY'],
-    'SECRET_KEY': os.environ['SECRET_KEY'], # CSRF secret key
-  })
+application.config['SQLALCHEMY_DATABASE_URI'] = secrets.get_database_uri()
+application.config['SECRET_KEY'] = secrets.SECRET_KEY
 
-  def http_to_https():
-    if request.is_secure:
-      return
-    if request.headers.get('X-Forwarded-Proto', '') == 'https':
-      return
-    return redirect(request.url.replace('http://', 'https://', 1), code=301)
-  application.before_request(http_to_https) # HTTPS connections only
+if secrets: # Running on a server
   application.debug = False
-
 else: # Running locally
-  application.config.update({
-    'SQLALCHEMY_DATABASE_URI':'sqlite:///:memory:',
-    'SECRET_KEY': 'default',
-  })
-
   def disable_caching(request):
     request.headers['Cache-Control'] = 'no-cache'
     return request
@@ -109,7 +79,7 @@ def upload_image(img_bytes, display_hash):
   else:
     boto3.client(
       's3',
-      aws_access_key_id = application.config['S3_ACCESS_KEY'],
-      aws_secret_access_key = application.config['S3_SECRET_ACCESS_KEY'],
+      aws_access_key_id = secrets.S3_ACCESS_KEY,
+      aws_secret_access_key = secrets.S3_SECRET_ACCESS_KEY,
     ).upload_fileobj(img_bytes, 'witnesspuzzles-images', name)
     return f'https://witnesspuzzles-images.s3.amazonaws.com/{name}'

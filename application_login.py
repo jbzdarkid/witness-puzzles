@@ -5,10 +5,11 @@ from flask_wtf import CSRFProtect
 
 from application_utils import *
 from application_database import *
+from application_secrets import secrets
 
-if 'RDS_DB_NAME' in os.environ: # Running on AWS
-  ADMIN_USERNAME = os.environ['RDS_USERNAME']
-  ADMIN_PASSWORD = os.environ['RDS_PASSWORD']
+if secrets: # Running on a server
+  ADMIN_USERNAME = secrets.RDS_USERNAME'
+  ADMIN_PASSWORD = secrets.RDS_PASSWORD'
 else:
   ADMIN_USERNAME = 'foo'
   ADMIN_PASSWORD = 'bar'
