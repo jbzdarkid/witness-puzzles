@@ -1,5 +1,7 @@
 class Secrets:
   def __init__(self):
+    # NOTE: When adding RDS connection parameters, ensure that RDS is allowing connections from this IP address.
+    
     self.RDS_USERNAME         = '' # Same as keepass
     self.RDS_PASSWORD         = '' # Same as keepass
     self.RDS_HOSTNAME         = '' # Instance endpoint

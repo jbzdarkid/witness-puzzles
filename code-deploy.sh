@@ -10,15 +10,12 @@ cd witness-puzzles
 sudo apt-get update
 sudo apt-get install -y \
   apache2 \
-  # build-essential \
   certbot \
   libapache2-mod-wsgi-py3 \
-  # msql-client \
+  libmysqlclient-dev \
+  mysql-client \
   python3-pip \
   python3-certbot-apache \
-  # requests \
-  # ruby-full \
-  # wget \
   xdg-utils
 
 # Version list at https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
@@ -28,7 +25,7 @@ wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool
 sudo dpkg -i /tmp/chrome.deb
 # May need apt --fix-broken install
 rm /tmp/chrome.deb
-apt-get autoremove
+sudo apt-get autoremove
 
 sudo python3 -m pip install -r requirements/prod.txt
 
