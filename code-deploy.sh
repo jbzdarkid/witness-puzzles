@@ -22,7 +22,7 @@ sudo apt-get install -y \
   xdg-utils
 
 # Version list at https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
-python3 -m pip install chromedriver-py==92.*
+sudo python3 -m pip install chromedriver-py==92.*
 CHROME_VERSION=92.0.4515.159-1
 wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb
 sudo dpkg -i /tmp/chrome.deb
@@ -30,7 +30,7 @@ sudo dpkg -i /tmp/chrome.deb
 rm /tmp/chrome.deb
 apt-get autoremove
 
-python3 -m pip install -r requirements/prod.txt
+sudo python3 -m pip install -r requirements/prod.txt
 
 # Copy apache configuration, set up apache modules
 sudo cp -f witness-puzzles.conf /etc/apache2/sites-available/

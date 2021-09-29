@@ -8,8 +8,8 @@ from application_database import *
 from application_secrets import secrets
 
 if secrets: # Running on a server
-  ADMIN_USERNAME = secrets.RDS_USERNAME'
-  ADMIN_PASSWORD = secrets.RDS_PASSWORD'
+  ADMIN_USERNAME = secrets.RDS_USERNAME
+  ADMIN_PASSWORD = secrets.RDS_PASSWORD
 else:
   ADMIN_USERNAME = 'foo'
   ADMIN_PASSWORD = 'bar'
