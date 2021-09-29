@@ -240,7 +240,7 @@ window.Puzzle = class {
   }
 
   matchesSymmetricalPos(x1, y1, x2, y2) {
-    return (this._mod(x1) === x2 && y1 === y2)
+    return (y1 === y2 && this._mod(x1) === x2)
   }
 
   // A variant of getCell which specifically returns line values,
