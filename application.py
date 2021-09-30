@@ -58,6 +58,9 @@ if application.debug:
   host_statically('pages/_UTM.html')
   host_statically('pages/_UTM.js')
   host_statically('pages/_UTM2.js')
+  
+  host_statically('pages/left_door.html')
+  host_statically('pages/left_door.js')
 
   host_statically('images')
 
