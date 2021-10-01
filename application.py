@@ -65,7 +65,7 @@ if application.debug:
 
   host_statically('images')
 
-def page_not_found(error):
+def page_not_found(error=None):
   return render_template('404_generic.html'), 404
 application.register_error_handler(404, page_not_found)
 application.register_error_handler(CSRFError, page_not_found)
@@ -103,6 +103,7 @@ def publish():
   display_hash = create_puzzle(title, puzzle_json, solution_json, image)
   return display_hash, 200
 application.add_url_rule('/publish', 'publish', publish, methods=['POST'])
+application.add_url_rule('/publish', 'publish_get', page_not_found, methods=['GET'])
 
 # Playing published puzzles
 def play(display_hash):
@@ -160,6 +161,7 @@ def telemetry():
     print('Unknown event type: ' + kwargs['event_type'])
   return '', 200
 application.add_url_rule('/telemetry', 'telemetry', telemetry, methods=['POST'])
+application.add_url_rule('/telemetry', 'telemetry_get', page_not_found, methods=['GET'])
 
 # Verifying that puzzles are valid
 if application.debug:
