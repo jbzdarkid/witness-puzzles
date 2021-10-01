@@ -7,6 +7,7 @@ from traceback import format_exc
 
 from flask_wtf.csrf import CSRFError
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.exceptions import HTTPException
 
 from application_database import *
 from application_utils import *
@@ -69,13 +70,20 @@ def page_not_found(error):
 application.register_error_handler(404, page_not_found)
 application.register_error_handler(CSRFError, page_not_found)
 
+# In case of a database error, cancel any active transactions to prevent the database getting stuck.
+def handle_database_error(exc):
+  if db.session.is_active: # db imported from application_database.py
+    db.session.rollback()
+  return '', 500
+application.register_error_handler(SQLAlchemyError, handle_database_error)
+
+# We do not actually want to handle HTTP exceptions (e.g. 405), we want to just return them to the caller.
+# https://flask.palletsprojects.com/en/2.0.x/errorhandling/#generic-exception-handlers
+application.register_error_handler(HTTPException, lambda exc: exc)
+
 def handle_exception(exc):
-  if isinstance(exc, SQLAlchemyError):
-    if db.session.is_active: # db imported from application_database.py
-      db.session.rollback()
-  else:
-    message = f'Caught a {type(exc).__name__}: {format_exc()}'
-    add_feedback(message)
+  message = f'Caught a {type(exc).__name__}: {format_exc()}'
+  add_feedback(message)
   return '', 500
 application.register_error_handler(Exception, handle_exception)
 
