@@ -1,6 +1,7 @@
 namespace(function() {
 
 // @Volatile -- must match order of MOVE_* in trace2
+// Move these, dummy.
 var PATH_NONE   = 0
 var PATH_LEFT   = 1
 var PATH_RIGHT  = 2
@@ -147,7 +148,7 @@ window.solve = function(p, partialCallback, finalCallback) {
           newTasks.push(function() {
             path = [pos]
             puzzle.startPoint = pos
-            return solveLoop(pos.x, pos.y, numEndpoints, earlyExitData, 0)
+            return solveLoop(pos.x, pos.y, numEndpoints, earlyExitData)
           })
         }(pos))
       }
@@ -215,7 +216,7 @@ function tailRecurse(x, y) {
 // Any performance efforts should be focused here.
 // Note: Most mechanics are NP (or harder), so don't feel bad about solving them by brute force.
 // https://arxiv.org/pdf/1804.10193.pdf
-function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
+function solveLoop(x, y, numEndpoints, earlyExitData) {
   // Stop trying to solve once we reach our goal
   if (solutionPaths.length >= window.MAX_SOLUTIONS) return
 
@@ -238,7 +239,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
   }
 
-  if (depth < NODE_DEPTH) nodes++
+  if (path.length < NODE_DEPTH) nodes++
 
   if (cell.end != null) {
     path.push(PATH_NONE)
@@ -283,24 +284,24 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     var newEarlyExitData = earlyExitData // Unused, just make a cheap copy.
   }
 
-  if (SOLVE_SYNC || depth > SYNC_THRESHOLD) {
+  if (SOLVE_SYNC || path.length > SYNC_THRESHOLD) {
     path.push(PATH_NONE)
 
     // Recursion order (LRUD) is optimized for BL->TR and mid-start puzzles
     if (y%2 === 0) {
       path[path.length-1] = PATH_LEFT
-      solveLoop(x - 1, y, numEndpoints, newEarlyExitData, depth + 1)
+      solveLoop(x - 1, y, numEndpoints, newEarlyExitData)
 
       path[path.length-1] = PATH_RIGHT
-      solveLoop(x + 1, y, numEndpoints, newEarlyExitData, depth + 1)
+      solveLoop(x + 1, y, numEndpoints, newEarlyExitData)
     }
 
     if (x%2 === 0) {
       path[path.length-1] = PATH_TOP
-      solveLoop(x, y - 1, numEndpoints, newEarlyExitData, depth + 1)
+      solveLoop(x, y - 1, numEndpoints, newEarlyExitData)
 
       path[path.length-1] = PATH_BOTTOM
-      solveLoop(x, y + 1, numEndpoints, newEarlyExitData, depth + 1)
+      solveLoop(x, y + 1, numEndpoints, newEarlyExitData)
     }
 
     path.pop()
@@ -316,22 +317,22 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     if (y%2 === 0) {
       newTasks.push(function() {
         path[path.length-1] = PATH_LEFT
-        return solveLoop(x - 1, y, numEndpoints, newEarlyExitData, depth + 1)
+        return solveLoop(x - 1, y, numEndpoints, newEarlyExitData)
       })
       newTasks.push(function() {
         path[path.length-1] = PATH_RIGHT
-        return solveLoop(x + 1, y, numEndpoints, newEarlyExitData, depth + 1)
+        return solveLoop(x + 1, y, numEndpoints, newEarlyExitData)
       })
     }
 
     if (x%2 === 0) {
       newTasks.push(function() {
         path[path.length-1] = PATH_TOP
-        return solveLoop(x, y - 1, numEndpoints, newEarlyExitData, depth + 1)
+        return solveLoop(x, y - 1, numEndpoints, newEarlyExitData)
       })
       newTasks.push(function() {
         path[path.length-1] = PATH_BOTTOM
-        return solveLoop(x, y + 1, numEndpoints, newEarlyExitData, depth + 1)
+        return solveLoop(x, y + 1, numEndpoints, newEarlyExitData)
       })
     }
 
