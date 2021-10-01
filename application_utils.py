@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, JavascriptException
 from PIL import Image
 import boto3
 
@@ -15,6 +15,9 @@ from application_secrets import secrets
 application = Flask(__name__, template_folder='pages')
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 application.config['SQLALCHEMY_DATABASE_URI'] = secrets.get_database_uri()
+# application.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+#   'connect_timeout': 10, # seconds
+# }
 application.config['SECRET_KEY'] = secrets.SECRET_KEY
 
 if secrets: # Running on a server
@@ -63,6 +66,8 @@ def validate_and_capture_image(solution_json):
     data = json.loads(result.get_attribute('data'))
   except TimeoutException:
     data = {'error': 'Validation timed out'}
+  except JavascriptException as e:
+    data = {'error': f'Javascript failure: {e}'}
 
   driver.quit()
   return data
