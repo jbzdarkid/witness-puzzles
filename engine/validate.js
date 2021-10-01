@@ -154,7 +154,7 @@ window.validateRegion = function(puzzle, region, quick) {
   // Get a list of negation symbols in the grid, and set them to 'nonce'
   var negationSymbols = []
   for (var pos of region) {
-    var cell = puzzle.getCell(pos.x, pos.y)
+    var cell = puzzle.grid[pos.x][pos.y]
     if (cell != null && cell.type === 'nega') {
       pos.cell = cell
       negationSymbols.push(pos)
@@ -297,7 +297,7 @@ function regionCheck(puzzle, region, quick) {
   var squareColor = null
 
   for (var pos of region) {
-    var cell = puzzle.getCell(pos.x, pos.y)
+    var cell = puzzle.grid[pos.x][pos.y]
     if (cell == null) continue
 
     // Check for uncovered dots
@@ -366,7 +366,7 @@ function regionCheck(puzzle, region, quick) {
   if (puzzle.hasPolyominos) {
     if (!window.polyFit(region, puzzle)) {
       for (var pos of region) {
-        var cell = puzzle.getCell(pos.x, pos.y)
+        var cell = puzzle.grid[pos.x][pos.y]
         if (cell == null) continue
         if (cell.type === 'poly' || cell.type === 'ylop') {
           regionData.addInvalid(pos)

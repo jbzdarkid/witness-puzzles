@@ -273,7 +273,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData) {
         // Additionally, we might have left an endpoint in the enclosed region.
         // If so, we should decrement the number of remaining endpoints (and possibly tail recurse).
         for (var pos of region) {
-          var endCell = puzzle.getCell(pos.x, pos.y)
+          var endCell = puzzle.grid[pos.x][pos.y]
           if (endCell != null && endCell.end != null) numEndpoints--
         }
 
