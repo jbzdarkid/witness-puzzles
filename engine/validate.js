@@ -66,10 +66,9 @@ window.validate_user_data = function(puzzle, path) {
 // negations: Negation pairs (for the purpose of darkening)
 window.validate = function(puzzle, quick) {
   console.log('Validating', puzzle)
-  puzzle.valid = true // Assume valid until we find an invalid element
+  var puzzleData = new RegionData() // Assumed valid until we find an invalid element
 
   var needsRegions = false
-  var monoRegion = []
   // These two are both used by validateRegion, so they are saved on the puzzle itself.
   puzzle.hasNegations = false
   puzzle.hasPolyominos = false
@@ -85,26 +84,32 @@ window.validate = function(puzzle, quick) {
       if (cell.line > window.LINE_NONE) {
         if (cell.gap > window.GAP_NONE) {
           console.log('Solution line goes over a gap at', x, y)
-          puzzle.valid = false
-          if (quick) return
+          puzzleData.invalidElements.push({'x': x, 'y': y})
+          if (quick) return puzzleData
         }
         if ((cell.dot === window.DOT_BLUE && cell.line === window.LINE_YELLOW) ||
             (cell.dot === window.DOT_YELLOW && cell.line === window.LINE_BLUE)) {
           console.log('Incorrectly covered dot: Dot is', cell.dot, 'but line is', cell.line)
-          puzzle.valid = false
-          if (quick) return
+          puzzleData.invalidElements.push({'x': x, 'y': y})
+          if (quick) return puzzleData
         }
-      } else {
-        monoRegion.push({'x':x, 'y':y})
       }
     }
   }
 
-  puzzle.invalidElements = []
-  puzzle.negations = []
   if (needsRegions) {
     var regions = puzzle.getRegions()
   } else {
+    var monoRegion = []
+    for (var x=0; x<puzzle.width; x++) {
+      for (var y=0; y<puzzle.height; y++) {
+        if (x%2 === 1 && y%2 === 1) {
+          monoRegion.push({'x': x, 'y': y})
+        } else if (puzzle.grid[x][y].line === window.LINE_NONE) {
+          monoRegion.push({'x': x, 'y': y})
+        }
+      }
+    }
     var regions = [monoRegion]
   }
   console.log('Found', regions.length, 'region(s)')
@@ -113,9 +118,9 @@ window.validate = function(puzzle, quick) {
   if (puzzle.settings.CUSTOM_MECHANICS) {
     for (var region of regions) {
       regionData = validateRegion(puzzle, region, quick)
-      puzzle.negations = puzzle.negations.concat(regionData.negations)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
+      puzzleData.negations = puzzleData.negations.concat(regionData.negations)
+      puzzleData.invalidElements = puzzleData.invalidElements.concat(regionData.invalidElements)
+      puzzleData.invalidElements = puzzleData.invalidElements.concat(regionData.veryInvalidElements)
     }
     // When using custom mechanics, we have to handle negations slightly differently.
     // Negations need to be applied after all regions are validated, so that we can evaluate negations for
@@ -127,14 +132,15 @@ window.validate = function(puzzle, quick) {
     for (var region of regions) {
       regionData = validateRegion(puzzle, region, quick)
       console.log('Region valid:', regionData.valid())
-      puzzle.negations = puzzle.negations.concat(regionData.negations)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.invalidElements)
-      puzzle.invalidElements = puzzle.invalidElements.concat(regionData.veryInvalidElements)
-      puzzle.valid = puzzle.valid && regionData.valid()
-      if (quick && !puzzle.valid) return
+      puzzleData.negations = puzzleData.negations.concat(regionData.negations)
+      puzzleData.invalidElements = puzzleData.invalidElements.concat(regionData.invalidElements)
+      // Note: Not using veryInvalid because I don't need to do logic on these elements, just flash them.
+      puzzleData.invalidElements = puzzleData.invalidElements.concat(regionData.veryInvalidElements)
+      if (quick && !puzzleData.valid()) break
     }
   }
-  console.log('Puzzle has', puzzle.invalidElements.length, 'invalid elements')
+  console.log('Puzzle has', puzzleData.invalidElements.length, 'invalid elements')
+  return puzzleData
 }
 
 // Determines whether or not a particular region is valid or not, including negation symbols.

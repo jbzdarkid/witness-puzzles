@@ -23,6 +23,7 @@
       }
 
       var data = {}
+      var puzzleData = null
       try {
         var puzzle = Puzzle.deserialize(solution_json)
         var path = JSON.parse(solution_json)['path'] // Path is passed as an extra property on the solution_json
@@ -34,20 +35,23 @@
         window.draw(puzzle)
         puzzle.clearLines()
         window.drawPath(puzzle, path)
-        window.validate(puzzle, true) // Quick validation, since we aren't actually *showing* this to anyone.
+        puzzleData = window.validate(puzzle, true) // Quick validation, since we aren't actually *showing* this to anyone.
       } catch (exc) {
         data.error = exc.message
         console.error(exc.stack)
         return setData(data)
       }
-      if (puzzle.valid !== true) {
-        data.error = 'Puzzle validation failed due to these elements: ' + JSON.stringify(puzzle.invalidElements)
+      if (puzzleData = null) {
+        data.error = 'Puzzle validation failed, puzzleData was null'
+        return setData(data)
+      } else if (!puzzleData.valid()) {
+        data.error = 'Puzzle validation failed due to these elements: ' + JSON.stringify(puzzleData.invalidElements)
         return setData(data)
       }
 
       // Solution was valid, go ahead with puzzle creation.
       // Extract additional properties, then clean the puzzle and redraw for image capture.
-      data.valid = puzzle.valid
+      data.valid = true
       data.title = puzzle.name
       puzzle.clearLines()
       data.puzzle_json = puzzle.serialize()

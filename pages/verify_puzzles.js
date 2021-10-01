@@ -13,8 +13,8 @@ function verifyPuzzle(hash, date, puzzle_json, solution_json, url, title) {
 
   // Note: Do not fix up puzzles here! If there is a bug with bad/malformed puzzle data, fix the deserializer.
 
-  window.validate(solution, true)
-  if (!solution.valid) {
+  var solutionData = window.validate(solution, true)
+  if (!solutionData.valid()) {
     // Unescape HTML (https://paulschreiber.com/blog/2008/09/20)
     var temp = document.createElement('div')
     temp.innerHTML = title
@@ -35,10 +35,10 @@ function verifyPuzzle(hash, date, puzzle_json, solution_json, url, title) {
     }
 
     setLogLevel('log')
-    window.validate(solution, false)
+    solutionData = window.validate(solution, false)
     solution.logGrid()
   }
-  return solution.valid
+  return solutionData.valid()
 }
 
 var i = 0

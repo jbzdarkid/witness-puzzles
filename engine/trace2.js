@@ -386,15 +386,15 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
       data.cursor.onpointerdown = null
       setTimeout(function() { // Run validation asynchronously so we can free the pointer immediately.
         puzzle.endPoint = data.pos
-        window.validate(puzzle, false) // We want all invalid elements so we can show the user.
+        var puzzleData = window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
-        for (var negation of puzzle.negations) {
+        for (var negation of puzzleData.negations) {
           console.debug('Rendering negation', negation)
           data.animations.insertRule('.' + data.svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
           data.animations.insertRule('.' + data.svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
         }
 
-        if (puzzle.valid) {
+        if (puzzleData.valid()) {
           window.PLAY_SOUND('success')
           // !important to override the child animation
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
@@ -410,7 +410,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
           // Get list of invalid elements
           if (puzzle.settings.FLASH_FOR_ERRORS) {
-            for (var invalidElement of puzzle.invalidElements) {
+            for (var invalidElement of puzzleData.invalidElements) {
               data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
             }
           }
