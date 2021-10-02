@@ -607,4 +607,44 @@ window.addSolveButtons = function() {
   nextSolution.innerHTML = '&rarr;'
 }
 
+// We only allow one HTTP request to be in flight at a time.
+window.sendHttpRequest = function(verb, path, timeoutSeconds, a, b) {
+  if (currentHttpRequest != null) return
+  if (b == null) {
+    _sendHttpRequest(verb, path, timeoutSeconds, null, a)
+  } else {
+    _sendHttpRequest(verb, path, timeoutSeconds, a, b)
+  }
+  return currentHttpRequest // in case the caller wants to call .abort()
+}
+window.fireAndForget = function(verb, path, body) {
+  _sendHttpRequest(verb, path, 600, body, function() {})
+  currentHttpRequest = null
+}
+
+// Only used for errors
+var HTTP_STATUS = {
+  401: '401 unauthorized', 403: '403 forbidden', 404: '404 not found', 409: '409 conflict', 413: '413 payload too large',
+  500: '500 internal server error',
+}
+
+var currentHttpRequest = null
+function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
+  currentHttpRequest = new XMLHttpRequest()
+  currentHttpRequest.onreadystatechange = function() {
+    if (this.readyState != XMLHttpRequest.DONE) return
+    onResponse(this.status, this.responseText || HTTP_STATUS[this.status])
+    currentHttpRequest = null
+  }
+  currentHttpRequest.ontimeout = function() {
+    onResponse(0, 'Request timed out')
+    currentHttpRequest = null
+  }
+  currentHttpRequest.timeout = timeoutSeconds * 1000
+  currentHttpRequest.open(verb, path, true)
+  currentHttpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  if (window.csrfToken != null) currentHttpRequest.setRequestHeader('X-CSRFToken', window.csrfToken)
+  currentHttpRequest.send(data)
+}
+
 })
