@@ -1,7 +1,7 @@
 namespace(function() {
 
 window.onload = function() {
-  loadPuzzles()
+  loadPuzzles(20) // First load should be smaller to improve FCP
 
   if (window.loggedIn) {
     var logout = document.createElement('a')
@@ -56,6 +56,7 @@ function addAdminButtons(puzzle, cell, img) {
   cell.appendChild(ref)
 }
 
+var puzzleHashes = []
 function addPuzzles(puzzles) {
   var table = document.getElementById('puzzleTable')
   for (var i=0; i<puzzles.length; i++) {
@@ -88,17 +89,18 @@ function addPuzzles(puzzles) {
 }
 
 var offset = 0
-var puzzleHashes = []
-function loadPuzzles() {
-  sendHttpRequest('GET', '/browse?sort_type=date&order=desc&limit=100&offset=' + offset, 10,
+var noMorePuzzles = false
+function loadPuzzles(limit) {
+  if (noMorePuzzles) return
+  sendHttpRequest('GET', '/browse?sort_type=date&order=desc&limit=' + limit + '&offset=' + offset, 10,
     function(status, responseText) {
-      if (status !== 200) {
-        // Even when there are no more puzzles, we still get a 200, just with an empty body.
-        // If we don't get a 200, we should try again later.
-        window.setTimeout(loadPuzzles, 5000)
-        return
+      if (status === 204) {
+        noMorePuzzles = true
+      } else if (status === 200) {
+        addPuzzles(JSON.parse(responseText))
+      } else { // Likely a connection error or timeout, retry
+        window.setTimeout(function() { loadPuzzles(limit) }, 5000)
       }
-      addPuzzles(JSON.parse(responseText))
     })
 }
 
@@ -110,7 +112,7 @@ window.onscroll = function() {
   // Start loading content when we get close to the bottom
   var currentHeight = document.body.scrollTop + document.body.clientHeight
   if (currentHeight / document.body.scrollHeight > 0.8) {
-    loadPuzzles()
+    loadPuzzles(100)
   }
 }
 

@@ -134,7 +134,10 @@ def browse():
       'url': puzzle.url,
       'title': puzzle.title,
     })
-  return to_json_string(output)
+  if len(output) == 0:
+    return '', 204
+  else:
+    return to_json_string(output), 200
 application.add_url_rule('/browse', 'browse', browse)
 
 @csrf.exempt
