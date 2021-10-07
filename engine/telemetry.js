@@ -16,14 +16,12 @@ window.addEventListener('error', function(event) {
 var sessionId = uuidv4() // Session ID is unique per page load, so as not to identify the user.
 
 function sendRequest(type, data) {
-  var request = new XMLHttpRequest()
-  request.open('POST', '/telemetry', true) // Fire and forget
-  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
   body = 'session_id=' + sessionId
   body += '&event_type=' + type
   body += '&version=%version%'
   if (data != null) body += '&data=' + data
-  request.send(body)
+
+  window.fireAndForget('POST', '/telemetry', body)
 }
 
 window.FEEDBACK     = function(message) { sendRequest('feedback', message) }

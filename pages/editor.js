@@ -467,41 +467,22 @@ window.onSolvedPuzzle = function(paths) {
   return paths
 }
 
-var currentPublishRequest
 window.publishPuzzle = function() {
-  // Clone the puzzle to ensure it's not modified while the request is being constructed
-  var request = new XMLHttpRequest()
-  request.onreadystatechange = function() {
-    // Don't continue if the request was cancelled or another request was started in the meantime.
-    if (this !== currentPublishRequest) return
-    if (this.readyState != XMLHttpRequest.DONE) return
-
-    var publish = document.getElementById('publish')
-    publish.disabled = false
-    if (this.status === 200) {
-      publish.innerText = 'Published, click here to play your puzzle!'
-      var url = '/play/' + this.responseText
-      publish.onpointerdown = function() {
-        window.location = url
-      }
-    } else {
-      publish.innerText = 'Error: ' + this.responseText
-    }
-  }
-  request.ontimeout = function() {
-    if (this !== currentPublishRequest) return
-    var publish = document.getElementById('publish')
-    publish.innerText = 'Error: Request timed out after 2 minutes'
-  }
-  request.timeout = 120000 // 120,000 milliseconds = 2 minutes
-  request.open('POST', '/publish', true)
-  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
   // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
   document.getElementById('puzzleName').blur()
 
-  request.send('solution=' + puzzle.serialize())
-  currentPublishRequest = request
+  currentPublishRequest = window.sendHttpRequest('POST', '/publish', 120, 'solution=' + puzzle.serialize(),
+    function(status, responseText) {
+      var publish = document.getElementById('publish')
+      if (status === 200) {
+        publish.innerText = 'Published, click here to play your puzzle!'
+        publish.disabled = false
+        var url = '/play/' + responseText
+        publish.onpointerdown = function() { window.location = url }
+      } else {
+        publish.innerText = 'Error: ' + responseText
+      }
+    })
 
   var publish = document.getElementById('publish')
   publish.onpointerdown = null
