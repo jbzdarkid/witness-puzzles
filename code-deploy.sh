@@ -38,7 +38,7 @@ sudo a2ensite witness-puzzles
 sudo a2dissite 000-default.conf
 
 # Test configuration & restart apache
-apache2ctl configtest
+sudo apache2ctl configtest
 sudo systemctl restart apache2
 sudo systemctl status apache2
 
