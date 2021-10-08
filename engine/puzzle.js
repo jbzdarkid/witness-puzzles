@@ -477,9 +477,9 @@ window.Puzzle = class {
         else if (cell.start === true)      row[x] = 'S'
         else if (cell.end != null)         row[x] = 'E'
         else if (cell.type === 'line') {
-          if (cell.line === 0)             row[x] = '.'
           if (cell.gap > 0)                row[x] = ' '
           if (cell.dot > 0)                row[x] = 'X'
+          if (cell.line === 0)             row[x] = '.'
           if (cell.line === 1)             row[x] = '#'
           if (cell.line === 2)             row[x] = '#'
           if (cell.line === 3)             row[x] = 'o'
