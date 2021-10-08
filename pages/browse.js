@@ -1,7 +1,11 @@
 namespace(function() {
 
 window.onload = function() {
-  loadPuzzles(20) // First load should be smaller to improve FCP
+  // First load should be smaller to improve FCP
+  // However, we need to keep loading until we have a scrollbar, since further puzzles trigger onscroll
+  doInitialLoad = function() {
+    if (document.body.scrollHeight == document.body.clientHeight)) loadPuzzles(20, doInitialLoad)
+  }
 
   if (window.loggedIn) {
     var logout = document.createElement('a')
@@ -90,7 +94,7 @@ function addPuzzles(puzzles) {
 
 var offset = 0
 var noMorePuzzles = false
-function loadPuzzles(limit) {
+function loadPuzzles(limit, callback) {
   if (noMorePuzzles) return
   sendHttpRequest('GET', '/browse?sort_type=date&order=desc&limit=' + limit + '&offset=' + offset, 10,
     function(status, responseText) {
@@ -101,6 +105,7 @@ function loadPuzzles(limit) {
       } else { // Likely a connection error or timeout, retry
         window.setTimeout(function() { loadPuzzles(limit) }, 5000)
       }
+      if (callback) callback()
     })
 }
 
