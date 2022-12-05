@@ -1,6 +1,7 @@
 SHIP BLOCKERS
 
 BUGS
+- Right click to remove start/end doesn't respect symmetry rules
 - Audio is laggy -- Try preloading?
 - "Seren✩: I let Witness Puzzles run until it resolved. It found some... questionable results."
 https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unknown.png
