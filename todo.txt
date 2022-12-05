@@ -26,6 +26,7 @@ https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unk
   * pollyfill.io ?
 
 FEATURES
+- Add send_last_lines from speedrunbot and send that when we 500.
 - Autocommit for the database?
   from flask_sqlalchemy import SQLAlchemy
   db = SQLAlchemy(session_options={'autocommit': True})
