@@ -7,6 +7,7 @@ from traceback import format_exc
 
 from flask_wtf.csrf import CSRFError
 from sqlalchemy.exc import SQLAlchemyError
+from sqlite3 import OperationalError
 from werkzeug.exceptions import HTTPException
 
 from application_database import *
@@ -72,8 +73,10 @@ application.register_error_handler(CSRFError, page_not_found)
 
 # In case of a database error, cancel any active transactions to prevent the database getting stuck.
 def handle_database_error(exc):
-  if db.session.is_active: # db imported from application_database.py
-    db.session.rollback()
+  try:
+    db.session.rollback() # db imported from application_database.py
+  except OperationalError: # No active session
+    pass
   return '', 500
 application.register_error_handler(SQLAlchemyError, handle_database_error)
 
