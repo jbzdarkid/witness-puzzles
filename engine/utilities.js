@@ -633,12 +633,12 @@ function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
   currentHttpRequest = new XMLHttpRequest()
   currentHttpRequest.onreadystatechange = function() {
     if (this.readyState != XMLHttpRequest.DONE) return
-    onResponse(this.status, this.responseText || HTTP_STATUS[this.status])
     currentHttpRequest = null
+    onResponse(this.status, this.responseText || HTTP_STATUS[this.status])
   }
   currentHttpRequest.ontimeout = function() {
-    onResponse(0, 'Request timed out')
     currentHttpRequest = null
+    onResponse(0, 'Request timed out')
   }
   currentHttpRequest.timeout = timeoutSeconds * 1000
   currentHttpRequest.open(verb, path, true)

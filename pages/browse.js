@@ -6,6 +6,7 @@ window.onload = function() {
   doInitialLoad = function() {
     if (document.body.scrollHeight == document.body.clientHeight) loadPuzzles(20, doInitialLoad)
   }
+  doInitialLoad()
 
   if (window.loggedIn) {
     var logout = document.createElement('a')
