@@ -4,7 +4,7 @@ window.onload = function() {
   // First load should be smaller to improve FCP
   // However, we need to keep loading until we have a scrollbar, since further puzzles trigger onscroll
   doInitialLoad = function() {
-    if (document.body.scrollHeight == document.body.clientHeight)) loadPuzzles(20, doInitialLoad)
+    if (document.body.scrollHeight == document.body.clientHeight) loadPuzzles(20, doInitialLoad)
   }
 
   if (window.loggedIn) {
