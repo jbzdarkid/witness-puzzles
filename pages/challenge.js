@@ -485,6 +485,8 @@ function applyRandomPillarSymmetry(puzzle, rng) {
 }
 
 function puzzleHasInvalidTriple(puzzle) {
+  // Much faster: One single pass to convert cells -> colors (and splash them outwards, if I'm really bored).
+  // Then do a second pass to check if any 2x2 has the right colors.
   function getColorFlag(puzzle, x, y) {
     var cell = puzzle.grid[x][y]
     if (cell == null) return 0
