@@ -23,7 +23,6 @@ host_redirect('/pages/browse.html', '/browse.html')
 host_redirect('/pages/editor.html', '/editor.html')
 host_redirect('/pages/telemetry.html', '/telemetry.html')
 host_redirect('/pages/triangles.html', '/triangles.html')
-host_redirect('/pages/validate.html', '/validate.html')
 host_redirect('/pages/webcrow.html', '/webcrow.html')
 
 # Large blocks of data
@@ -38,7 +37,6 @@ host_statically('pages/editor.js')
 host_statically('pages/telemetry.js')
 host_statically('pages/triangles.html')
 host_statically('pages/triangles.js')
-host_statically('pages/validate.html')
 host_statically('pages/webcrow.html')
 host_statically('pages/webcrow.js')
 

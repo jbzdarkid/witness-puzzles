@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, send_from_directory
 import os
 import json
+import threading
 from chromedriver_py import binary_path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -51,25 +52,47 @@ def host_statically(path, serverpath=None):
 def host_redirect(path, serverpath):
   application.add_url_rule(serverpath, f'redirect_{serverpath}', lambda:redirect(path))
 
+### WARNING ###
+# This is a very fragile solution to a very tricky problem. Selenium is not multiprocess-safe (not to mention not thread-safe).
+# However, it's quite expensive to keep opening up separate chrome instances for each image capture.
+# It's also challenging to do cross-process synchronization in flask.
+# Fortunately, this flask server is configured to be a single thread -- so it's safe to use threading.Lock() in this SPECIFIC case.
+### WARNING ###
+driver = None
+lock = threading.Lock()
 def validate_and_capture_image(solution_json):
-  options = webdriver.ChromeOptions()
-  options.add_argument('headless')
-  os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
-  driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
-  driver.get(f'{request.url_root}validate.html')
+  global lock, driver
+  acquired = lock.acquire(timeout=600)
+  if not acquired:
+    # If we timeout while trying to lock, something has gone terribly wrong.
+    # In this case, we should remake the driver object (which is probably dead) and the lock.
+    driver = None
+    l = threading.Lock()
+    # There's no reason (at this point) to capture the actual image, because the caller is long gone.
+    return
+
+  if not driver:
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
+    validate_page = 'file:///' + __file__.replace(__name__ + '.py', 'pages/validate.html')
+    driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
+    driver.get(validate_page)
 
   try:
     # Wait for page to load, then run the script and wait for a response.
+    driver.refresh()
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-    driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)})')
+    driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)})') # JSON escapement for solution_json
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
     data = json.loads(result.get_attribute('data'))
   except TimeoutException:
     data = {'error': 'Validation timed out'}
   except JavascriptException as e:
     data = {'error': f'Javascript failure: {e}'}
+  finally:
+    lock.release()
 
-  driver.quit()
   return data
 
 def upload_image(img_bytes, display_hash):
