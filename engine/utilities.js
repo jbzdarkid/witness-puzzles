@@ -607,7 +607,8 @@ window.addSolveButtons = function() {
   nextSolution.innerHTML = '&rarr;'
 }
 
-// We only allow one HTTP request to be in flight at a time.
+var currentHttpRequest = null // We only allow one HTTP request to be in flight at a time.
+
 window.sendHttpRequest = function(verb, path, timeoutSeconds, a, b) {
   if (currentHttpRequest != null) return
   if (b == null) {
@@ -628,7 +629,6 @@ var HTTP_STATUS = {
   500: '500 internal server error',
 }
 
-var currentHttpRequest = null
 function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
   currentHttpRequest = new XMLHttpRequest()
   currentHttpRequest.onreadystatechange = function() {
