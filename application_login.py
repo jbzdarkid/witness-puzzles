@@ -52,7 +52,7 @@ def browse_page():
 application.add_url_rule('/pages/browse.html', 'browse_page', browse_page)
 
 def delete():
-  if !is_logged_in():
+  if not is_logged_in():
     return '', 200
   display_hash = request.form['puzzle']
   print(f'Authenticated as {current_user.id}; deleting puzzle {display_hash}')
@@ -62,7 +62,7 @@ def delete():
 application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 
 def refresh():
-  if !is_logged_in():
+  if not is_logged_in():
     return '', 200
   display_hash = request.form['puzzle']
   print(f'Authenticated as {current_user.id}; refreshing image for puzzle {display_hash}')
@@ -82,13 +82,13 @@ def refresh():
 application.add_url_rule('/refresh', 'refresh', refresh, methods=['POST'])
 
 def telemetry_page():
-  if !is_logged_in():
+  if not is_logged_in():
     return render_template('404_generic.html'), 404
   return render_template('telemetry.html', feedback=get_all_feedback(), errors=get_all_errors())
 application.add_url_rule('/pages/telemetry.html', 'telemetry_page', telemetry_page, methods=['GET'])
 
 def delete_telemetry():
-  if !is_logged_in():
+  if not is_logged_in():
     return '', 200
   if request.form['type'] == 'feedback':
     delete_feedback(int(request.form['id']))
