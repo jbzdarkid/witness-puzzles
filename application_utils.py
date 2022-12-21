@@ -71,15 +71,15 @@ def validate_and_capture_image(solution_json):
     # There's no reason (at this point) to capture the actual image, because the caller is long gone.
     return
 
-  if not driver:
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
-    os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
-    validate_page = 'file:///' + __file__.replace(__name__ + '.py', 'pages/validate.html')
-    driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
-    driver.get(validate_page)
-
   try:
+    if not driver:
+      options = webdriver.ChromeOptions()
+      options.add_argument('headless')
+      os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
+      validate_page = 'file:///' + __file__.replace(__name__ + '.py', 'pages/validate.html')
+      driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
+      driver.get(validate_page)
+
     # Wait for page to load, then run the script and wait for a response.
     driver.refresh()
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
