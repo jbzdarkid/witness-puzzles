@@ -24,11 +24,13 @@ def load_user(user_id):
   user.id = user_id
   return user
 
+def is_logged_in():
+  return 'true' if current_user.get_id() == ADMIN_USERNAME else 'false'
+
 host_redirect('/pages/login.html', '/login.html')
 def login():
   if request.method == 'GET':
-    logged_in = 'true' if current_user.get_id() == ADMIN_USERNAME else 'false'
-    return render_template('login.html', logged_in=logged_in)
+    return render_template('login.html', logged_in=is_logged_in())
 
   if request.form['username'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
     user = UserMixin()
@@ -46,12 +48,11 @@ def logout():
 application.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 
 def browse_page():
-  logged_in = 'true' if current_user.get_id() == ADMIN_USERNAME else 'false'
-  return render_template('browse.html', logged_in=logged_in)
+  return render_template('browse.html', logged_in=is_logged_in())
 application.add_url_rule('/pages/browse.html', 'browse_page', browse_page)
 
 def delete():
-  if current_user.get_id() != ADMIN_USERNAME:
+  if !is_logged_in():
     return '', 200
   display_hash = request.form['puzzle']
   print(f'Authenticated as {current_user.id}; deleting puzzle {display_hash}')
@@ -61,7 +62,7 @@ def delete():
 application.add_url_rule('/delete', 'delete', delete, methods=['POST'])
 
 def refresh():
-  if current_user.get_id() != ADMIN_USERNAME:
+  if !is_logged_in():
     return '', 200
   display_hash = request.form['puzzle']
   print(f'Authenticated as {current_user.id}; refreshing image for puzzle {display_hash}')
@@ -81,13 +82,13 @@ def refresh():
 application.add_url_rule('/refresh', 'refresh', refresh, methods=['POST'])
 
 def telemetry_page():
-  if current_user.get_id() != ADMIN_USERNAME:
+  if !is_logged_in():
     return render_template('404_generic.html'), 404
   return render_template('telemetry.html', feedback=get_all_feedback(), errors=get_all_errors())
 application.add_url_rule('/pages/telemetry.html', 'telemetry_page', telemetry_page, methods=['GET'])
 
 def delete_telemetry():
-  if current_user.get_id() != ADMIN_USERNAME:
+  if !is_logged_in():
     return '', 200
   if request.form['type'] == 'feedback':
     delete_feedback(int(request.form['id']))
