@@ -27,6 +27,8 @@ sudo dpkg -i /tmp/chrome.deb
 rm /tmp/chrome.deb
 sudo apt-get autoremove
 
+google-chrome-stable -version # Hopefully outputs 92.0.whatever you installed above
+
 sudo python3 -m pip install -r requirements/prod.txt
 
 # Copy apache configuration, set up apache modules
