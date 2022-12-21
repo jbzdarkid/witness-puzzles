@@ -2,6 +2,7 @@ namespace(function() {
 
 var seed = 0
 var difficulty = 0
+var puzzle = null
 
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
@@ -10,11 +11,13 @@ window.onload = function() {
     seed = crypto.getRandomValues(new Uint32Array(1))[0]
     params.set('seed', seed)
     window.location.search = params.toString()
-    return // Changing window.location triggers a refresh, and we don't want to generate puzzles after doing that!
+    return // Changing window.location triggers a refresh, so we're all done here.
   }
   if (params.get('difficulty') == 'hard') {
     difficulty = 1 // TODO: Hard mode? Maybe... always hard mode?
   }
+  puzzle = params.get('puzzle') // null if not present
+  if (styles[puzzle] == null) puzzle = null // Check for invalid puzzle name
 
   var challenge = document.getElementById('challenge')
   for (var styleName in styles) {
@@ -25,13 +28,6 @@ window.onload = function() {
     challenge.appendChild(svg)
     // TODO: This should be a loading icon, which gets overwritten by the actual puzzle.
   }
-}
-
-function ytMessage(func) {
-  return // TODO: This feels gross. Is there a cleaner way of doing this that doesn't involve loading scripts into my namespace? Or maybe an explicit button, so users can consent to giving info to google.
-  var msg = {event:'command', func:func}
-  var win = document.getElementById('player-iframe').contentWindow
-  win.postMessage(JSON.stringify(msg), 'https://www.youtube.com')
 }
 
 var styles = {
@@ -62,6 +58,7 @@ var styles = {
     puzzle.grid[0][8].start = true
     puzzle.grid[8][0].end = 'top'
 
+    // TODO: Not working!
     var colors = shuffle(['0x052812', '0xFFC17A', '0xA4C34F', '0xB52EBD', '0x99EC35'])
     while (true) {
       var cells = randomEmptyCells(puzzle, 2)
@@ -138,7 +135,7 @@ var styles = {
   }
 }
 
-// Some functions separated out to avoid duplication
+// Some style functions, separated out to avoid duplication
 function largeMaze() {
   var puzzle = new Puzzle(7, 7)
   puzzle.grid[0][14].start = true
@@ -218,45 +215,77 @@ window.generatePuzzles = function(style) {
   document.getElementById('start').disabled = true
   document.getElementById('start').innerText = 'Generating...'
 
-  setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam.
+  setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam. This is obviously my fault.
 
-  var styleKeys = Object.keys(styles)
+  /* TODO: Progress bar while generating
+    var solveAuto = document.createElement('button')
+  parent.appendChild(solveAuto)
+  solveAuto.id = 'solveAuto'
+  solveAuto.innerText = 'Solve (automatically)'
+  solveAuto.onpointerdown = solvePuzzle
+  solveAuto.style = 'margin-right: 8px'
 
-  var onComplete = function() {
+  var div = document.createElement('div')
+  parent.appendChild(div)
+  div.style = 'display: inline-block; vertical-align:top'
+
+  var progressBox = document.createElement('div')
+  div.appendChild(progressBox)
+  progressBox.id = 'progressBox'
+  progressBox.style = 'display: none; width: 220px; border: 1px solid black; margin-top: 2px'
+
+  var progressPercent = document.createElement('label')
+  progressBox.appendChild(progressPercent)
+  progressPercent.id = 'progressPercent'
+  progressPercent.style = 'float: left; margin-left: 4px'
+  progressPercent.innerText = '0%'
+
+  var progress = document.createElement('div')
+  progressBox.appendChild(progress)
+  progress.id = 'progress'
+  progress.style = 'z-index: -1; height: 38px; width: 0%; background-color: #390'
+  */
+
+
+  var styleKeys = []
+  if (puzzle != null) {
+    puzzle.split(',')
+  } else {
+    styleKeys = Object.keys(styles)
+  }
+
+  var generateNextPuzzle = function() {
     if (styleKeys.length === 0) {
       setLogLevel('info')
       console.info('All done!')
-      // TODO: How does this music timing feel?
-      document.getElementById('start').disabled = false
-      document.getElementById('start').innerText = 'Reroll'
-      // ytMessage('seekTo')
-      // ytMessage('playVideo')
+      // document.getElementById('start').disabled = false
+      document.getElementById('start').innerText = 'Generated'
       return
     }
     
     var styleName = styleKeys.pop()
     hide(styleName)
-    generatePuzzleAsync(styleName, 100, onComplete)
+    generatePuzzleAsync(styleName, 100, generateNextPuzzle)
   }
-  onComplete()
+  generateNextPuzzle()
 }
 
-function generatePuzzleAsync(styleName, i, onComplete) {
-  if (i === 0) {
-    // Hack! Bug! Create dummy puzzles when unsolvable
+function generatePuzzleAsync(styleName, attempts, generateNextPuzzle) {
+  if (attempts === 0) {
+    // This is not great -- but we'd rather have a failure state than run forever.
     puzzle = new Puzzle(1, 0)
     puzzle.grid[0][0].start = true
     puzzle.grid[2][0].end = 'right'
     window.draw(puzzle, styleName)
     console.error('Failed to generate a random puzzle for ' + styleName)
-    onComplete()
+    generateNextPuzzle()
   }
 
   var puzzle = styles[styleName]()
 
   // Not allowed for solvable *or* unsolvable triples.
   if (styleName.startsWith('triple') && puzzleHasInvalidTriple(puzzle)) {
-    generatePuzzleAsync(styleName, i, onComplete) // No need to modify the iteration count, this check is very cheap.
+    generatePuzzleAsync(styleName, attempts, generateNextPuzzle) // No need to modify the iteration count, this check is very cheap.
     return
   }
 
@@ -267,7 +296,7 @@ function generatePuzzleAsync(styleName, i, onComplete) {
     if (styleName.startsWith('triple') && !possibleTriples.includes(styleName)) isSolvable = !isSolvable
 
     if (!isSolvable) {
-      generatePuzzleAsync(styleName, i-1, onComplete)
+      generatePuzzleAsync(styleName, attempts-1, generateNextPuzzle)
       return
     }
 
@@ -287,8 +316,9 @@ function generatePuzzleAsync(styleName, i, onComplete) {
       panelCover.setAttribute('id', styleName + '-cover')
       svg.appendChild(panelCover)
     }
+    
     // TODO: Create solution viewer here. One per puzzle.
-    onComplete()
+    generateNextPuzzle()
   })
 }
 
@@ -335,7 +365,7 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
       show('pillar-left'); show('pillar-right')
     } else if (puzzle.name.startsWith('pillar') && completedPuzzles.includes('pillar-left') && completedPuzzles.includes('pillar-right')) {
       ytMessage('pauseVideo')
-      // Play fanfare? Show time?
+      // TODO: Fanfare?
     }
   }, 2000)
 }

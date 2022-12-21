@@ -17,37 +17,35 @@
     <script async type="text/javascript" src="/engine/trace2.js"></script>
     <script async type="text/javascript" src="/engine/telemetry.js"></script>
     <script async type="text/javascript" src="/pages/challenge.js"></script>
-    <title>The Challenge</title>
+    <title>Challenge Practice</title>
   </head>
   <body>
-    <script>loadHeader('The Challenge')</script>
-
-<!--
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <iframe id="player-iframe" width="400px" height="150px" frameborder="0" src="https://www.youtube.com/embed/B25mZ15bQaY"></iframe>
-    -->
+    <script>loadHeader('Challenge Practice')</script>
 
     <div style="text-align: center;">
-      <button id="start" onpointerdown="generatePuzzles()">Start Challenge</button>
+      <select id="puzzleStyle" onchange="foo()">
+        <option>Full Challenge</option>
+        <option>Horizontal Symmetry</option>
+        <option>Vertical Symmetry</option>
+        <option>Rotational Symmetry</option>
+        <option>Pillar</option>
+        <option>Pillar (H Symmetry)</option>
+        <option>Pillar (V Symmetry)</option>
+        <option>Pillar (R Symmetry)</option>
+        <option>Pillar (Two Lines)</option>
+      </select>
+      <button id="start" onpointerdown="generatePuzzles()">Generate</button>
       <button onpointerdown="showSolutions()">Show Solutions</button>
     </div>
 
-    <div id="challenge" style="display: flex; justify-content: space-evenly">
-    </div>
-    <div id="solutionViewer-meta" style="display: flex">
+    <div id="challenge" style="display: flex; justify-content: space-evenly"></div>
+    <div id="solutions" style="display: flex; justify-content: space-evenly"></div>
       <!--
         <td style="text-align: center">
           <div id="solutionViewer-left" style="display: none">
             <button id="previousSolution-left">&larr;</button>
             <label id="solutionCount-left"></label>
             <button id="nextSolution-left">&rarr;</button>
-          </div>
-        </td><td>
-        </td><td style="text-align: center">
-          <div id="solutionViewer-right" style="display: none">
-            <button id="previousSolution-right">&larr;</button>
-            <label id="solutionCount-right"></label>
-            <button id="nextSolution-right">&rarr;</button>
           </div>
         </td>
       -->
