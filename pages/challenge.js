@@ -1,8 +1,7 @@
 namespace(function() {
 
 var seed = 0
-var difficulty = 0
-var puzzle = null
+var unique = false
 
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
@@ -13,22 +12,115 @@ window.onload = function() {
     window.location.search = params.toString()
     return // Changing window.location triggers a refresh, so we're all done here.
   }
-  if (params.get('difficulty') == 'hard') {
-    difficulty = 1 // TODO: Hard mode? Maybe... always hard mode?
+  if (params.get('difficulty') == 'hard') unique = true
+  if (params.has('puzzle')) {
+    var challengeType = document.getElementById('challengeType')
+    challengeType.value = params.get('puzzle')
+    window.setChallengeType()
   }
-  puzzle = params.get('puzzle') // null if not present
-  if (styles[puzzle] == null) puzzle = null // Check for invalid puzzle name
 
-  var challenge = document.getElementById('challenge')
+  // Create svgs for all of the puzzles, regardless of style
+  var puzzles = document.getElementById('puzzles')
   for (var styleName in styles) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.id = styleName
     // TODO: Do I need pointer-events? If yes, move into draw() [and scourge]. If no, just scourge.
     svg.style = 'pointer-events: auto; opacity: none'
-    challenge.appendChild(svg)
-    // TODO: This should be a loading icon, which gets overwritten by the actual puzzle.
+    puzzles.appendChild(svg)
+
+    // Add a cover to the triple panels, so that they can power on in sequence.
+    var panelCover = window.createElement('rect')
+    panelCover.setAttribute('width', svg.style.width)
+    panelCover.setAttribute('height', svg.style.height)
+    panelCover.setAttribute('opacity', 1)
+    panelCover.setAttribute('style', 'pointer-events: none')
+    panelCover.setAttribute('id', styleName + '-cover')
+    svg.appendChild(panelCover)
   }
 }
+
+window.setChallengeType = function() {
+  // Hide all puzzles
+  for (var style in Object.keys(styles)) hide(style)
+
+  // No need to change the trace_completion_func
+  var type = document.getElementById('challengeType').value
+  if (type == 'full' || type == 'intro') {
+    show('easy-maze', 0) // TODO: Second argument: Cover opacity
+    show('hard-maze', 1)
+    show('stones', 1)
+    document.getElementById('easy-maze-cover').setAttribute('opacity', 0)
+  } else if (type == 'scramble') {
+    show('scramble-
+  // ...
+}
+
+// TODO: Clean this up. IDK what exactly it needs but it's currently __a mess__
+// and some of it is duplicate with setChallengeType. Le sigh.
+// Honestly I think giving each style an "oncomplete" might be easier.
+window.TRACE_COMPLETION_FUNC = function(puzzle) {
+  completedPuzzles.push(puzzle.name)
+
+  window.setTimeout(function() {
+    if (puzzle.name == 'easy-maze') {
+      hide('easy-maze')
+      show('hard-maze')
+    } else if (puzzle.name == 'hard-maze') {
+      hide('hard-maze')
+      show('stones')
+    } else if (puzzle.name == 'stones') {
+      hide('stones')
+      show(scrambleOrder.pop())
+    } else if (puzzle.name.startsWith('scramble')) {
+      hide(puzzle.name)
+      if (scrambleOrder.length > 0) {
+        show(scrambleOrder.pop())
+      } else {
+        show('triple-twocolor-0'); show('triple-twocolor-1'); show('triple-twocolor-2')
+        // TODO: Verify order
+        // TODO: Verify power-on delays
+        // TODO: Verify power on duration.
+        // TODO: Play power on sound?
+        document.getElementById('triple-twocolor-1-cover').style.animation = 'turnOn 1.5s linear 0s 1 forwards'
+        document.getElementById('triple-twocolor-0-cover').style.animation = 'turnOn 1.5s linear 2s 1 forwards'
+        document.getElementById('triple-twocolor-2-cover').style.animation = 'turnOn 1.5s linear 4s 1 forwards'
+      }
+    } else if (puzzle.name.startsWith('triple-twocolor')) {
+      hide('triple-twocolor-0'); hide('triple-twocolor-1'); hide('triple-twocolor-2')
+      show('triple-threecolor-0'); show('triple-threecolor-1'); show('triple-threecolor-2')
+      document.getElementById('triple-threecolor-1-cover').style.animation = 'turnOn 1.5s linear 0s 1 forwards'
+      document.getElementById('triple-threecolor-2-cover').style.animation = 'turnOn 1.5s linear 2s 1 forwards'
+      document.getElementById('triple-threecolor-0-cover').style.animation = 'turnOn 1.5s linear 4s 1 forwards'
+    } else if (puzzle.name.startsWith('triple-threecolor')) {
+      hide('triple-threecolor-0'); hide('triple-threecolor-1'); hide('triple-threecolor-2')
+      show('triangle-left'); show('triangle-right')
+    } else if (puzzle.name.startsWith('triangle') && completedPuzzles.includes('triangle-left') && completedPuzzles.includes('triangle-right')) {
+      hide('triangle-left'); hide('triangle-right')
+      show('pillar-left'); show('pillar-right')
+    } else if (puzzle.name.startsWith('pillar') && completedPuzzles.includes('pillar-left') && completedPuzzles.includes('pillar-right')) {
+      ytMessage('pauseVideo')
+      // TODO: Fanfare?
+    }
+  }, 2000)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var styles = {
   'easy-maze': function() {
@@ -187,6 +279,8 @@ function triangles(count) {
   return puzzle
 }
 
+// not sure who uses these exactly
+
 function hide(id) {
   var elem = document.getElementById(id)
   if (elem == null) throw Error('Could not find element with id ' + id)
@@ -198,6 +292,9 @@ function show(id) {
   if (elem == null) throw Error('Could not find element with id ' + id)
   elem.style.display = null
 }
+
+
+
 
 var completedPuzzles = []
 var scrambleOrder = []

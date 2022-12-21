@@ -23,22 +23,20 @@
     <script>loadHeader('Challenge Practice')</script>
 
     <div style="text-align: center;">
-      <select id="puzzleStyle" onchange="foo()">
-        <option>Full Challenge</option>
-        <option>Horizontal Symmetry</option>
-        <option>Vertical Symmetry</option>
-        <option>Rotational Symmetry</option>
-        <option>Pillar</option>
-        <option>Pillar (H Symmetry)</option>
-        <option>Pillar (V Symmetry)</option>
-        <option>Pillar (R Symmetry)</option>
-        <option>Pillar (Two Lines)</option>
+      <select id="challengeType" onchange="setChallengeType()">
+        <option value="full">Full Challenge</option>
+        <option value="intro">First 3 mazes</option>
+        <option value="shuffle">Central Pillar</option>
+        <option value="triple-2">Black/White Triple</option>
+        <option value="triple-3">White/Green/Purple Triple</option>
+        <option value="triangles">Triangles</option>
+        <option value="pillars">Pillars</option>
       </select>
-      <button id="start" onpointerdown="generatePuzzles()">Generate</button>
+      <button id="generate" onpointerdown="generateNew()">Generate New</button>
       <button onpointerdown="showSolutions()">Show Solutions</button>
     </div>
 
-    <div id="challenge" style="display: flex; justify-content: space-evenly"></div>
+    <div id="puzzles" style="display: flex; justify-content: space-evenly"></div>
     <div id="solutions" style="display: flex; justify-content: space-evenly"></div>
       <!--
         <td style="text-align: center">
