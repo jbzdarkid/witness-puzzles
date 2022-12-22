@@ -10,7 +10,7 @@ function uuidv4() {
 // https://stackoverflow.com/q/12571650
 window.addEventListener('error', function(event) {
   ERROR(event.error.stack)
-  console.error('Error in file ' + event.filename + ' on line ' + event.line)
+  console.error('Error in file ' + event.filename + ' on line ' + event.lineno)
 })
 
 var sessionId = uuidv4() // Session ID is unique per page load, so as not to identify the user.

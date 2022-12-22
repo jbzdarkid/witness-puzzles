@@ -22,15 +22,15 @@
   <body>
     <script>loadHeader('Challenge Practice')</script>
 
-    <div style="text-align: center;">
+    <div style="text-align: center; margin-bottom: 10px">
       <select id="challengeType" onchange="showScene(this.value)">
         <option value="full">Full Challenge</option>
         <option value="intro">First 3 Mazes</option>
         <option value="scramble-polyominos">Polyominos</option>
         <option value="scramble-stars">Stars</option>
         <option value="scramble-symmetry">Symmetry</option>
-        <option value="triple-2">2 Color Triple</option>
-        <option value="triple-3">3 Color Triple</option>
+        <option value="triple2">2 Color Triple</option>
+        <option value="triple3">3 Color Triple</option>
         <option value="triangles">Triangles</option>
         <option value="pillars">Pillars</option>
       </select>
@@ -45,7 +45,7 @@
       <button onpointerdown="showSolutions()">Show Solutions</button>
     </div>
 
-    <div id="puzzles" style="display: flex; justify-content: space-evenly"></div>
-    <div id="solutions" style="display: flex; justify-content: space-evenly"></div>
+    <div id="puzzles" style="display: flex; justify-content: space-evenly; align-items: center"></div>
+    <div id="solutions" style="display: flex; justify-content: space-evenly; align-items: center"></div>
   </body>
 </html>
