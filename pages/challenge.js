@@ -3,6 +3,11 @@ namespace(function() {
 var seed = 0
 var unique = false
 
+// TODO: I would like to keep seed stability -- this is a perfect place to use random hashing!
+// - Change the randInt function to respect the currently generating whatever
+// - Only generate specific puzzles if the challengeType != full
+// - Generate specific puzzles async (on completion?) if challengeType != full
+
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
   seed = parseInt(params.get('seed')) || 0
@@ -45,7 +50,7 @@ window.onload = function() {
     solutionViewer.appendChild(nextSolution)
   }
 
-  var scene = location.hash
+  var scene = location.hash.substring(1)
   if (scene != '') {
     var challengeType = document.getElementById('challengeType')
     challengeType.value = scene
@@ -68,7 +73,7 @@ function show(id, coverOpacity, coverAnimation) {
 window.showScene = function(scene) {
   // Hide all puzzles
   for (var style in styles) document.getElementById(style).style.display = 'none'
-  window.hash = scene
+  location.hash = scene
 
   if (scene == 'full' || scene == 'intro') {
     show('easy-maze', 0)
@@ -151,7 +156,7 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
 window.generateNew = function() {
   // Reset the seed and reload the page to get a new one
   var params = new URLSearchParams(window.location.search)
-  params.seed = 0
+  params.set('seed', 0)
   window.location.search = params.toString()
 }
 

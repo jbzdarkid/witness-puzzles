@@ -20,13 +20,14 @@ paths = [
   Path('application_database.py'),
   Path('application_login.py'),
   Path('application_utils.py'),
+  Path('code-deploy.sh')
   Path('data'),
   Path('engine'),
+  Path('LICENSE.md')
   Path('pages'),
-  Path('requirements.txt'),
+  Path('README.md')
   Path('requirements'),
-  # Path('.ebextensions/https-instance.config'),
-  Path('install-google-chrome.sh'),
+  Path('requirements.txt'),
   Path('robots.txt'),
 ]
 
