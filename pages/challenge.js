@@ -68,6 +68,7 @@ function show(id, coverOpacity, coverAnimation) {
 window.showScene = function(scene) {
   // Hide all puzzles
   for (var style in styles) document.getElementById(style).style.display = 'none'
+  window.hash = scene
 
   if (scene == 'full' || scene == 'intro') {
     show('easy-maze', 0)
@@ -86,9 +87,9 @@ window.showScene = function(scene) {
     show('triple-twocolor-0', 1, 'turnOn 1.5s linear 2s 1 forwards')
     show('triple-twocolor-2', 1, 'turnOn 1.5s linear 4s 1 forwards')
   } else if (scene == 'triple3') {
-    show('triple-threecolor-1', 0, 'turnOn 1.5s linear 0s 1 forwards')
-    show('triple-threecolor-2', 0, 'turnOn 1.5s linear 2s 1 forwards')
-    show('triple-threecolor-0', 0, 'turnOn 1.5s linear 4s 1 forwards')
+    show('triple-threecolor-1', 1, 'turnOn 1.5s linear 0s 1 forwards')
+    show('triple-threecolor-2', 1, 'turnOn 1.5s linear 2s 1 forwards')
+    show('triple-threecolor-0', 1, 'turnOn 1.5s linear 4s 1 forwards')
   } else if (scene == 'triangles') {
     show('triangle-left', 0)
     show('triangle-right', 0)
@@ -168,15 +169,16 @@ function generate() {
   generateAttempts = 100
 
   setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam. This is, obviously, my fault.
+  document.getElementById('progressBox').style.display = null
 
   generatePuzzleAsync(Object.keys(styles), function() {
     setLogLevel('info')
+    document.getElementById('progressBox').style.display = 'none'
     console.info('All done!')
 
     var generateNew = document.getElementById('generateNew')
     generateNew.disabled = false
     generateNew.innerText = 'Generate New'
-
 
     var scene = document.getElementById('challengeType').value
     showScene(scene)
@@ -184,12 +186,11 @@ function generate() {
 }
 
 function generatePuzzleAsync(styleKeys, finalCallback) {
-  percent = 100.0 * (styles.length - styleKeys.length) / styles.length
-  // document.getElementById('progressPercent').innerText = percent + '%'
+  percent = 100 - Math.floor(100.0 * styleKeys.length / Object.keys(styles).length)
+  document.getElementById('progressPercent').innerText = percent + '%'
   document.getElementById('progress').style.width = percent + '%'
 
   if (styleKeys.length === 0) {
-    document.getElementById('progressBox').style.display = 'none'
     finalCallback()
     return
   }
