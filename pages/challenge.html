@@ -23,30 +23,29 @@
     <script>loadHeader('Challenge Practice')</script>
 
     <div style="text-align: center;">
-      <select id="challengeType" onchange="setChallengeType()">
+      <select id="challengeType" onchange="showScene(this.value)">
         <option value="full">Full Challenge</option>
-        <option value="intro">First 3 mazes</option>
-        <option value="shuffle">Central Pillar</option>
-        <option value="triple-2">Black/White Triple</option>
-        <option value="triple-3">White/Green/Purple Triple</option>
+        <option value="intro">First 3 Mazes</option>
+        <option value="scramble-polyominos">Polyominos</option>
+        <option value="scramble-stars">Stars</option>
+        <option value="scramble-symmetry">Symmetry</option>
+        <option value="triple-2">2 Color Triple</option>
+        <option value="triple-3">3 Color Triple</option>
         <option value="triangles">Triangles</option>
         <option value="pillars">Pillars</option>
       </select>
-      <button id="generate" onpointerdown="generateNew()">Generate New</button>
+      <button id="generateNew" onpointerdown="generateNew()" disabled>Generating...</button>
+      <div style="display: inline-block; vertical-align: top">
+        <div id="progressBox" style="display: none; width: 220px; border: 1px solid black; margin-top: 2px">
+          <!--<label id="progressPercent" style="float: left; margin-left: 4px;">0%</label>-->
+          <div id="progress" style="z-index: -1; height: 38px; width: 0%; background-color: #390"></div>
+        </div>
+      </div>
+
       <button onpointerdown="showSolutions()">Show Solutions</button>
     </div>
 
     <div id="puzzles" style="display: flex; justify-content: space-evenly"></div>
     <div id="solutions" style="display: flex; justify-content: space-evenly"></div>
-      <!--
-        <td style="text-align: center">
-          <div id="solutionViewer-left" style="display: none">
-            <button id="previousSolution-left">&larr;</button>
-            <label id="solutionCount-left"></label>
-            <button id="nextSolution-left">&rarr;</button>
-          </div>
-        </td>
-      -->
-    </div>
   </body>
 </html>
