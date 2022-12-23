@@ -2,11 +2,10 @@ namespace(function() {
 
 var seed = 0
 var unique = false
-
-// TODO: I would like to keep seed stability -- this is a perfect place to use random hashing!
-// - Change the randInt function to respect the currently generating whatever
-// - Only generate specific puzzles if the challengeType != full
-// - Generate specific puzzles async (on completion?) if challengeType != full
+var scrambleOrder = []
+var possibleTriples = []
+var leftPillarSymmetry = 0
+var rightPillarSymmetry = 0
 
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
@@ -50,14 +49,52 @@ window.onload = function() {
     solutionViewer.appendChild(nextSolution)
   }
 
-  var scene = location.hash.substring(1)
-  if (scene != '') {
-    var challengeType = document.getElementById('challengeType')
-    challengeType.value = scene
+  unique = (params.get('difficulty') == 'hard')
+  generate(location.hash.substring(1))
+}
+
+window.generate = function(scene) {
+  var toGenerate = []
+  if (scene == 'intro')                    toGenerate = ['easy-maze', 'hard-maze', 'stones']
+  else if (scene == 'scramble-polyominos') toGenerate = ['scramble-polyominos']
+  else if (scene == 'scramble-stars')      toGenerate = ['scramble-stars']
+  else if (scene == 'scramble-symmetry')   toGenerate = ['scramble-symmetry']
+  else if (scene == 'scramble-maze')       toGenerate = ['scramble-maze']
+  else if (scene == 'triple2')             toGenerate = ['triple-twocolor-0', 'triple-twocolor-1', 'triple-twocolor-2']
+  else if (scene == 'triple3')             toGenerate = ['triple-threecolor-0', 'triple-threecolor-1', 'triple-threecolor-2']
+  else if (scene == 'triangles')           toGenerate = ['triangle-left']
+  else if (scene == 'pillars')             toGenerate = ['triangle-right']
+  else if (scene == 'fanfare')             toGenerate = []
+  else {
+    scene = 'full'
+    toGenerate = Object.keys(styles)
   }
 
-  unique = (params.get('difficulty') == 'hard')
-  generate()
+  if (scene != 'scramble-maze' && scene != 'fanfare') {
+    document.getElementById('challengeType').value = scene
+  }
+
+  setRngContext('meta')
+  scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
+  possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
+  leftPillarSymmetry = randInt(4)
+  rightPillarSymmetry = randInt(4)
+
+  console.info('Generating...')
+  setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam. This is, obviously, my fault.
+  document.getElementById('progressBox').style.display = null
+
+  generatePuzzlesAsync(toGenerate, 0, function() {
+    setLogLevel('info')
+    document.getElementById('progressBox').style.display = 'none'
+    console.info('All done!')
+
+    var generateNew = document.getElementById('generateNew')
+    generateNew.disabled = false
+    generateNew.innerText = 'Generate New'
+
+    showScene(scene) // From outer scope
+  })
 }
 
 function show(id, coverOpacity, coverAnimation) {
@@ -70,7 +107,7 @@ function show(id, coverOpacity, coverAnimation) {
   if (cover != null && coverAnimation != null) cover.style.animation = coverAnimation
 }
 
-window.showScene = function(scene) {
+function showScene(scene) {
   // Hide all puzzles
   for (var style in styles) document.getElementById(style).style.display = 'none'
   location.hash = scene
@@ -142,7 +179,7 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
       // if both are solved, nextScene = 'fanfare'
     }
 
-    if (nextScene == null) return;
+    if (nextScene == null) return; // Completing this puzzle did not trigger another scene.
 
     var type = document.getElementById('challengeType').value
     if (type == 'full') {
@@ -154,88 +191,72 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
 }
 
 window.generateNew = function() {
-  // Reset the seed and reload the page to get a new one
+  // Reset the seed and reload the page to get a new seed
   var params = new URLSearchParams(window.location.search)
   params.set('seed', 0)
   window.location.search = params.toString()
 }
 
-var scrambleOrder = []
-var possibleTriples = []
-var leftPillarSymmetry = 0
-var rightPillarSymmetry = 0
-var generateAttempts = 0
-
-function generate() {
-  scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
-  possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
-  leftPillarSymmetry = randInt(4)
-  rightPillarSymmetry = randInt(4)
-  generateAttempts = 100
-
-  setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam. This is, obviously, my fault.
-  document.getElementById('progressBox').style.display = null
-
-  generatePuzzleAsync(Object.keys(styles), function() {
-    setLogLevel('info')
-    document.getElementById('progressBox').style.display = 'none'
-    console.info('All done!')
-
-    var generateNew = document.getElementById('generateNew')
-    generateNew.disabled = false
-    generateNew.innerText = 'Generate New'
-
-    var scene = document.getElementById('challengeType').value
-    showScene(scene)
-  })
-}
-
-function generatePuzzleAsync(styleKeys, finalCallback) {
-  percent = 100 - Math.floor(100.0 * styleKeys.length / Object.keys(styles).length)
-  document.getElementById('progressPercent').innerText = percent + '%'
-  document.getElementById('progress').style.width = percent + '%'
-
-  if (styleKeys.length === 0) {
+function generatePuzzlesAsync(styleKeys, i, finalCallback) {
+  if (i >= styleKeys.length) {
     finalCallback()
     return
   }
-  var styleName = styleKeys[0]
-  var puzzle = styles[styleName]() // Generate a random puzzle
 
-  // Check for invalid triple L shape in both solvable and unsolvable puzzles.
-  if (styleName.startsWith('triple')) {
-    if (puzzleHasInvalidTriple(puzzle)) {
-      // No need to modify the attempt count, this check is very cheap.
-      generatePuzzleAsync(styleKeys, finalCallback)
-      return
-    }
-  }
+  var styleName = styleKeys[i]
+  setRngContext(styleName)
 
-  generateAttempts--
-  if (generateAttempts <= 0) {
-    // This is not great -- but we'd rather have a failure state than run forever.
+  // TODO: What about a partial callback? Then we can count up to 100 solve attempts?
+  percent = Math.floor(100.0 * i / styleKeys.length)
+  document.getElementById('progressPercent').innerText = percent + '%'
+  document.getElementById('progress').style.width = percent + '%'
+
+  generateSinglePuzzleAsync(styleName, 100, function(puzzle) {
+    window.draw(puzzle, styleName)
+    puzzle.name = styleName // So that we know what we solved in the trace completion callback
+
+    // Add a cover to panels, so that they can "power on" in sequence.
+    var svg = document.getElementById(styleName)
+    var panelCover = window.createElement('rect')
+    panelCover.setAttribute('width', svg.style.width)
+    panelCover.setAttribute('height', svg.style.height)
+    panelCover.setAttribute('opacity', 1)
+    panelCover.setAttribute('style', 'pointer-events: none')
+    panelCover.setAttribute('id', styleName + '-cover')
+    svg.appendChild(panelCover)
+
+    svg.style.display = 'none'
+
+    // Save the paths for the solution viewer here, I guess?
+    // TODO: Apparently my best solution here is cutnpaste, which sucks.
+
+    generatePuzzlesAsync(styleKeys, i+1, finalCallback)
+  })
+}
+
+function generateSinglePuzzleAsync(styleName, solveAttempts, callback) {
+  if (solveAttempts <= 0) {
+    console.error('Failed to generate a random puzzle for ' + styleName)
+
+    // This is not great -- but we don't want to take forever. Ideally, this wouldn't happen.
     var puzzle = new Puzzle(1, 0)
     puzzle.grid[0][0].start = true
     puzzle.grid[2][0].end = 'right'
-    window.draw(puzzle, styleName)
-    puzzle.name = styleName
-
-    generateAttempts = 100
-    styleKeys.shift()
-    console.error('Failed to generate a random puzzle for ' + styleName)
-
-    generatePuzzleAsync(styleKeys, finalCallback)
+    callback(puzzle)
     return
   }
 
+  // Generate a random puzzle. Null means 'trivially invalid'
+  var puzzle = null
+  while (puzzle == null) puzzle = styles[styleName]()
+
   window.solve(puzzle, /*partialCallback=*/null, /*finalCallback=*/function(paths) {
-    styleName = styleKeys[0] // Javascript bug, local variables are not copied.
     var success = false
 
     if (styleName.startsWith('triple') && !possibleTriples.includes(styleName)) {
       success = (paths.length == 0)
     } else if (unique) {
-      if (puzzle.symmetry == null && puzzleName != 'scramble-symmetry') { // Eh. There's probably a nicer way of doing this.
+      if (puzzle.symmetry == null || styleName == 'scramble-symmetry') {
         success = (paths.length == 1)
       } else {
         success = (paths.length == 2)
@@ -245,31 +266,13 @@ function generatePuzzleAsync(styleKeys, finalCallback) {
     }
 
     if (success) {
-      window.draw(puzzle, styleName)
-      puzzle.name = styleName // So that we know what we solved in the trace completion callback
-
-      // Add a cover to panels, so that they can "power on" in sequence.
-      var svg = document.getElementById(styleName)
-      var panelCover = window.createElement('rect')
-      panelCover.setAttribute('width', svg.style.width)
-      panelCover.setAttribute('height', svg.style.height)
-      panelCover.setAttribute('opacity', 1)
-      panelCover.setAttribute('style', 'pointer-events: none')
-      panelCover.setAttribute('id', styleName + '-cover')
-      svg.appendChild(panelCover)
-
-      svg.style.display = 'none'
-
-      // Save the paths for the solution viewer here, I guess?
-      // TODO: Apparently my best solution here is cutnpaste, which sucks.
-
-      generateAttempts = 100
-      styleKeys.shift()
       // TODO: Error?! Make info less spammy, then.
       console.error('Successfully generated a random puzzle for ' + styleName)
-    }
 
-    generatePuzzleAsync(styleKeys, finalCallback)
+      callback(puzzle)
+    } else {
+      generateSinglePuzzleAsync(styleName, solveAttempts - 1, callback)
+    }
   })
 }
 
@@ -398,6 +401,10 @@ function tripleTwoColor() {
   for (var cell of randomEmptyCells(puzzle, 6)) {
     puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
   }
+
+  // Check for invalid triple L shape in both solvable and unsolvable puzzles.
+  if (puzzleHasInvalidTriple(puzzle)) return null
+
   return puzzle
 }
 
@@ -415,6 +422,10 @@ function tripleThreeColor() {
   for (var cell of randomEmptyCells(puzzle, 2)) {
     puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'green'}
   }
+
+  // Check for invalid triple L shape in both solvable and unsolvable puzzles.
+  if (puzzleHasInvalidTriple(puzzle)) return null
+
   return puzzle
 }
 
@@ -448,8 +459,20 @@ function shuffle(list) {
   return list
 }
 
+// We compute different "RNG seeds" per puzzle, which allows us to independently compute RNG without generating the entire sequence.
+var contextHash = 0
+var seedOffset = 0 // But, we still want to use the same base seed -- so this number increments per puzzle.
 function randInt(n) {
-  return squirrel3(++seed) % Math.floor(n)
+  return squirrel3(contextHash + (++seedOffset)) % Math.floor(n)
+}
+
+function setRngContext(str) {
+  contextHash = 0
+  for (var i = 0; i < str.length; i++) {
+    contextHash = squirrel3(contextHash + str.charCodeAt(i))
+  }
+
+  seedOffset = 0
 }
 
 // Credit https://youtu.be/LWFzPP8ZbdU (Squirrel Eiserloh, GDC 2017)
@@ -496,7 +519,9 @@ function cutRandomEdges(puzzle, count) {
 
 function placeRandomCornerDots(puzzle, count, dotColor) {
   var cells = getCells(puzzle, popRandomElement, count, function(x, y) {
-    return (x%2 === 0 && y%2 === 0 && puzzle.grid[x][y].dot == null)
+    if (x%2 === 1 || y%2 === 1) return false
+    var cell = puzzle.grid[x][y]
+    return (cell.dot == null && cell.start !== true && cell.end == null)
   })
   for (var cell of cells) puzzle.grid[cell.x][cell.y].dot = dotColor
 }
