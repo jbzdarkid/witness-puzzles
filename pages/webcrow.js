@@ -5,9 +5,6 @@ namespace(function() {
 window.puzzle = null
 window.onload = function() {
   clearPuzzle()
-  document.getElementById('solveMode').style.display = 'none'
-  document.getElementById('solveManual').style.display = 'none'
-  document.getElementById('solveAuto').style.display = 'none'
 }
 
 window.clearPuzzle = function() {
@@ -96,8 +93,11 @@ function onElementClicked(event, x, y) {
   puzzle.clearLines()
 
   if (puzzleHasElements()) {
-    window.solve(puzzle)
-    window.solvePuzzle()
+    document.getElementById('solutionViewer').style.display = null
+
+    var paths = window.solve(puzzle)
+    puzzle.autoSolved = true
+    window.showSolution(window.puzzle, paths, 0)
   } else {
     document.getElementById('solutionViewer').style.display = 'none'
   }

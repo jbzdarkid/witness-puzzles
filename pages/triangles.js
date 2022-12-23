@@ -113,16 +113,16 @@ window.newTriangles = function(maxSolutions) {
   document.getElementById('solutionViewer-right').style.display = 'none'
 
   window.showSolutions = function() {
-    showSolution(triangle6.puzzle, triangle6.paths, 0, 'left')
-    showSolution(triangle8.puzzle, triangle8.paths, 0, 'right')
+    window.showSolution(triangle6.puzzle, triangle6.paths, 0, '-left')
+    window.showSolution(triangle8.puzzle, triangle8.paths, 0, '-right')
   }
   window.TRACE_COMPLETION_FUNC = function(solution) {
     if (solution == triangle6.puzzle) {
       var index = window.getSolutionIndex(triangle6.paths, solution)
-      showSolution(triangle6.puzzle, triangle6.paths, index, 'left')
+      window.showSolution(triangle6.puzzle, triangle6.paths, index, '-left')
     } else {
       var index = window.getSolutionIndex(triangle8.paths, solution)
-      showSolution(triangle8.puzzle, triangle8.paths, index, 'right')
+      window.showSolution(triangle8.puzzle, triangle8.paths, index, '-right')
     }
   }
 

@@ -466,14 +466,15 @@ window.solvePuzzle = function() {
 
     window.puzzle.autoSolved = true
     paths = window.onSolvedPuzzle(paths)
-    showSolution(window.puzzle, paths, 0)
+    window.showSolution(window.puzzle, paths, 0)
   })
 }
 
-function showSolution(puzzle, paths, num) {
-  var previousSolution = document.getElementById('previousSolution')
-  var solutionCount = document.getElementById('solutionCount')
-  var nextSolution = document.getElementById('nextSolution')
+window.showSolution = function(puzzle, paths, num, suffix) {
+  if (suffix == null) suffix = ''
+  var previousSolution = document.getElementById('previousSolution' + suffix)
+  var solutionCount = document.getElementById('solutionCount' + suffix)
+  var nextSolution = document.getElementById('nextSolution' + suffix)
 
   if (paths.length === 0) { // 0 paths, arrows are useless
     solutionCount.innerText = '0 of 0'
@@ -497,16 +498,16 @@ function showSolution(puzzle, paths, num) {
     nextSolution.disabled = false
     previousSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
-        showSolution(puzzle, paths, num - 10)
+        window.showSolution(puzzle, paths, num - 10)
       } else {
-        showSolution(puzzle, paths, num - 1)
+        window.showSolution(puzzle, paths, num - 1)
       }
     }
     nextSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
-        showSolution(puzzle, paths, num + 10)
+        window.showSolution(puzzle, paths, num + 10)
       } else {
-        showSolution(puzzle, paths, num + 1)
+        window.showSolution(puzzle, paths, num + 1)
       }
     }
   }
@@ -535,7 +536,7 @@ function createCheckbox() {
   return checkbox
 }
 
-// Required global variables/functions:
+// Required global variables/functions: <-- HINT: This means you're writing bad code.
 // window.puzzle
 // window.onSolvedPuzzle()
 // window.MAX_SOLUTIONS // defined by solve.js
