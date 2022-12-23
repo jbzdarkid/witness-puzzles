@@ -26,6 +26,8 @@ https://cdn.discordapp.com/attachments/155773038908932097/866773427703644160/unk
   * coverage-ext sam saccone
   * pollyfill.io ?
 
+- editor is a bit buggy with manual/auto solve mode
+
 FEATURES
 - Add send_last_lines from speedrunbot and send that when we 500.
 - Autocommit for the database?

@@ -471,10 +471,15 @@ window.solvePuzzle = function() {
 }
 
 window.showSolution = function(puzzle, paths, num, suffix) {
-  if (suffix == null) suffix = ''
-  var previousSolution = document.getElementById('previousSolution' + suffix)
-  var solutionCount = document.getElementById('solutionCount' + suffix)
-  var nextSolution = document.getElementById('nextSolution' + suffix)
+  if (suffix == null) {
+    var previousSolution = document.getElementById('previousSolution' + suffix)
+    var solutionCount = document.getElementById('solutionCount' + suffix)
+    var nextSolution = document.getElementById('nextSolution' + suffix)
+  } else {
+    var previousSolution = document.getElementById('previousSolution-' + suffix)
+    var solutionCount = document.getElementById('solutionCount-' + suffix)
+    var nextSolution = document.getElementById('nextSolution-' + suffix)
+  }
 
   if (paths.length === 0) { // 0 paths, arrows are useless
     solutionCount.innerText = '0 of 0'
@@ -498,16 +503,16 @@ window.showSolution = function(puzzle, paths, num, suffix) {
     nextSolution.disabled = false
     previousSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
-        window.showSolution(puzzle, paths, num - 10)
+        window.showSolution(puzzle, paths, num - 10, suffix)
       } else {
-        window.showSolution(puzzle, paths, num - 1)
+        window.showSolution(puzzle, paths, num - 1, suffix)
       }
     }
     nextSolution.onpointerdown = function(event) {
       if (event.shiftKey) {
-        window.showSolution(puzzle, paths, num + 10)
+        window.showSolution(puzzle, paths, num + 10, suffix)
       } else {
-        window.showSolution(puzzle, paths, num + 1)
+        window.showSolution(puzzle, paths, num + 1, suffix)
       }
     }
   }
@@ -516,7 +521,7 @@ window.showSolution = function(puzzle, paths, num, suffix) {
     // Save the current path on the puzzle object (so that we can pass it along with publishing)
     puzzle.path = paths[num]
     // Draws the given path, and also updates the puzzle to have path annotations on it.
-    window.drawPath(puzzle, paths[num])
+    window.drawPath(puzzle, paths[num], suffix)
   }
 }
 

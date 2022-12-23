@@ -7,6 +7,9 @@ var possibleTriples = []
 var leftPillarSymmetry = 0
 var rightPillarSymmetry = 0
 
+// TODO: Can I host random doors out of this? Just another scene, right?
+// TODO: Solutions, sigh.
+
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
   seed = parseInt(params.get('seed')) || 0
@@ -29,22 +32,22 @@ window.onload = function() {
     puzzles.appendChild(svg)
 
     var solutionViewer = document.createElement('div')
-    solutionViewer.id = styleName + '-solutionViewer'
+    solutionViewer.id = 'solutionViewer-' + styleName
     solutionViewer.style = 'display: none'
     solutions.appendChild(solutionViewer)
 
     var previousSolution = document.createElement('button')
-    previousSolution.id = styleName + '-previousSolution'
+    previousSolution.id = 'previousSolution-' + styleName
     previousSolution.innerHTML = '&larr;'
     solutionViewer.appendChild(previousSolution)
 
     var solutionCount = document.createElement('label')
-    solutionCount.id = styleName + '-solutionCount'
+    solutionCount.id = 'solutionCount-' + styleName
     solutionCount.style = 'padding: 6px'
     solutionViewer.appendChild(solutionCount)
 
     var nextSolution = document.createElement('button')
-    nextSolution.id = styleName + '-nextSolution'
+    nextSolution.id = 'nextSolution-' + styleName
     nextSolution.innerHTML = '&rarr;'
     solutionViewer.appendChild(nextSolution)
   }
@@ -53,26 +56,37 @@ window.onload = function() {
   generate(location.hash.substring(1))
 }
 
+var sceneToPanels = {
+  'intro': ['easy-maze', 'hard-maze', 'stones'],
+  'scramble-polyominos': ['scramble-polyominos'],
+  'scramble-stars': ['scramble-stars'],
+  'scramble-symmetry': ['scramble-symmetry'],
+  'scramble-maze': ['scramble-maze'],
+  'triple2': ['triple-twocolor-0', 'triple-twocolor-1', 'triple-twocolor-2'],
+  'triple3': ['triple-threecolor-0', 'triple-threecolor-1', 'triple-threecolor-2'],
+  'triangles': ['triangle-left', 'triangle-right'],
+  'pillars': ['pillar-left', 'pillar-right'],
+  'fanfare': [],
+
+  'full': ['easy-maze', 'hard-maze', 'stones', 'scramble-polyominos', 'scramble-stars', 'scramble-symmetry', 'scramble-maze', 'triple-twocolor-0', 'triple-twocolor-1', 'triple-twocolor-2', 'triple-threecolor-0', 'triple-threecolor-1', 'triple-threecolor-2', 'triangle-left', 'triangle-right', 'pillar-left', 'pillar-right'],
+
+  'doors': ['door-left', 'door-right'],
+}
+
 window.generate = function(scene) {
-  var toGenerate = []
-  if (scene == 'intro')                    toGenerate = ['easy-maze', 'hard-maze', 'stones']
-  else if (scene == 'scramble-polyominos') toGenerate = ['scramble-polyominos']
-  else if (scene == 'scramble-stars')      toGenerate = ['scramble-stars']
-  else if (scene == 'scramble-symmetry')   toGenerate = ['scramble-symmetry']
-  else if (scene == 'scramble-maze')       toGenerate = ['scramble-maze']
-  else if (scene == 'triple2')             toGenerate = ['triple-twocolor-0', 'triple-twocolor-1', 'triple-twocolor-2']
-  else if (scene == 'triple3')             toGenerate = ['triple-threecolor-0', 'triple-threecolor-1', 'triple-threecolor-2']
-  else if (scene == 'triangles')           toGenerate = ['triangle-left']
-  else if (scene == 'pillars')             toGenerate = ['triangle-right']
-  else if (scene == 'fanfare')             toGenerate = []
-  else {
+  var toGenerate = sceneToPanels[scene]
+  if (toGenerate == null) {
     scene = 'full'
-    toGenerate = Object.keys(styles)
+    toGenerate = sceneToPanels['full']
   }
 
-  if (scene != 'scramble-maze' && scene != 'fanfare') {
-    document.getElementById('challengeType').value = scene
+  var challengeType = document.getElementById('challengeType')
+  var found = false
+  for (var option in challengeType.getElementsByTagName('option')) {
+    if (option.value == scene) found = true
   }
+
+  if (found) challengeType.value = scene
 
   setRngContext('meta')
   scrambleOrder = shuffle(['scramble-stars', 'scramble-maze', 'scramble-polyominos', 'scramble-symmetry'])
@@ -97,19 +111,39 @@ window.generate = function(scene) {
   })
 }
 
-function show(id, coverOpacity, coverAnimation) {
-  var elem = document.getElementById(id)
-  if (elem == null) throw Error('Could not find element with id ' + id)
-  elem.style.display = null
+window.showSolutions = function() {
+  // var challengeType = document.getElementById('challengeType').value
+  // if (challengeType.value == 'full') return // wtf do we do in full challenge mode? idk.
 
-  var cover = document.getElementById(id + '-cover')
-  if (cover != null) cover.setAttribute('opacity', coverOpacity)
-  if (cover != null && coverAnimation != null) cover.style.animation = coverAnimation
+  for (var styleName in styles) {
+    var panel = document.getElementById(styleName)
+    if (panel.style.display != 'none') {
+      var solutionViewer = document.getElementById('solutionViewer-' + styleName)
+      solutionViewer.style.display = null
+
+      window.showSolution(panel.puzzle, solutionViewer.paths, 0, styleName)
+    }
+  }
+}
+
+function show(id, coverOpacity, coverAnimation) {
+  var panel = document.getElementById(id)
+  if (panel == null) throw Error('Could not find panel "' + id + '"')
+  panel.style.display = null
+
+  var panelCover = document.getElementById(id + '-cover')
+  if (panelCover != null) {
+    panelCover.setAttribute('opacity', coverOpacity)
+    if (coverAnimation != null) panelCover.style.animation = coverAnimation
+  }
 }
 
 function showScene(scene) {
-  // Hide all puzzles
-  for (var style in styles) document.getElementById(style).style.display = 'none'
+  // Hide all puzzles and solutions
+  for (var styleName in styles) {
+    document.getElementById(styleName).style.display = 'none'
+    document.getElementById('solutionViewer-' + styleName).style.display = 'none'
+  }
   location.hash = scene
 
   if (scene == 'full' || scene == 'intro') {
@@ -140,6 +174,9 @@ function showScene(scene) {
     show('pillar-right', 0)
   } else if (scene == 'fanfare') {
     // TODO: Fanfare?
+  } else if (scene == 'doors') {
+    show('door-left', 1, 'slideUp 15s linear 0s 1 forwards')
+    show('door-right', 1, 'slideUp 15s linear 0s 1 forwards')
   }
 }
 
@@ -181,11 +218,11 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
 
     if (nextScene == null) return; // Completing this puzzle did not trigger another scene.
 
-    var type = document.getElementById('challengeType').value
-    if (type == 'full') {
+    var challengeType = document.getElementById('challengeType').value
+    if (challengeType == 'full') {
       showScene(nextScene)
     } else {
-      showSolutions() // TODO: right, this.
+      window.showSolutions()
     }
   }, 1000)
 }
@@ -206,7 +243,6 @@ function generatePuzzlesAsync(styleKeys, i, finalCallback) {
   var styleName = styleKeys[i]
   setRngContext(styleName)
 
-  // TODO: What about a partial callback? Then we can count up to 100 solve attempts?
   percent = Math.floor(100.0 * i / styleKeys.length)
   document.getElementById('progressPercent').innerText = percent + '%'
   document.getElementById('progress').style.width = percent + '%'
@@ -216,19 +252,16 @@ function generatePuzzlesAsync(styleKeys, i, finalCallback) {
     puzzle.name = styleName // So that we know what we solved in the trace completion callback
 
     // Add a cover to panels, so that they can "power on" in sequence.
-    var svg = document.getElementById(styleName)
+    var panel = document.getElementById(styleName)
     var panelCover = window.createElement('rect')
-    panelCover.setAttribute('width', svg.style.width)
-    panelCover.setAttribute('height', svg.style.height)
+    panelCover.setAttribute('width', panel.style.width)
+    panelCover.setAttribute('height', panel.style.height)
     panelCover.setAttribute('opacity', 1)
     panelCover.setAttribute('style', 'pointer-events: none')
     panelCover.setAttribute('id', styleName + '-cover')
-    svg.appendChild(panelCover)
+    panel.appendChild(panelCover)
 
-    svg.style.display = 'none'
-
-    // Save the paths for the solution viewer here, I guess?
-    // TODO: Apparently my best solution here is cutnpaste, which sucks.
+    panel.puzzle = puzzle // Save the puzzle object so we can draw to it when showing solutions
 
     generatePuzzlesAsync(styleKeys, i+1, finalCallback)
   })
@@ -268,6 +301,9 @@ function generateSinglePuzzleAsync(styleName, solveAttempts, callback) {
     if (success) {
       // TODO: Error?! Make info less spammy, then.
       console.error('Successfully generated a random puzzle for ' + styleName)
+
+      var solutionViewer = document.getElementById('solutionViewer-' + styleName)
+      solutionViewer.paths = paths // Save for later when we want to show solutions
 
       callback(puzzle)
     } else {
@@ -377,6 +413,8 @@ var styles = {
       puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
     }
     return puzzle
+  }, 'left-door': function() {
+  }, 'right-door': function() {
   }
 }
 
