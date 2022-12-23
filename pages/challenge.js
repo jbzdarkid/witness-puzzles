@@ -467,7 +467,7 @@ function randInt(n) {
 }
 
 function setRngContext(str) {
-  contextHash = 0
+  contextHash = seed
   for (var i = 0; i < str.length; i++) {
     contextHash = squirrel3(contextHash + str.charCodeAt(i))
   }
