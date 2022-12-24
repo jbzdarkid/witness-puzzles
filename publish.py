@@ -20,12 +20,12 @@ paths = [
   Path('application_database.py'),
   Path('application_login.py'),
   Path('application_utils.py'),
-  Path('code-deploy.sh')
+  Path('code-deploy.sh'),
   Path('data'),
   Path('engine'),
-  Path('LICENSE.md')
+  Path('LICENSE.md'),
   Path('pages'),
-  Path('README.md')
+  Path('README.md'),
   Path('requirements'),
   Path('requirements.txt'),
   Path('robots.txt'),
