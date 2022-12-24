@@ -12,7 +12,9 @@ var solvedPuzzles = []
 // - Add RNG generation
 // - Figure out about 'panel cover' animations
 // X Add scene
-// - Add to dropdown, somehow (Or, just allow #doors?)
+// X Add to dropdown, somehow (Or, just allow #doors?)
+// TODO: Dark theme covers are invisible
+// TODO: Fanfare should use svg text so it can act like a puzzle
 // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
 
 window.onload = function() {
@@ -194,8 +196,8 @@ function showScene(scene) {
   } else if (scene == 'fanfare') {
     show('fanfare', 0, 'none')
   } else if (scene == 'doors') {
-    show('door-left', 1, 'none', 'slideUp 15s linear 0s 1 forwards')
-    show('door-right', 1, 'none', 'slideUp 15s linear 0s 1 forwards')
+    show('door-left', 0, 'none')
+    show('door-right', 0, 'none')
   }
 }
 
@@ -384,26 +386,9 @@ var puzzleGenerators = {
     }
     cutRandomEdges(puzzle, 5)
     return puzzle
-  }, 'scramble-polyominos': function() {
-    var puzzle = new Puzzle(4, 4)
-    puzzle.grid[0][8].start = true
-    puzzle.grid[8][0].end = 'top'
-
-    var colors = shuffle(['#052812', '#FFC17A', '#A4C34F', '#B52EBD', '#99EC35'])
-    while (true) {
-      var cells = randomEmptyCells(puzzle, 2)
-      var manhattanDistance = Math.abs(cells[0].x - cells[1].x) + Math.abs(cells[0].y - cells[1].y)
-      if (manhattanDistance >= 6) break
-    }
-    puzzle.grid[cells[0].x][cells[0].y] = {'type': 'star', 'color': colors[0]}
-    puzzle.grid[cells[1].x][cells[1].y] = {'type': 'star', 'color': colors[0]}
-
-    for (var cell of randomEmptyCells(puzzle, 2)) {
-      puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': colors[1], 'polyshape': randomPolyomino()}
-    }
-    cutRandomEdges(puzzle, 8)
-    return puzzle
-  }, 'scramble-stars': function() {
+  },
+  'scramble-polyominos': polyominosAndStars,
+  'scramble-stars': function() {
     var puzzle = new Puzzle(4, 4)
     puzzle.grid[0][8].start = true
     puzzle.grid[8][0].end = 'top'
@@ -462,8 +447,24 @@ var puzzleGenerators = {
     return puzzle
   }, 'fanfare': function() {
     return null
-  }, 'left-door': function() {
-  }, 'right-door': function() {
+  },
+  'door-left': polyominosAndStars,
+  'door-right': function() {
+    var puzzle = new Puzzle(4, 4)
+    puzzle.grid[0][0].end = 'left'
+    puzzle.grid[8][8].start = true
+
+    // TODO: Probably different colors for right door.
+    var colors = shuffle(['#052812', '#FFC17A', '#A4C34F', '#B52EBD', '#99EC35'])
+    for (var cell of randomEmptyCells(puzzle, 2)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': colors[0]}
+    }
+    for (var cell of randomEmptyCells(puzzle, 2)) {
+      puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': colors[1]}
+    }
+    placeRandomCornerDots(puzzle, 2, window.DOT_BLACK)
+    cutRandomEdges(puzzle, 8)
+    return puzzle
   }
 }
 
@@ -513,6 +514,27 @@ function tripleThreeColor() {
   // Check for invalid triple L shape in both solvable and unsolvable puzzles.
   if (puzzleHasInvalidTriple(puzzle)) return null
 
+  return puzzle
+}
+
+function polyominosAndStars() {
+  var puzzle = new Puzzle(4, 4)
+  puzzle.grid[0][8].start = true
+  puzzle.grid[8][0].end = 'top'
+
+  var colors = shuffle(['#052812', '#FFC17A', '#A4C34F', '#B52EBD', '#99EC35'])
+  while (true) {
+    var cells = randomEmptyCells(puzzle, 2)
+    var manhattanDistance = Math.abs(cells[0].x - cells[1].x) + Math.abs(cells[0].y - cells[1].y)
+    if (manhattanDistance >= 6) break
+  }
+  puzzle.grid[cells[0].x][cells[0].y] = {'type': 'star', 'color': colors[0]}
+  puzzle.grid[cells[1].x][cells[1].y] = {'type': 'star', 'color': colors[0]}
+
+  for (var cell of randomEmptyCells(puzzle, 2)) {
+    puzzle.grid[cell.x][cell.y] = {'type': 'poly', 'color': colors[1], 'polyshape': randomPolyomino()}
+  }
+  cutRandomEdges(puzzle, 8)
   return puzzle
 }
 
