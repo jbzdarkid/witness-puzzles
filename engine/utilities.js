@@ -472,9 +472,9 @@ window.solvePuzzle = function() {
 
 window.showSolution = function(puzzle, paths, num, suffix) {
   if (suffix == null) {
-    var previousSolution = document.getElementById('previousSolution' + suffix)
-    var solutionCount = document.getElementById('solutionCount' + suffix)
-    var nextSolution = document.getElementById('nextSolution' + suffix)
+    var previousSolution = document.getElementById('previousSolution')
+    var solutionCount = document.getElementById('solutionCount')
+    var nextSolution = document.getElementById('nextSolution')
   } else {
     var previousSolution = document.getElementById('previousSolution-' + suffix)
     var solutionCount = document.getElementById('solutionCount-' + suffix)

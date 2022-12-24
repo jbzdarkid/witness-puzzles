@@ -33,8 +33,9 @@
         <option value="triple3">3 Color Triple</option>
         <option value="triangles">Triangles</option>
         <option value="pillars">Pillars</option>
+        <option value="doors" hidden>Random Doors</option>
       </select>
-      <button id="generateNew" onpointerdown="generateNew()" disabled>Generating...</button>
+      <button id="generateNew" onpointerdown="generateNew()">Generate New</button>
       <div style="display: inline-block; vertical-align: top">
         <div id="progressBox" style="display: none; width: 220px; border: 1px solid black; margin-top: 2px">
           <label id="progressPercent" style="float: left; margin-left: 4px;">0%</label>
@@ -42,10 +43,9 @@
         </div>
       </div>
 
-      <button onpointerdown="showSolutions()">Show Solutions</button>
+      <button id="showSolutions" onpointerdown="showSolutions()">Show Solutions</button>
     </div>
 
     <div id="puzzles" style="display: flex; justify-content: space-evenly; align-items: center"></div>
-    <div id="solutions" style="display: flex; justify-content: space-evenly; align-items: center"></div>
   </body>
 </html>

@@ -158,7 +158,7 @@ window.solve = function(p, partialCallback, finalCallback) {
 
   taskLoop(partialCallback, function() {
     var end = (new Date()).getTime()
-    console.info('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+    console.log('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
     if (finalCallback) finalCallback(solutionPaths)
   })
   return solutionPaths
@@ -379,7 +379,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
     var dx = 0
     var dy = 0
     if (path[i] === PATH_NONE) { // Reached an endpoint, move into it
-      console.log('Reached endpoint')
+      console.debug('Reached endpoint')
       if (cell.end === 'left') {
         window.onMove(-24, 0)
       } else if (cell.end === 'right') {
@@ -407,7 +407,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       throw Error('Path element ' + (i-1) + ' was not a valid path direction: ' + path[i])
     }
 
-    console.log('Currently at', x, y, cell, 'moving', dx, dy)
+    console.debug('Currently at', x, y, cell, 'moving', dx, dy)
 
     x += dx
     y += dy
@@ -429,7 +429,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   for (var x=0; x<puzzle.width; x++) {
     rows += ('' + x).padEnd(5, ' ') + '|'
   }
-  console.info(rows)
+  console.log(rows)
   for (var y=0; y<puzzle.height; y++) {
     var output = ('' + y).padEnd(3, ' ') + '|'
     for (var x=0; x<puzzle.width; x++) {
@@ -437,7 +437,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
       var dir = (cell != null && cell.dir != null ? cell.dir : '')
       output += dir.padEnd(5, ' ') + '|'
     }
-    console.info(output)
+    console.log(output)
   }
 }
 

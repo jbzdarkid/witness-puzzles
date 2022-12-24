@@ -6,9 +6,14 @@ var scrambleOrder = []
 var possibleTriples = []
 var leftPillarSymmetry = 0
 var rightPillarSymmetry = 0
+var solvedPuzzles = []
 
 // TODO: Can I host random doors out of this? Just another scene, right?
-// TODO: Solutions, sigh.
+// - Add RNG generation
+// - Figure out about 'panel cover' animations
+// X Add scene
+// - Add to dropdown, somehow
+// TODO: puzzle.settings.MONOCHROME_SYMMETRY?
 
 window.onload = function() {
   var params = new URLSearchParams(window.location.search)
@@ -22,19 +27,20 @@ window.onload = function() {
 
   // Create svgs for all of the puzzles, regardless of style
   var puzzles = document.getElementById('puzzles')
-  var solutions = document.getElementById('solutions')
   for (var styleName in styles) {
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.id = styleName
-    // TODO: Do I need pointer-events? If yes, move into draw() [and scourge]. If no, just scourge.
-    // This might only be needed on editor.js? Not sure...
-    svg.style = 'pointer-events: auto; opacity: none'
-    puzzles.appendChild(svg)
+    var parentDiv = document.createElement('div')
+    parentDiv.id = styleName + '-parent'
+    parentDiv.style.display = 'none'
+    puzzles.appendChild(parentDiv)
+
+    var panel = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    panel.id = styleName
+    parentDiv.appendChild(panel)
 
     var solutionViewer = document.createElement('div')
     solutionViewer.id = 'solutionViewer-' + styleName
-    solutionViewer.style = 'display: none'
-    solutions.appendChild(solutionViewer)
+    solutionViewer.style = 'margin-top: 4px; opacity: 0'
+    parentDiv.appendChild(solutionViewer)
 
     var previousSolution = document.createElement('button')
     previousSolution.id = 'previousSolution-' + styleName
@@ -82,7 +88,7 @@ window.generate = function(scene) {
 
   var challengeType = document.getElementById('challengeType')
   var found = false
-  for (var option in challengeType.getElementsByTagName('option')) {
+  for (var option of challengeType.getElementsByTagName('option')) {
     if (option.value == scene) found = true
   }
 
@@ -93,103 +99,117 @@ window.generate = function(scene) {
   possibleTriples = ['triple-twocolor-' + randInt(3), 'triple-threecolor-' + randInt(3)]
   leftPillarSymmetry = randInt(4)
   rightPillarSymmetry = randInt(4)
+  solvedPuzzles = []
 
   console.info('Generating...')
-  setLogLevel('error') // window.solve and window.draw produce an unfortunate amount of spam. This is, obviously, my fault.
   document.getElementById('progressBox').style.display = null
+
+  var generateNew = document.getElementById('generateNew')
+  var showSolutions = document.getElementById('showSolutions')
+
+  generateNew.disabled = true
+  generateNew.innerText = 'Generating:'
+  challengeType.disabled = true // Changing type while solving is very damaging
+  showSolutions.disabled = true // Meaningless until regenerated
 
   generatePuzzlesAsync(toGenerate, 0, function() {
     setLogLevel('info')
     document.getElementById('progressBox').style.display = 'none'
     console.info('All done!')
 
-    var generateNew = document.getElementById('generateNew')
     generateNew.disabled = false
     generateNew.innerText = 'Generate New'
+    challengeType.disabled = false
+    showSolutions.disabled = false
 
     showScene(scene) // From outer scope
   })
 }
 
 window.showSolutions = function() {
-  // var challengeType = document.getElementById('challengeType').value
-  // if (challengeType.value == 'full') return // wtf do we do in full challenge mode? idk.
-
   for (var styleName in styles) {
-    var panel = document.getElementById(styleName)
-    if (panel.style.display != 'none') {
+    var parentDiv = document.getElementById(styleName + '-parent')
+    if (parentDiv.style.display != 'none') { // If the panel is in this scene
+      var panel = document.getElementById(styleName)
+      var panelCover = document.getElementById(styleName + '-cover')
       var solutionViewer = document.getElementById('solutionViewer-' + styleName)
-      solutionViewer.style.display = null
 
-      window.showSolution(panel.puzzle, solutionViewer.paths, 0, styleName)
+      panelCover.style.opacity = 0
+      panelCover.style.pointerEvents = 'none'
+
+      if (solutionViewer.style.opacity == '0') { // If the solution viewer is hidden
+        solutionViewer.style.opacity = null
+        window.showSolution(panel.puzzle, solutionViewer.paths, 0, styleName)
+      }
     }
   }
 }
 
-function show(id, coverOpacity, coverAnimation) {
-  var panel = document.getElementById(id)
-  if (panel == null) throw Error('Could not find panel "' + id + '"')
-  panel.style.display = null
+function show(id, coverOpacity, pointerEvents, coverAnimation) {
+  var parentDiv = document.getElementById(id + '-parent')
+  parentDiv.style.display = null
 
   var panelCover = document.getElementById(id + '-cover')
-  if (panelCover != null) {
-    panelCover.setAttribute('opacity', coverOpacity)
-    if (coverAnimation != null) panelCover.style.animation = coverAnimation
-  }
+  panelCover.setAttribute('opacity', coverOpacity)
+  panelCover.setAttribute('style', 'pointer-events: ' + pointerEvents)
+  if (coverAnimation != null) panelCover.style.animation = coverAnimation
 }
 
 function showScene(scene) {
   // Hide all puzzles and solutions
   for (var styleName in styles) {
-    document.getElementById(styleName).style.display = 'none'
-    document.getElementById('solutionViewer-' + styleName).style.display = 'none'
+    document.getElementById(styleName + '-parent').style.display = 'none'
+    document.getElementById('solutionViewer-' + styleName).style.opacity = '0'
   }
   location.hash = scene
 
   if (scene == 'full' || scene == 'intro') {
-    show('easy-maze', 0)
-    show('hard-maze', 1)
-    show('stones', 1)
+    show('easy-maze', 0, 'none')
+    show('hard-maze', 1, 'all')
+    show('stones', 1, 'all')
   } else if (scene == 'scramble-polyominos') {
-    show('scramble-polyominos', 0)
+    show('scramble-polyominos', 0, 'none')
   } else if (scene == 'scramble-stars') {
-    show('scramble-stars', 0)
+    show('scramble-stars', 0, 'none')
   } else if (scene == 'scramble-symmetry') {
-    show('scramble-symmetry', 0)
+    show('scramble-symmetry', 0, 'none')
   } else if (scene == 'scramble-maze') {
-    show('scramble-maze', 0)
+    show('scramble-maze', 0, 'none')
   } else if (scene == 'triple2') {
-    show('triple-twocolor-1', 1, 'turnOn 1.5s linear 0s 1 forwards')
-    show('triple-twocolor-0', 1, 'turnOn 1.5s linear 2s 1 forwards')
-    show('triple-twocolor-2', 1, 'turnOn 1.5s linear 4s 1 forwards')
+    show('triple-twocolor-1', 1, 'none', 'turnOn 1.5s linear 0s 1 forwards')
+    show('triple-twocolor-0', 1, 'none', 'turnOn 1.5s linear 2s 1 forwards')
+    show('triple-twocolor-2', 1, 'none', 'turnOn 1.5s linear 4s 1 forwards')
   } else if (scene == 'triple3') {
-    show('triple-threecolor-1', 1, 'turnOn 1.5s linear 0s 1 forwards')
-    show('triple-threecolor-2', 1, 'turnOn 1.5s linear 2s 1 forwards')
-    show('triple-threecolor-0', 1, 'turnOn 1.5s linear 4s 1 forwards')
+    show('triple-threecolor-1', 1, 'none', 'turnOn 1.5s linear 0s 1 forwards')
+    show('triple-threecolor-2', 1, 'none', 'turnOn 1.5s linear 2s 1 forwards')
+    show('triple-threecolor-0', 1, 'none', 'turnOn 1.5s linear 4s 1 forwards')
   } else if (scene == 'triangles') {
-    show('triangle-left', 0)
-    show('triangle-right', 0)
+    show('triangle-left', 0, 'none')
+    show('triangle-right', 0, 'none')
   } else if (scene == 'pillars') {
-    show('pillar-left', 0)
-    show('pillar-right', 0)
+    show('pillar-left', 0, 'none')
+    show('pillar-right', 0, 'none')
   } else if (scene == 'fanfare') {
-    // TODO: Fanfare?
+    var fanfare = document.getElementById('fanfare-parent')
+    fanfare.style.display = null
+    fanfare.innerText = 'You win!'
+    fanfare.style.fontSize = '15em'
   } else if (scene == 'doors') {
-    show('door-left', 1, 'slideUp 15s linear 0s 1 forwards')
-    show('door-right', 1, 'slideUp 15s linear 0s 1 forwards')
+    show('door-left', 1, 'none', 'slideUp 15s linear 0s 1 forwards')
+    show('door-right', 1, 'none', 'slideUp 15s linear 0s 1 forwards')
   }
 }
 
-window.TRACE_COMPLETION_FUNC = function(puzzle) {
-  window.setTimeout(function() {
-    if (puzzle.name == 'easy-maze') {
-      show('hard-maze', 0, 'turnOn 1.5s linear 0s 1 forwards')
-      return
-    } else if (puzzle.name == 'hard-maze') {
-      show('stones', 0, 'turnOn 1.5s linear 0s 1 forwards')
-      return
-    }
+window.TRACE_COMPLETION_FUNC = function(puzzle, rawPath) {
+  // These 3 mazes always progress like this, regardless of scene
+  if (puzzle.name == 'easy-maze') {
+    show('hard-maze', 0, 'none', 'turnOn 2s linear 0s 1 forwards')
+  } else if (puzzle.name == 'hard-maze') {
+    show('stones', 0, 'none', 'turnOn 2s linear 0s 1 forwards')
+  }
 
+  var challengeType = document.getElementById('challengeType').value
+  if (challengeType == 'full') {
     var sceneMap = {}
     sceneMap['stones'] = scrambleOrder[0]
     sceneMap[scrambleOrder[0]] = scrambleOrder[1]
@@ -205,26 +225,54 @@ window.TRACE_COMPLETION_FUNC = function(puzzle) {
 
     var nextScene = sceneMap[puzzle.name]
 
-    // Handle two scenes which have no ordering
+    // Handle two scenes which have no explicit ordering
+    solvedPuzzles.push(puzzle.name)
     if (puzzle.name == 'triangle-left' || puzzle.name == 'triangle-right') {
-      var left = document.getElementById('triangle-left')
-      var right = document.getElementById('triangle-right')
-      // if both are solved, nextScene = 'pillars'
+      if (solvedPuzzles.includes('triangle-left') && solvedPuzzles.includes('triangle-right')) {
+        nextScene = 'pillars'
+      }
     } else if (puzzle.name == 'pillar-left' || puzzle.name == 'pillar-right') {
-      var left = document.getElementById('pillar-left')
-      var right = document.getElementById('pillar-right')
-      // if both are solved, nextScene = 'fanfare'
+      if (solvedPuzzles.includes('pillar-left') && solvedPuzzles.includes('pillar-right')) {
+        nextScene = 'fanfare'
+      }
     }
 
-    if (nextScene == null) return; // Completing this puzzle did not trigger another scene.
-
-    var challengeType = document.getElementById('challengeType').value
-    if (challengeType == 'full') {
-      showScene(nextScene)
-    } else {
-      window.showSolutions()
+    if (nextScene != null) {
+      window.setTimeout(function() {
+        showScene(nextScene)
+      }, 2000)
     }
-  }, 1000)
+
+    return // Do not show solutions in 'full challenge' mode.
+  }
+
+  // Show solution for the solved puzzle
+  var solutionViewer = document.getElementById('solutionViewer-' + puzzle.name)
+  solutionViewer.style.opacity = null
+
+  var matchingPath = 0
+  for (var i=0; i<solutionViewer.paths.length; i++) {
+    var path = solutionViewer.paths[i]
+    if (path[0][0] != rawPath[0][0] || path[0][1] != rawPath[0][1]) continue // Different start point
+    if (path.length != rawPath.length) continue
+
+    var match = true
+    for (var j=1; j<rawPath.length; j++) {
+      if (path[j] != rawPath[j]) match = false
+    }
+
+    if (match) {
+      matchingPath = i
+      break
+    }
+  }
+
+  window.showSolution(puzzle, solutionViewer.paths, matchingPath, puzzle.name)
+
+  if (puzzle.name.includes('triple')) {
+    // Show the "solutions" for the other two triples, too.
+    window.showSolutions()
+  }
 }
 
 window.generateNew = function() {
@@ -247,21 +295,25 @@ function generatePuzzlesAsync(styleKeys, i, finalCallback) {
   document.getElementById('progressPercent').innerText = percent + '%'
   document.getElementById('progress').style.width = percent + '%'
 
-  generateSinglePuzzleAsync(styleName, 100, function(puzzle) {
+  generateSinglePuzzleAsync(styleName, 1000, function(puzzle, paths) {
     window.draw(puzzle, styleName)
     puzzle.name = styleName // So that we know what we solved in the trace completion callback
 
-    // Add a cover to panels, so that they can "power on" in sequence.
     var panel = document.getElementById(styleName)
+    panel.puzzle = puzzle // Save the puzzle object so we can draw to it when showing solutions
+
+    // Add a cover to panels, so that they can "power on" in sequence.
+    var parentDiv = document.getElementById(styleName + '-parent')
     var panelCover = window.createElement('rect')
     panelCover.setAttribute('width', panel.style.width)
     panelCover.setAttribute('height', panel.style.height)
     panelCover.setAttribute('opacity', 1)
-    panelCover.setAttribute('style', 'pointer-events: none')
+    panelCover.setAttribute('style', 'pointer-events: all')
     panelCover.setAttribute('id', styleName + '-cover')
     panel.appendChild(panelCover)
 
-    panel.puzzle = puzzle // Save the puzzle object so we can draw to it when showing solutions
+    var solutionViewer = document.getElementById('solutionViewer-' + styleName)
+    solutionViewer.paths = paths // Save for later when we want to show solutions
 
     generatePuzzlesAsync(styleKeys, i+1, finalCallback)
   })
@@ -275,7 +327,7 @@ function generateSinglePuzzleAsync(styleName, solveAttempts, callback) {
     var puzzle = new Puzzle(1, 0)
     puzzle.grid[0][0].start = true
     puzzle.grid[2][0].end = 'right'
-    callback(puzzle)
+    callback(puzzle, [])
     return
   }
 
@@ -291,6 +343,8 @@ function generateSinglePuzzleAsync(styleName, solveAttempts, callback) {
     } else if (unique) {
       if (puzzle.symmetry == null || styleName == 'scramble-symmetry') {
         success = (paths.length == 1)
+      } else if (styleName == 'hard-maze' || styleName == 'scramble-maze') {
+        success = (paths.length <= 50)
       } else {
         success = (paths.length == 2)
       }
@@ -299,13 +353,9 @@ function generateSinglePuzzleAsync(styleName, solveAttempts, callback) {
     }
 
     if (success) {
-      // TODO: Error?! Make info less spammy, then.
-      console.error('Successfully generated a random puzzle for ' + styleName)
+      console.info('Successfully generated a random puzzle for ' + styleName)
 
-      var solutionViewer = document.getElementById('solutionViewer-' + styleName)
-      solutionViewer.paths = paths // Save for later when we want to show solutions
-
-      callback(puzzle)
+      callback(puzzle, paths)
     } else {
       generateSinglePuzzleAsync(styleName, solveAttempts - 1, callback)
     }
@@ -390,7 +440,6 @@ var styles = {
   'triangle-right': function() {return triangles(8)},
   'pillar-left': function() {
     var puzzle = new Puzzle(6, 6, true)
-    // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
     applyRandomPillarSymmetry(puzzle, leftPillarSymmetry)
 
     for (var i=0; i<8; i++) {
@@ -403,7 +452,6 @@ var styles = {
     return puzzle
   }, 'pillar-right': function() {
     var puzzle = new Puzzle(6, 6, true)
-    // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
     applyRandomPillarSymmetry(puzzle, rightPillarSymmetry)
 
     for (var cell of randomEmptyCells(puzzle, 3)) {
@@ -413,6 +461,8 @@ var styles = {
       puzzle.grid[cell.x][cell.y] = {'type': 'square', 'color': 'black'}
     }
     return puzzle
+  }, 'fanfare': function() {
+    return null
   }, 'left-door': function() {
   }, 'right-door': function() {
   }
@@ -643,7 +693,9 @@ function applyRandomPillarSymmetry(puzzle, rng) {
 
 function puzzleHasInvalidTriple(puzzle) {
   var colorFlags = []
-  for (var x=1; x<puzzle.width+1; x+=2) colorFlags[x] = []
+  for (var x=-1; x<puzzle.width+1; x+=2) colorFlags[x] = []
+
+  // Extend each color out in a + (so that we only have to map once)
   for (var x=1; x<puzzle.width-1; x+=2) {
     for (var y=1; y<puzzle.height-1; y+=2) {
       var cell = puzzle.grid[x][y]
@@ -654,10 +706,18 @@ function puzzleHasInvalidTriple(puzzle) {
       else if (cell.color == 'green')  flag = 4
       else continue
 
-      if ((colorFlags[x][y] | flag) === 7) return true
+      colorFlags[x-2][y] |= flag
+      colorFlags[x][y-2] |= flag
+      colorFlags[x][y] |= flag
       colorFlags[x][y+2] |= flag
       colorFlags[x+2][y] |= flag
-      colorFlags[x+2][y+2] |= flag
+    }
+  }
+
+  // Then check to see if any cell has all 3 colors in its adjacency
+  for (var x=1; x<puzzle.width-1; x+=2) {
+    for (var y=1; y<puzzle.height-1; y+=2) {
+      if (colorFlags[x][y] === 7) return true
     }
   }
   return false
