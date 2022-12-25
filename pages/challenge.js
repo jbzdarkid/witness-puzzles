@@ -9,12 +9,17 @@ var rightPillarSymmetry = 0
 var solvedPuzzles = []
 
 // TODO: Can I host random doors out of this? Just another scene, right?
-// - Add RNG generation
-// - Figure out about 'panel cover' animations
+// X Add RNG generation
 // X Add scene
 // X Add to dropdown, somehow (Or, just allow #doors?)
-// TODO: Dark theme covers are invisible
+// - Figure out about 'panel cover' animations
 // TODO: Fanfare should use svg text so it can act like a puzzle
+// TODO: Mobile layout -- flexbox should work here, just set a flex-basis or whaever
+// TODO: Game-accurate RNG? It's not too hard.
+// - Actual RNG generator (instead of hash function -- should still use rngContext via hash function, but increment using pure RNG)
+// - Fix the Poly puzzle to match game logic
+// - Confirm the right door code
+// - Possibly change the RNG context for pillar symmetry and scramble.
 // TODO: puzzle.settings.MONOCHROME_SYMMETRY?
 
 window.onload = function() {
@@ -239,6 +244,7 @@ window.TRACE_COMPLETION_FUNC = function(puzzle, rawPath) {
     }
 
     if (nextScene != null) {
+      // Let users look at their solutions for a bit before whisking them away
       window.setTimeout(function() {
         showScene(nextScene)
       }, 2000)
@@ -309,6 +315,7 @@ function generatePuzzlesAsync(puzzlesToGenerate, i, finalCallback) {
     panelCover.setAttribute('width', panel.style.width)
     panelCover.setAttribute('height', panel.style.height)
     panelCover.setAttribute('opacity', 1)
+    panelCover.setAttribute('fill', window.BORDER)
     panelCover.setAttribute('style', 'pointer-events: all')
     panelCover.setAttribute('id', puzzleName + '-cover')
     panel.appendChild(panelCover)
@@ -332,7 +339,7 @@ function generateSinglePuzzleAsync(puzzleName, solveAttempts, callback) {
     return
   }
 
-  // Generate a random puzzle. Null means 'trivially invalid'
+  // Generate a random puzzle. The generator returns null when the puzzle is 'trivially invalid' (currently only for L shapes)
   var puzzle = null
   while (puzzle == null) puzzle = puzzleGenerators[puzzleName]()
 
