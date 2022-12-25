@@ -650,6 +650,7 @@ function push(dx, dy, dir, targetDir) {
   } else if (targetDir === 'right' || targetDir === 'bottom') {
     movementRatio = 3
   }
+  if (window.settings.disablePushing === true) movementRatio *= 1000
 
   if (dir === 'left') {
     var overshoot = data.bbox.x1 - (data.x + dx) + 12
