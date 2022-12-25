@@ -13,7 +13,6 @@ var solvedPuzzles = []
 // X Add scene
 // X Add to dropdown, somehow (Or, just allow #doors?)
 // - Figure out about 'panel cover' animations
-// TODO: Fanfare should use svg text so it can act like a puzzle
 // TODO: Mobile layout -- flexbox should work here, just set a flex-basis or whaever
 // TODO: Game-accurate RNG? It's not too hard.
 // - Actual RNG generator (instead of hash function -- should still use rngContext via hash function, but increment using pure RNG)
@@ -199,10 +198,38 @@ function showScene(scene) {
     show('pillar-left', 0, 'none')
     show('pillar-right', 0, 'none')
   } else if (scene == 'fanfare') {
-    show('fanfare', 0, 'none')
+    var parentDiv = document.getElementById('fanfare-parent')
+    parentDiv.style.width = '100%'
+    parentDiv.style.height = '100%'
+    parentDiv.style.display = null
+
+    var panel = document.getElementById('fanfare')
+    panel.setAttribute('viewBox', '0 0 100 100')
+    panel.setAttribute('width', '100%')
+    panel.setAttribute('height', '100%')
+
+    var text = createElement('text')
+    text.setAttribute('x', 15)
+    text.setAttribute('y', 25)
+    text.setAttribute('style', 'font-family: Constantia-Bold; font-variant: small-caps')
+    text.setAttribute('fill', window.TEXT_COLOR)
+    text.innerHTML = 'You win!'
+    panel.appendChild(text)
+
+    var panelCover = window.createElement('rect')
+    panelCover.setAttribute('id', puzzleName + '-cover')
+    panel.appendChild(panelCover)
   } else if (scene == 'doors') {
     show('door-left', 0, 'none')
     show('door-right', 0, 'none')
+    
+    // 00.000 -- start slideup anim (panel is powering on, immediately interactable)
+    // 01.000 -- panel completely powered on
+    // 04.500 -- end slideup anim
+    // 17.000 -- start slidedown anim (panel is powering off, immediately non-interactable)
+    // 18.000 -- panel completely powered off
+    // 21.500 -- end slidedown anim
+    // 23.000 -- start slideup anim
   }
 }
 
@@ -310,7 +337,6 @@ function generatePuzzlesAsync(puzzlesToGenerate, i, finalCallback) {
     panel.puzzle = puzzle // Save the puzzle object so we can draw to it when showing solutions
 
     // Add a cover to panels, so that they can "power on" in sequence.
-    var parentDiv = document.getElementById(puzzleName + '-parent')
     var panelCover = window.createElement('rect')
     panelCover.setAttribute('width', panel.style.width)
     panelCover.setAttribute('height', panel.style.height)

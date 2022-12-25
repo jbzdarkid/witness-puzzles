@@ -29,6 +29,7 @@ paths = [
   Path('requirements'),
   Path('requirements.txt'),
   Path('robots.txt'),
+  Path('witness-puzzles.conf'),
 ]
 
 all_paths = []
