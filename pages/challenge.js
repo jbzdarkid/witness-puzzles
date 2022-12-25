@@ -161,7 +161,7 @@ function show(id, coverOpacity, pointerEvents, coverAnimation) {
   var panelCover = document.getElementById(id + '-cover')
   panelCover.setAttribute('opacity', coverOpacity)
   panelCover.setAttribute('style', 'pointer-events: ' + pointerEvents)
-  if (coverAnimation != null) panelCover.style.animation = coverAnimation
+  panelCover.style.animation = coverAnimation
 }
 
 function showScene(scene) {
@@ -184,13 +184,13 @@ function showScene(scene) {
   } else if (scene == 'scramble-maze') {
     show('scramble-maze', 0, 'none')
   } else if (scene == 'triple2') {
-    show('triple-twocolor-1', 1, 'none', 'turnOn 1.5s linear 0s 1 forwards')
-    show('triple-twocolor-0', 1, 'none', 'turnOn 1.5s linear 2s 1 forwards')
-    show('triple-twocolor-2', 1, 'none', 'turnOn 1.5s linear 4s 1 forwards')
+    show('triple-twocolor-1', 1, 'none', 'turnOn 1s linear 0s 1 forwards')
+    show('triple-twocolor-0', 1, 'none', 'turnOn 1s linear 1s 1 forwards')
+    show('triple-twocolor-2', 1, 'none', 'turnOn 1s linear 2s 1 forwards')
   } else if (scene == 'triple3') {
-    show('triple-threecolor-1', 1, 'none', 'turnOn 1.5s linear 0s 1 forwards')
-    show('triple-threecolor-2', 1, 'none', 'turnOn 1.5s linear 2s 1 forwards')
-    show('triple-threecolor-0', 1, 'none', 'turnOn 1.5s linear 4s 1 forwards')
+    show('triple-threecolor-1', 1, 'none', 'turnOn 1s linear 0s 1 forwards')
+    show('triple-threecolor-2', 1, 'none', 'turnOn 1s linear 1s 1 forwards')
+    show('triple-threecolor-0', 1, 'none', 'turnOn 1s linear 2s 1 forwards')
   } else if (scene == 'triangles') {
     show('triangle-left', 0, 'none')
     show('triangle-right', 0, 'none')
@@ -220,9 +220,6 @@ function showScene(scene) {
     panelCover.setAttribute('id', puzzleName + '-cover')
     panel.appendChild(panelCover)
   } else if (scene == 'doors') {
-    show('door-left', 0, 'none')
-    show('door-right', 0, 'none')
-    
     // 00.000 -- start slideup anim (panel is powering on, immediately interactable)
     // 01.000 -- panel completely powered on
     // 04.500 -- end slideup anim
@@ -230,15 +227,55 @@ function showScene(scene) {
     // 18.000 -- panel completely powered off
     // 21.500 -- end slidedown anim
     // 23.000 -- start slideup anim
+
+    var leftSlider = document.getElementById('door-left-cover2')
+    var rightSlider = document.getElementById('door-right-cover2')
+
+    show('door-left', 1, 'none', 'turnOn 1s linear 0s 1 forwards')
+    show('door-right', 1, 'none', 'turnOn 1s linear 0s 1 forwards')
+    leftSlider.style.animation = 'slideUp 4.5s linear 0s 1 forwards'
+    rightSlider.style.animation = 'slideUp 4.5s linear 0s 1 forwards'
+
+    // We need to clear the animations to play new ones, for some reason
+    setTimeout(function() {
+      show('door-left', 0, 'none', null)
+      show('door-right', 0, 'none', null)
+      leftSlider.style.height = '0%'
+      leftSlider.style.animation = null
+      rightSlider.style.height = '0%'
+      rightSlider.style.animation = null
+    }, 5000)
+
+    setTimeout(function() {
+      console.info('Stand clear of the closing doors, please')
+      show('door-left', 0, 'all', 'turnOn 1s linear reverse 0s 1 forwards')
+      show('door-right', 0, 'all', 'turnOn 1s linear reverse 0s 1 forwards')
+      leftSlider.style.animation = 'slideUp 4.5s linear reverse 0s 1 forwards'
+      rightSlider.style.animation = 'slideUp 4.5s linear reverse 0s 1 forwards'
+
+      // We need to clear the animations to play new ones, for some reason
+      setTimeout(function() {
+        show('door-left', 1, 'all', null)
+        show('door-right', 1, 'all', null)
+        leftSlider.style.height = '100%'
+        leftSlider.style.animation = null
+        rightSlider.style.height = '100%'
+        rightSlider.style.animation = null
+      }, 5000)
+
+      setTimeout(function() {
+        showScene('doors')
+      }, 6000)
+    }, 17000)
   }
 }
 
 window.TRACE_COMPLETION_FUNC = function(puzzle, rawPath) {
   // These 3 mazes always progress like this, regardless of scene
   if (puzzle.name == 'easy-maze') {
-    show('hard-maze', 0, 'none', 'turnOn 2s linear 0s 1 forwards')
+    show('hard-maze', 0, 'none', 'turnOn 1s linear 0s 1 forwards')
   } else if (puzzle.name == 'hard-maze') {
-    show('stones', 0, 'none', 'turnOn 2s linear 0s 1 forwards')
+    show('stones', 0, 'none', 'turnOn 1s linear 0s 1 forwards')
   }
 
   var challengeType = document.getElementById('challengeType').value
@@ -345,6 +382,18 @@ function generatePuzzlesAsync(puzzlesToGenerate, i, finalCallback) {
     panelCover.setAttribute('style', 'pointer-events: all')
     panelCover.setAttribute('id', puzzleName + '-cover')
     panel.appendChild(panelCover)
+
+    // Doors need a second cover to simulate "sliding open"
+    if (puzzleName.includes('door')) {
+      var panelCover2 = window.createElement('rect')
+      panelCover2.setAttribute('width', panel.style.width)
+      panelCover2.setAttribute('height', '100%')
+      panelCover2.setAttribute('opacity', 1)
+      panelCover2.setAttribute('fill', window.BACKGROUND)
+      panelCover2.setAttribute('style', 'pointer-events: all')
+      panelCover2.setAttribute('id', puzzleName + '-cover2')
+      panel.appendChild(panelCover2)
+    }
 
     var solutionViewer = document.getElementById('solutionViewer-' + puzzleName)
     solutionViewer.paths = paths // Save for later when we want to show solutions
@@ -484,7 +533,7 @@ var puzzleGenerators = {
   'door-left': polyominosAndStars,
   'door-right': function() {
     var puzzle = new Puzzle(4, 4)
-    puzzle.grid[0][0].end = 'left'
+    puzzle.grid[0][0].end = 'top'
     puzzle.grid[8][8].start = true
 
     // TODO: Probably different colors for right door.
