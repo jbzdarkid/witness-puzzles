@@ -222,6 +222,14 @@ function showScene(scene) {
   } else if (scene == 'doors') {
     show('door-left', 0, 'none')
     show('door-right', 0, 'none')
+    
+    // 00.000 -- start slideup anim (panel is powering on, immediately interactable)
+    // 01.000 -- panel completely powered on
+    // 04.500 -- end slideup anim
+    // 17.000 -- start slidedown anim (panel is powering off, immediately non-interactable)
+    // 18.000 -- panel completely powered off
+    // 21.500 -- end slidedown anim
+    // 23.000 -- start slideup anim
   }
 }
 
