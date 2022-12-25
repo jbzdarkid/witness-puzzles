@@ -6,6 +6,8 @@ cd /var/www/apache-flask/
 git clone https://github.com/jbzdarkid/witness-puzzles
 cd witness-puzzles
 
+# Alternately, scp -i privatekey.pem 5.29.zip user@witnesspuzzles.com:/var/www/apache-flask/witness-puzzles/
+
 # Install all the dependencies
 sudo apt-get update
 sudo apt-get install -y \
@@ -30,6 +32,8 @@ sudo apt-get autoremove
 google-chrome-stable -version # Hopefully outputs 92.0.whatever you installed above
 
 sudo python3 -m pip install -r requirements/prod.txt
+
+# Here is where you should set up environment secrets.
 
 # Copy apache configuration, set up apache modules
 sudo cp -f witness-puzzles.conf /etc/apache2/sites-available/
