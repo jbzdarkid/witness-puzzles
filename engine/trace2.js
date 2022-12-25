@@ -485,6 +485,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
 
   clearAnimations()
 
+  // Add initial line segments + secondary symmetry cursor, if needed
   if (puzzle.symmetry == null) {
     data.puzzle.updateCell2(data.pos.x, data.pos.y, 'type', 'line')
     data.puzzle.updateCell2(data.pos.x, data.pos.y, 'line', window.LINE_BLACK)
@@ -509,6 +510,24 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
     data.symcursor.setAttribute('cx', symStart.getAttribute('cx'))
     data.symcursor.setAttribute('cy', symStart.getAttribute('cy'))
     data.symcursor.setAttribute('r', 12)
+  }
+
+  // Fixup: Mark out of bounds cells as null, setting inbounds cells as {}
+  // This allows tracing to correctly identify inbounds cells (and thus interior walls) and correctly handle exterior walls for oddly shaped puzzles.
+  {
+    var savedGrid = data.puzzle.switchToMaskedGrid()
+    var maskedGrid = data.puzzle.grid
+    data.puzzle.grid = savedGrid
+
+    for (var x=1; x<data.puzzle.width; x+=2) {
+      for (var y=1; y<data.puzzle.height; y+=2) {
+        if (maskedGrid[x][y] == null) { // null == MASKED_OOB
+          data.puzzle.grid[x][y] = null
+        } else if (data.puzzle.grid[x][y] == null) {
+          data.puzzle.grid[x][y] = {}
+        }
+      }
+    }
   }
   data.path.push(new PathSegment(MOVE_NONE)) // Must be created after initializing data.symbbox
 }
