@@ -51,7 +51,7 @@ window.Puzzle = class {
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
-    // Cells default to null
+    // Cells default to null (Note: This will be changed in trace, see Fixup in onTraceStart)
     // Lines default to {'type':'line', 'line':0}
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
@@ -70,7 +70,7 @@ window.Puzzle = class {
             // Fixup: Sometimes we have a polyshape which is empty. Just ignore these objects.
             if (puzzle.grid[x][y].polyshape & ~window.ROTATION_BIT === 0) puzzle.grid[x][y] = null
           } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != null) {
-            // Legacy: Lines used to use 'line' instead of 'color'
+            // Legacy: Lines used to use 'color' instead of 'line', but that was redundant with actual colors
             cell.line = cell.color
             delete cell.color
           } else if (cell.gap === true) {
