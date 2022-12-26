@@ -8,11 +8,9 @@ var leftPillarSymmetry = 0
 var rightPillarSymmetry = 0
 var solvedPuzzles = []
 
-// TODO: Can I host random doors out of this? Just another scene, right?
-// X Add RNG generation
-// X Add scene
-// X Add to dropdown, somehow (Or, just allow #doors?)
-// - Figure out about 'panel cover' animations
+// TODO: Doors is hiding solution viewer by calling showScene. Sigh.
+// TODO: Doors needs to force solve exit when the panel closes.
+// TODO: Doors needs to put the cover *over* the panel. Somehow.
 // TODO: Mobile layout -- flexbox should work here, just set a flex-basis or whaever
 // TODO: Game-accurate RNG? It's not too hard.
 // - Actual RNG generator (instead of hash function -- should still use rngContext via hash function, but increment using pure RNG)
