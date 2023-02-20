@@ -73,6 +73,7 @@ def validate_and_capture_image(solution_json):
 
   try:
     if not driver:
+      os.command('killall chrome') # I'm seeing chrome executables floating around, so try murder?
       options = webdriver.ChromeOptions()
       options.add_argument('headless')
       os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
