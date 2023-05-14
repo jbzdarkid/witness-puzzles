@@ -21,8 +21,8 @@ sudo apt-get install -y \
   xdg-utils
 
 # Version list at https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
-sudo python3 -m pip install chromedriver-py==92.*
-CHROME_VERSION=92.0.4515.159-1
+sudo python3 -m pip install chromedriver-py==110.*
+CHROME_VERSION=110.0.5481.177-1
 wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb
 sudo dpkg -i /tmp/chrome.deb
 # May need apt --fix-broken install

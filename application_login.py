@@ -1,4 +1,3 @@
-import os
 from flask import render_template, request
 from flask_login import current_user, login_user, logout_user, UserMixin, LoginManager
 from flask_wtf import CSRFProtect

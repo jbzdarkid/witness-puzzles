@@ -126,7 +126,7 @@ class Telemetry(db.Model):
   client_version = db.Column(db.Text, nullable=False)
   page = db.Column(db.Text, nullable=True)
   puzzle = db.Column(db.Text, nullable=True)
-  
+ 
   data = db.Column(db.Text, nullable=True)
   start_time = db.Column(db.DateTime, nullable=True)
   solve_time = db.Column(db.DateTime, nullable=True)

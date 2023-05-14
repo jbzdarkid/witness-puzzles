@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, send_from_directory
+from flask import Flask, redirect, send_from_directory
 import os
 import json
 import threading
@@ -67,13 +67,13 @@ def validate_and_capture_image(solution_json):
     # If we timeout while trying to lock, something has gone terribly wrong.
     # In this case, we should remake the driver object (which is probably dead) and the lock.
     driver = None
-    l = threading.Lock()
+    lock = threading.Lock()
     # There's no reason (at this point) to capture the actual image, because the caller is long gone.
     return
 
   try:
     if not driver:
-      os.command('killall chrome') # I'm seeing chrome executables floating around, so try murder?
+      os.system('killall chrome') # I'm seeing chrome executables floating around, so try murder?
       options = webdriver.ChromeOptions()
       options.add_argument('headless')
       os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
