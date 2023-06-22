@@ -73,12 +73,14 @@ def validate_and_capture_image(solution_json):
 
   try:
     if not driver:
-      os.system('killall chrome') # I'm seeing chrome executables floating around, so try murder?
-      options = webdriver.ChromeOptions()
+      if not application.debug: # In local testing we use chrome as a frontend, so don't kill it.
+        os.system('killall chrome') # Murder any chrome executables
+      options = webdriver.chrome.options.Options()
       options.add_argument('headless')
       os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
       validate_page = 'file:///' + __file__.replace(__name__ + '.py', 'pages/validate.html')
-      driver = webdriver.Chrome(chrome_options=options, executable_path=binary_path)
+      service = webdriver.chrome.service.Service(executable_path=binary_path)
+      driver = webdriver.Chrome(options=options, service=service)
       driver.get(validate_page)
 
     # Wait for page to load, then run the script and wait for a response.

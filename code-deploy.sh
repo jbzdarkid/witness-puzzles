@@ -3,10 +3,11 @@
 sudo mkdir -p /var/www/apache-flask/
 sudo chown -R $USER /var/www/apache-flask/
 cd /var/www/apache-flask/
-git clone https://github.com/jbzdarkid/witness-puzzles
-cd witness-puzzles
 
+git clone https://github.com/jbzdarkid/witness-puzzles
 # Alternately, scp -i privatekey.pem 5.29.zip user@witnesspuzzles.com:/var/www/apache-flask/witness-puzzles/
+
+cd witness-puzzles
 
 # Install all the dependencies
 sudo apt-get update
@@ -20,16 +21,22 @@ sudo apt-get install -y \
   python3-certbot-apache \
   xdg-utils
 
+if python3 --version | grep -vq 'Python 3.8.'
+  then echo "Incorrect python version: $(python3 --version)"
+fi
+
 # Version list at https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
 sudo python3 -m pip install chromedriver-py==110.*
 CHROME_VERSION=110.0.5481.177-1
 wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb
 sudo dpkg -i /tmp/chrome.deb
-# May need apt --fix-broken install
+sudo apt --fix-broken install -y
 rm /tmp/chrome.deb
 sudo apt-get autoremove
 
-google-chrome-stable -version # Hopefully outputs 92.0.whatever you installed above
+if google-chrome-stable -version | grep -vq ${CHROME_VERSION:0:-2}
+  then echo "Incorrect chrome version: $(google-chrome-stable -version)"
+fi
 
 sudo python3 -m pip install -r requirements/prod.txt
 
