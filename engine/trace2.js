@@ -524,7 +524,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
         if (maskedGrid[x][y] == null) { // null == MASKED_OOB
           data.puzzle.grid[x][y] = null
         } else if (data.puzzle.grid[x][y] == null) {
-          data.puzzle.grid[x][y] = {}
+          data.puzzle.grid[x][y] = {'type':'nonce'}
         }
       }
     }

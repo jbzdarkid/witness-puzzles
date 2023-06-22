@@ -51,7 +51,8 @@ window.Puzzle = class {
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
-    // Cells default to null (Note: This will be changed in trace, see Fixup in onTraceStart)
+    // Cells default to null
+    // During onTraceStart, empty cells that are still inbounds are changed to {'type': 'nonce'} for tracing purposes.
     // Lines default to {'type':'line', 'line':0}
     for (var x=0; x<puzzle.width; x++) {
       for (var y=0; y<puzzle.height; y++) {
