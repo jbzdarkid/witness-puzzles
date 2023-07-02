@@ -1,4 +1,0 @@
--r common.txt
-docutils==0.15.2
-SQLAlchemy-Utils==0.36.3
-mysqlclient==2.0.3
