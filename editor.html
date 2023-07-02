@@ -1,0 +1,112 @@
+<html xmlns="http://www.w3.org/2000/xhtml">
+  <head>
+    <meta name="robots" content="nosnippet"/>
+    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="/data/favicon.png">
+    <script type="text/javascript" src="/engine/utilities.js"></script>
+    <script type="text/javascript" src="/engine/svg.js"></script>
+    <script async type="text/javascript" src="/engine/polyominos.js"></script>
+    <script async type="text/javascript" src="/engine/puzzle.js"></script>
+    <script async type="text/javascript" src="/engine/solve.js"></script>
+    <script async type="text/javascript" src="/engine/validate.js"></script>
+    <script async type="text/javascript" src="/engine/custom_mechanics.js"></script>
+    <script async type="text/javascript" src="/engine/display2.js"></script>
+    <script async type="text/javascript" src="/engine/trace2.js"></script>
+    <script async type="text/javascript" src="/engine/telemetry.js"></script>
+    <script async type="text/javascript" src="editor.js"></script>
+    <title>Create a puzzle</title>
+  </head>
+  <body>
+    <script>loadHeader('Creating puzzle')</script>
+
+    <label id="puzzleName" contentEditable=true style="font-size: 72"></label>
+
+    <table id="meta" class="noselect">
+      <tr>
+        <td style="text-align: center;">
+          <div id="metaButtons" style="display:inline">
+            <button id="newButton" onpointerdown="createEmptyPuzzle()">New</button>
+            <button id="loadButton" onpointerdown="loadPuzzle()">Load</button>
+            <button id="deleteButton" onpointerdown="deletePuzzle()">Delete</button>
+          </div>
+          <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
+          <select id="puzzleStyle" onchange="createEmptyPuzzle()">
+            <option>Default</option>
+            <option>Horizontal Symmetry</option>
+            <option>Vertical Symmetry</option>
+            <option>Rotational Symmetry</option>
+            <option>Pillar</option>
+            <option>Pillar (H Symmetry)</option>
+            <option>Pillar (V Symmetry)</option>
+            <option>Pillar (R Symmetry)</option>
+            <option>Pillar (Two Lines)</option>
+          </select>
+        </td>
+      </tr><tr>
+        <td>
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <!-- This gets a margin-left because the buttons are a bit smaller than the crayons -->
+            <table id="symbolButtons" style="padding: 5px; margin-left: 6px; display:none" cellpadding="4" cellspacing="0">
+              <tr>
+                <td><button id="start"></button></td>
+                <td><button id="end"></button></td>
+              </tr><tr>
+                <td><button id="gap"></button></td>
+                <td><button id="dot"></button></td>
+              </tr><tr>
+                <td><button id="square"></button></td>
+                <td><button id="star"></button></td>
+              </tr><tr>
+                <td><button id="nega"></button></td>
+                <td><button id="triangle"></button></td>
+              </tr><tr>
+                <td><button id="poly"></button></td>
+                <td><button id="rpoly"></button></td>
+              </tr><tr>
+                <td><button id="ylop"></button></td>
+                <td><button id="rylop"></button></td>
+              </tr><tr>
+                <td><button id="bridge" style="display: none"></button></td>
+                <td><button id="arrow" style="display: none"></button></td>
+              </tr><tr>
+                <td><button id="sizer" style="display: none"></button></td>
+              </tr>
+            </table>
+            <div style="display: flex; justify-content: center; min-width: 432px">
+              <div id="puzzleBox" style="position: relative">
+                <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
+                <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
+                <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
+                <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
+                <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
+                <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
+                <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
+                <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
+                <svg id="puzzle" style="z-index: 10"></svg>
+              </div>
+            </div>
+            <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
+              <tr><td><button id="black"></button></td></tr>
+              <tr><td><button id="white"></button></td></tr>
+              <tr><td><button id="red"></button></td></tr>
+              <tr><td><button id="orange"></button></td></tr>
+              <tr><td><button id="yellow"></button></td></tr>
+              <tr><td><button id="green"></button></td></tr>
+              <tr><td><button id="blue"></button></td></tr>
+              <tr><td><button id="purple"></button></td></tr>
+              <tr><td><button id="custom" style="display: none"></button></td></tr>
+            </table>
+          </div>
+        </td>
+      </tr><tr>
+        <td style="text-align:center;">
+          <script>addSolveButtons()</script>
+        </td>
+      </tr><tr>
+        <td style="text-align:center;">
+          <button id="publish" onpointerdown="publishPuzzle()" disabled>Publish</button>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
