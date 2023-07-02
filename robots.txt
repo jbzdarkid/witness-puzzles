@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /data/*
+Disallow: /play/*
+Disallow: /pages/404_*.html
+Disallow: /pages/login.html
+Disallow: /pages/validate.html
