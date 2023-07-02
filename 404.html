@@ -20,7 +20,7 @@
         document.title = '404: Puzzle not found'
         
         var puzzleNotFound = document.getElementById('puzzleNotFound')
-        puzzleNotFound.innerText = puzzleNotFound.innerText.replace('%display_hash%', window.location.pathname.substring(22))
+        puzzleNotFound.innerHTML = puzzleNotFound.innerHTML.replace('%display_hash%', window.location.pathname.substring(22))
         document.getElementById('pageNotFound').style.display = 'none'
         puzzleNotFound.style.display = null
       }
