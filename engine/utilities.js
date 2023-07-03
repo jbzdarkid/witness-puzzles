@@ -59,16 +59,17 @@ var proxy = {
     setIfNull(this._map, 'sensitivity', '0.7')
     setIfNull(this._map, 'expanded', 'false')
     setIfNull(this._map, 'customMechanics', 'false')
+    setIfNull(this._map, 'githubAccount', 'false')
     return this
   },
 }
 window.settings = new Proxy({}, proxy.init())
 
 var tracks = {
-  'start':   new Audio(src = '/data/panel_start_tracing.aac'),
-  'success': new Audio(src = '/data/panel_success.aac'),
-  'fail':    new Audio(src = '/data/panel_failure.aac'),
-  'abort':   new Audio(src = '/data/panel_abort_tracing.aac'),
+  'start':   new Audio(src = 'data/panel_start_tracing.aac'),
+  'success': new Audio(src = 'data/panel_success.aac'),
+  'fail':    new Audio(src = 'data/panel_failure.aac'),
+  'abort':   new Audio(src = 'data/panel_abort_tracing.aac'),
 }
 
 var currentAudio = null
@@ -292,12 +293,7 @@ window.loadHeader = function(titleText) {
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
-  feedbackButton.onpointerdown = function() {
-    var feedback = prompt('Provide feedback:')
-    if (feedback) {
-      window.FEEDBACK(feedback)
-    }
-  }
+  feedbackButton.onpointerdown = window.FEEDBACK
 
   var separator = document.createElement('label')
   navbar.appendChild(separator)
@@ -412,6 +408,28 @@ window.loadHeader = function(titleText) {
     window.settings.volume = this.value
   }
   volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
+
+  expandedSettings.appendChild(document.createElement('br'))
+
+  var githubAccount = createCheckbox()
+  expandedSettings.appendChild(githubAccount)
+  githubAccount.id = 'githubAccount'
+  if (window.settings.githubAccount == 'true') {
+    githubAccount.style.background = window.BORDER
+    githubAccount.checked = true
+  }
+
+  githubAccount.onpointerdown = function() {
+    this.checked = !this.checked
+    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
+    window.settings.githubAccount = this.checked
+  }
+
+  var githubLabel = document.createElement('label')
+  expandedSettings.appendChild(githubLabel)
+  githubLabel.style.marginLeft = '6px'
+  githubLabel.htmlFor = 'githubAccount'
+  githubLabel.innerHTML = 'I have a<br>GitHub account'
 
   expandedSettings.appendChild(document.createElement('br'))
 
@@ -651,6 +669,20 @@ function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
   currentHttpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   if (window.csrfToken != null) currentHttpRequest.setRequestHeader('X-CSRFToken', window.csrfToken)
   currentHttpRequest.send(data)
+}
+
+window.getIssueUrl = function(args) {
+  var url = 'https://github.com/jbzdarkid/witness-puzzles/issues/new'
+  var first = true
+  for (var key in args) {
+    url += (first ? '?' : '&')
+    first = false
+    url += encodeURIComponent(key)
+    url += '='
+    url += encodeURIComponent(args[key])
+  }
+
+  return url
 }
 
 })

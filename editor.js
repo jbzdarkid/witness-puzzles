@@ -468,27 +468,98 @@ window.onSolvedPuzzle = function(paths) {
 }
 
 window.publishPuzzle = function() {
+  var anchor = document.createElement('div')
+  document.body.appendChild(anchor)
+  anchor.id = 'anchor'
+  anchor.style.width = '100%'
+  anchor.style.height = '100%'
+  anchor.style.position = 'absolute'
+  anchor.style.opacity = '50%'
+  anchor.style.background = 'black'
+  anchor.style.top = 0
+  anchor.style.zIndex = 2 // Position in front of the header bar
+  anchor.onpointerdown = function(event) {onPublishConfirm(false)}
+
+  var puzzle = document.getElementById('puzzle')
+  var confirm = document.createElement('div')
+  puzzle.parentElement.insertBefore(confirm, puzzle)
+  confirm.id = 'confirm'
+  confirm.style.display = 'flex'
+  confirm.style.position = 'absolute'
+  confirm.style.width = '100%'
+  confirm.style.height = '100%'
+  confirm.style.minWidth = '400px'
+  confirm.style.zIndex = 3 // Position in front of the anchor
+  confirm.onpointerdown = function(event) {onPublishConfirm(true)}
+  
+  /*
+  if (window.settings.githubAccount == 'true' || window.confirm(
+      'To publish a new puzzle, you will need a (free) GitHub account.\n' +
+      'Once you click OK, you will be prompted to sign in to GitHub,\n' +
+      'then you can click "Submit new issue" to publish.')) {
+  }
+  */
+}
+
+function onPublishConfirm(confirmed) {
+  var anchor = document.getElementById('anchor')
+  var confirm = document.getElementById('confirm')
+  anchor.parentElement.removeChild(anchor)
+  confirm.parentElement.removeChild(confirm)
+
+  if (!confirmed) {
+
+    event.stopPropagation()
+    return
+  }
+
   // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
   document.getElementById('puzzleName').blur()
 
-  currentPublishRequest = window.sendHttpRequest('POST', '/publish', 120, 'solution=' + puzzle.serialize(),
-    function(status, responseText) {
-      var publish = document.getElementById('publish')
-      if (status === 200) {
-        publish.innerText = 'Published, click here to play your puzzle!'
-        publish.disabled = false
-        var url = '/play/' + responseText
-        publish.onpointerdown = function() { window.location = url }
-      } else {
-        publish.innerText = 'Error: ' + responseText
-      }
-    })
+  var issueUrl = window.getIssueUrl({
+    'labels': 'new puzzle',
+    'title': 'Publish puzzle "' + puzzle.name + '"',
+    'body': puzzle.serialize(),
+  })
 
-  var publish = document.getElementById('publish')
-  publish.onpointerdown = null
-  publish.disabled = true
-  publish.innerText = 'Validating puzzle...'
+  window.open(issueUrl, '_blank')
 }
+
+/*
+function shapeChooser() {
+  var puzzle = document.getElementById('puzzle')
+  puzzle.style.opacity = 0
+  puzzle.style.minWidth = '432px'
+
+
+  var chooserTable = document.createElement('table')
+  chooser.appendChild(chooserTable)
+  chooserTable.id = 'chooserTable'
+  chooserTable.setAttribute('cellspacing', '24px')
+  chooserTable.setAttribute('cellpadding', '0px')
+  chooserTable.style.padding = 25
+  chooserTable.style.background = window.BACKGROUND
+  chooserTable.style.border = window.BORDER
+  chooserTable.onpointerdown = function(event) {shapeChooserClick(event, this)}
+  for (var x=0; x<4; x++) {
+    var row = chooserTable.insertRow(x)
+    for (var y=0; y<4; y++) {
+      var cell = row.insertCell(y)
+      cell.powerOfTwo = 1 << (x + y*4)
+      cell.onpointerdown = function(event) {shapeChooserClick(event, this)}
+      cell.style.width = 58
+      cell.style.height = 58
+      if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
+        cell.clicked = true
+        cell.style.background = 'black'
+      } else {
+        cell.clicked = false
+        cell.style.background = FOREGROUND
+      }
+    }
+  }
+}
+*/
 
 // Returns the next value in the list.
 // If the value is not found, defaults to the first element.

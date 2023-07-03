@@ -6,17 +6,17 @@
     <meta property="og:site_name" content="Witness Puzzles"/>
     <meta property="og:image" content="%image%"/>
     <meta name="robots" content="noindex, nofollow, nosnippet"/>
-    <link rel="stylesheet" type="text/css" href="/data/style.css" id="stylesheet">
-    <link rel="icon" type="image/png" href="/data/favicon.png">
-    <script type="text/javascript" src="/engine/utilities.js"></script>
-    <script type="text/javascript" src="/engine/svg.js"></script>
-    <script async type="text/javascript" src="/engine/polyominos.js"></script>
-    <script async type="text/javascript" src="/engine/puzzle.js"></script>
-    <script async type="text/javascript" src="/engine/validate.js"></script>
-    <script async type="text/javascript" src="/engine/custom_mechanics.js"></script>
-    <script async type="text/javascript" src="/engine/display2.js"></script>
-    <script async type="text/javascript" src="/engine/trace2.js"></script>
-    <script async type="text/javascript" src="/engine/telemetry.js"></script>
+    <link rel="stylesheet" type="text/css" href="data/style.css" id="stylesheet">
+    <link rel="icon" type="image/png" href="data/favicon.png">
+    <script type="text/javascript" src="engine/utilities.js"></script>
+    <script type="text/javascript" src="engine/svg.js"></script>
+    <script async type="text/javascript" src="engine/polyominos.js"></script>
+    <script async type="text/javascript" src="engine/puzzle.js"></script>
+    <script async type="text/javascript" src="engine/validate.js"></script>
+    <script async type="text/javascript" src="engine/custom_mechanics.js"></script>
+    <script async type="text/javascript" src="engine/display2.js"></script>
+    <script async type="text/javascript" src="engine/trace2.js"></script>
+    <script async type="text/javascript" src="engine/telemetry.js"></script>
     <title>%title%</title>
   </head>
   <body>
@@ -35,11 +35,6 @@
 
       var puzzle = Puzzle.deserialize(%puzzle%)
       draw(puzzle)
-      window.START_PUZZLE()
-      window.TRACE_COMPLETION_FUNC = function() {
-        window.SOLVE_PUZZLE()
-        window.TRACE_COMPLETION_FUNC = null
-      }
     }
   </script>
 </html>

@@ -1,32 +1,36 @@
 namespace(function() {
 
-// Adapted from https://stackoverflow.com/a/2117523
-function uuidv4() {
-  return ('10000000-1000-4000-8000-100000000000').replace(/[018]/g, c =>
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-  )
-}
-
 // https://stackoverflow.com/q/12571650
 window.addEventListener('error', function(event) {
-  ERROR(event.error.stack)
   console.error('Error in file ' + event.filename + ' on line ' + event.lineno)
+
+  console.error('To open a bug, click the link below:')
+  if (window.settings.githubAccount != 'true') {
+    console.error('Note that you will need a (free) GitHub account.')
+  }
+
+  var issueUrl = window.getIssueUrl({
+    'labels': 'bug report',
+    'title': 'Bug report',
+    'body': 'Page: ' + window.location.href + '\n' +
+            'Stacktrace: ```' + (event.error ? event.error.stack : 'null') + '```\n' +
+            'Additional comments: ',
+  })
+  console.error(issueUrl)
 })
 
-var sessionId = uuidv4() // Session ID is unique per page load, so as not to identify the user.
-
-function sendRequest(type, data) {
-  body = 'session_id=' + sessionId
-  body += '&event_type=' + type
-  body += '&version=%version%'
-  if (data != null) body += '&data=' + data
-
-  window.fireAndForget('POST', '/telemetry', body)
+window.FEEDBACK = function() {
+  var issueUrl = window.getIssueUrl({
+    'labels': 'feedback',
+    'title': 'User feedback',
+    'body': 'Page: ' + window.location.href + '\nFeedback: ',
+  })
+  if (window.settings.githubAccount == 'true' || window.confirm(
+      'To provide feedback you will need a (free) GitHub account.\n' +
+      'Once you click OK, you will be prompted to sign in to GitHub,\n' +
+      'then you can type your feedback and click "Submit new issue".')) {
+    window.open(issueUrl, '_blank')
+  }
 }
-
-window.FEEDBACK     = function(message) { sendRequest('feedback', message) }
-window.ERROR        = function(message) { sendRequest('error', message) }
-window.START_PUZZLE = function() { sendRequest('puzzle_start') }
-window.SOLVE_PUZZLE = function() { sendRequest('puzzle_solve') }
 
 })

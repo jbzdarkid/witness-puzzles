@@ -21,8 +21,7 @@ As of 7/2/2023, this codebase no longer requires a backend host.
 - Puzzle submission now uses github issues. There is no longer up-front validation, publishing a puzzle will simply create a github issue.
   - Opening an issue will trigger the validation and publication workflow. If your puzzle fails to validate, the bot will respond with the validation error and notify me.
 - Telemetry and automated error reporting are removed.
-- Routing and hosting is now handled by github pages. This means that all the python (flask) code is for local testing.
-  - All pages which are visible on github are on the separate `gh-pages` branch.
+- Routing and hosting is now handled by github pages. For local development, just open the pages in your web browser.
 
 # Overview
 This repo handles puzzle creation, solution, and displaying. The core engine is made of 8 files:
