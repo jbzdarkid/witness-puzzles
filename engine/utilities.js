@@ -269,7 +269,7 @@ window.loadHeader = function(titleText) {
     navbar.style.position = 'fixed' // When browsing, pin the navbar to the top so that it's visible during infinite scroll.
 
     link.innerText = 'Create a puzzle'
-    link.onpointerdown = function() {window.location = '/editor.html'}
+    link.onpointerdown = function() {window.location = 'editor.html'}
 
     var link2 = document.createElement('label')
     navbar.appendChild(link2)
@@ -281,10 +281,10 @@ window.loadHeader = function(titleText) {
 
   } else if (window.location.href.includes('/play/')) {
     link.innerText = 'Back to all puzzles'
-    link.onpointerdown = function() {window.location = '/browse.html'}
+    link.onpointerdown = function() {window.location = 'browse.html'}
   } else /* All other pages */ {
     link.innerText = 'Browse all puzzles'
-    link.onpointerdown = function() {window.location = '/browse.html'}
+    link.onpointerdown = function() {window.location = 'browse.html'}
   }
 
   var feedbackButton = document.createElement('label')
@@ -411,6 +411,7 @@ window.loadHeader = function(titleText) {
 
   expandedSettings.appendChild(document.createElement('br'))
 
+  /*
   var githubAccount = createCheckbox()
   expandedSettings.appendChild(githubAccount)
   githubAccount.id = 'githubAccount'
@@ -432,6 +433,7 @@ window.loadHeader = function(titleText) {
   githubLabel.innerHTML = 'I have a<br>GitHub account'
 
   expandedSettings.appendChild(document.createElement('br'))
+  */
 
   // Custom mechanics -- disabled for now
   window.settings.customMechanics = false
@@ -543,7 +545,7 @@ window.showSolution = function(puzzle, paths, num, suffix) {
   }
 }
 
-function createCheckbox() {
+window.createCheckbox = function() {
   var checkbox = document.createElement('div')
   checkbox.style.width = '22px'
   checkbox.style.height = '22px'

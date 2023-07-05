@@ -468,6 +468,11 @@ window.onSolvedPuzzle = function(paths) {
 }
 
 window.publishPuzzle = function() {
+  if (window.settings.githubAccount == 'true') {
+    onPublishConfirm(true)
+    return
+  }
+
   var anchor = document.createElement('div')
   document.body.appendChild(anchor)
   anchor.id = 'anchor'
@@ -484,82 +489,83 @@ window.publishPuzzle = function() {
   var confirm = document.createElement('div')
   puzzle.parentElement.insertBefore(confirm, puzzle)
   confirm.id = 'confirm'
-  confirm.style.display = 'flex'
+  confirm.style = 'display: flex; flex-direction: column; justify-content: space-between'
   confirm.style.position = 'absolute'
   confirm.style.width = '100%'
   confirm.style.height = '100%'
-  confirm.style.minWidth = '400px'
   confirm.style.zIndex = 3 // Position in front of the anchor
-  confirm.onpointerdown = function(event) {onPublishConfirm(true)}
+  confirm.style.background = window.PAGE_BACKGROUND
+
+  var confirmText = document.createElement('label')
+  confirm.appendChild(confirmText)
+  confirmText.style.margin = '5px'
+  confirmText.innerText =
+    'To publish a new puzzle, you will need a (free) GitHub account. ' +
+    'Once you click OK, you will be prompted to sign in to GitHub, ' +
+    'then you can click "Submit new issue" to publish your puzzle.'
   
-  /*
-  if (window.settings.githubAccount == 'true' || window.confirm(
-      'To publish a new puzzle, you will need a (free) GitHub account.\n' +
-      'Once you click OK, you will be prompted to sign in to GitHub,\n' +
-      'then you can click "Submit new issue" to publish.')) {
+  var githubAccount = document.createElement('div')
+  confirm.appendChild(githubAccount)
+  githubAccount.style = 'display: flex; flex-direction: row; justify-content: flex-start; align-items: center'
+  githubAccount.style.margin = '5px'
+
+  var haveAccount = createCheckbox()
+  githubAccount.appendChild(haveAccount)
+  haveAccount.id = 'haveAccount'
+  haveAccount.onpointerdown = function() {
+    this.checked = !this.checked
+    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
   }
-  */
+
+  var githubLabel = document.createElement('label')
+  githubAccount.appendChild(githubLabel)
+  githubLabel.style.marginLeft = '6px'
+  githubLabel.htmlFor = 'haveAccount'
+  githubLabel.onpointerdown = function() {haveAccount.onpointerdown()}
+  githubLabel.innerText = 'I already have a GitHub account, don\'t ask me again'
+  githubLabel.style.flexShrink = '10000'
+
+  var buttons = document.createElement('div')
+  confirm.appendChild(buttons)
+  buttons.style = 'display: flex; flex-direction: row; justify-content: space-between'
+  buttons.style.margin = '5px'
+
+  var buttonNo = document.createElement('button')
+  buttons.appendChild(buttonNo)
+  buttonNo.innerText = 'Cancel'
+  buttonNo.onpointerdown = function(event) {onPublishConfirm(false)}
+
+  var buttonYes = document.createElement('button')
+  buttons.appendChild(buttonYes)
+  buttonYes.innerText = 'OK'
+  buttonYes.onpointerdown = function(event) {
+    if (document.getElementById('haveAccount').checked) {
+      window.settings.githubAccount = true
+    }
+    onPublishConfirm(true)
+  }
 }
 
 function onPublishConfirm(confirmed) {
+  if (confirmed) {
+    // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
+    document.getElementById('puzzleName').blur()
+
+    var issueUrl = window.getIssueUrl({
+      'labels': 'new puzzle',
+      'title': 'Publish puzzle "' + puzzle.name + '"',
+      'body': puzzle.serialize(),
+    })
+
+    window.open(issueUrl, '_blank')
+  }
+
   var anchor = document.getElementById('anchor')
+  if (anchor) anchor.parentElement.removeChild(anchor)
   var confirm = document.getElementById('confirm')
-  anchor.parentElement.removeChild(anchor)
-  confirm.parentElement.removeChild(confirm)
-
-  if (!confirmed) {
-
-    event.stopPropagation()
-    return
-  }
-
-  // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
-  document.getElementById('puzzleName').blur()
-
-  var issueUrl = window.getIssueUrl({
-    'labels': 'new puzzle',
-    'title': 'Publish puzzle "' + puzzle.name + '"',
-    'body': puzzle.serialize(),
-  })
-
-  window.open(issueUrl, '_blank')
+  if (confirm) confirm.parentElement.removeChild(confirm)
+  event.stopPropagation()
 }
-
-/*
-function shapeChooser() {
-  var puzzle = document.getElementById('puzzle')
-  puzzle.style.opacity = 0
-  puzzle.style.minWidth = '432px'
-
-
-  var chooserTable = document.createElement('table')
-  chooser.appendChild(chooserTable)
-  chooserTable.id = 'chooserTable'
-  chooserTable.setAttribute('cellspacing', '24px')
-  chooserTable.setAttribute('cellpadding', '0px')
-  chooserTable.style.padding = 25
-  chooserTable.style.background = window.BACKGROUND
-  chooserTable.style.border = window.BORDER
-  chooserTable.onpointerdown = function(event) {shapeChooserClick(event, this)}
-  for (var x=0; x<4; x++) {
-    var row = chooserTable.insertRow(x)
-    for (var y=0; y<4; y++) {
-      var cell = row.insertCell(y)
-      cell.powerOfTwo = 1 << (x + y*4)
-      cell.onpointerdown = function(event) {shapeChooserClick(event, this)}
-      cell.style.width = 58
-      cell.style.height = 58
-      if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
-        cell.clicked = true
-        cell.style.background = 'black'
-      } else {
-        cell.clicked = false
-        cell.style.background = FOREGROUND
-      }
-    }
-  }
-}
-*/
 
 // Returns the next value in the list.
 // If the value is not found, defaults to the first element.
