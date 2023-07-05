@@ -21,7 +21,6 @@ if not any([label['name'] == 'new puzzle' for label in j['labels']]):
     print('This issue was not a puzzle request.')
     exit()
 
-print('Starting automation...')
 with open('play_template.html', 'r', encoding='utf-8') as f:
     contents = f.read()
 
@@ -29,7 +28,6 @@ tempfile = Path('temp.html')
 with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents.replace('%puzzle%', j['body'])) # Let javascript do the object load; we'll be happy with whatever.
 
-# Do automation stuff here
 print('Installing chrome...')
 chrome_version = '110.0.5481.177-1'
 subprocess.run([
@@ -55,6 +53,8 @@ for _ in range(60):
     sleep(1)
     retcode = p.poll()
     if retcode:
+        print('Error:', retcode)
+        print('stderr:', p.stderr.read())
         break
     line = p.stdout.readline()
     print(line)
