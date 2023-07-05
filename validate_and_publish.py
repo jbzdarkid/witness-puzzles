@@ -40,9 +40,10 @@ subprocess.run(['sudo', 'dpkg', '-i', '/tmp/chrome.deb'], check=True)
 subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
 
 print('Verifying puzzle...')
-print('file:///' + str(tempfile))
+print(tempfile.as_uri())
+os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
 p = subprocess.Popen(
-    ['google-chrome-stable', 'file:///' + str(tempfile), '--headless'],
+    ['google-chrome-stable', tempfile.as_uri(), '--headless'],
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     text=True,
