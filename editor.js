@@ -561,8 +561,8 @@ function onPublishConfirm(event, confirmed) {
 
     var issueUrl = window.getIssueUrl({
       'labels': 'new puzzle',
-      'title': 'Publish puzzle "' + puzzle.name + '"',
-      'body': puzzle.serialize(),
+      'title': 'Publish puzzle "' + window.puzzle.name + '"',
+      'body': window.puzzle.serialize(),
     })
 
     window.open(issueUrl, '_blank')

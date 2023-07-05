@@ -2,6 +2,11 @@ function namespace(code) {
   code()
 }
 
+// https://stackoverflow.com/q/12571650
+window.addEventListener('error', function(event) {
+  console.error('Error in file ' + event.filename + ' on line ' + event.lineno)
+})
+
 namespace(function() {
 
 /*** Start cross-compatibility ***/

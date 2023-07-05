@@ -16,7 +16,6 @@
     <script async type="text/javascript" src="engine/custom_mechanics.js"></script>
     <script async type="text/javascript" src="engine/display2.js"></script>
     <script async type="text/javascript" src="engine/trace2.js"></script>
-    <script async type="text/javascript" src="engine/telemetry.js"></script>
     <title>%title%</title>
   </head>
   <body>
@@ -28,11 +27,7 @@
   <script>
     window.display_hash = '%display_hash%'
     window.onload = function() {
-      // Unescape HTML (https://paulschreiber.com/blog/2008/09/20)
-      var temp = document.createElement('div')
-      temp.innerHTML = '%title%'
-      document.getElementById('title').innerText = temp.childNodes[0].nodeValue
-
+      <!-- %solution% -->
       var puzzle = Puzzle.deserialize(%puzzle%)
       draw(puzzle)
     }
