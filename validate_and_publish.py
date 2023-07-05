@@ -10,13 +10,16 @@ print('Loading puzzle submission...')
 api = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}'
 
 issue = 9 # os.environ.get('ISSUE_ID')
-j = requests.get(f'{api}/issues/{issue}').json()
+headers = {
+    'Accept': 'application/vnd.github.v3+json',
+    'Authorization': 'Bearer ' + environ['GITHUB_TOKEN'],
+    'User-Agent': 'Witness Puzzles/3.0 (https://github.com/jbzdarkid/witness-puzzles)',
+}
+j = requests.get(f'{api}/issues/{issue}', headers=headers).json()
 
 if not any([label['name'] == 'new puzzle' for label in j['labels']]):
     print('This issue was not a puzzle request.')
     exit()
-
-puzzle = json.loads(j['body'])
 
 print('Starting automation...')
 with open('play_template.html', 'r', encoding='utf-8') as f:
@@ -24,7 +27,7 @@ with open('play_template.html', 'r', encoding='utf-8') as f:
 
 tempfile = Path('temp.html')
 with tempfile.open('w', encoding='utf-8') as f:
-    f.write(contents.replace('%puzzle%', puzzle))
+    f.write(contents.replace('%puzzle%', j['body'])) # Let javascript do the object load; we'll be happy with whatever.
 
 # Do automation stuff here
 print('Installing chrome...')
