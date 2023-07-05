@@ -24,7 +24,7 @@ if not any([label['name'] == 'new puzzle' for label in j['labels']]):
 with open('play_template.html', 'r', encoding='utf-8') as f:
     contents = f.read()
 
-tempfile = Path('temp.html')
+tempfile = Path('temp.html').resolve()
 with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents.replace('%puzzle%', j['body'])) # Let javascript do the object load; we'll be happy with whatever.
 
