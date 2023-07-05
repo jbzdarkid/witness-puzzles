@@ -22,5 +22,5 @@ jobs:
         API_KEY: ${{ secrets.API_KEY }}
     - uses: actions/upload-artifact@v2
       with:
-        path: *.png
+        path: '*.png'
         if-no-files-found: ignore
