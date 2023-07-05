@@ -14,9 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 1 # No need for history
-    - run: python3 -u validate_and_publish.py
-      timeout-minutes: 10
+        fetch-depth: 1 # No need for git history
+    - run: python3 -u .github/workflows/validate_and_publish.py
+      timeout-minutes: 5
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         API_KEY: ${{ secrets.API_KEY }}
+    - uses: actions/upload-artifact@v2
+      with:
+        path: *.png
+        if-no-files-found: ignore
