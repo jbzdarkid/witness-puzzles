@@ -687,4 +687,19 @@ window.getIssueUrl = function(args) {
   return url
 }
 
+window.createAnchor = function() {
+  var anchor = document.createElement('div')
+  document.body.appendChild(anchor)
+  anchor.id = 'anchor'
+  anchor.style.width = '100%'
+  anchor.style.height = '100%'
+  anchor.style.position = 'absolute'
+  anchor.style.opacity = '50%'
+  anchor.style.background = 'black'
+  anchor.style.top = 0
+  anchor.style.zIndex = 2 // Position in front of the header bar
+  
+  return anchor
+}
+
 })

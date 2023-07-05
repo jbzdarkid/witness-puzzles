@@ -469,21 +469,12 @@ window.onSolvedPuzzle = function(paths) {
 
 window.publishPuzzle = function() {
   if (window.settings.githubAccount == 'true') {
-    onPublishConfirm(true)
+    onPublishConfirm(null, true)
     return
   }
 
-  var anchor = document.createElement('div')
-  document.body.appendChild(anchor)
-  anchor.id = 'anchor'
-  anchor.style.width = '100%'
-  anchor.style.height = '100%'
-  anchor.style.position = 'absolute'
-  anchor.style.opacity = '50%'
-  anchor.style.background = 'black'
-  anchor.style.top = 0
-  anchor.style.zIndex = 2 // Position in front of the header bar
-  anchor.onpointerdown = function(event) {onPublishConfirm(false)}
+  var anchor = window.createAnchor()
+  anchor.onpointerdown = function(event) {onPublishConfirm(event, false)}
 
   var puzzle = document.getElementById('puzzle')
   var confirm = document.createElement('div')
@@ -522,7 +513,7 @@ window.publishPuzzle = function() {
   githubLabel.style.marginLeft = '6px'
   githubLabel.htmlFor = 'haveAccount'
   githubLabel.onpointerdown = function() {haveAccount.onpointerdown()}
-  githubLabel.innerText = 'I already have a GitHub account, don\'t ask me again'
+  githubLabel.innerText = 'I already have a GitHub account, don\'t ask again'
   githubLabel.style.flexShrink = '10000'
 
   var buttons = document.createElement('div')
@@ -533,7 +524,7 @@ window.publishPuzzle = function() {
   var buttonNo = document.createElement('button')
   buttons.appendChild(buttonNo)
   buttonNo.innerText = 'Cancel'
-  buttonNo.onpointerdown = function(event) {onPublishConfirm(false)}
+  buttonNo.onpointerdown = function(event) {onPublishConfirm(event, false)}
 
   var buttonYes = document.createElement('button')
   buttons.appendChild(buttonYes)
@@ -542,11 +533,11 @@ window.publishPuzzle = function() {
     if (document.getElementById('haveAccount').checked) {
       window.settings.githubAccount = true
     }
-    onPublishConfirm(true)
+    onPublishConfirm(event, true)
   }
 }
 
-function onPublishConfirm(confirmed) {
+function onPublishConfirm(event, confirmed) {
   if (confirmed) {
     // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
     document.getElementById('puzzleName').blur()
@@ -564,7 +555,7 @@ function onPublishConfirm(confirmed) {
   if (anchor) anchor.parentElement.removeChild(anchor)
   var confirm = document.getElementById('confirm')
   if (confirm) confirm.parentElement.removeChild(confirm)
-  event.stopPropagation()
+  if (event) event.stopPropagation()
 }
 
 // Returns the next value in the list.
@@ -987,13 +978,8 @@ function shapeChooser() {
   puzzle.style.opacity = 0
   puzzle.style.minWidth = '432px'
 
-  var anchor = document.createElement('div')
-  document.body.appendChild(anchor)
-  anchor.id = 'anchor'
-  anchor.style.width = '99%'
-  anchor.style.height = '100%'
-  anchor.style.position = 'absolute'
-  anchor.style.top = 0
+  var anchor = window.createAnchor()
+  anchor.style.opacity = '0%'
   anchor.onpointerdown = function(event) {shapeChooserClick(event)}
 
   var chooser = document.createElement('div')
@@ -1269,14 +1255,9 @@ function dragStart(event, elem) {
   dragging = event.position
   console.log('Drag started at', dragging.x, dragging.y)
 
-  var anchor = document.createElement('div')
-  document.body.appendChild(anchor)
-
-  anchor.id = 'anchor'
-  anchor.style.position = 'absolute'
-  anchor.style.top = 0
-  anchor.style.width = '99%'
-  anchor.style.height = '100%'
+  var anchor = window.createAnchor()
+  anchor.style.zIndex = null
+  anchor.style.opacity = '0%'
   anchor.style.cursor = elem.style.cursor
   document.onmousemove = function(event) {dragMove(event, elem)}
   document.ontouchmove = function(event) {dragMove(event, elem)}
