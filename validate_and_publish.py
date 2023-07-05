@@ -12,7 +12,7 @@ api = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}'
 issue = 9 # os.environ.get('ISSUE_ID')
 headers = {
     'Accept': 'application/vnd.github.v3+json',
-    'Authorization': 'Bearer ' + environ['GITHUB_TOKEN'],
+    'Authorization': 'Bearer ' + os.environ['GITHUB_TOKEN'],
     'User-Agent': 'Witness Puzzles/3.0 (https://github.com/jbzdarkid/witness-puzzles)',
 }
 j = requests.get(f'{api}/issues/{issue}', headers=headers).json()
