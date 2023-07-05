@@ -48,10 +48,11 @@ p = subprocess.Popen(
     stderr=subprocess.PIPE,
     text=True,
     encoding='utf-8',
-    timeout=60,
     bufsize=0,
 )
-while 1:
+
+for _ in range(60):
+    sleep(1)
     retcode = p.poll()
     if retcode:
         break

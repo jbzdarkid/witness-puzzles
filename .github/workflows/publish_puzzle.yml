@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1 # No need for history
-    - run: python3 validate_and_publish.py
+    - run: python3 -u validate_and_publish.py
       timeout-minutes: 10
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
