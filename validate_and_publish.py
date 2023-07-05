@@ -19,7 +19,7 @@ j = requests.get(f'{api}/issues/{issue}', headers=headers).json()
 
 if not any([label['name'] == 'new puzzle' for label in j['labels']]):
     print('This issue was not a puzzle request.')
-    exit()
+    exit(1)
 
 with open('play_template.html', 'r', encoding='utf-8') as f:
     contents = f.read()
@@ -40,8 +40,9 @@ subprocess.run(['sudo', 'dpkg', '-i', '/tmp/chrome.deb'], check=True)
 subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
 
 print('Verifying puzzle...')
+print('file:///' + str(tempfile))
 p = subprocess.Popen(
-    ['google-chrome-stable', str(tempfile)],
+    ['google-chrome-stable', 'file:///' + str(tempfile), '--headless'],
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     text=True,
@@ -55,6 +56,7 @@ for _ in range(60):
     if retcode:
         print('Error:', retcode)
         print('stderr:', p.stderr.read())
+        exit(2)
         break
     line = p.stdout.readline()
     print(line)
