@@ -293,7 +293,7 @@ window.loadHeader = function(titleText) {
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
-  feedbackButton.onpointerdown = window.FEEDBACK
+  feedbackButton.onpointerdown = function() {window.open('https://github.com/jbzdarkid/witness-puzzles/issues', '_blank')}
 
   var separator = document.createElement('label')
   navbar.appendChild(separator)
@@ -306,7 +306,7 @@ window.loadHeader = function(titleText) {
   sourceLink.style = 'float: right; line-height: 60px; cursor: pointer'
   sourceLink.innerText = 'Source code'
   sourceLink.className = 'navbar-content'
-  sourceLink.onpointerdown = function() {window.location = 'https://github.com/jbzdarkid/witness-puzzles'}
+  sourceLink.onpointerdown = function() {window.open('https://github.com/jbzdarkid/witness-puzzles', '_blank')}
 
   var collapsedSettings = drawSymbol({'type': 'plus', 'width':20, 'height':20})
   navbar.appendChild(collapsedSettings)
@@ -685,21 +685,6 @@ window.getIssueUrl = function(args) {
   }
 
   return url
-}
-
-window.createAnchor = function() {
-  var anchor = document.createElement('div')
-  document.body.appendChild(anchor)
-  anchor.id = 'anchor'
-  anchor.style.width = '100%'
-  anchor.style.height = '100%'
-  anchor.style.position = 'absolute'
-  anchor.style.opacity = '50%'
-  anchor.style.background = 'black'
-  anchor.style.top = 0
-  anchor.style.zIndex = 2 // Position in front of the header bar
-  
-  return anchor
 }
 
 })

@@ -19,18 +19,4 @@ window.addEventListener('error', function(event) {
   console.error(issueUrl)
 })
 
-window.FEEDBACK = function() {
-  var issueUrl = window.getIssueUrl({
-    'labels': 'feedback',
-    'title': 'User feedback',
-    'body': 'Page: ' + window.location.href + '\nFeedback: ',
-  })
-  if (window.settings.githubAccount == 'true' || window.confirm(
-      'To provide feedback you will need a (free) GitHub account.\n' +
-      'Once you click OK, you will be prompted to sign in to GitHub,\n' +
-      'then you can type your feedback and click "Submit new issue".')) {
-    window.open(issueUrl, '_blank')
-  }
-}
-
 })

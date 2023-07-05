@@ -467,16 +467,33 @@ window.onSolvedPuzzle = function(paths) {
   return paths
 }
 
+function createAnchor() {
+  var anchor = document.createElement('div')
+  document.body.appendChild(anchor)
+  anchor.id = 'anchor'
+  anchor.style.width = '100%'
+  anchor.style.height = '100%'
+  anchor.style.position = 'absolute'
+  anchor.style.opacity = '50%'
+  anchor.style.background = 'black'
+  anchor.style.top = 0
+  anchor.style.zIndex = 2 // Position in front of the header bar
+  
+  return anchor
+}
+
 window.publishPuzzle = function() {
   if (window.settings.githubAccount == 'true') {
     onPublishConfirm(null, true)
     return
   }
 
-  var anchor = window.createAnchor()
+  var anchor = createAnchor()
   anchor.onpointerdown = function(event) {onPublishConfirm(event, false)}
 
   var puzzle = document.getElementById('puzzle')
+  puzzle.style.opacity = 0
+  puzzle.style.minWidth = '432px'
   var confirm = document.createElement('div')
   puzzle.parentElement.insertBefore(confirm, puzzle)
   confirm.id = 'confirm'
@@ -550,6 +567,10 @@ function onPublishConfirm(event, confirmed) {
 
     window.open(issueUrl, '_blank')
   }
+
+  var puzzle = document.getElementById('puzzle')
+  puzzle.style.opacity = null
+  puzzle.style.minWidth = null
 
   var anchor = document.getElementById('anchor')
   if (anchor) anchor.parentElement.removeChild(anchor)
@@ -978,7 +999,7 @@ function shapeChooser() {
   puzzle.style.opacity = 0
   puzzle.style.minWidth = '432px'
 
-  var anchor = window.createAnchor()
+  var anchor = createAnchor()
   anchor.style.opacity = '0%'
   anchor.onpointerdown = function(event) {shapeChooserClick(event)}
 
@@ -1255,7 +1276,7 @@ function dragStart(event, elem) {
   dragging = event.position
   console.log('Drag started at', dragging.x, dragging.y)
 
-  var anchor = window.createAnchor()
+  var anchor = createAnchor()
   anchor.style.zIndex = null
   anchor.style.opacity = '0%'
   anchor.style.cursor = elem.style.cursor
