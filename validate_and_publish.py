@@ -12,7 +12,6 @@ api = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}'
 issue = 9 # os.environ.get('ISSUE_ID')
 j = requests.get(f'{api}/issues/{issue}').json()
 
-print(j['labels'])
 if not any([label['name'] == 'new puzzle' for label in j['labels']]):
     print('This issue was not a puzzle request.')
     exit()
@@ -24,7 +23,7 @@ with open('play_template.html', 'r', encoding='utf-8') as f:
     contents = f.read()
 
 tempfile = Path('temp.html')
-with tempfile.open('r', encoding='utf-8') as f:
+with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents.replace('%puzzle%', puzzle))
 
 # Do automation stuff here
