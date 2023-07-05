@@ -1,0 +1,22 @@
+name: Publish Puzzle
+on:
+  push:
+  issues:
+    types: [opened, reopened]
+
+  concurrency:
+    group: ${{ github.workflow }} # Limit to one publish action at a time, others will queue behind.
+
+  jobs:
+    run:
+      runs-on: ubuntu-latest
+
+      steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1 # No need for history
+      - run: python3 validate_and_publish.py
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          API_KEY: ${{ secrets.API_KEY }}
