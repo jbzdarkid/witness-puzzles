@@ -12,6 +12,7 @@ api = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}'
 issue = 9 # os.environ.get('ISSUE_ID')
 j = requests.get(f'{api}/issues/{issue}').json
 
+print(j['labels'])
 if not any([label['name'] == 'new puzzle' for label in j['labels']]):
     print('This issue was not a puzzle request.')
     exit()
