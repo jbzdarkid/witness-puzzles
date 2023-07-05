@@ -21,7 +21,7 @@ if not any([label['name'] == 'new puzzle' for label in j['labels']]):
     print('This issue was not a puzzle request.')
     exit(1)
 
-with open('validate.html', 'r', encoding='utf-8') as f:
+with open('.github/workflows/validate.html', 'r', encoding='utf-8') as f:
     contents = f.read()
 
 tempfile = Path('temp.html').resolve()
@@ -70,7 +70,7 @@ display_hash = display_hash.replace('1', 'C')
 display_hash = display_hash.replace('0', 'D')
 puzzle = get_puzzle(display_hash)
 
-with open('play_template.html', 'r', encoding='utf-8') as f:
+with open('.github/workflows/play_template.html', 'r', encoding='utf-8') as f:
     contents = f.read()
 
 contents = contents
