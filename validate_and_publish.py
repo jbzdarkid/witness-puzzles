@@ -57,13 +57,23 @@ while 1:
 
 
 
-display_hash = # ...
+"""
+h = sha256()
+h.update(puzzle_json.encode())
+display_hash = h.hexdigest()[:8].upper()
+display_hash = display_hash.replace('I', 'A')
+display_hash = display_hash.replace('O', 'B')
+display_hash = display_hash.replace('1', 'C')
+display_hash = display_hash.replace('0', 'D')
+puzzle = get_puzzle(display_hash)
+
 contents = contents
     .replace('%title%', puzzle.name)
     .replace('%display_hash%', puzzle.display_hash)
     .replace('%solution%', puzzle.display_hash)
     .replace('%puzzle%', puzzle.display_hash)
     .replace('%image%', puzzle.display_hash)
+"""
 
 
 
