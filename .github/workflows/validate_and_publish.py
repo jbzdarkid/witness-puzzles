@@ -40,6 +40,7 @@ subprocess.run(['sudo', 'dpkg', '-i', '/tmp/chrome.deb'], check=True)
 subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
 
 
+import sys
 subprocess.run([sys.executable, '-m', 'pip', 'install', 'selenium==4.10.0'])
 subprocess.run([sys.executable, '-m', 'pip', 'install', 'chromedriver-py==110.*'])
 
