@@ -41,23 +41,12 @@ subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
 
 print('Verifying puzzle...')
 os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
+os.environ['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=/run/user/1000/bus'
 
 # https://developer.chrome.com/articles/new-headless
 dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
 
 print(dom)
-
-for _ in range(60):
-    sleep(1)
-    retcode = p.poll()
-    if retcode:
-        print('Error:', retcode)
-        print('stderr:', p.stderr.read())
-        exit(2)
-        break
-    line = p.stdout.readline()
-    print(line)
-
 
 
 """
