@@ -50,8 +50,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, JavascriptException
-from PIL import Image
-import boto3
 
 options = webdriver.chrome.options.Options()
 options.add_argument('headless')
