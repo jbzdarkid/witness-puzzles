@@ -44,7 +44,7 @@ import sys
 subprocess.run([sys.executable, '-m', 'pip', 'install', 'selenium==4.10.0'])
 subprocess.run([sys.executable, '-m', 'pip', 'install', 'chromedriver-py==110.*'])
 
-from chromedriver_py import binary_path
+# from chromedriver_py import binary_path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
