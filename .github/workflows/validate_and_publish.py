@@ -39,6 +39,38 @@ subprocess.run([
 subprocess.run(['sudo', 'dpkg', '-i', '/tmp/chrome.deb'], check=True)
 subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
 
+
+subprocess.run([sys.executable, '-m', 'pip', 'install', 'selenium==4.10.0'])
+subprocess.run([sys.executable, '-m', 'pip', 'install', 'chromedriver-py==110.*'])
+
+from chromedriver_py import binary_path
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException, JavascriptException
+from PIL import Image
+import boto3
+
+options = webdriver.chrome.options.Options()
+options.add_argument('headless')
+os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
+validate_page = 'file:///' + __file__.replace(__name__ + '.py', 'pages/validate.html')
+service = webdriver.chrome.service.Service(executable_path=binary_path)
+driver = webdriver.Chrome(options=options, service=service)
+driver.get(validate_page)
+
+# Wait for page to load, then run the script and wait for a response.
+driver.refresh()
+WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
+driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)})') # JSON escapement for solution_json
+result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
+data = json.loads(result.get_attribute('data'))
+
+print(data)
+
+
+"""
 print('Verifying puzzle...')
 os.environ['LD_LIBRARY_PATH'] = '/opt/google/chrome/lib/:' + os.environ.get('LD_LIBRARY_PATH', '')
 os.environ['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=/run/user/1000/bus'
@@ -47,7 +79,7 @@ os.environ['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=/run/user/1000/bus'
 dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
 
 print(dom)
-
+"""
 
 """
 h = sha256()
