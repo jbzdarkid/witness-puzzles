@@ -4,7 +4,9 @@ import json
 import os
 import requests
 import subprocess
+import sys
 
+print(sys.argv)
 
 print('Loading puzzle submission...')
 api = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}'
