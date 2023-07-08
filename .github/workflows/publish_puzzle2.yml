@@ -1,11 +1,7 @@
-name: Publish Puzzle
+name: Publish Puzzle 2
 on:
   push:
   workflow_dispatch:
-    inputs:
-      puzzle:
-        required: true
-        type: string
 
 concurrency:
   group: ${{ github.workflow }} # Limit to one publish action at a time, others will queue behind.
