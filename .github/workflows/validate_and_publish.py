@@ -6,29 +6,23 @@ import requests
 import subprocess
 import sys
 
-print(sys.argv)
-
+"""
 print('Loading puzzle submission...')
 api = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}'
-
-issue = 9 # os.environ.get('ISSUE_ID')
 headers = {
     'Accept': 'application/vnd.github.v3+json',
     'Authorization': 'Bearer ' + os.environ['GITHUB_TOKEN'],
     'User-Agent': 'Witness Puzzles/3.0 (https://github.com/jbzdarkid/witness-puzzles)',
 }
-j = requests.get(f'{api}/issues/{issue}', headers=headers).json()
-
-if not any([label['name'] == 'new puzzle' for label in j['labels']]):
-    print('This issue was not a puzzle request.')
-    exit(1)
+"""
 
 with open('.github/workflows/validate.html', 'r', encoding='utf-8') as f:
     contents = f.read()
 
 tempfile = Path('temp.html').resolve()
 with tempfile.open('w', encoding='utf-8') as f:
-    f.write(contents.replace('%puzzle%', j['body'])) # Let javascript do the object load; we'll be happy with whatever.
+    puzzle = sys.argv[1]
+    f.write(contents.replace('%puzzle%', puzzle)) # Let javascript do the object load; we'll be happy with whatever.
 
 print('Installing chrome...')
 chrome_version = '110.0.5481.177-1'
@@ -41,10 +35,6 @@ subprocess.run([
 subprocess.run(['sudo', 'dpkg', '-i', '/tmp/chrome.deb'], check=True)
 subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
 
-
-import sys
-#subprocess.run([sys.executable, '-m', 'pip', 'install', 'selenium==4.10.0'])
-#subprocess.run([sys.executable, '-m', 'pip', 'install', 'chromedriver-py==110.*'])
 
 from chromedriver_py import binary_path
 from selenium import webdriver

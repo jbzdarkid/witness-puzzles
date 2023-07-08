@@ -1,6 +1,5 @@
 name: Publish Puzzle
 on:
-  push:
   workflow_dispatch:
     inputs:
       puzzle:
@@ -18,9 +17,8 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1 # No need for git history
-    - run: echo ${{ inputs.puzzle }}
-    #- run: python3 -m pip install selenium==4.10.0
-    #- run: python3 -m pip install chromedriver-py==110.*
+    - run: python3 -m pip install selenium==4.10.0
+    - run: python3 -m pip install chromedriver-py==110.*
     - run: python3 -u .github/workflows/validate_and_publish.py ${{ inputs.puzzle }}
       timeout-minutes: 5
       env:
