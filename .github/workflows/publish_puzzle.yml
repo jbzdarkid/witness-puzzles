@@ -1,7 +1,7 @@
 name: Publish Puzzle
 on:
   repository_dispatch:
-    - types: [validate_puzzle]
+    types: [validate_puzzle]
   push:
   issues:
     types: [opened, reopened]
