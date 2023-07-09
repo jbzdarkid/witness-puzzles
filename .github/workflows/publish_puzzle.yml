@@ -1,4 +1,4 @@
-name: Publish Puzzle
+name: Validate and publish
 on:
   workflow_dispatch:
     inputs:
@@ -14,18 +14,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Cloning the repo
+      uses: actions/checkout@v2
       with:
         fetch-depth: 1 # No need for git history
-    - name: Setting up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    - name: Install dependencies
+    - name: Installing dependencies
       run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
-    - name: Validate puzzle
+    - name: Validating puzzle
       run: python .github/workflows/validate_and_publish.py ${{ inputs.puzzle }}
-    - uses: actions/upload-artifact@v2
+      with:
+        env:
+          PUZZLE: ${{ inputs.puzzle }}
+    - name: Publishing puzzle
+      uses: actions/upload-artifact@v2
       if: always()
       with:
         path: 'temp.html'
