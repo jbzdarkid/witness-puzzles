@@ -2,7 +2,13 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import chromedriver_autoinstaller
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException, JavascriptException
 from pyvirtualdisplay import Display
+
 display = Display(visible=0, size=(800, 800))  
 display.start()
 
@@ -33,11 +39,24 @@ for option in options:
     
 driver = webdriver.Chrome(options = chrome_options)
 
-driver.get('http://github.com')
-print(driver.title)
+contents = open('.github/workflows/validate.html', 'r', encoding='utf-8').read()
+puzzle = sys.argv[1]
+contents = contents.replace('%puzzle%', puzzle) # Let javascript do the object load; we'll be happy with whatever.
+
+tempfile = Path('temp.html').resolve()
+with tempfile.open('w', encoding='utf-8') as f:
+    f.write(contents.replace('%puzzle%', puzzle))
+
+driver.get(tempfile.as_uri())
 with open('./GitHub_Action_Results.txt', 'w') as f:
     f.write(f"This was written with a GitHub action {driver.title}")
 
+# Wait for page to load, then run the script and wait for a response.
+WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
+driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)})') # JSON escapement for solution_json
+result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
+data = json.loads(result.get_attribute('data'))
+print(data)
 
 
 exit()
