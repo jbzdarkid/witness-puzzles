@@ -34,5 +34,9 @@ jobs:
     - run: echo ${{ inputs.puzzle }}
     - name: Run script
       run: python .github/workflows/validate_and_publish.py ${{ inputs.puzzle }}
+    - uses: actions/upload-artifact@v2
+      with:
+        path: 'temp.html'
+        if-no-files-found: ignore
 
 
