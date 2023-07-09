@@ -62,7 +62,6 @@ with open('./GitHub_Action_Results.txt', 'w') as f:
 
 # Wait for page to load, then run the script and wait for a response.
 WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-driver.execute_script(f'validate_and_capture_image({json.dumps(solution_json)})') # JSON escapement for solution_json
 result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
 data = json.loads(result.get_attribute('data'))
 print(data)
