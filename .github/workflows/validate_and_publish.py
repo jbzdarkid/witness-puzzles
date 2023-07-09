@@ -15,7 +15,6 @@ from pathlib import Path
 from time import sleep
 import json
 import os
-import requests
 import subprocess
 import sys
 
