@@ -50,7 +50,7 @@ driver = webdriver.Chrome(options = chrome_options)
 
 contents = open('.github/workflows/validate.html', 'r', encoding='utf-8').read()
 puzzle = sys.argv[1]
-contents = contents.replace('%puzzle%', puzzle) # Let javascript do the object load; we'll be happy with whatever.
+contents = contents.replace('%solution_json%', puzzle) # Let javascript do the object load; we'll be happy with whatever.
 
 tempfile = Path('temp.html').resolve()
 with tempfile.open('w', encoding='utf-8') as f:
