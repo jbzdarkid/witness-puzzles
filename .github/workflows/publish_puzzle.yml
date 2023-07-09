@@ -32,6 +32,6 @@ jobs:
     - name: Install xvfb
       run: sudo apt-get install xvfb
     - name: Run script
-      run: python3 -u .github/workflows/validate_and_publish.py
+      run: python .github/workflows/validate_and_publish.py
 
 
