@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, JavascriptException
 from pyvirtualdisplay import Display
+import sys
 
 display = Display(visible=0, size=(800, 800))  
 display.start()
