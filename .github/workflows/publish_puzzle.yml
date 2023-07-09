@@ -17,14 +17,19 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1 # No need for git history
-    - run: sudo apt-get install xvfb
-    - run: python3 -m pip install pyvirtualdisplay
-    - run: python3 -u .github/workflows/validate_and_publish.py ${{ inputs.puzzle }}
-      timeout-minutes: 5
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        API_KEY: ${{ secrets.API_KEY }}
-    - uses: actions/upload-artifact@v2
+    - name: Setting up Python
+      uses: actions/setup-python@v4
       with:
-        path: '*.png'
-        if-no-files-found: ignore
+        python-version: '3.9'
+    - name: Installing package list
+      run: apt list --installed    
+    - name: Removing previous chrome instances on runner 
+      run: sudo apt purge google-chrome-stable  
+      
+      # Need to fetch reqs if needed
+    - name: Installing all necessary packages
+      run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
+    - name: Install xvfb
+      run: sudo apt-get install xvfb
+
+
