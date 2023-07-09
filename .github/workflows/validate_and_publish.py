@@ -62,7 +62,11 @@ with open('./GitHub_Action_Results.txt', 'w') as f:
 
 # Wait for page to load, then run the script and wait for a response.
 WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
-result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
+try:
+    result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
+except:
+    for entry in driver.get_log('browser'):
+        print(entry)
 data = json.loads(result.get_attribute('data'))
 print(data)
 
