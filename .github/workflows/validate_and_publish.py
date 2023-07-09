@@ -16,24 +16,41 @@ headers = {
 }
 """
 
-with open('.github/workflows/validate.html', 'r', encoding='utf-8') as f:
-    contents = f.read()
-
-tempfile = Path('temp.html').resolve()
-with tempfile.open('w', encoding='utf-8') as f:
-    puzzle = sys.argv[1]
-    f.write(contents.replace('%puzzle%', puzzle)) # Let javascript do the object load; we'll be happy with whatever.
+from pyvirtualdisplay import Display
+Display(visible=0, size=(800, 800)).start()
 
 print('Installing chrome...')
 chrome_version = '110.0.5481.177-1'
 subprocess.run([
-  'wget',
-  '--no-verbose',
-  '-O', '/tmp/chrome.deb',
-  f'https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_{chrome_version}_amd64.deb',
+    'wget',
+    '--no-verbose',
+    '-O', '/tmp/chrome.deb',
+    f'https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_{chrome_version}_amd64.deb',
 ], check=True)
 subprocess.run(['sudo', 'dpkg', '-i', '/tmp/chrome.deb'], check=True)
 subprocess.run(['sudo', 'apt', '--fix-broken', 'install', '-y'], check=True)
+
+
+contents = open('.github/workflows/validate.html', 'r', encoding='utf-8').read()
+puzzle = sys.argv[1]
+contents = contents.replace('%puzzle%', puzzle) # Let javascript do the object load; we'll be happy with whatever.
+
+tempfile = Path('temp.html').resolve()
+with tempfile.open('w', encoding='utf-8') as f:
+    f.write(contents.replace('%puzzle%', puzzle))
+
+
+# https://developer.chrome.com/articles/new-headless
+dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--window-size=1200,1200', '--ignore-certificate-errors', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
+print(dom)
+
+
+
+
+
+
+
+exit()
 
 
 from chromedriver_py import binary_path
