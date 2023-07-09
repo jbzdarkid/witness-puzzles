@@ -31,7 +31,7 @@ jobs:
       run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
     - name: Install xvfb
       run: sudo apt-get install xvfb
-    - run: echo ${{ inputs }}
+    - run: echo ${{ inputs.puzzle }}
     - name: Run script
       run: python .github/workflows/validate_and_publish.py ${{ inputs.puzzle }}
 
