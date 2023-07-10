@@ -23,5 +23,11 @@ jobs:
       env:
         PUZZLE: ${{ inputs.puzzle }}
     - name: Publishing puzzle
-      run: git add .; git commit --author="Automatic v&p workflow <jbzdarkid@users.noreply.github.com>" -m "Published puzzle ${{ env.display_hash }}"; git show HEAD
+      run: |
+        git add .
+        git config user.email "jbzdarkid@users.noreply.github.com"
+        git config user.name "Validate and publish workflow"
+        git commit -m "Published puzzle ${{ env.display_hash }}"
+        # git push
+        git show HEAD
 
