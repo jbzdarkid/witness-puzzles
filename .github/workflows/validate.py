@@ -15,7 +15,7 @@ with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents)
 
 args = ['google-chrome-stable', tempfile.as_uri(), '--window=size=1200,1200', '--headless=new', '--dump-dom']
-dom = subprocess.run(args, text=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
+dom = subprocess.run(args, text=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True).stdout
 
 start = dom.index('src="data:image/svg+xml;base64,') + len('src="data:image/svg+xml;base64,')
 end   = dom.index('">\n', start)
