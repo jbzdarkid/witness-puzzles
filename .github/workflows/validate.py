@@ -34,7 +34,9 @@ solution_path = data['solution_path'] # TODO: Encrypt?
 alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' # Everything but 0, O, 1, I
 display_hash = ''.join(random.choices(alphabet, k=8))
 image_url = Path(f'images/{display_hash[:2]}/{display_hash}.png')
+image_url.parent.mkdir(parents=True, exist_ok=True)
 page_url = Path(f'play/{display_hash}.html')
+page_url.parent.mkdir(parents=True, exist_ok=True)
 
 print('Creating puzzle page...')
 with image_url.open('x+b') as f:
