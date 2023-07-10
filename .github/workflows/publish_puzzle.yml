@@ -23,5 +23,5 @@ jobs:
       env:
         PUZZLE: ${{ inputs.puzzle }}
     - name: Publishing puzzle
-      run: git diff
+      run: git add .; git commit -m "Published puzzle ${{ env.display_hash }}"; git show HEAD
 

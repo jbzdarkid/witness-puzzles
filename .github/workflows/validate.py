@@ -54,7 +54,9 @@ with open(page_url, 'x', encoding='utf-8') as f:
     f.write(contents)
 
 contents = open('puzzle_list.js', 'r', encoding='utf-8').read().split('\n')
-contents.insert(1, f'{display_hash}{title}')
+contents.insert(1, f'"{display_hash}{title}",')
 with open('puzzle_list.js', 'w', encoding='utf-8') as f:
     f.write('\n'.join(contents))
 
+# Needed for the commit message. Don't use the title because it's user-controlled, and thus an attack vector.
+os.environ['GITHUB_OUTPUT'] = f'display_hash={display_hash}'
