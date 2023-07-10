@@ -33,7 +33,7 @@ print(dom)
 print('='*100)
 
 start = dom.index('data:image/svg+xml;base64,') - len('data:image/svg+xml;base64,')
-end   = dom.index('">', img_data_start)
+end   = dom.index('">', start)
 img_data = dom[start:end]
 print(img_data)
 
