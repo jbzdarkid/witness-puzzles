@@ -13,20 +13,18 @@
   </head>
   <script>
     window.setLogLevel('error')
+
     var setData = function(data) {
-      var result = document.createElement('p')
-      result.id = 'result'
-      result.data = JSON.stringify(data)
-      document.body.append(result)
+      document.body.innerHTML = '!'.repeat(3) + JSON.stringify(data) + '@'.repeat(3)
     }
 
     window.onload = function() {
       var data = {}
       var puzzleData = null
       try {
-        var solution_json = %solution_json%
-        var puzzle = Puzzle.deserialize(JSON.stringify(solution_json))
-        var path = solution_json['path'] // Path is passed as an extra property on the solution_json
+        var input_data = %input_data%
+        var puzzle = Puzzle.deserialize(JSON.stringify(input_data))
+        var path = input_data['path'] // Path is passed as an extra property on the solution_json
         validate_user_data(puzzle, path)
 
         // Although we were passed a drawn solution object, we clear, redraw, and revalidate to make sure
@@ -48,6 +46,7 @@
         data.title = puzzle.name
         puzzle.clearLines()
         data.puzzle_json = puzzle.serialize()
+        data.solution_path = path
         window.draw(puzzle)
 
         // All of this is just to take a clean screenshot. Since these screenshots are publicly hosted,
@@ -63,7 +62,7 @@
           var ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0)
           // Base-64 encode the image, which python should just be able to read.
-          data.screenshot = canvas.toDataURL() // Defaults to PNG, 100%
+          data.screenshot = canvas.toDataURL('image/png') // Defaults to PNG, 100%
           return setData(data)
         }
 

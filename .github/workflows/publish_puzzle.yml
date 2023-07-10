@@ -23,10 +23,5 @@ jobs:
       env:
         PUZZLE: ${{ inputs.puzzle }}
     - name: Publishing puzzle
-      uses: actions/upload-artifact@v2
-      if: always()
-      with:
-        path: 'temp.html'
-        if-no-files-found: ignore
-
+      run: git diff
 
