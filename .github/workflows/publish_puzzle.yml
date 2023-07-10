@@ -22,9 +22,8 @@ jobs:
       run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
     - name: Validating puzzle
       run: python .github/workflows/validate.py
-      with:
-        env:
-          PUZZLE: ${{ inputs.puzzle }}
+      env:
+        PUZZLE: ${{ inputs.puzzle }}
     - name: Publishing puzzle
       uses: actions/upload-artifact@v2
       if: always()
