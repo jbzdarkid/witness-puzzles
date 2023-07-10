@@ -42,12 +42,6 @@ options = [
     #'--remote-debugging-port=9222'
 ]
 
-for option in options:
-    chrome_options.add_argument(option)
-
-    
-driver = webdriver.Chrome(options = chrome_options)
-
 contents = open('.github/workflows/template_validate.html', 'r', encoding='utf-8').read()
 puzzle = os.environ['PUZZLE']
 contents = contents.replace('%solution_json%', puzzle) # Let javascript do the object load; we'll be happy with whatever.
@@ -56,12 +50,17 @@ tempfile = Path('temp.html').resolve()
 with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents.replace('%puzzle%', puzzle))
 
-driver.get(tempfile.as_uri())
-with open('./GitHub_Action_Results.txt', 'w') as f:
-    f.write(f"This was written with a GitHub action {driver.title}")
+dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), *options, '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
+print(dom)
 
-# Wait for page to load, then run the script and wait for a response.
-WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'puzzle')))
+# This works but I don't wanna use selenium if I don't have to.
+"""
+for option in options:
+    chrome_options.add_argument(option)
+
+driver = webdriver.Chrome(options = chrome_options)
+driver.get(tempfile.as_uri())
+
 try:
     result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
 except:
@@ -69,7 +68,7 @@ except:
         print(entry)
 data = json.loads(result.get_attribute('data'))
 print(data)
-
+"""
 
 exit()
 
