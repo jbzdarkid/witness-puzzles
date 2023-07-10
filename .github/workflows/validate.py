@@ -9,15 +9,6 @@ import sys
 display = Display(visible=0, size=(800, 800))  
 display.start()
 
-chromedriver_autoinstaller.install()  # Check if the current version of chromedriver exists
-                                      # and if it doesn't exist, download it automatically,
-                                      # then add chromedriver to path
-
-# Add your options as needed    
-options = [
-    "--window-size=1200,1200",
-    "--ignore-certificate-errors"
-]
 
 contents = open('.github/workflows/template_validate.html', 'r', encoding='utf-8').read()
 puzzle = os.environ['PUZZLE']
@@ -29,7 +20,7 @@ with tempfile.open('w', encoding='utf-8') as f:
 
 dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--window=size=1200,1200', '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
 
-start = dom.index('src="data:image/svg+xml;base64,') - len('src="data:image/svg+xml;base64,')
+start = dom.index('src="data:image/svg+xml;base64,') + len('src="data:image/svg+xml;base64,')
 end   = dom.index('">\n', start)
 img_data = dom[start:end]
 print(img_data)
