@@ -21,7 +21,7 @@ jobs:
     - name: Installing dependencies
       run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
     - name: Validating puzzle
-      run: python .github/workflows/validate_and_publish.py ${{ inputs.puzzle }}
+      run: python .github/workflows/validate.py
       with:
         env:
           PUZZLE: ${{ inputs.puzzle }}
