@@ -33,8 +33,8 @@ solution_path = data['solution_path'] # TODO: Encrypt?
 # (Also, I'm flattening the alphabet ahead of time to avoid letter bias.)
 alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' # Everything but 0, O, 1, I
 display_hash = ''.join(random.choices(alphabet, k=8))
-image_url = f'images/{display_hash[:2]}/{display_hash}.png'
-page_url = f'play/{display_hash}.html'
+image_url = Path(f'images/{display_hash[:2]}/{display_hash}.png').resolve()
+page_url = Path(f'play/{display_hash}.html').resolve()
 
 print('Creating puzzle page...')
 with open(image_url, 'x+b') as f:
