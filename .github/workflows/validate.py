@@ -28,7 +28,7 @@ with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents)
 
 dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--window=size=1200,1200', '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
-img_data_start = dom.index('data:image/svg+xml;base64,') = len('data:image/svg+xml;base64,')
+img_data_start = dom.index('data:image/svg+xml;base64,') - len('data:image/svg+xml;base64,')
 img_data = dom[img_data_start:dom.index('">')]
 print(img_data)
 
