@@ -8,7 +8,7 @@ function onSubmit(e) {
   var headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'Accept': 'application/vnd.github+json',
-    'Authorization': 'Bearer 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',
+    'Authorization': 'Bearer ghp_token',
     'X-GitHub-Api-Version': '2022-11-28',
   }
   var options = {
