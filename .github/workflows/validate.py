@@ -41,11 +41,11 @@ with open(image_url, 'wb') as f:
     f.write(img_bytes)
 
 contents = open('.github/workflows/template_play.html', 'r', encoding='utf-8').read()
-contents = contents
-    .replace('%title%', title)
-    .replace('%display_hash%', display_hash)
-    .replace('%image_url%', image_url)
-    .replace('%puzzle%', puzzle)
+contents = contents \
+    .replace('%title%', title) \
+    .replace('%display_hash%', display_hash) \
+    .replace('%image_url%', image_url) \
+    .replace('%puzzle%', puzzle) \
     .replace('%solution%', solution_path)
 with open(page_url, 'w', encoding='utf-8') as f:
     f.write(contents)
