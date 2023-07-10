@@ -32,8 +32,8 @@ solution_path = data['solution_path'] # TODO: Encrypt
 
 # This is a slightly updated display_hash solution -- rather than hashing the puzzle, I'm just generating a random ID every time.
 # (Also, I'm flattening the alphabet ahead of time to avoid letter bias.)
-alphabet = ['23456789ABCDEFGHJKLMNPQRSTUVWXYZ']
-display_hash = ''.join(itertools.product(8, alphabet))
+alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+display_hash = ''.join(itertools.product(alphabet, repeat=8))
 image_url = f'images/{display_hash[:2]}/{display_hash}.png'
 page_url = f'play/{display_hash}.html'
 
