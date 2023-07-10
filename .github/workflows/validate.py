@@ -1,18 +1,6 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 import chromedriver_autoinstaller
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException, JavascriptException
 from pyvirtualdisplay import Display
 from pathlib import Path
-import json
-import sys
-from pathlib import Path
-from time import sleep
 import json
 import os
 import subprocess
@@ -25,21 +13,10 @@ chromedriver_autoinstaller.install()  # Check if the current version of chromedr
                                       # and if it doesn't exist, download it automatically,
                                       # then add chromedriver to path
 
-chrome_options = webdriver.ChromeOptions()    
 # Add your options as needed    
 options = [
-  # Define window size here
-   "--window-size=1200,1200",
+    "--window-size=1200,1200",
     "--ignore-certificate-errors"
- 
-    #"--headless",
-    #"--disable-gpu",
-    #"--window-size=1920,1200",
-    #"--ignore-certificate-errors",
-    #"--disable-extensions",
-    #"--no-sandbox",
-    #"--disable-dev-shm-usage",
-    #'--remote-debugging-port=9222'
 ]
 
 contents = open('.github/workflows/template_validate.html', 'r', encoding='utf-8').read()
@@ -48,27 +25,13 @@ contents = contents.replace('%solution_json%', puzzle) # Let javascript do the o
 
 tempfile = Path('temp.html').resolve()
 with tempfile.open('w', encoding='utf-8') as f:
-    f.write(contents.replace('%puzzle%', puzzle))
+    f.write(contents)
 
-dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), *options, '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
-print(dom)
+dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--window=size=1200,1200', '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
+img_data_start = dom.index('data:image/svg+xml;base64,') = len('data:image/svg+xml;base64,')
+img_data = dom[img_data_start:dom.index('">')]
+print(img_data)
 
-# This works but I don't wanna use selenium if I don't have to.
-"""
-for option in options:
-    chrome_options.add_argument(option)
-
-driver = webdriver.Chrome(options = chrome_options)
-driver.get(tempfile.as_uri())
-
-try:
-    result = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, 'result')))
-except:
-    for entry in driver.get_log('browser'):
-        print(entry)
-data = json.loads(result.get_attribute('data'))
-print(data)
-"""
 
 exit()
 
