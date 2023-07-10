@@ -19,7 +19,7 @@ jobs:
       with:
         fetch-depth: 1 # No need for git history
     - name: Validating puzzle
-      run: python .github/workflows/validate.py
+      run: python -u .github/workflows/validate.py
       env:
         PUZZLE: ${{ inputs.puzzle }}
     - name: Publishing puzzle

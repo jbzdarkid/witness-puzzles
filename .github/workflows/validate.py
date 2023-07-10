@@ -17,10 +17,11 @@ args = ['google-chrome-stable', tempfile.as_uri(), '--headless=new', '--dump-dom
 dom = subprocess.run(args, text=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True).stdout
 
 data = dom[dom.index('!!!')+3:dom.index('@@@')]
-print(data)
 data = json.loads(data)
 if not data.get('valid', False):
     print('Puzzle was not valid:', data['error'])
+    import sys
+    sys.stdout.flush()
     exit(1)
 print('Puzzle validated!')
 
