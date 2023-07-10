@@ -1,4 +1,5 @@
 from pathlib import Path
+import base64
 import json
 import os
 import random
@@ -25,7 +26,7 @@ print('Puzzle validated!')
 
 # Extract data from the data (in case we fail, not that we should)
 title = data['title']
-img_bytes = data['screenshot'][len('data:image/png;base64,'):] # Remove prefix
+img_bytes = base64.b64decode(data['screenshot'][len('data:image/png;base64,'):])
 puzzle_json = data['puzzle_json']
 solution_path = data['solution_path'] # TODO: Encrypt?
 
