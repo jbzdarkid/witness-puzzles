@@ -12,8 +12,6 @@
     <script type="text/javascript" src="engine/trace2.js"></script>
   </head>
   <script>
-    var solution_json = %solution_json%
-
     window.setLogLevel('error')
     var setData = function(data) {
       var result = document.createElement('p')
@@ -22,13 +20,13 @@
       document.body.append(result)
     }
 
-    // Anonymous, immediately-executed function to allow for 'return'
-    (function() {
+    window.onload = function() {
       var data = {}
       var puzzleData = null
       try {
-        var puzzle = Puzzle.deserialize(solution_json)
-        var path = JSON.parse(solution_json)['path'] // Path is passed as an extra property on the solution_json
+        var solution_json = %solution_json%
+        var puzzle = Puzzle.deserialize(JSON.stringify(solution_json))
+        var path = solution_json['path'] // Path is passed as an extra property on the solution_json
         validate_user_data(puzzle, path)
 
         // Although we were passed a drawn solution object, we clear, redraw, and revalidate to make sure
@@ -74,7 +72,7 @@
         console.error(exc.stack)
         return setData(data)
       }
-    })();
+    }
   </script>
   <body>
     <svg id="puzzle"></svg>
