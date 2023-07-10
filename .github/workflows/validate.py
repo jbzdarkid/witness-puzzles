@@ -1,10 +1,6 @@
-from pyvirtualdisplay import Display
 from pathlib import Path
 import os
 import subprocess
-
-#display = Display(visible=0, size=(800, 800))  
-#display.start()
 
 contents = open('.github/workflows/template_validate.html', 'r', encoding='utf-8').read()
 puzzle = os.environ['PUZZLE']
