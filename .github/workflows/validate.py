@@ -31,13 +31,13 @@ solution_path = data['solution_path'] # TODO: Encrypt?
 
 # This is a slightly updated display_hash solution -- rather than hashing the puzzle, I'm just generating a random ID every time.
 # (Also, I'm flattening the alphabet ahead of time to avoid letter bias.)
-alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' # Everything but 0, O, 1, I
 display_hash = ''.join(random.choices(alphabet, k=8))
-image_url = Path(f'images/{display_hash[:2]}/{display_hash}.png').resolve()
-page_url = Path(f'play/{display_hash}.html').resolve()
+image_url = f'images/{display_hash[:2]}/{display_hash}.png'
+page_url = f'play/{display_hash}.html'
 
 print('Creating puzzle page...')
-with image_url.open('wb') as f:
+with open(image_url, 'x+b') as f:
     f.write(img_bytes)
 
 contents = open('.github/workflows/template_play.html', 'r', encoding='utf-8').read()
@@ -47,10 +47,10 @@ contents = contents \
     .replace('%image_url%', image_url) \
     .replace('%puzzle%', puzzle) \
     .replace('%solution%', solution_path)
-with page_url.open('w', encoding='utf-8') as f:
+with open(page_url, 'x+', encoding='utf-8') as f:
     f.write(contents)
 
-with open('puzzle_list.js', 'a', encoding='utf-8') as f:
+with open('puzzle_list.js', 'a+', encoding='utf-8') as f:
     contents = f.read().split('\n')
     contents.insert(1, f'{display_hash}{title}')
     f.seek(0)
