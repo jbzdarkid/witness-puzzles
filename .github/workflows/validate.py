@@ -17,6 +17,8 @@ with tempfile.open('w', encoding='utf-8') as f:
 args = ['google-chrome-stable', tempfile.as_uri(), '--headless=new', '--dump-dom']
 dom = subprocess.run(args, text=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True).stdout
 
+tempfile.unlink() # So that it doesn't get committed
+
 data = dom[dom.index('!!!')+3:dom.index('@@@')]
 data = json.loads(data)
 if not data.get('valid', False):
@@ -48,7 +50,7 @@ contents = contents \
     .replace('%title%', title) \
     .replace('%display_hash%', display_hash) \
     .replace('%image_url%', image_url) \
-    .replace('%puzzle%', puzzle) \
+    .replace('%puzzle%', puzzle_json) \
     .replace('%solution%', solution_path)
 with open(page_url, 'x', encoding='utf-8') as f:
     f.write(contents)
