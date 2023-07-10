@@ -46,7 +46,7 @@
         data.title = puzzle.name
         puzzle.clearLines()
         data.puzzle_json = puzzle.serialize()
-        data.solution_path = path
+        data.solution_path = JSON.stringify(path)
         window.draw(puzzle)
 
         // All of this is just to take a clean screenshot. Since these screenshots are publicly hosted,
