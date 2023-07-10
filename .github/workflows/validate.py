@@ -28,18 +28,10 @@ with tempfile.open('w', encoding='utf-8') as f:
     f.write(contents)
 
 dom = subprocess.check_output(['google-chrome-stable', tempfile.as_uri(), '--window=size=1200,1200', '--headless=new', '--dump-dom'], text=True, encoding='utf-8')
-print('-'*100)
-print(dom)
-print('='*100)
 
 start = dom.index('src="data:image/svg+xml;base64,') - len('src="data:image/svg+xml;base64,')
-end   = dom.index('">', start)
-print(dom.index('">', start))
-print(dom.index('">\r', start))
-print(dom.index('">\n', start))
+end   = dom.index('">\n', start)
 img_data = dom[start:end]
-print(dom[start:start+100])
-print(dom[end-100:end])
 print(img_data)
 
 
