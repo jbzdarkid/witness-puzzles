@@ -40,7 +40,7 @@ Path(image_url).parent.mkdir(parents=True, exist_ok=True)
 Path(page_url).parent.mkdir(parents=True, exist_ok=True)
 
 print('Creating puzzle page...')
-with open(image_url, 'x+b') as f:
+with open(image_url, 'xb') as f:
     f.write(img_bytes)
 
 contents = open('.github/workflows/template_play.html', 'r', encoding='utf-8').read()
@@ -50,12 +50,11 @@ contents = contents \
     .replace('%image_url%', image_url) \
     .replace('%puzzle%', puzzle) \
     .replace('%solution%', solution_path)
-with open(page_url, 'x+', encoding='utf-8') as f:
+with open(page_url, 'x', encoding='utf-8') as f:
     f.write(contents)
 
-with open('puzzle_list.js', 'a+', encoding='utf-8') as f:
-    contents = f.read().split('\n')
-    contents.insert(1, f'{display_hash}{title}')
-    f.seek(0)
+contents = open('puzzle_list.js', 'r', encoding='utf-8').read().split('\n')
+contents.insert(1, f'{display_hash}{title}')
+with open('puzzle_list.js', 'w', encoding='utf-8') as f:
     f.write('\n'.join(contents))
 
