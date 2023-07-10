@@ -1,7 +1,7 @@
 from pathlib import Path
-import itertools
 import json
 import os
+import random
 import subprocess
 
 print('Validating puzzle...')
@@ -20,8 +20,6 @@ data = dom[dom.index('!!!')+3:dom.index('@@@')]
 data = json.loads(data)
 if not data.get('valid', False):
     print('Puzzle was not valid:', data['error'])
-    import sys
-    sys.stdout.flush()
     exit(1)
 print('Puzzle validated!')
 
@@ -29,12 +27,12 @@ print('Puzzle validated!')
 title = data['title']
 img_bytes = data['screenshot'][len('data:image/png;base64,'):] # Remove prefix
 puzzle_json = data['puzzle_json']
-solution_path = data['solution_path'] # TODO: Encrypt
+solution_path = data['solution_path'] # TODO: Encrypt?
 
 # This is a slightly updated display_hash solution -- rather than hashing the puzzle, I'm just generating a random ID every time.
 # (Also, I'm flattening the alphabet ahead of time to avoid letter bias.)
 alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-display_hash = ''.join(itertools.product(alphabet, repeat=8))
+display_hash = ''.join(random.choices(alphabet, k=8))
 image_url = f'images/{display_hash[:2]}/{display_hash}.png'
 page_url = f'play/{display_hash}.html'
 
