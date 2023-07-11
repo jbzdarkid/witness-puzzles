@@ -5,6 +5,23 @@ import os
 import random
 import subprocess
 
+def gpg_encrypt(plaintext, key):
+    # For security reasons, GPG always prefers to read and write from files.
+    tmp = os.environ['TMPDIR']
+    with open(f'{tmp}/plaintext.txt', 'w') as f:
+        f.write(plaintext)
+    with open(f'{tmp}/key.txt', 'w') as f:
+        f.write(key)
+    subprocess.run([
+        'gpg',
+        '--cipher-algo AES256',
+        '-c', f'{tmp}/plaintext.txt'
+        '--passphrase-file', f'{tmp}/key.txt',
+        '-o', f'{tmp}/ciphertext.txt',
+    ], check=True)
+    with open(f'{tmp}/ciphertext.txt', 'r') as f:
+        return f.read()
+
 print('Validating puzzle...')
 contents = open('.github/workflows/template_validate.html', 'r', encoding='utf-8').read()
 puzzle = os.environ['PUZZLE']
@@ -30,7 +47,10 @@ print('Puzzle validated!')
 title = data['title']
 img_bytes = base64.b64decode(data['screenshot'][len('data:image/png;base64,'):])
 puzzle_json = data['puzzle_json']
-solution_path = data['solution_path'] # TODO: Encrypt?
+solution_path = data['solution_path']
+
+# Encrypt this since we'll be saving it directly on the page
+solution_path = gpg_encrypt(solution_path, os.environ['SECRET'])
 
 # This is a slightly updated display_hash solution -- rather than hashing the puzzle, I'm just generating a random ID every time.
 # (Also, I'm flattening the alphabet ahead of time to avoid letter bias.)
