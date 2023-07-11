@@ -482,101 +482,66 @@ function createAnchor() {
   return anchor
 }
 
+var waitedFor = 0
 window.publishPuzzle = function() {
-  if (window.settings.githubAccount == 'true') {
-    onPublishConfirm(null, true)
-    return
-  }
+  // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
+  document.getElementById('puzzleName').blur()
 
-  var anchor = createAnchor()
-  anchor.onpointerdown = function(event) {onPublishConfirm(event, false)}
+  // Adapted from https://stackoverflow.com/a/2117523
+  var requestId = ('10000000-1000-4000-8000-100000000000').replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
 
-  var puzzle = document.getElementById('puzzle')
-  puzzle.style.opacity = 0
-  puzzle.style.minWidth = '432px'
-  var confirm = document.createElement('div')
-  puzzle.parentElement.insertBefore(confirm, puzzle)
-  confirm.id = 'confirm'
-  confirm.style = 'display: flex; flex-direction: column; justify-content: space-between'
-  confirm.style.position = 'absolute'
-  confirm.style.width = '100%'
-  confirm.style.height = '100%'
-  confirm.style.zIndex = 3 // Position in front of the anchor
-  confirm.style.background = window.PAGE_BACKGROUND
+  var formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe7V_JSIq4NtYipSxtPtkIlXBjX0aWIFYJuzJKzQ9h-MaB5tQ/formResponse'
+  window.fireAndForget('POST', formUrl, 'entry.177397119=' + puzzle.serialize() + '&entry.1158751145=' + requestId)
 
-  var confirmText = document.createElement('label')
-  confirm.appendChild(confirmText)
-  confirmText.style.margin = '5px'
-  confirmText.innerText =
-    'To publish a new puzzle, you will need a (free) GitHub account. ' +
-    'Once you click OK, you will be prompted to sign in to GitHub, ' +
-    'then you can click "Submit new issue" to publish your puzzle.'
-  
-  var githubAccount = document.createElement('div')
-  confirm.appendChild(githubAccount)
-  githubAccount.style = 'display: flex; flex-direction: row; justify-content: flex-start; align-items: center'
-  githubAccount.style.margin = '5px'
+  window.setTimeout(function() {
+    waitedFor = 5000
 
-  var haveAccount = createCheckbox()
-  githubAccount.appendChild(haveAccount)
-  haveAccount.id = 'haveAccount'
-  haveAccount.onpointerdown = function() {
-    this.checked = !this.checked
-    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
-  }
+    // First, we need to figure out which workflow corresponds with this request.
+    window.sendHttpRequest('GET', 'https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs?status=pending', function(response) {
+      var runId = null
+      for (var run in response['workflow_runs']) {
+        if (run['name'].includes(requestId)) {
+          runId = run['id']
+          break
+        }
+      }
 
-  var githubLabel = document.createElement('label')
-  githubAccount.appendChild(githubLabel)
-  githubLabel.style.marginLeft = '6px'
-  githubLabel.htmlFor = 'haveAccount'
-  githubLabel.onpointerdown = function() {haveAccount.onpointerdown()}
-  githubLabel.innerText = 'I already have a GitHub account, don\'t ask again'
-  githubLabel.style.flexShrink = '10000'
+      if (runId == null) {
+        var publish = document.getElementById('publish')
+        publish.innerText = 'Error: Could not contact server'
+        return
+      }
 
-  var buttons = document.createElement('div')
-  confirm.appendChild(buttons)
-  buttons.style = 'display: flex; flex-direction: row; justify-content: space-between'
-  buttons.style.margin = '5px'
-
-  var buttonNo = document.createElement('button')
-  buttons.appendChild(buttonNo)
-  buttonNo.innerText = 'Cancel'
-  buttonNo.onpointerdown = function(event) {onPublishConfirm(event, false)}
-
-  var buttonYes = document.createElement('button')
-  buttons.appendChild(buttonYes)
-  buttonYes.innerText = 'OK'
-  buttonYes.onpointerdown = function(event) {
-    if (document.getElementById('haveAccount').checked) {
-      window.settings.githubAccount = true
-    }
-    onPublishConfirm(event, true)
-  }
+      // Now that we have the run ID, we can wait for the task to queue.
+      publishWait(runId)
+    })
+  }, 5000) // Slight delay to wait for the google apps script + github action queue time
 }
 
-function onPublishConfirm(event, confirmed) {
-  if (confirmed) {
-    // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
-    document.getElementById('puzzleName').blur()
+function publishWait(runId) {
+  var publish = document.getElementById('publish')
+  window.sendHttpRequest('GET', 'https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs/' + runId, function(response) {
+    waitedFor += 1000
+    if (waitedFor >= 100 * 1000) {
+      publish.innerText = 'Error: Publishing timed out'
+      return
+    }
 
-    var issueUrl = window.getIssueUrl({
-      'labels': 'new puzzle',
-      'title': 'Publish puzzle "' + window.puzzle.name + '"',
-      'body': window.puzzle.serialize(),
-    })
-
-    window.open(issueUrl, '_blank')
-  }
-
-  var puzzle = document.getElementById('puzzle')
-  puzzle.style.opacity = null
-  puzzle.style.minWidth = null
-
-  var anchor = document.getElementById('anchor')
-  if (anchor) anchor.parentElement.removeChild(anchor)
-  var confirm = document.getElementById('confirm')
-  if (confirm) confirm.parentElement.removeChild(confirm)
-  if (event) event.stopPropagation()
+    if (['in_progress', 'queued', 'requested', 'waiting', 'pending'].includes(response['status'])) {
+      window.setTimeout(function() { publishWait(runId) }, 1000)
+      return
+    } else if (response['status'] == 'completed') {
+      console.error(response) // somehow we need the display_hash
+      var display_hash = '123456'
+      publish.innerText = 'Published, click here to play your puzzle!'
+      publish.disabled = false
+      publish.onpointerdown = function() { window.location = '/play/' + display_hash + '.html' }
+    } else {
+      publish.innerText = 'Error: Publishing failed'
+      return
+    }
+  })
 }
 
 // Returns the next value in the list.
