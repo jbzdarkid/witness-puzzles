@@ -7,7 +7,8 @@ import subprocess
 
 def gpg_encrypt(plaintext, key):
     # For security reasons, GPG always prefers to read and write from files.
-    tmp = os.environ['TMPDIR']
+    print(os.environ.keys())
+    tmp = os.environ.get('TMPDIR', '/tmp')
     with open(f'{tmp}/plaintext.txt', 'w') as f:
         f.write(plaintext)
     with open(f'{tmp}/key.txt', 'w') as f:
