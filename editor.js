@@ -496,8 +496,9 @@ window.publishPuzzle = function() {
   var publish = document.getElementById('publish')
   publish.innerText = 'Sending puzzle to the server...'
 
-  window.httpGetLoop('https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs?status=pending', 5, function(response) {
-    for (var run in response['workflow_runs']) {
+  window.httpGetLoop('https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs?per_page=10', 30, function(response) {
+    var runs = JSON.parse(response)['workflow_runs']
+    for (var run of runs) {
       if (run['name'].includes(requestId)) {
         return run['id']
       }
@@ -507,17 +508,16 @@ window.publishPuzzle = function() {
   }, /* onError */ function() {
     publish.innerText = 'Error: Could not contact the server'
   }, /* onSuccess */ function(runId) {
-    publish.innerText = 'Waiting for puzzle to be validated...'
-    window.httpGetLoop('https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/run/' + runId, 60, function(response) {
+    publish.innerText = 'Waiting for the server to validate your puzzle...'
+    window.httpGetLoop('https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs/' + runId, 60, function(response) {
       // Request is still pending
-      if (['in_progress', 'queued', 'requested', 'waiting', 'pending'].includes(response['status'])) return null
-      else if (response['status'] == 'completed') return response // TODO probably extract something here
+      var status = JSON.parse(response)['status']
+      if (['in_progress', 'queued', 'requested', 'waiting', 'pending'].includes(status)) return null
+      else if (status != 'completed') return response // TODO probably extract something here
       else return null
     }, /* onError */ function() {
       publish.innerText = 'Error: Publishing failed'
-    }, /* onSuccess */ function() {
-      console.error(response) // somehow we need the display_hash from this
-      var display_hash = '123456'
+    }, /* onSuccess */ function(display_hash) {
       publish.innerText = 'Published, click here to play your puzzle!'
       publish.disabled = false
       publish.onpointerdown = function() { window.location = '/play/' + display_hash + '.html' }

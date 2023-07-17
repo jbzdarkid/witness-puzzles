@@ -14,8 +14,8 @@ def gpg_encrypt(plaintext, key):
     with open(f'{tmp}/key.txt', 'w') as f:
         f.write(key)
     subprocess.run([
-        'gpg2',
-        '--cipher-algo AES256',
+        'gpg',
+        '--cipher-algo', 'AES256',
         '-c', f'{tmp}/plaintext.txt'
         '--passphrase-file', f'{tmp}/key.txt',
         '-o', f'{tmp}/ciphertext.txt',

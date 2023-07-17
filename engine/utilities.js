@@ -611,13 +611,14 @@ window.addSolveButtons = function() {
   nextSolution.innerHTML = '&rarr;'
 }
 
+var SECONDS_PER_LOOP = 1
 window.httpGetLoop = function(url, maxTimeout, action, onError, onSuccess) {
   if (maxTimeout <= 0) {
     onError()
     return
   }
 
-  _sendHttpRequest('GET', url, 1, null, function(httpCode, response) {
+  sendHttpRequest('GET', url, SECONDS_PER_LOOP, null, function(httpCode, response) {
     if (httpCode >= 200 && httpCode <= 299) {
       var output = action(response) // Retry if action returns null
       if (output) {
@@ -627,13 +628,13 @@ window.httpGetLoop = function(url, maxTimeout, action, onError, onSuccess) {
     } // Always retry on non-success HTTP codes
     
     window.setTimeout(function() {
-      httpGetLoop(url, maxTimeout - 1, action, onError, onSuccess)
+      httpGetLoop(url, maxTimeout - SECONDS_PER_LOOP, action, onError, onSuccess)
     }, 1000)
   })
 }
 
-window.fireAndForget = function(verb, path, body) {
-  _sendHttpRequest(verb, path, 600, body, function() {})
+window.fireAndForget = function(verb, url, body) {
+  sendHttpRequest(verb, url, 600, body, function() {})
 }
 
 // Only used for errors
@@ -642,10 +643,12 @@ var HTTP_STATUS = {
   500: '500 internal server error',
 }
 
-function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
+var etagCache = {}
+function sendHttpRequest(verb, url, timeoutSeconds, data, onResponse) {
   currentHttpRequest = new XMLHttpRequest()
   currentHttpRequest.onreadystatechange = function() {
     if (this.readyState != XMLHttpRequest.DONE) return
+    etagCache[url] = this.getResponseHeader('ETag')
     currentHttpRequest = null
     onResponse(this.status, this.responseText || HTTP_STATUS[this.status])
   }
@@ -654,8 +657,12 @@ function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
     onResponse(0, 'Request timed out')
   }
   currentHttpRequest.timeout = timeoutSeconds * 1000
-  currentHttpRequest.open(verb, path, true)
-  currentHttpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  currentHttpRequest.open(verb, url, true)
+  currentHttpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+  
+  var etag = etagCache[url]
+  if (etag != null) currentHttpRequest.setRequestHeader('If-None-Match', etag)
+
   currentHttpRequest.send(data)
 }
 
