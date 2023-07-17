@@ -620,12 +620,12 @@ window.httpGetLoop = function(url, maxTimeout, action, onError, onSuccess) {
 
   sendHttpRequest('GET', url, SECONDS_PER_LOOP, null, function(httpCode, response) {
     if (httpCode >= 200 && httpCode <= 299) {
-      var output = action(response) // Retry if action returns null
+      var output = action(JSON.parse(response))
       if (output) {
         onSuccess(output)
         return
-      }
-    } // Always retry on non-success HTTP codes
+      } // Retry if action returns null
+    } // Retry on non-success HTTP codes
     
     window.setTimeout(function() {
       httpGetLoop(url, maxTimeout - SECONDS_PER_LOOP, action, onError, onSuccess)
