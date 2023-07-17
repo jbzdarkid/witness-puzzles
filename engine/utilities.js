@@ -626,7 +626,9 @@ window.httpGetLoop = function(url, maxTimeout, action, onError, onSuccess) {
       }
     } // Always retry on non-success HTTP codes
     
-    httpGetLoop(url, maxTimeout - 1, action, onError, onSuccess)
+    window.setTimeout(function() {
+      httpGetLoop(url, maxTimeout - 1, action, onError, onSuccess)
+    }, 1000)
   })
 }
 

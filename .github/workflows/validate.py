@@ -8,13 +8,13 @@ import subprocess
 def gpg_encrypt(plaintext, key):
     # For security reasons, GPG always prefers to read and write from files.
     print(os.environ.keys())
-    tmp = os.environ.get('TMPDIR', '/tmp')
+    tmp = os.environ.get('RUNNER_TEMP', '/tmp')
     with open(f'{tmp}/plaintext.txt', 'w') as f:
         f.write(plaintext)
     with open(f'{tmp}/key.txt', 'w') as f:
         f.write(key)
     subprocess.run([
-        'gpg',
+        'gpg2',
         '--cipher-algo AES256',
         '-c', f'{tmp}/plaintext.txt'
         '--passphrase-file', f'{tmp}/key.txt',
