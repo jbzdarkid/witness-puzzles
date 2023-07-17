@@ -5,6 +5,11 @@ on:
       puzzle:
         required: true
         type: string
+      requestId:
+        required: true
+        type: string
+
+run-name: Validating request ${{ inputs.requestId }}
 
 concurrency:
   group: ${{ github.workflow }} # Limit to one publish action at a time, others will queue behind.
@@ -23,7 +28,7 @@ jobs:
       env:
         PUZZLE: ${{ inputs.puzzle }}
         SECRET: ${{ secrets.GPG_KEY }}
-    - name: Publishing puzzle
+    - name: Publishing puzzle ${{ env.display_hash }}
       run: |
         git add .
         git config user.email "jbzdarkid@users.noreply.github.com"

@@ -64,7 +64,6 @@ var proxy = {
     setIfNull(this._map, 'sensitivity', '0.7')
     setIfNull(this._map, 'expanded', 'false')
     setIfNull(this._map, 'customMechanics', 'false')
-    setIfNull(this._map, 'githubAccount', 'false')
     return this
   },
 }
@@ -414,32 +413,6 @@ window.loadHeader = function(titleText) {
   }
   volume.style.backgroundImage = 'linear-gradient(to right, ' + window.ALT_BACKGROUND + ', ' + window.ACTIVE_COLOR + ')'
 
-  expandedSettings.appendChild(document.createElement('br'))
-
-  /*
-  var githubAccount = createCheckbox()
-  expandedSettings.appendChild(githubAccount)
-  githubAccount.id = 'githubAccount'
-  if (window.settings.githubAccount == 'true') {
-    githubAccount.style.background = window.BORDER
-    githubAccount.checked = true
-  }
-
-  githubAccount.onpointerdown = function() {
-    this.checked = !this.checked
-    this.style.background = (this.checked ? window.BORDER : window.PAGE_BACKGROUND)
-    window.settings.githubAccount = this.checked
-  }
-
-  var githubLabel = document.createElement('label')
-  expandedSettings.appendChild(githubLabel)
-  githubLabel.style.marginLeft = '6px'
-  githubLabel.htmlFor = 'githubAccount'
-  githubLabel.innerHTML = 'I have a<br>GitHub account'
-
-  expandedSettings.appendChild(document.createElement('br'))
-  */
-
   // Custom mechanics -- disabled for now
   window.settings.customMechanics = false
   /*
@@ -638,20 +611,27 @@ window.addSolveButtons = function() {
   nextSolution.innerHTML = '&rarr;'
 }
 
-var currentHttpRequest = null // We only allow one HTTP request to be in flight at a time.
-
-window.sendHttpRequest = function(verb, path, timeoutSeconds, a, b) {
-  if (currentHttpRequest != null) return
-  if (b == null) {
-    _sendHttpRequest(verb, path, timeoutSeconds, null, a)
-  } else {
-    _sendHttpRequest(verb, path, timeoutSeconds, a, b)
+window.httpGetLoop = function(url, maxTimeout, action, onError, onSuccess) {
+  if (maxTimeout <= 0) {
+    onError()
+    return
   }
-  return currentHttpRequest // in case the caller wants to call .abort()
+
+  _sendHttpRequest('GET', url, 1, null, function(httpCode, response) {
+    if (httpCode >= 200 && httpCode <= 299) {
+      var output = action(response) // Retry if action returns null
+      if (output) {
+        onSuccess(output)
+        return
+      }
+    } // Always retry on non-success HTTP codes
+    
+    httpGetLoop(url, maxTimeout - 1, action, onError, onSuccess)
+  })
 }
+
 window.fireAndForget = function(verb, path, body) {
   _sendHttpRequest(verb, path, 600, body, function() {})
-  currentHttpRequest = null
 }
 
 // Only used for errors
@@ -674,22 +654,7 @@ function _sendHttpRequest(verb, path, timeoutSeconds, data, onResponse) {
   currentHttpRequest.timeout = timeoutSeconds * 1000
   currentHttpRequest.open(verb, path, true)
   currentHttpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  if (window.csrfToken != null) currentHttpRequest.setRequestHeader('X-CSRFToken', window.csrfToken)
   currentHttpRequest.send(data)
-}
-
-window.getIssueUrl = function(args) {
-  var url = 'https://github.com/jbzdarkid/witness-puzzles/issues/new'
-  var first = true
-  for (var key in args) {
-    url += (first ? '?' : '&')
-    first = false
-    url += encodeURIComponent(key)
-    url += '='
-    url += encodeURIComponent(args[key])
-  }
-
-  return url
 }
 
 })

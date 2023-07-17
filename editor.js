@@ -482,65 +482,46 @@ function createAnchor() {
   return anchor
 }
 
-var waitedFor = 0
 window.publishPuzzle = function() {
   // Last-minute call to blur (deselect) the puzzle name, to ensure that changes are flushed.
   document.getElementById('puzzleName').blur()
 
   // Adapted from https://stackoverflow.com/a/2117523
   var requestId = ('10000000-1000-4000-8000-100000000000').replace(/[018]/g, c =>
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 
   var formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe7V_JSIq4NtYipSxtPtkIlXBjX0aWIFYJuzJKzQ9h-MaB5tQ/formResponse'
   window.fireAndForget('POST', formUrl, 'entry.177397119=' + puzzle.serialize() + '&entry.1158751145=' + requestId)
 
-  window.setTimeout(function() {
-    waitedFor = 5000
-
-    // First, we need to figure out which workflow corresponds with this request.
-    window.sendHttpRequest('GET', 'https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs?status=pending', function(response) {
-      var runId = null
-      for (var run in response['workflow_runs']) {
-        if (run['name'].includes(requestId)) {
-          runId = run['id']
-          break
-        }
-      }
-
-      if (runId == null) {
-        var publish = document.getElementById('publish')
-        publish.innerText = 'Error: Could not contact server'
-        return
-      }
-
-      // Now that we have the run ID, we can wait for the task to queue.
-      publishWait(runId)
-    })
-  }, 5000) // Slight delay to wait for the google apps script + github action queue time
-}
-
-function publishWait(runId) {
   var publish = document.getElementById('publish')
-  window.sendHttpRequest('GET', 'https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs/' + runId, function(response) {
-    waitedFor += 1000
-    if (waitedFor >= 100 * 1000) {
-      publish.innerText = 'Error: Publishing timed out'
-      return
+  publish.innerText = 'Sending puzzle to the server...'
+
+  window.httpGetLoop('https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/runs?status=pending', 5, function(response) {
+    for (var run in response['workflow_runs']) {
+      if (run['name'].includes(requestId)) {
+        return run['id']
+      }
     }
 
-    if (['in_progress', 'queued', 'requested', 'waiting', 'pending'].includes(response['status'])) {
-      window.setTimeout(function() { publishWait(runId) }, 1000)
-      return
-    } else if (response['status'] == 'completed') {
-      console.error(response) // somehow we need the display_hash
+    return null
+  }, /* onError */ function() {
+    publish.innerText = 'Error: Could not contact the server'
+  }, /* onSuccess */ function(runId) {
+    publish.innerText = 'Waiting for puzzle to be validated...'
+    window.httpGetLoop('https://api.github.com/repos/jbzdarkid/witness-puzzles/actions/run/' + runId, 60, function(response) {
+      // Request is still pending
+      if (['in_progress', 'queued', 'requested', 'waiting', 'pending'].includes(response['status'])) return null
+      else if (response['status'] == 'completed') return response // TODO probably extract something here
+      else return null
+    }, /* onError */ function() {
+      publish.innerText = 'Error: Publishing failed'
+    }, /* onSuccess */ function() {
+      console.error(response) // somehow we need the display_hash from this
       var display_hash = '123456'
       publish.innerText = 'Published, click here to play your puzzle!'
       publish.disabled = false
       publish.onpointerdown = function() { window.location = '/play/' + display_hash + '.html' }
-    } else {
-      publish.innerText = 'Error: Publishing failed'
-      return
-    }
+    })
   })
 }
 
