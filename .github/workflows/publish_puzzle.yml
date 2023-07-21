@@ -24,16 +24,17 @@ jobs:
       with:
         fetch-depth: 1 # No need for git history
     - name: Validating puzzle
+      id: validate
       run: python -u .github/workflows/validate.py
       env:
         PUZZLE: ${{ inputs.puzzle }}
         SECRET: ${{ secrets.GPG_KEY }}
-    - name: Publishing puzzle ${{ env.display_hash }}
+    - name: Publishing puzzle ${{ steps.validate.outputs.display_hash }}
       run: |
         git add .
         git config user.email "jbzdarkid@users.noreply.github.com"
         git config user.name "Validate and publish workflow"
-        git commit -m "Published puzzle ${{ env.display_hash }}"
+        git commit -m "Published puzzle ${{ steps.validate.outputs.display_hash }}"
         # git push
         git show HEAD
 
