@@ -19,8 +19,8 @@ def gpg_encrypt(plaintext, key):
         '-o', f'{tmp}/ciphertext.txt',
         '-c', f'{tmp}/plaintext.txt', # Inexplicably, the plaintext *must* be the last option.
     ], check=True)
-    with open(f'{tmp}/ciphertext.txt', 'r') as f:
-        return f.read()
+    with open(f'{tmp}/ciphertext.txt', 'rb') as f:
+        return f.read().hex()
 
 print('Validating puzzle...')
 contents = open('.github/workflows/template_validate.html', 'r', encoding='utf-8').read()
