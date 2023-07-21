@@ -519,17 +519,22 @@ window.publishPuzzle = function() {
       publish.innerText = 'Error: Validation failed'
     }, /* onSuccess */ function(jobsUrl) {
       window.httpGetLoop(jobsUrl, 10, function(response) {
-        var publishStep = response['steps'][4]
-        var result = publishStep['conclusion']
-        if (['in_progress', 'queued', 'requested', 'waiting', 'pending'].includes(status)) return null
-        else if (status == 'completed') return publishStep['name'].substring(18) // 
-        else return null
+        var publishStep = response['jobs'][0]['steps'][3]
+        if (publishStep['conclusion'] == 'success') { // This is the only valid exit state.
+          return publishStep['name'].substring(18) // Strip off "Publishing puzzle "
+        }
+        
+        return '' // Signal value
       }, /* onError */ function() {
         publish.innerText = 'Error: Publishing failed'
       }, /* onSuccess */ function(displayHash) {
-        publish.innerText = 'Published, click here to play your puzzle!'
-        publish.disabled = false
-        publish.onpointerdown = function() { window.location = '/play/' + displayHash + '.html' }
+        if (displayHash == '') {
+          publish.innerText = 'Error: Publishing failed'
+        } else {
+          publish.innerText = 'Published, click here to play your puzzle!'
+          publish.disabled = false
+          publish.onpointerdown = function() { window.location = '/play/' + displayHash + '.html' }
+        }
       })
     })
   })

@@ -13,11 +13,11 @@ def gpg_encrypt(plaintext, key):
     with open(f'{tmp}/key.txt', 'w') as f:
         f.write(key)
     subprocess.run([
-        'gpg', '--symmetric',
+        'gpg', '--batch', '--symmetric',
         '--cipher-algo', 'AES256',
-        '-c', f'{tmp}/plaintext.txt'
         '--passphrase-file', f'{tmp}/key.txt',
         '-o', f'{tmp}/ciphertext.txt',
+        '-c', f'{tmp}/plaintext.txt', # Inexplicably, the plaintext *must* be the last option.
     ], check=True)
     with open(f'{tmp}/ciphertext.txt', 'r') as f:
         return f.read()
