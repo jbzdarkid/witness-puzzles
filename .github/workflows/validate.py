@@ -18,7 +18,7 @@ def gpg_encrypt(plaintext, key):
         '--passphrase-file', f'{tmp}/key.txt',
         '-o', f'{tmp}/ciphertext.txt',
         '-c', f'{tmp}/plaintext.txt', # Inexplicably, the plaintext *must* be the last option.
-    ], check=True)
+    ], check=True, stdout=subprocess.DEVNULL)
     with open(f'{tmp}/ciphertext.txt', 'rb') as f:
         return f.read().hex()
 
@@ -81,4 +81,5 @@ with open('puzzle_list.js', 'w', encoding='utf-8') as f:
     f.write('\n'.join(contents))
 
 # Needed for the commit message. Don't use the title because it's user-controlled, and thus an attack vector.
+print(f'Done, created puzzle pages for display_hash={display_hash}')
 os.environ['GITHUB_OUTPUT'] = f'display_hash={display_hash}'
