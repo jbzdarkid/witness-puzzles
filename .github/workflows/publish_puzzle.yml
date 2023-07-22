@@ -19,9 +19,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - run: printenv
+    - run: echo "git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE"
     - name: Cloning the repo
-      run: |
-        git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
+      run: git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
     - name: Validating puzzle
       id: validate
       run: python -u .github/workflows/validate.py
