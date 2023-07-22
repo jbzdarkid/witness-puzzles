@@ -27,6 +27,9 @@ jobs:
         git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
         git fetch origin --depth 1 $GITHUB_REF_NAME
         git checkout $GITHUB_REF_NAME
+        git config user.email "jbzdarkid@users.noreply.github.com"
+        git config user.name "Validate and publish workflow"
+        git config http.https://github.com/.extraheader AUTHORIZATION: basic $GITHUB_TOKEN
     - name: Validating puzzle
       id: validate
       run: python -u .github/workflows/validate.py
@@ -36,8 +39,6 @@ jobs:
     - name: Publishing puzzle ${{ steps.validate.outputs.display_hash }}
       run: |
         git add .
-        git config user.email "jbzdarkid@users.noreply.github.com"
-        git config user.name "Validate and publish workflow"
         git commit -m "Published puzzle ${{ steps.validate.outputs.display_hash }}"
         # git push
         git show HEAD

@@ -80,5 +80,5 @@ with open('puzzle_list.js', 'w', encoding='utf-8') as f:
 
 # Needed for the commit message. Don't use the title because it's user-controlled, and thus an attack vector.
 print(f'Done, created puzzle pages for display_hash={display_hash}')
-with open(os.environ['GITHUB_OUTPUT'], 'r') as f:
+with open(os.environ['GITHUB_OUTPUT'], 'w') as f:
   f.write(f'display_hash={display_hash}')
