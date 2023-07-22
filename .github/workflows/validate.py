@@ -58,8 +58,6 @@ alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' # Everything but 0, O, 1, I
 display_hash = ''.join(random.choices(alphabet, k=8))
 image_url = f'images/{display_hash}.png'
 page_url = f'play/{display_hash}.html'
-Path(image_url).parent.mkdir(parents=True, exist_ok=True)
-Path(page_url).parent.mkdir(parents=True, exist_ok=True)
 
 print('Creating puzzle page...')
 with open(image_url, 'xb') as f:
@@ -82,4 +80,5 @@ with open('puzzle_list.js', 'w', encoding='utf-8') as f:
 
 # Needed for the commit message. Don't use the title because it's user-controlled, and thus an attack vector.
 print(f'Done, created puzzle pages for display_hash={display_hash}')
-os.environ['GITHUB_OUTPUT'] = f'display_hash={display_hash}'
+with open(os.environ['GITHUB_OUTPUT'], 'r') as f:
+  f.write(f'display_hash={display_hash}')
