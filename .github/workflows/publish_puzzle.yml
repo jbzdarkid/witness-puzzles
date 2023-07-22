@@ -19,17 +19,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - run: printenv
-    - run: echo "git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE"
     - name: Cloning the repo
       run: |
         mkdir -p $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE
         git init
-        git remote add origin https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE"
-        git fetch origin $GITHUB_REF --depth 1
-        git status
-        git reset --hard $GITHUB_REF
+        git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
+        git fetch origin --depth 1 $GITHUB_REF_NAME
+        git checkout $GITHUB_REF_NAME
     - name: Validating puzzle
       id: validate
       run: python -u .github/workflows/validate.py
