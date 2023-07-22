@@ -24,7 +24,7 @@ jobs:
         mkdir -p $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE
         git init
-        git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
+        git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
         git fetch origin --depth 1 $GITHUB_REF_NAME
         git checkout $GITHUB_REF_NAME
     - name: Validating puzzle
