@@ -56,7 +56,7 @@ solution_path = gpg_encrypt(solution_path, os.environ['SECRET'])
 # (Also, I'm flattening the alphabet ahead of time to avoid letter bias.)
 alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' # Everything but 0, O, 1, I
 display_hash = ''.join(random.choices(alphabet, k=8))
-image_url = f'images/{display_hash[:2]}/{display_hash}.png'
+image_url = f'images/{display_hash}.png'
 page_url = f'play/{display_hash}.html'
 Path(image_url).parent.mkdir(parents=True, exist_ok=True)
 Path(page_url).parent.mkdir(parents=True, exist_ok=True)

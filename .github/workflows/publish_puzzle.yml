@@ -20,9 +20,7 @@ jobs:
 
     steps:
     - name: Cloning the repo
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1 # No need for git history
+      run: git fetch --depth 1 origin $GITHUB_REF
     - name: Validating puzzle
       id: validate
       run: python -u .github/workflows/validate.py
