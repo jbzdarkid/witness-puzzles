@@ -21,7 +21,7 @@ jobs:
     steps:
     - name: Cloning the repo
       run: |
-        git clone --depth 1 -- $GITHUB_REF $GITHUB_WORKSPACE
+        git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
     - name: Validating puzzle
       id: validate
       run: python -u .github/workflows/validate.py
