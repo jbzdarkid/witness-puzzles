@@ -30,7 +30,6 @@ jobs:
         git fetch origin $GITHUB_REF --depth 1
         git status
         git reset --hard $GITHUB_REF
-      run: git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
     - name: Validating puzzle
       id: validate
       run: python -u .github/workflows/validate.py
