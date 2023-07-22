@@ -22,6 +22,14 @@ jobs:
     - run: printenv
     - run: echo "git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE"
     - name: Cloning the repo
+      run: |
+        mkdir -p $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE
+        git init
+        git remote add origin https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE"
+        git fetch origin $GITHUB_REF --depth 1
+        git status
+        git reset --hard $GITHUB_REF
       run: git clone --depth 1 --reference $GITHUB_REF -- https://github.com/$GITHUB_REPOSITORY $GITHUB_WORKSPACE
     - name: Validating puzzle
       id: validate
