@@ -13,6 +13,7 @@ function addPuzzles(count) {
   var table = document.getElementById('puzzleTable')
   for (; offset < offset + count; offset++) {
     var puzzleData = window.puzzleList[offset] // Concatenation of display hash and title.
+    if (puzzleData == null || puzzleData.length < 8) continue
     var displayHash = puzzleData.substring(0, 8)
 
     var cell = document.createElement('a')
@@ -24,6 +25,7 @@ function addPuzzles(count) {
     cell.appendChild(img)
     img.style.maxHeight = '200px'
     img.src = 'https://witnesspuzzles-images.s3.amazonaws.com/' + displayHash.substring(0, 2) + '/' + displayHash + '.png'
+    // img.src = 'images/' + displayHash + '.png'
 
     cell.appendChild(document.createElement('br'))
 
