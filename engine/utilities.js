@@ -2,11 +2,6 @@ function namespace(code) {
   code()
 }
 
-// https://stackoverflow.com/q/12571650
-window.addEventListener('error', function(event) {
-  console.error('Error in file ' + event.filename + ' on line ' + event.lineno)
-})
-
 namespace(function() {
 
 /*** Start cross-compatibility ***/
@@ -297,7 +292,12 @@ window.loadHeader = function(titleText) {
   feedbackButton.style = 'float: right; margin-right: 8px; cursor: pointer; line-height: 60px'
   feedbackButton.innerText = 'Send feedback'
   feedbackButton.className = 'navbar-content'
-  feedbackButton.onpointerdown = function() {window.open('https://github.com/jbzdarkid/witness-puzzles/issues', '_blank')}
+  feedbackButton.onpointerdown = function() {
+    var feedback = prompt('Provide feedback:')
+    if (feedback) {
+      sendFeedback(feedback)
+    }
+  }
 
   var separator = document.createElement('label')
   navbar.appendChild(separator)
@@ -664,6 +664,19 @@ function sendHttpRequest(verb, url, timeoutSeconds, data, onResponse) {
   if (etag != null) currentHttpRequest.setRequestHeader('If-None-Match', etag)
 
   currentHttpRequest.send(data)
+}
+
+// https://stackoverflow.com/q/12571650
+window.addEventListener('error', function(event) {
+  console.error('Please disregard the following CORS exception. It is expected and the request will succeed regardless.')
+  var formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSeXwtuKTbhXlQ5dUYtGjMQtkseFMBFka0jbBeOwd8tKiJb_ug/formResponse'
+  window.fireAndForget('POST', formUrl, 'entry.909077667=' + encodeURIComponent(event.error.stack) + '&entry.2145672989=' + encodeURIComponent(event.filename) + '%20:' + event.lineno)
+})
+
+function sendFeedback(feedback) {
+  console.error('Please disregard the following CORS exception. It is expected and the request will succeed regardless.')
+  var formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe6kWD2rC7qaBVExJBUmAhU5qnhLzaY98ZQ3xp6Gq5fkizNHQ/formResponse'
+  window.fireAndForget('POST', formUrl, 'entry.188054716=' + encodeURIComponent(feedback) + '&entry.508151484=' + encodeURIComponent(window.location.href))
 }
 
 })

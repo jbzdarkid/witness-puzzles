@@ -490,6 +490,7 @@ window.publishPuzzle = function() {
   var requestId = ('10000000-1000-4000-8000-100000000000').replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 
+  console.error('Please disregard the following CORS exception. It is expected and the request will succeed regardless.')
   var formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe7V_JSIq4NtYipSxtPtkIlXBjX0aWIFYJuzJKzQ9h-MaB5tQ/formResponse'
   window.fireAndForget('POST', formUrl, 'entry.177397119=' + puzzle.serialize() + '&entry.1158751145=' + requestId)
 
@@ -533,7 +534,7 @@ window.publishPuzzle = function() {
         } else {
           publish.innerText = 'Published, click here to play your puzzle!'
           publish.disabled = false
-          publish.onpointerdown = function() { window.location = '/play/' + displayHash + '.html' }
+          publish.onpointerdown = function() { window.location = 'play/' + displayHash + '.html' }
         }
       })
     })
