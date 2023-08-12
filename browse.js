@@ -9,11 +9,17 @@ window.onload = function() {
 }
 
 var offset = 0
+var noMorePuzzles = false
 function addPuzzles(count) {
+  if (noMorePuzzles) return
+
   var table = document.getElementById('puzzleTable')
   for (; offset < offset + count; offset++) {
     var puzzleData = window.puzzleList[offset] // Concatenation of display hash and title.
-    if (puzzleData == null || puzzleData.length < 8) continue
+    if (puzzleData == null || puzzleData.length < 8) {
+      noMorePuzzles = true
+      break
+    }
     var displayHash = puzzleData.substring(0, 8)
 
     var cell = document.createElement('a')
