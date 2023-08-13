@@ -4,22 +4,16 @@ window.onload = function() {
   // First load should be smaller to improve FCP
   // However, we need to keep loading until we have a scrollbar, since further puzzles trigger onscroll
   while (document.body.scrollHeight == document.body.clientHeight) {
-    addPuzzles(20)
+    if (!addPuzzles(20)) break
   }
 }
 
 var offset = 0
-var noMorePuzzles = false
 function addPuzzles(count) {
-  if (noMorePuzzles) return
-
   var table = document.getElementById('puzzleTable')
   for (; offset < offset + count; offset++) {
     var puzzleData = window.puzzleList[offset] // Concatenation of display hash and title.
-    if (puzzleData == null || puzzleData.length < 8) {
-      noMorePuzzles = true
-      break
-    }
+    if (puzzleData == null || puzzleData.length < 8) return false
     var displayHash = puzzleData.substring(0, 8)
 
     var cell = document.createElement('a')
@@ -41,6 +35,8 @@ function addPuzzles(count) {
     link.style.cursor = 'pointer'
     link.style.color = window.TEXT_COLOR
   }
+
+  return true
 }
 
 window.onscroll = function() {
