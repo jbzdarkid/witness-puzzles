@@ -1,0 +1,19 @@
+name: Decrypt solution
+on:
+  workflow_dispatch:
+    inputs:
+      display_hash:
+        required: true
+        type: string
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - run: pip install cryptography
+    - run: python -u decrypt.py
+      env:
+        DISPLAY_HASH: ${{ inputs.display_hash }}
+        SECRET: ${{ secrets.GPG_KEY }}
