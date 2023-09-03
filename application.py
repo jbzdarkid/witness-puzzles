@@ -127,11 +127,16 @@ def browse():
 
   output = []
   for puzzle in puzzles:
-    output.append({
+    j = {
       'display_hash': puzzle.display_hash,
       'url': puzzle.url,
       'title': puzzle.title,
-    })
+    }
+    if is_logged_in(): # For export purposes
+      j['puzzle_json'] = puzzle.puzzle_json
+      j['solution_json'] = puzzle.solution_json
+    output.append(j)
+
   if len(output) == 0:
     return '', 204
   else:

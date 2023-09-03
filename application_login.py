@@ -27,10 +27,11 @@ def is_logged_in():
   return current_user.get_id() == ADMIN_USERNAME
 
 host_redirect('/pages/login.html', '/login.html')
-def login():
-  if request.method == 'GET':
-    return render_template('login.html', logged_in=str(is_logged_in()))
+def login_page():
+  return render_template('login.html', logged_in=str(is_logged_in()))
+application.add_url_rule('/pages/login.html', 'login_page', login_page, methods=['GET'])
 
+def login():
   if request.form['username'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
     user = UserMixin()
     user.id = request.form['username']
@@ -38,7 +39,7 @@ def login():
     print(f'Logged in as {user.id}')
     return redirect('/browse.html')
   return render_template('login.html')
-application.add_url_rule('/pages/login.html', 'login', login, methods=['GET', 'POST'])
+application.add_url_rule('/login', 'login', login, methods=['POST'])
 
 def logout():
   if current_user.get_id() != None:
