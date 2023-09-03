@@ -12,7 +12,7 @@
   <body>
     <script>loadHeader('Witness Puzzles')</script>
     <script>
-      window.loggedIn = {{ logged_in }}
+      window.loggedIn = '{{ logged_in }}' == 'True'
       window.csrfToken = '{{ csrf_token() }}'
     </script>
 
