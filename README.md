@@ -1,1 +1,1 @@
-# This repository has moved to [jbzdarkid.github.io](https://github.com/jbzdarkid/jbzdarkid.github.io). See [here](https://github.com/jbzdarkid/jbzdarkid.github.io/blob/master/STANDALONE.md) for notes on the move to a static content provider.
+# This repository has moved to [jbzdarkid.github.io](https://github.com/jbzdarkid/jbzdarkid.github.io).<br>See [here](https://github.com/jbzdarkid/jbzdarkid.github.io/blob/master/STANDALONE.md) for notes on the move to a static content provider.
